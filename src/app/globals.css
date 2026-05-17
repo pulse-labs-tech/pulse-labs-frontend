@@ -1,0 +1,444 @@
+@import "tailwindcss";
+
+/* ============================================================
+   PULSE LABS — Design System Tokens (TailwindCSS v4 @theme)
+   ============================================================
+   Multi-resolution responsive design: Mobile → 4K UHD
+   ============================================================ */
+
+@theme inline {
+  /* --- Fonts --- */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), "Fira Code", monospace;
+
+  /* --- Custom Breakpoints (extends default sm/md/lg/xl/2xl) --- */
+  --breakpoint-3xl: 120rem; /* 1920px — Full HD+ / 2K */
+  --breakpoint-4xl: 160rem; /* 2560px — QHD / Ultra-wide */
+  --breakpoint-5xl: 240rem; /* 3840px — 4K UHD */
+
+  /* --- Colors: Pulse Labs Brand Palette --- */
+  --color-brand-50: oklch(0.97 0.01 250);
+  --color-brand-100: oklch(0.94 0.02 250);
+  --color-brand-200: oklch(0.88 0.05 250);
+  --color-brand-300: oklch(0.78 0.10 250);
+  --color-brand-400: oklch(0.68 0.15 250);
+  --color-brand-500: oklch(0.58 0.19 250);
+  --color-brand-600: oklch(0.50 0.19 250);
+  --color-brand-700: oklch(0.42 0.16 250);
+  --color-brand-800: oklch(0.35 0.12 250);
+  --color-brand-900: oklch(0.28 0.08 250);
+  --color-brand-950: oklch(0.20 0.05 250);
+
+  /* --- Accent (Energy / CTA) --- */
+  --color-accent-50: oklch(0.97 0.02 160);
+  --color-accent-100: oklch(0.94 0.04 160);
+  --color-accent-200: oklch(0.88 0.08 160);
+  --color-accent-300: oklch(0.78 0.14 160);
+  --color-accent-400: oklch(0.68 0.18 160);
+  --color-accent-500: oklch(0.60 0.20 160);
+  --color-accent-600: oklch(0.52 0.18 160);
+  --color-accent-700: oklch(0.44 0.14 160);
+  --color-accent-800: oklch(0.36 0.10 160);
+  --color-accent-900: oklch(0.28 0.06 160);
+
+  /* --- Surface / Neutral --- */
+  --color-surface-50: oklch(0.985 0 0);
+  --color-surface-100: oklch(0.97 0.002 250);
+  --color-surface-200: oklch(0.93 0.004 250);
+  --color-surface-300: oklch(0.87 0.006 250);
+  --color-surface-400: oklch(0.71 0.01 250);
+  --color-surface-500: oklch(0.55 0.014 250);
+  --color-surface-600: oklch(0.45 0.014 250);
+  --color-surface-700: oklch(0.37 0.012 250);
+  --color-surface-800: oklch(0.27 0.01 250);
+  --color-surface-900: oklch(0.20 0.008 250);
+  --color-surface-950: oklch(0.13 0.006 250);
+
+  /* --- Semantic Colors --- */
+  --color-background: var(--color-surface-50);
+  --color-foreground: var(--color-surface-900);
+  --color-muted: var(--color-surface-100);
+  --color-muted-foreground: var(--color-surface-500);
+  --color-border: var(--color-surface-200);
+  --color-ring: var(--color-brand-500);
+  --color-primary: var(--color-brand-500);
+  --color-primary-foreground: white;
+
+  /* --- Status Colors --- */
+  --color-success: oklch(0.60 0.18 145);
+  --color-warning: oklch(0.75 0.18 75);
+  --color-error: oklch(0.58 0.22 25);
+  --color-info: var(--color-brand-400);
+
+  /* --- Border Radius --- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* --- Shadows (subtle, layered) --- */
+  --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.03);
+  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06);
+  --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.07), 0 2px 4px -2px oklch(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px oklch(0 0 0 / 0.08), 0 4px 6px -4px oklch(0 0 0 / 0.04);
+  --shadow-xl: 0 20px 25px -5px oklch(0 0 0 / 0.08), 0 8px 10px -6px oklch(0 0 0 / 0.04);
+
+  /* --- Animations --- */
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-fade-up: fade-up 0.6s ease-out;
+  --animate-slide-in-left: slide-in-left 0.5s ease-out;
+  --animate-slide-in-right: slide-in-right 0.5s ease-out;
+  --animate-scale-in: scale-in 0.3s ease-out;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-slide-toast: slide-toast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ============================================================
+     Auth Dark Theme — Soft + Depth (OKLCH)
+     Used by: (auth) route group — login, register, forgot-password
+     ============================================================ */
+
+  /* --- Auth Surfaces (blue-tinted darks for depth) --- */
+  --color-auth-bg: oklch(0.12 0.006 260);
+  --color-auth-surface: oklch(0.16 0.008 260);
+  --color-auth-elevated: oklch(0.20 0.008 260);
+  --color-auth-card-hover: oklch(0.23 0.008 260);
+  --color-auth-border: oklch(0.28 0.006 260);
+  --color-auth-border-subtle: oklch(0.22 0.004 260);
+
+  /* --- Auth Text --- */
+  --color-auth-text: oklch(0.98 0 0);
+  --color-auth-text-2: oklch(0.70 0.01 260);
+  --color-auth-text-3: oklch(0.48 0.01 260);
+
+  /* --- Auth Accent (vibrant mint-jade — premium green) --- */
+  --color-auth-accent: oklch(0.75 0.19 160);
+  --color-auth-accent-dim: oklch(0.75 0.19 160 / 0.12);
+  --color-auth-accent-dark: oklch(0.65 0.19 160);
+  --color-auth-accent-glow: oklch(0.75 0.19 160 / 0.35);
+
+  /* --- Auth Secondary Accents --- */
+  --color-auth-purple: oklch(0.68 0.18 280);
+  --color-auth-purple-dim: oklch(0.68 0.18 280 / 0.12);
+  --color-auth-orange: oklch(0.72 0.16 55);
+  --color-auth-orange-dim: oklch(0.72 0.16 55 / 0.12);
+  --color-auth-cyan: oklch(0.78 0.14 195);
+  --color-auth-cyan-dim: oklch(0.78 0.14 195 / 0.12);
+
+  /* --- Auth Error --- */
+  --color-auth-error: oklch(0.63 0.24 25);
+  --color-auth-error-dim: oklch(0.63 0.24 25 / 0.12);
+
+  /* --- Auth Shadows (darker, deeper for dark UI) --- */
+  --shadow-auth: 0 4px 24px oklch(0 0 0 / 0.5);
+  --shadow-auth-card: 0 1px 8px oklch(0 0 0 / 0.4);
+  --shadow-auth-accent: 0 4px 14px var(--color-auth-accent-glow);
+}
+
+/* ============================================================
+   Keyframe Animations
+   ============================================================ */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.58 0.19 250 / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px oklch(0.58 0.19 250 / 0.15);
+  }
+}
+
+@keyframes slide-toast {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Dark Mode Overrides
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--color-surface-950);
+    --color-foreground: var(--color-surface-100);
+    --color-muted: var(--color-surface-900);
+    --color-muted-foreground: var(--color-surface-400);
+    --color-border: var(--color-surface-800);
+  }
+}
+
+/* ============================================================
+   Base Styles
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Focus Styles (Accessibility)
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   Input Autofill — Force dark bg (crypto-style)
+   Prevents browser autofill from turning inputs white.
+   ============================================================ */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-auth-elevated) inset !important;
+  -webkit-text-fill-color: var(--color-auth-text) !important;
+  caret-color: var(--color-auth-text) !important;
+  background-clip: content-box !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Input focus glow — emerald accent ring */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-auth-accent) !important;
+  box-shadow: 0 0 0 3px var(--color-auth-accent-dim),
+    0 0 12px var(--color-auth-accent-glow) !important;
+}
+
+/* ============================================================
+   Selection Styles
+   ============================================================ */
+
+::selection {
+  background-color: oklch(0.75 0.19 160 / 0.3);
+  color: oklch(0.98 0 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::selection {
+    background-color: oklch(0.75 0.19 160 / 0.3);
+    color: oklch(0.98 0 0);
+  }
+}
+
+/* ============================================================
+   Fluid Typography Scale (adapts mobile → 4K)
+   ============================================================ */
+
+.text-fluid-xs {
+  font-size: clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem);
+}
+
+.text-fluid-sm {
+  font-size: clamp(0.8125rem, 0.75rem + 0.2vw, 1rem);
+}
+
+.text-fluid-base {
+  font-size: clamp(0.9375rem, 0.85rem + 0.25vw, 1.125rem);
+}
+
+.text-fluid-lg {
+  font-size: clamp(1.125rem, 1rem + 0.4vw, 1.375rem);
+}
+
+.text-fluid-xl {
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+}
+
+.text-fluid-2xl {
+  font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2.25rem);
+}
+
+.text-fluid-3xl {
+  font-size: clamp(1.875rem, 1.4rem + 1.2vw, 3rem);
+}
+
+.text-fluid-4xl {
+  font-size: clamp(2.25rem, 1.6rem + 1.8vw, 4rem);
+}
+
+.text-fluid-5xl {
+  font-size: clamp(3rem, 2rem + 2.5vw, 5rem);
+}
+
+/* ============================================================
+   Responsive Container (scales across all breakpoints)
+   ============================================================ */
+
+.container-responsive {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 3vw, 4rem);
+  padding-right: clamp(1rem, 3vw, 4rem);
+  max-width: 1440px;
+}
+
+@media (min-width: 1920px) {
+  .container-responsive {
+    max-width: 1680px;
+    padding-left: clamp(2rem, 3vw, 6rem);
+    padding-right: clamp(2rem, 3vw, 6rem);
+  }
+}
+
+@media (min-width: 2560px) {
+  .container-responsive {
+    max-width: 2200px;
+    padding-left: clamp(3rem, 4vw, 8rem);
+    padding-right: clamp(3rem, 4vw, 8rem);
+  }
+}
+
+@media (min-width: 3840px) {
+  .container-responsive {
+    max-width: 3200px;
+    padding-left: clamp(4rem, 5vw, 12rem);
+    padding-right: clamp(4rem, 5vw, 12rem);
+  }
+}
+
+/* ============================================================
+   Utility Classes
+   ============================================================ */
+
+/* Glassmorphism effect */
+.glass {
+  background: oklch(1 0 0 / 0.6);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid oklch(1 0 0 / 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass {
+    background: oklch(0.15 0.01 250 / 0.6);
+    border-color: oklch(1 0 0 / 0.08);
+  }
+}
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-400),
+    var(--color-accent-400)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Smooth hover transitions */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Section spacing (fluid) */
+.section-padding {
+  padding-top: clamp(3rem, 8vw, 8rem);
+  padding-bottom: clamp(3rem, 8vw, 8rem);
+}
