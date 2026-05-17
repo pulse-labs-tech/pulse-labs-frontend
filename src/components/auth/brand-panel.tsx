@@ -39,7 +39,7 @@ const iconColorMap = {
 
 export function BrandPanel() {
   return (
-    <div className="relative hidden flex-col justify-center gap-10 overflow-hidden border-r border-white/[0.06] bg-auth-bg px-10 py-16 lg:flex lg:px-14 xl:px-16 3xl:px-20 4xl:px-28">
+    <div className="relative hidden flex-col justify-center gap-10 overflow-hidden border-r border-auth-border-subtle bg-auth-bg px-10 py-16 lg:flex lg:px-14 xl:px-16 3xl:px-20 4xl:px-28">
       {/* Ambient glow — top left emerald */}
       <div
         className="pointer-events-none absolute -left-[120px] -top-[120px] h-[400px] w-[400px] rounded-full opacity-100"

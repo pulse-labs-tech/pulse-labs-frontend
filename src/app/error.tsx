@@ -36,7 +36,7 @@ export default function Error({
         </p>
 
         {process.env.NODE_ENV === "development" && (
-          <pre className="mt-5 max-w-full overflow-auto rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-left text-xs text-auth-text-3">
+          <pre className="mt-5 max-w-full overflow-auto rounded-xl border border-auth-border-subtle bg-white/[0.02] p-4 text-left text-xs text-auth-text-3">
             {error.message}
           </pre>
         )}

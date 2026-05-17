@@ -48,7 +48,7 @@ export default function HomePage() {
             <div className="pointer-events-none absolute -left-[80px] bottom-[10%] h-[350px] w-[350px] blur-[80px]" style={{ background: "radial-gradient(circle, oklch(0.68 0.18 280 / 0.05) 0%, transparent 70%)" }} aria-hidden="true" />
 
             <div className="relative mx-auto max-w-4xl text-center 3xl:max-w-5xl">
-              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-auth-text-2 backdrop-blur-md">
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-auth-border-subtle bg-white/5 px-4 py-2 text-xs font-medium text-auth-text-2 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
                 Early Access — Miễn phí
               </div>
@@ -65,7 +65,7 @@ export default function HomePage() {
                   Bắt đầu miễn phí
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                 </Link>
-                <a href="#how-it-works" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 py-3.5 text-sm font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95 3xl:text-base">
+                <a href="#how-it-works" className="inline-flex items-center gap-2 rounded-full border border-auth-border-subtle bg-white/5 px-8 py-3.5 text-sm font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95 3xl:text-base">
                   Xem cách hoạt động
                   <ChevronRight className="h-4 w-4" />
                 </a>
@@ -73,8 +73,8 @@ export default function HomePage() {
 
               {/* Query mockup */}
               <div className="mx-auto mt-16 max-w-2xl 3xl:max-w-3xl">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md">
-                  <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-auth-elevated/80 px-4 py-3.5">
+                <div className="rounded-2xl border border-auth-border-subtle bg-white/[0.03] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md">
+                  <div className="flex items-center gap-3 rounded-xl border border-auth-border-subtle bg-auth-elevated/80 px-4 py-3.5">
                     <Search className="h-4 w-4 shrink-0 text-auth-text-3" />
                     <span className="text-sm text-auth-text-3">&quot;Cách triển khai microservices cho hệ thống e-commerce?&quot;</span>
                   </div>
@@ -102,10 +102,10 @@ export default function HomePage() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:gap-5">
                 {features.map((f) => { const Icon = f.icon; return (
-                  <div key={f.tag} className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] 3xl:p-8">
+                  <div key={f.tag} className="group relative rounded-2xl border border-auth-border-subtle bg-white/[0.02] p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-auth-border-subtle hover:bg-white/[0.04] hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] 3xl:p-8">
                     <div className="mb-5 flex items-center gap-3">
                       <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconGlowMap[f.color]} transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg 3xl:h-11 3xl:w-11`}><Icon className="h-[18px] w-[18px] 3xl:h-5 3xl:w-5" /></div>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-medium text-auth-text-3">{f.tag}</span>
+                      <span className="rounded-full border border-auth-border-subtle bg-white/5 px-2.5 py-0.5 text-[10px] font-medium text-auth-text-3">{f.tag}</span>
                     </div>
                     <h3 className="mb-2 text-[15px] font-bold tracking-tight 3xl:text-base">{f.title}</h3>
                     <p className="text-[13px] leading-relaxed text-auth-text-2/80 3xl:text-sm">{f.description}</p>
@@ -127,7 +127,7 @@ export default function HomePage() {
                 {steps.map((s, i) => (
                   <div key={s.number} className="relative">
                     {i < steps.length - 1 && <div className="pointer-events-none absolute right-0 top-12 hidden h-px w-full translate-x-1/2 bg-gradient-to-r from-white/10 to-transparent md:block" />}
-                    <div className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] 3xl:p-9">
+                    <div className="group relative rounded-2xl border border-auth-border-subtle bg-white/[0.02] p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-auth-border-subtle hover:bg-white/[0.04] hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] 3xl:p-9">
                       <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-950/40 text-xl font-bold text-emerald-400 transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(52,211,153,0.2)] 3xl:h-14 3xl:w-14 3xl:text-2xl">{s.number}</div>
                       <h3 className="mb-2 text-base font-bold tracking-tight 3xl:text-lg">{s.title}</h3>
                       <p className="text-[13px] leading-relaxed text-auth-text-2/80 3xl:text-sm">{s.description}</p>
@@ -140,7 +140,7 @@ export default function HomePage() {
 
           {/* CTA */}
           <section id="cta" className="scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
-            <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-12 text-center shadow-[0_8px_40px_rgba(0,0,0,0.4)] backdrop-blur-md sm:p-16 lg:p-20 3xl:max-w-5xl 3xl:p-24">
+            <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-auth-border-subtle bg-white/[0.03] p-12 text-center shadow-[0_8px_40px_rgba(0,0,0,0.4)] backdrop-blur-md sm:p-16 lg:p-20 3xl:max-w-5xl 3xl:p-24">
               <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 blur-[100px]" style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.14) 0%, transparent 70%)" }} aria-hidden="true" />
               <div className="relative">
                 <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-extrabold tracking-tight 3xl:text-[2.75rem]">Sẵn sàng xây dựng <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">knowledge base</span> của bạn?</h2>
@@ -149,7 +149,7 @@ export default function HomePage() {
                   <Link href="/register" className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-10 py-4 text-base font-bold text-white shadow-[0_0_30px_rgba(52,211,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_0_60px_rgba(52,211,153,0.6)] active:scale-95">
                     Bắt đầu miễn phí <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </Link>
-                  <a href="mailto:support@pulseknowledge.com" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-10 py-4 text-base font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95">Liên hệ tư vấn</a>
+                  <a href="mailto:support@pulseknowledge.com" className="inline-flex items-center gap-2 rounded-full border border-auth-border-subtle bg-white/5 px-10 py-4 text-base font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95">Liên hệ tư vấn</a>
                 </div>
               </div>
             </div>
