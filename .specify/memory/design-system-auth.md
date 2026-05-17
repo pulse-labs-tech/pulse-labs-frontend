@@ -50,7 +50,7 @@ All auth colors are namespaced with `--color-auth-*` and available as Tailwind c
   active:scale-95 transition-all duration-300" />
 
 <!-- Secondary (glassmorphic) -->
-<button class="rounded-full border border-auth-border-subtle bg-white/5
+<button class="rounded-full border border-white/10 bg-white/5
   backdrop-blur-md hover:bg-white/10 hover:scale-105
   active:scale-95 transition-all duration-300" />
 ```
