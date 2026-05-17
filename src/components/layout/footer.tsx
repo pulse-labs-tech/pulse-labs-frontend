@@ -16,7 +16,7 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-auth-border-subtle bg-auth-bg">
+    <footer className="border-t border-white/[0.06] bg-auth-bg">
       <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8 3xl:max-w-[1680px] 4xl:max-w-[2200px]">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
@@ -43,7 +43,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 border-t border-auth-border-subtle pt-6">
+        <div className="mt-12 border-t border-white/[0.04] pt-6">
           <p className="text-center text-[11px] text-auth-text-3/60">© {new Date().getFullYear()} Pulse Knowledge. Bảo lưu mọi quyền.</p>
         </div>
       </div>
