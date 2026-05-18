@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X } from "lucide-react";
+import { PulseLogo } from "@/components/shared/pulse-logo";
 
 const navLinks = [
   { href: "#features", label: "Tính năng" },
@@ -15,10 +15,8 @@ export function Header() {
   return (
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-white/[0.06] bg-auth-bg/70 backdrop-blur-2xl backdrop-saturate-150">
       <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 lg:px-8 3xl:h-16 3xl:max-w-[1680px] 4xl:max-w-[2200px]">
-        <Link href="/" className="group flex items-center gap-2.5">
-          <div className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg shadow-[0_0_12px_rgba(52,211,153,0.3)] transition-shadow duration-300 group-hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] 3xl:h-9 3xl:w-9">
-            <Image src="/images/logo-512.png" alt="Pulse Knowledge" width={36} height={36} className="h-full w-full object-cover" priority />
-          </div>
+        <Link href="/" className="group flex items-center gap-2.5" aria-label="Pulse Knowledge — trang chủ">
+          <PulseLogo size={32} className="transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
           <span className="text-sm font-bold tracking-tight text-auth-text 3xl:text-[15px]">
             Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
           </span>

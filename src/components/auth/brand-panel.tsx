@@ -5,7 +5,8 @@
  * Displays logo, headline, value propositions with ambient glow effects.
  */
 
-import { Brain, Search, Target, Zap } from "lucide-react";
+import { Brain, Search, Target } from "lucide-react";
+import { PulseLogo } from "@/components/shared/pulse-logo";
 
 const valueProps = [
   {
@@ -61,9 +62,7 @@ export function BrandPanel() {
 
       {/* Logo */}
       <div className="relative flex items-center gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_14px_rgba(52,211,153,0.3)] 3xl:h-10 3xl:w-10">
-          <Zap className="h-[18px] w-[18px] text-white" strokeWidth={2.5} />
-        </div>
+        <PulseLogo size={36} className="drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" />
         <span className="text-[15px] font-bold tracking-tight text-auth-text 3xl:text-base">
           Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
         </span>

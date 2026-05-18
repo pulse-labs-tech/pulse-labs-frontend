@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { PulseLogo } from "@/components/shared/pulse-logo";
 
 const footerLinks = {
   product: [
@@ -20,10 +20,8 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8 3xl:max-w-[1680px] 4xl:max-w-[2200px]">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-2.5">
-              <div className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-md shadow-[0_0_10px_rgba(52,211,153,0.2)]">
-                <Image src="/images/logo-512.png" alt="Pulse Knowledge" width={28} height={28} className="h-full w-full object-cover" />
-              </div>
+            <Link href="/" className="group inline-flex items-center gap-2.5">
+              <PulseLogo size={28} className="opacity-90 transition-opacity duration-200 group-hover:opacity-100" />
               <span className="text-sm font-bold tracking-tight text-auth-text">
                 Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
