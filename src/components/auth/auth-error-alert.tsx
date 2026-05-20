@@ -1,18 +1,25 @@
 /**
  * Auth Error Alert — Reusable error/warning block for auth pages.
  * Maps API error codes to Vietnamese user-facing messages.
+ *
+ * @see /features/api-docs/API_Auth_Docs.md — Error Code Catalog
  */
 
-import { AlertCircle, ShieldAlert, WifiOff, Clock, ServerCrash, MailWarning } from "lucide-react";
+import {
+  AlertCircle,
+  ShieldAlert,
+  WifiOff,
+  Clock,
+  ServerCrash,
+  MailWarning,
+  Link2Off,
+  CheckCircle2,
+} from "lucide-react";
 import type { ReactNode } from "react";
+import type { AuthErrorCode } from "@/types/auth";
 
-export type AuthErrorCode =
-  | "INVALID_CREDENTIALS"
-  | "EMAIL_NOT_VERIFIED"
-  | "ACCOUNT_LOCKED"
-  | "RATE_LIMITED"
-  | "SERVER_ERROR"
-  | "NETWORK_ERROR";
+// Re-export for backward compatibility
+export type { AuthErrorCode } from "@/types/auth";
 
 interface AuthErrorConfig {
   message: string;
@@ -22,6 +29,7 @@ interface AuthErrorConfig {
 }
 
 const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
+  // ── Auth Errors ──
   INVALID_CREDENTIALS: {
     message: "Email hoặc mật khẩu không đúng.",
     icon: <AlertCircle className="h-3.5 w-3.5 shrink-0" />,
@@ -45,6 +53,75 @@ const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
     icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
   },
+
+  // ── Validation ──
+  VALIDATION_ERROR: {
+    message: "Vui lòng kiểm tra lại thông tin.",
+    icon: <AlertCircle className="h-3.5 w-3.5 shrink-0" />,
+    variant: "error",
+  },
+
+  // ── Token / Verify Email ──
+  TOKEN_MISSING: {
+    message: "Link xác minh không hợp lệ.",
+    icon: <Link2Off className="h-3.5 w-3.5 shrink-0" />,
+    variant: "error",
+  },
+  TOKEN_INVALID: {
+    message: "Link xác minh không hợp lệ hoặc đã được sử dụng.",
+    icon: <Link2Off className="h-3.5 w-3.5 shrink-0" />,
+    variant: "error",
+    action: { label: "Gửi lại email xác minh" },
+  },
+  TOKEN_EXPIRED: {
+    message: "Link xác minh đã hết hạn. Vui lòng gửi lại.",
+    icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
+    variant: "warning",
+    action: { label: "Gửi lại" },
+  },
+  EMAIL_ALREADY_VERIFIED: {
+    message: "Email đã được xác minh trước đó.",
+    icon: <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />,
+    variant: "warning",
+    action: { label: "Đăng nhập", href: "/login" },
+  },
+
+  // ── Session / Access Token ──
+  UNAUTHORIZED: {
+    message: "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    variant: "error",
+    action: { label: "Đăng nhập", href: "/login" },
+  },
+
+  // ── Refresh Token ──
+  MISSING_REFRESH_TOKEN: {
+    message: "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.",
+    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    variant: "error",
+    action: { label: "Đăng nhập", href: "/login" },
+  },
+  INVALID_REFRESH_TOKEN: {
+    message: "Phiên đăng nhập đã bị thu hồi. Vui lòng đăng nhập lại.",
+    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    variant: "error",
+    action: { label: "Đăng nhập", href: "/login" },
+  },
+  REFRESH_TOKEN_EXPIRED: {
+    message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
+    variant: "warning",
+    action: { label: "Đăng nhập", href: "/login" },
+  },
+  REFRESH_TOKEN_REUSED: {
+    message:
+      "Phát hiện hoạt động bất thường. Tất cả phiên đã bị đăng xuất vì lý do bảo mật.",
+    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    variant: "error",
+    action: { label: "Đăng nhập lại", href: "/login" },
+  },
+
+  // ── Client-side Errors ──
   SERVER_ERROR: {
     message: "Hệ thống đang bận. Vui lòng thử lại.",
     icon: <ServerCrash className="h-3.5 w-3.5 shrink-0" />,

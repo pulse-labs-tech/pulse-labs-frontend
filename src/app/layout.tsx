@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { generateOrganizationJsonLd } from "@/lib/seo";
+import { getUserData } from "@/lib/token-storage";
+import { AuthProvider } from "@/contexts/auth-context";
 import "./globals.css";
 
 /* ============================================================
@@ -105,11 +107,13 @@ export const metadata: Metadata = {
    Root Layout
    ============================================================ */
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read user data from cookie (server-side) for AuthProvider hydration
+  const initialUser = await getUserData();
   const organizationJsonLd = generateOrganizationJsonLd();
 
   return (
@@ -136,10 +140,13 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        {/* Content — pages handle their own layout structure */}
-        <div className="flex-1">
-          {children}
-        </div>
+        {/* Auth state provider — reads initial user from cookie */}
+        <AuthProvider initialUser={initialUser}>
+          {/* Content — pages handle their own layout structure */}
+          <div className="flex-1">
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
