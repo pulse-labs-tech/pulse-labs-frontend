@@ -1,0 +1,393 @@
+"use client";
+
+/**
+ * Register Form — Client Component with full state management.
+ *
+ * Uses React 19 useActionState for form submission.
+ * Handles: idle, editing, submitting, field errors, global errors, success state.
+ *
+ * Fields: firstName, lastName, email, password, acceptedTerms, selectedPlanIntent
+ * On success → shows "check your email" verification screen.
+ */
+
+import { useActionState, useState, useCallback } from "react";
+import Link from "next/link";
+import { Loader2, Eye, EyeOff, Check, Mail } from "lucide-react";
+import { registerAction } from "@/app/actions/auth";
+import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
+
+export function RegisterForm() {
+  const [state, formAction, isPending] = useActionState(
+    registerAction,
+    undefined,
+  );
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  // ─── Password strength indicators ──
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+
+  // ─── Success state → "Check your email" screen ──
+  if (state?.success) {
+    return (
+      <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
+        <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
+          {/* Success icon */}
+          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-950/30">
+            <Mail className="h-6 w-6 text-emerald-400" />
+          </div>
+
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
+            Kiểm tra email
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-auth-text-2 3xl:text-sm">
+            Chúng tôi đã gửi email xác minh đến{" "}
+            <span className="font-semibold text-auth-text">
+              {state.email}
+            </span>
+            . Vui lòng kiểm tra hộp thư và nhấn vào link xác minh.
+          </p>
+
+          {state.resendAvailableInSeconds && (
+            <p className="mt-3 text-xs text-auth-text-3">
+              Có thể gửi lại sau {state.resendAvailableInSeconds} giây.
+            </p>
+          )}
+
+          <div className="mt-8 flex flex-col gap-3">
+            <Link
+              href="/login"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] 3xl:text-sm 3xl:py-3.5"
+            >
+              Đi tới đăng nhập →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Registration form ──
+  return (
+    <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
+      <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
+        {/* Mobile logo — shown only on small screens */}
+        <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_12px_rgba(52,211,153,0.3)]">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              className="h-4 w-4 text-white"
+            >
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </div>
+          <span className="text-sm font-bold tracking-tight text-auth-text">
+            Pulse
+            <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+              Knowledge
+            </span>
+          </span>
+        </div>
+
+        {/* Form header */}
+        <div className="mb-6 flex flex-col gap-1.5">
+          <h2
+            className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl 4xl:text-[28px]"
+            id="register-heading"
+          >
+            Tạo tài khoản
+          </h2>
+          <p className="text-[13px] text-auth-text-2 3xl:text-sm">
+            Đã có tài khoản?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-auth-accent hover:underline"
+            >
+              Đăng nhập →
+            </Link>
+          </p>
+        </div>
+
+        {/* Form */}
+        <form
+          action={formAction}
+          className="flex flex-col gap-4"
+          aria-labelledby="register-heading"
+          noValidate
+        >
+          {/* Global error */}
+          {state?.globalError && (
+            <AuthErrorAlert code={state.globalError} />
+          )}
+
+          {/* Name fields — side by side */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* First name */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="register-firstName"
+                className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
+              >
+                Tên
+              </label>
+              <input
+                type="text"
+                id="register-firstName"
+                name="firstName"
+                placeholder="Tên"
+                autoComplete="given-name"
+                required
+                aria-invalid={!!state?.errors?.firstName}
+                aria-describedby={
+                  state?.errors?.firstName
+                    ? "register-firstName-error"
+                    : undefined
+                }
+                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                  state?.errors?.firstName
+                    ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
+                    : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
+                }`}
+              />
+              {state?.errors?.firstName && (
+                <p
+                  id="register-firstName-error"
+                  className="text-xs text-auth-error"
+                  role="alert"
+                >
+                  {state.errors.firstName[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Last name */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="register-lastName"
+                className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
+              >
+                Họ
+              </label>
+              <input
+                type="text"
+                id="register-lastName"
+                name="lastName"
+                placeholder="Họ"
+                autoComplete="family-name"
+                required
+                aria-invalid={!!state?.errors?.lastName}
+                aria-describedby={
+                  state?.errors?.lastName
+                    ? "register-lastName-error"
+                    : undefined
+                }
+                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                  state?.errors?.lastName
+                    ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
+                    : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
+                }`}
+              />
+              {state?.errors?.lastName && (
+                <p
+                  id="register-lastName-error"
+                  className="text-xs text-auth-error"
+                  role="alert"
+                >
+                  {state.errors.lastName[0]}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Email field */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="register-email"
+              className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="register-email"
+              name="email"
+              placeholder="you@company.com"
+              autoComplete="email"
+              required
+              aria-invalid={!!state?.errors?.email}
+              aria-describedby={
+                state?.errors?.email ? "register-email-error" : undefined
+              }
+              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                state?.errors?.email
+                  ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
+                  : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
+              }`}
+            />
+            {state?.errors?.email && (
+              <p
+                id="register-email-error"
+                className="text-xs text-auth-error"
+                role="alert"
+              >
+                {state.errors.email[0]}
+              </p>
+            )}
+          </div>
+
+          {/* Password field with visibility toggle */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="register-password"
+              className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
+            >
+              Mật khẩu
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="register-password"
+                name="password"
+                placeholder="••••••••"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={!!state?.errors?.password}
+                aria-describedby="register-password-strength"
+                className={`w-full rounded-lg border bg-auth-elevated px-3.5 py-2.5 pr-10 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                  state?.errors?.password
+                    ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
+                    : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-auth-text-3 transition-colors hover:text-auth-text-2"
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+            {state?.errors?.password && (
+              <p className="text-xs text-auth-error" role="alert">
+                {state.errors.password[0]}
+              </p>
+            )}
+
+            {/* Password strength indicators */}
+            {password.length > 0 && (
+              <div
+                id="register-password-strength"
+                className="mt-1 flex flex-col gap-1"
+              >
+                <StrengthRule met={hasMinLength} label="Ít nhất 8 ký tự" />
+                <StrengthRule met={hasUppercase} label="1 chữ in hoa" />
+                <StrengthRule met={hasNumber} label="1 chữ số" />
+              </div>
+            )}
+          </div>
+
+          {/* Hidden plan intent */}
+          <input type="hidden" name="selectedPlanIntent" value="free" />
+
+          {/* Terms checkbox */}
+          <div className="flex items-start gap-2.5">
+            <input
+              type="checkbox"
+              id="register-terms"
+              name="acceptedTerms"
+              value="true"
+              required
+              aria-invalid={!!state?.errors?.acceptedTerms}
+              className="mt-0.5 h-4 w-4 shrink-0 appearance-none rounded border border-auth-border bg-auth-elevated transition-all duration-200 checked:border-emerald-500 checked:bg-emerald-500 focus:ring-2 focus:ring-auth-accent-dim cursor-pointer relative
+              checked:after:content-['✓'] checked:after:text-white checked:after:text-[10px] checked:after:font-bold checked:after:absolute checked:after:inset-0 checked:after:flex checked:after:items-center checked:after:justify-center"
+            />
+            <label
+              htmlFor="register-terms"
+              className="text-xs leading-relaxed text-auth-text-3 cursor-pointer select-none"
+            >
+              Tôi đồng ý với{" "}
+              <Link
+                href="/terms"
+                className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
+              >
+                Điều khoản sử dụng
+              </Link>{" "}
+              và{" "}
+              <Link
+                href="/privacy"
+                className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
+              >
+                Chính sách bảo mật
+              </Link>
+            </label>
+          </div>
+          {state?.errors?.acceptedTerms && (
+            <p className="-mt-2 text-xs text-auth-error" role="alert">
+              {state.errors.acceptedTerms[0]}
+            </p>
+          )}
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            disabled={isPending}
+            aria-busy={isPending}
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60 3xl:text-sm 3xl:py-3.5"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang tạo tài khoản...
+              </>
+            ) : (
+              "Tạo tài khoản miễn phí →"
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────
+// Password strength rule indicator
+// ────────────────────────────────────────────────────────────────
+
+function StrengthRule({ met, label }: { met: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div
+        className={`flex h-3.5 w-3.5 items-center justify-center rounded-full transition-all duration-200 ${
+          met
+            ? "bg-emerald-500/20 text-emerald-400"
+            : "bg-auth-border/30 text-auth-text-3"
+        }`}
+      >
+        <Check className="h-2.5 w-2.5" />
+      </div>
+      <span
+        className={`text-[11px] transition-colors duration-200 ${
+          met ? "text-emerald-400" : "text-auth-text-3"
+        }`}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
