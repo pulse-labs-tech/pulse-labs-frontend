@@ -46,7 +46,7 @@ import type { RoleKbDto } from "@/types/onboarding";
 
 export function DashboardView() {
   const router = useRouter();
-  const { clearAuth } = useAuth();
+  const { user: authUser, clearAuth } = useAuth();
   const [isPending, startTransition] = useTransition();
 
   // Core Dashboard State
@@ -60,6 +60,8 @@ export function DashboardView() {
   const [isLoading, setIsLoading] = useState(true);
   const [isChangingRole, setIsChangingRole] = useState(false);
   const [globalErrorMsg, setGlobalErrorMsg] = useState<string | null>(null);
+  // Non-blocking API warning (shows banner but dashboard still renders)
+  const [apiWarning, setApiWarning] = useState<string | null>(null);
 
   // Polling management refs
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -104,6 +106,52 @@ export function DashboardView() {
   );
 
   // ────────────────────────────────────────────────────────────────
+  // Fallback summary built from auth context when API is unavailable
+  // ────────────────────────────────────────────────────────────────
+  const buildFallbackSummary = useCallback((): DashboardSummaryData => {
+    return {
+      user: {
+        id: authUser?.id || "",
+        displayName: authUser?.displayName || authUser?.email || "",
+        email: authUser?.email || "",
+        isEmailVerified: authUser?.emailVerified ?? true,
+        onboardingStatus: "completed",
+        plan: (authUser?.plan as "free" | "pro") || "free",
+      },
+      role: {
+        roleKbId: "",
+        roleName: "Đang tải...",
+        roleGroup: "Khác",
+        isPrimary: true,
+        createdAt: new Date().toISOString(),
+      },
+      stats: {
+        totalItems: 0,
+        activeDomains: 0,
+        processingJobs: 0,
+        failedJobs: 0,
+        indexedItems: 0,
+        degradedItems: 0,
+        pendingRetrievalItems: 0,
+        queriesUsedToday: 0,
+        queriesLimitToday: authUser?.plan === "pro" ? 100 : 20,
+        compilesUsedThisMonth: 0,
+        compilesLimitThisMonth: authUser?.plan === "pro" ? 200 : 30,
+        storageUsedBytes: 0,
+        storageLimitBytes: authUser?.plan === "pro" ? 1073741824 : 104857600,
+      },
+      quickActions: [],
+      recentItems: [],
+      activeJobs: [],
+      domainSnapshot: [],
+      activity: [],
+      quota: null,
+      sectionErrors: [],
+      serverTime: new Date().toISOString(),
+    };
+  }, [authUser]);
+
+  // ────────────────────────────────────────────────────────────────
   // 2. Initial Data Fetch (Bootstrap)
   // ────────────────────────────────────────────────────────────────
   const fetchDashboardData = useCallback(
@@ -133,17 +181,27 @@ export function DashboardView() {
             }
           }
         } else {
-          handleGlobalError(summaryRes.error_code, summaryRes.msg);
+          const errCode = summaryRes.error_code;
+          // Auth/permission errors → hard block (redirect)
+          if (errCode === "UNAUTHORIZED" || errCode === "FORBIDDEN" || errCode === "ONBOARDING_REQUIRED") {
+            handleGlobalError(errCode, summaryRes.msg);
+          } else {
+            // Non-auth error (API not ready, network, etc.) → graceful degradation
+            if (!summary) setSummary(buildFallbackSummary());
+            setApiWarning(summaryRes.msg || "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật.");
+          }
         }
       } catch (err) {
         console.error("fetchDashboardData error:", err);
-        setGlobalErrorMsg("Không kết nối được máy chủ. Kiểm tra mạng và thử lại.");
+        // Network error → degrade gracefully, never block the whole dashboard
+        if (!summary) setSummary(buildFallbackSummary());
+        setApiWarning("Không kết nối được máy chủ. Một số dữ liệu có thể chưa cập nhật.");
       } finally {
         setIsLoading(false);
         setIsChangingRole(false);
       }
     },
-    [handleGlobalError]
+    [handleGlobalError, summary, buildFallbackSummary]
   );
 
   useEffect(() => {
@@ -468,6 +526,23 @@ export function DashboardView() {
               <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
               <p className="text-sm text-auth-text-2">Đang đồng bộ vai trò chuyên môn...</p>
             </div>
+          </div>
+        )}
+
+        {/* Non-blocking API warning banner */}
+        {apiWarning && (
+          <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300 animate-fade-in">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+            <span className="flex-1">{apiWarning}</span>
+            <button
+              onClick={() => { setApiWarning(null); fetchDashboardData(selectedRoleKbId || undefined, true); }}
+              className="ml-2 shrink-0 rounded-lg bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300 hover:bg-amber-500/20 transition-colors"
+            >
+              Thử lại
+            </button>
+            <button onClick={() => setApiWarning(null)} className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors">
+              <XCircle className="h-4 w-4" />
+            </button>
           </div>
         )}
 
