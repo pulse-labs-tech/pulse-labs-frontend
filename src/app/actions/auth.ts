@@ -147,7 +147,8 @@ export async function loginAction(
 
   // 2. Call auth API
   const { email, password, returnUrl } = validatedFields.data;
-  let nextRoute = returnUrl || "/dashboard";
+  // returnUrl only used if backend doesn't provide nextRoute
+  let nextRoute = "/onboarding";
 
   try {
     const result = await apiLogin({ email, password, returnUrl });
@@ -171,14 +172,14 @@ export async function loginAction(
     // 4. Store user data in readable cookie (for client hydration)
     await setUserData(result.data.user);
 
-    // 5. Use backend-provided nextRoute
+    // 5. Use backend-provided nextRoute (BE returns /onboarding or /dashboard
+    //    based on onboardingStatus — always trust the backend value)
     const rawData = result.data as unknown as Record<string, string | undefined>;
     nextRoute =
       rawData.nextRoute ||
       rawData["next-route"] ||
       rawData.next_route ||
-      returnUrl ||
-      "/dashboard";
+      "/onboarding";
   } catch {
     return { globalError: "NETWORK_ERROR" };
   }
