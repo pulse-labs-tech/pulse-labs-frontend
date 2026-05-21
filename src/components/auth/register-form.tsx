@@ -54,6 +54,7 @@ export function RegisterForm() {
     return (
       <VerifyEmailScreen
         email={state.email || ""}
+        password={password}
         initialCountdown={state.resendAvailableInSeconds || 60}
       />
     );
@@ -380,9 +381,11 @@ export function RegisterForm() {
 
 function VerifyEmailScreen({
   email,
+  password,
   initialCountdown,
 }: {
   email: string;
+  password?: string;
   initialCountdown: number;
 }) {
   const [countdown, setCountdown] = useState(initialCountdown);
@@ -406,7 +409,7 @@ function VerifyEmailScreen({
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // Handle resend
+  // Handle resend — also handles auto-verify when BE returns verificationLink
   const handleResend = useCallback(async () => {
     if (countdown > 0 || isResending) return;
 
@@ -414,20 +417,27 @@ function VerifyEmailScreen({
     setResendMessage(null);
 
     try {
-      const result = await resendVerificationAction(email);
+      const result = await resendVerificationAction(email, password);
 
       if (result.success) {
+        // Auto-verified — redirect immediately
+        if (result.autoVerifiedRedirect) {
+          setResendMessage("✓ Email đã xác minh! Đang chuyển hướng...");
+          window.location.href = result.autoVerifiedRedirect;
+          return;
+        }
+
         setCountdown(result.resendAvailableInSeconds || 60);
         setResendMessage("✓ Đã gửi lại email xác minh");
       } else {
-        setResendMessage("Không thể gửi lại. Vui lòng thử lại sau.");
+        setResendMessage(result.serverMessage || "Không thể gửi lại. Vui lòng thử lại sau.");
       }
     } catch {
       setResendMessage("Lỗi kết nối. Vui lòng thử lại.");
     } finally {
       setIsResending(false);
     }
-  }, [countdown, isResending, email]);
+  }, [countdown, isResending, email, password]);
 
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
@@ -470,7 +480,11 @@ function VerifyEmailScreen({
           )}
 
           {resendMessage && (
-            <p className="mt-1 text-xs text-emerald-400">
+            <p className={`mt-1 text-xs ${
+              resendMessage.startsWith("✓")
+                ? "text-emerald-400"
+                : "text-auth-error"
+            }`}>
               {resendMessage}
             </p>
           )}

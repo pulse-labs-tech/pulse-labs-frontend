@@ -309,10 +309,13 @@ export interface ResendVerificationResult {
   error?: AuthErrorCode;
   serverMessage?: string;
   retryAfterSeconds?: number;
+  /** If auto-verify succeeded, redirect to this route */
+  autoVerifiedRedirect?: string;
 }
 
 export async function resendVerificationAction(
   email: string,
+  password?: string,
 ): Promise<ResendVerificationResult> {
   try {
     const result = await apiResendVerification(email);
@@ -324,6 +327,57 @@ export async function resendVerificationAction(
         serverMessage: result.msg,
         retryAfterSeconds: data?.retryAfterSeconds,
       };
+    }
+
+    // ─── Dev mode: auto-verify if verificationLink is present ──
+    if (result.data.verificationLink) {
+      try {
+        const url = new URL(result.data.verificationLink);
+        const token = url.searchParams.get("token");
+
+        if (token) {
+          const verifyResult = await apiVerifyEmail(token);
+
+          if (
+            verifyResult.status === "1" ||
+            verifyResult.error_code === "EMAIL_ALREADY_VERIFIED"
+          ) {
+            // Auto-login if password was provided
+            if (password) {
+              const loginResult = await apiLogin({ email, password });
+
+              if (loginResult.status === "1") {
+                await setAuthTokens(
+                  loginResult.data.accessToken,
+                  loginResult.data.refreshToken,
+                  loginResult.data.expiresIn,
+                );
+                await setUserData(loginResult.data.user);
+
+                const rawData = loginResult.data as unknown as Record<string, string | undefined>;
+                const nextRoute =
+                  rawData.nextRoute ||
+                  rawData["next-route"] ||
+                  rawData.next_route ||
+                  "/dashboard";
+
+                return {
+                  success: true,
+                  autoVerifiedRedirect: nextRoute,
+                };
+              }
+            }
+
+            // No password → just report success, user can go to login
+            return {
+              success: true,
+              autoVerifiedRedirect: "/login",
+            };
+          }
+        }
+      } catch {
+        // Auto-verify failed silently, fall through to normal response
+      }
     }
 
     return {

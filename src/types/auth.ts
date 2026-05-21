@@ -110,6 +110,8 @@ export interface ResendVerificationResponseData {
   /** Always `true` — server never reveals if email exists (anti-enumeration). */
   sentIfEligible: true;
   resendAvailableInSeconds: number;
+  /** Only present in dev mode (DEBUG_RETURN_VERIFICATION_LINK=true) */
+  verificationLink?: string;
 }
 
 /** POST /api/v1/auth/refresh — success data */
