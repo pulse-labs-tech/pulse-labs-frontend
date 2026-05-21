@@ -136,12 +136,16 @@ const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
 
 interface AuthErrorAlertProps {
   code: AuthErrorCode;
+  serverMessage?: string;
+  retryAfterSeconds?: number;
   onAction?: () => void;
   className?: string;
 }
 
 export function AuthErrorAlert({
   code,
+  serverMessage,
+  retryAfterSeconds,
   onAction,
   className = "",
 }: AuthErrorAlertProps) {
@@ -149,6 +153,11 @@ export function AuthErrorAlert({
   if (!config) return null;
 
   const isWarning = config.variant === "warning";
+
+  let messageToDisplay = serverMessage || config.message;
+  if (code === "RATE_LIMITED" && retryAfterSeconds && retryAfterSeconds > 0) {
+    messageToDisplay = `Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ${retryAfterSeconds} giây.`;
+  }
 
   return (
     <div
@@ -162,7 +171,7 @@ export function AuthErrorAlert({
     >
       <span className="mt-0.5">{config.icon}</span>
       <span className="flex-1">
-        {config.message}
+        {messageToDisplay}
         {config.action && (
           <>
             {" "}

@@ -112,7 +112,11 @@ export function RegisterForm() {
         >
           {/* Global error */}
           {state?.globalError && (
-            <AuthErrorAlert code={state.globalError} />
+            <AuthErrorAlert
+              code={state.globalError}
+              serverMessage={state.serverMessage}
+              retryAfterSeconds={state.retryAfterSeconds}
+            />
           )}
 
           {/* Name fields — side by side */}
@@ -138,7 +142,7 @@ export function RegisterForm() {
                     ? "register-firstName-error"
                     : undefined
                 }
-                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
                   state?.errors?.firstName
                     ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                     : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -176,7 +180,7 @@ export function RegisterForm() {
                     ? "register-lastName-error"
                     : undefined
                 }
-                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
                   state?.errors?.lastName
                     ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                     : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -213,7 +217,7 @@ export function RegisterForm() {
               aria-describedby={
                 state?.errors?.email ? "register-email-error" : undefined
               }
-              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
                 state?.errors?.email
                   ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                   : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -250,7 +254,7 @@ export function RegisterForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 aria-invalid={!!state?.errors?.password}
                 aria-describedby="register-password-strength"
-                className={`w-full rounded-lg border bg-auth-elevated px-3.5 py-2.5 pr-10 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                className={`w-full rounded-lg border bg-auth-elevated px-3.5 py-2.5 pr-10 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
                   state?.errors?.password
                     ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                     : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"

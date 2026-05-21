@@ -65,7 +65,11 @@ export function LoginForm() {
         >
           {/* Global error */}
           {state?.globalError && (
-            <AuthErrorAlert code={state.globalError} />
+            <AuthErrorAlert
+              code={state.globalError}
+              serverMessage={state.serverMessage}
+              retryAfterSeconds={state.retryAfterSeconds}
+            />
           )}
 
           {/* Email field */}
@@ -87,7 +91,7 @@ export function LoginForm() {
               aria-describedby={
                 state?.errors?.email ? "login-email-error" : undefined
               }
-              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
                 state?.errors?.email
                   ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                   : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -131,7 +135,7 @@ export function LoginForm() {
               aria-describedby={
                 state?.errors?.password ? "login-password-error" : undefined
               }
-              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
                 state?.errors?.password
                   ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                   : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"

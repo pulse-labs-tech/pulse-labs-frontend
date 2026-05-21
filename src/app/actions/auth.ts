@@ -45,6 +45,10 @@ const KNOWN_AUTH_ERRORS: AuthErrorCode[] = [
   "TOKEN_EXPIRED",
   "EMAIL_ALREADY_VERIFIED",
   "UNAUTHORIZED",
+  "MISSING_REFRESH_TOKEN",
+  "INVALID_REFRESH_TOKEN",
+  "REFRESH_TOKEN_EXPIRED",
+  "REFRESH_TOKEN_REUSED",
 ];
 
 function mapErrorCode(code: string): AuthErrorCode {
@@ -64,6 +68,8 @@ export interface LoginActionState {
     password?: string[];
   };
   globalError?: AuthErrorCode;
+  serverMessage?: string;
+  retryAfterSeconds?: number;
   message?: string;
 }
 
@@ -91,7 +97,12 @@ export async function loginAction(
     const result = await apiLogin({ email, password });
 
     if (result.status === "0") {
-      return { globalError: mapErrorCode(result.error_code) };
+      const data = result.data as any;
+      return {
+        globalError: mapErrorCode(result.error_code),
+        serverMessage: result.msg,
+        retryAfterSeconds: data?.retryAfterSeconds,
+      };
     }
 
     // 3. Store tokens in HttpOnly cookies
@@ -121,6 +132,8 @@ export async function loginAction(
 export interface RegisterActionState {
   errors?: Record<string, string[]>;
   globalError?: AuthErrorCode;
+  serverMessage?: string;
+  retryAfterSeconds?: number;
   success?: boolean;
   email?: string;
   resendAvailableInSeconds?: number;
@@ -151,7 +164,12 @@ export async function registerAction(
     const result = await apiRegister(validatedFields.data);
 
     if (result.status === "0") {
-      return { globalError: mapErrorCode(result.error_code) };
+      const data = result.data as any;
+      return {
+        globalError: mapErrorCode(result.error_code),
+        serverMessage: result.msg,
+        retryAfterSeconds: data?.retryAfterSeconds,
+      };
     }
 
     // Success — return data for "check your email" UI state
@@ -209,6 +227,8 @@ export interface ResendVerificationResult {
   success?: boolean;
   resendAvailableInSeconds?: number;
   error?: AuthErrorCode;
+  serverMessage?: string;
+  retryAfterSeconds?: number;
 }
 
 export async function resendVerificationAction(
@@ -218,7 +238,12 @@ export async function resendVerificationAction(
     const result = await apiResendVerification(email);
 
     if (result.status === "0") {
-      return { error: mapErrorCode(result.error_code) };
+      const data = result.data as any;
+      return {
+        error: mapErrorCode(result.error_code),
+        serverMessage: result.msg,
+        retryAfterSeconds: data?.retryAfterSeconds,
+      };
     }
 
     return {
