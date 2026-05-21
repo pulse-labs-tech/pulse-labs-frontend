@@ -82,6 +82,7 @@ export async function loginAction(
   const validatedFields = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
+    returnUrl: formData.get("returnUrl"),
   });
 
   if (!validatedFields.success) {
@@ -91,11 +92,11 @@ export async function loginAction(
   }
 
   // 2. Call auth API
-  const { email, password } = validatedFields.data;
-  let nextRoute = "/dashboard";
+  const { email, password, returnUrl } = validatedFields.data;
+  let nextRoute = returnUrl || "/dashboard";
 
   try {
-    const result = await apiLogin({ email, password });
+    const result = await apiLogin({ email, password, returnUrl });
 
     if (result.status === "0") {
       const data = result.data as unknown as { retryAfterSeconds?: number };
@@ -116,8 +117,14 @@ export async function loginAction(
     // 4. Store user data in readable cookie (for client hydration)
     await setUserData(result.data.user);
 
-    // 5. Use backend-provided nextRoute
-    nextRoute = result.data.nextRoute || "/dashboard";
+    // 5. Use backend-provided nextRoute (handling possible naming variations)
+    const rawData = result.data as unknown as Record<string, string | undefined>;
+    nextRoute =
+      rawData.nextRoute ||
+      rawData["next-route"] ||
+      rawData.next_route ||
+      returnUrl ||
+      "/dashboard";
   } catch {
     return { globalError: "NETWORK_ERROR" };
   }
@@ -189,7 +196,12 @@ export async function registerAction(
           const loginResult = await apiLogin({ email, password });
           if (loginResult.status === "1") {
             loginData = loginResult.data;
-            nextRoute = loginResult.data.nextRoute || "/dashboard";
+            const loginRawData = loginResult.data as unknown as Record<string, string | undefined>;
+            nextRoute =
+              loginRawData.nextRoute ||
+              loginRawData["next-route"] ||
+              loginRawData.next_route ||
+              "/dashboard";
           } else {
             return {
               globalError: mapErrorCode(loginResult.error_code),
@@ -213,7 +225,12 @@ export async function registerAction(
       const loginResult = await apiLogin({ email, password });
       if (loginResult.status === "1") {
         loginData = loginResult.data;
-        nextRoute = loginResult.data.nextRoute || "/dashboard";
+        const loginRawData = loginResult.data as unknown as Record<string, string | undefined>;
+        nextRoute =
+          loginRawData.nextRoute ||
+          loginRawData["next-route"] ||
+          loginRawData.next_route ||
+          "/dashboard";
       } else {
         if (loginResult.error_code === "INVALID_CREDENTIALS") {
           return {

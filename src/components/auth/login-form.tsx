@@ -8,12 +8,15 @@
  */
 
 import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { loginAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl") || "";
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
 
   return (
@@ -63,6 +66,8 @@ export function LoginForm() {
           aria-labelledby="login-heading"
           noValidate
         >
+          <input type="hidden" name="returnUrl" value={returnUrl} />
+
           {/* Global error */}
           {state?.globalError && (
             <AuthErrorAlert

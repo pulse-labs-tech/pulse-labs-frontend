@@ -20,6 +20,7 @@ export const loginSchema = z.object({
     .string()
     .min(1, { message: "Vui lòng nhập mật khẩu." })
     .max(1024, { message: "Mật khẩu quá dài." }),
+  returnUrl: z.string().optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

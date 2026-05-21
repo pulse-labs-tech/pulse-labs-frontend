@@ -44,7 +44,14 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace(redirectTo);
+      let finalRedirectUrl = redirectTo;
+      if (typeof window !== "undefined" && redirectTo.startsWith("/login")) {
+        const currentPath = window.location.pathname + window.location.search;
+        if (currentPath && currentPath !== "/" && currentPath !== "/login") {
+          finalRedirectUrl = `${redirectTo}?returnUrl=${encodeURIComponent(currentPath)}`;
+        }
+      }
+      router.replace(finalRedirectUrl);
     }
   }, [isLoading, isAuthenticated, router, redirectTo]);
 
