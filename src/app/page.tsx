@@ -47,7 +47,7 @@ export default function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div className="min-h-screen bg-auth-bg text-auth-text">
+      <div className="min-h-screen overflow-x-hidden bg-auth-bg text-auth-text">
         <Header />
         <main id="main-content">
           {/* HERO */}
@@ -129,7 +129,7 @@ export default function HomePage() {
           </section>
 
           {/* FEATURES */}
-          <section id="features" className="relative scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
+          <section id="features" className="relative overflow-hidden scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
             <div className="pointer-events-none absolute left-1/2 top-[10%] h-[500px] w-[700px] -translate-x-1/2 blur-[120px]" style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.06) 0%, transparent 70%)" }} aria-hidden="true" />
             <div className="relative mx-auto max-w-7xl 3xl:max-w-[1680px] 4xl:max-w-[2200px]">
               <ScrollReveal direction="up">
@@ -157,7 +157,7 @@ export default function HomePage() {
           </section>
 
           {/* HOW IT WORKS */}
-          <section id="how-it-works" className="relative scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
+          <section id="how-it-works" className="relative overflow-hidden scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
             <div className="pointer-events-none absolute right-[10%] top-[30%] h-[400px] w-[400px] blur-[100px]" style={{ background: "radial-gradient(circle, oklch(0.75 0.19 160 / 0.07) 0%, transparent 70%)" }} aria-hidden="true" />
             <div className="relative mx-auto max-w-5xl 3xl:max-w-6xl">
               <ScrollReveal direction="up">
@@ -182,7 +182,7 @@ export default function HomePage() {
           </section>
 
           {/* CTA */}
-          <section id="cta" className="scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
+          <section id="cta" className="relative overflow-hidden scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
             <ScrollReveal direction="up" delay={0.2}>
               <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-12 text-center shadow-[0_8px_40px_rgba(0,0,0,0.4)] backdrop-blur-md sm:p-16 lg:p-20 3xl:max-w-5xl 3xl:p-24">
                 <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 blur-[100px]" style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.14) 0%, transparent 70%)" }} aria-hidden="true" />
