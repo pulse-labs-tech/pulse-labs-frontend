@@ -60,6 +60,60 @@ function mapErrorCode(code: string): AuthErrorCode {
 }
 
 // ────────────────────────────────────────────────────────────────
+// Shared helper: extract token from verificationLink URL
+// ────────────────────────────────────────────────────────────────
+
+function extractToken(verificationLink: string): string | null {
+  try {
+    const url = new URL(verificationLink);
+    return url.searchParams.get("token");
+  } catch {
+    return null;
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// Shared helper: verify token → auto login → store tokens
+// Returns nextRoute on success, or throws to caller
+// ────────────────────────────────────────────────────────────────
+
+async function verifyAndLogin(
+  token: string,
+  email: string,
+  password: string,
+): Promise<{ loginData: LoginResponseData; nextRoute: string } | { error: AuthErrorCode; serverMessage?: string }> {
+  const verifyResult = await apiVerifyEmail(token);
+
+  if (
+    verifyResult.status !== "1" &&
+    verifyResult.error_code !== "EMAIL_ALREADY_VERIFIED"
+  ) {
+    return {
+      error: mapErrorCode(verifyResult.error_code),
+      serverMessage: verifyResult.msg,
+    };
+  }
+
+  const loginResult = await apiLogin({ email, password });
+
+  if (loginResult.status !== "1") {
+    return {
+      error: mapErrorCode(loginResult.error_code),
+      serverMessage: loginResult.msg,
+    };
+  }
+
+  const rawData = loginResult.data as unknown as Record<string, string | undefined>;
+  const nextRoute =
+    rawData.nextRoute ||
+    rawData["next-route"] ||
+    rawData.next_route ||
+    "/onboarding";
+
+  return { loginData: loginResult.data, nextRoute };
+}
+
+// ────────────────────────────────────────────────────────────────
 // 1. Login Action
 // ────────────────────────────────────────────────────────────────
 
@@ -117,7 +171,7 @@ export async function loginAction(
     // 4. Store user data in readable cookie (for client hydration)
     await setUserData(result.data.user);
 
-    // 5. Use backend-provided nextRoute (handling possible naming variations)
+    // 5. Use backend-provided nextRoute
     const rawData = result.data as unknown as Record<string, string | undefined>;
     nextRoute =
       rawData.nextRoute ||
@@ -135,6 +189,12 @@ export async function loginAction(
 
 // ────────────────────────────────────────────────────────────────
 // 2. Register Action
+//
+// Flow:
+//   1. POST /register
+//   2. If verificationLink in response → extract token → auto verify → auto login
+//   3. Else → POST /resend-verification → extract token → auto verify → auto login
+//   4. If still no token → show "check your email" screen (fallback)
 // ────────────────────────────────────────────────────────────────
 
 export interface RegisterActionState {
@@ -151,7 +211,7 @@ export async function registerAction(
   prevState: RegisterActionState | undefined,
   formData: FormData,
 ): Promise<RegisterActionState> {
-  // 1. Validate form fields
+  // 1. Validate
   const validatedFields = registerSchema.safeParse({
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
@@ -162,105 +222,85 @@ export async function registerAction(
   });
 
   if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-    };
+    return { errors: validatedFields.error.flatten().fieldErrors };
   }
 
-  // 2. Call auth API
   const { email, password } = validatedFields.data;
-  let nextRoute = "";
-  let loginData: LoginResponseData | null = null;
 
   try {
-    const result = await apiRegister(validatedFields.data);
+    // ─── Step 1: Register ──────────────────────────────────────
+    const registerResult = await apiRegister(validatedFields.data);
 
-    if (result.status === "0") {
-      const data = result.data as unknown as { retryAfterSeconds?: number };
+    if (registerResult.status === "0") {
+      const data = registerResult.data as unknown as { retryAfterSeconds?: number };
       return {
-        globalError: mapErrorCode(result.error_code),
-        serverMessage: result.msg,
+        globalError: mapErrorCode(registerResult.error_code),
+        serverMessage: registerResult.msg,
         retryAfterSeconds: data?.retryAfterSeconds,
       };
     }
 
-    // Success — Auto verify if verificationLink is present
-    if (result.data.verificationLink) {
-      const url = new URL(result.data.verificationLink);
-      const token = url.searchParams.get("token");
-      if (token) {
-        // Verify email
-        const verifyResult = await apiVerifyEmail(token);
-        if (verifyResult.status === "1" || verifyResult.error_code === "EMAIL_ALREADY_VERIFIED") {
-          // Immediately login
-          const loginResult = await apiLogin({ email, password });
-          if (loginResult.status === "1") {
-            loginData = loginResult.data;
-            const loginRawData = loginResult.data as unknown as Record<string, string | undefined>;
-            nextRoute =
-              loginRawData.nextRoute ||
-              loginRawData["next-route"] ||
-              loginRawData.next_route ||
-              "/dashboard";
-          } else {
-            return {
-              globalError: mapErrorCode(loginResult.error_code),
-              serverMessage: loginResult.msg,
-            };
-          }
-        } else {
-          return {
-            globalError: mapErrorCode(verifyResult.error_code),
-            serverMessage: verifyResult.msg,
-          };
+    let verificationToken: string | null = null;
+    let resendAvailableInSeconds = registerResult.data.resendAvailableInSeconds;
+
+    // ─── Step 2: Try token from register response (dev mode) ───
+    if (registerResult.data.verificationLink) {
+      verificationToken = extractToken(registerResult.data.verificationLink);
+    }
+
+    // ─── Step 3: If no token yet → call resend-verification ────
+    // BE now returns verificationLink in resend-verification response
+    if (!verificationToken) {
+      const resendResult = await apiResendVerification(email);
+
+      if (resendResult.status === "1") {
+        resendAvailableInSeconds = resendResult.data.resendAvailableInSeconds;
+
+        if (resendResult.data.verificationLink) {
+          verificationToken = extractToken(resendResult.data.verificationLink);
         }
-      } else {
-        return {
-          globalError: "TOKEN_INVALID",
-          serverMessage: "Không tìm thấy mã xác thực trong đường dẫn đăng ký.",
-        };
       }
-    } else {
-      // No verification link (silent register policy, email already exists / already verified)
-      const loginResult = await apiLogin({ email, password });
-      if (loginResult.status === "1") {
-        loginData = loginResult.data;
-        const loginRawData = loginResult.data as unknown as Record<string, string | undefined>;
-        nextRoute =
-          loginRawData.nextRoute ||
-          loginRawData["next-route"] ||
-          loginRawData.next_route ||
-          "/dashboard";
-      } else {
-        if (loginResult.error_code === "INVALID_CREDENTIALS") {
+      // resend failure is non-fatal — fall through to email screen
+    }
+
+    // ─── Step 4: Auto verify + login if we have a token ────────
+    if (verificationToken) {
+      const result = await verifyAndLogin(verificationToken, email, password);
+
+      if ("error" in result) {
+        // Token invalid/expired — still fall through to email screen
+        // (don't block the user, just let them verify manually)
+        if (
+          result.error !== "TOKEN_INVALID" &&
+          result.error !== "TOKEN_EXPIRED"
+        ) {
           return {
-            globalError: "EMAIL_ALREADY_VERIFIED",
-            serverMessage: "Email này đã được sử dụng. Vui lòng đăng nhập bằng tài khoản của bạn.",
+            globalError: result.error,
+            serverMessage: result.serverMessage,
           };
         }
-        return {
-          globalError: mapErrorCode(loginResult.error_code),
-          serverMessage: loginResult.msg,
-        };
+      } else {
+        // ─── Step 5: Store tokens & redirect ───────────────────
+        await setAuthTokens(
+          result.loginData.accessToken,
+          result.loginData.refreshToken,
+          result.loginData.expiresIn,
+        );
+        await setUserData(result.loginData.user);
+        redirect(result.nextRoute);
       }
     }
+
+    // ─── Fallback: No token → show "check your email" screen ───
+    return {
+      success: true,
+      email,
+      resendAvailableInSeconds,
+    };
   } catch (err) {
-    console.error("Registration/Auto-verification error:", err);
+    console.error("Register/auto-verify error:", err);
     return { globalError: "NETWORK_ERROR" };
   }
-
-  // 3. Store tokens & redirect outside try-catch
-  if (loginData && nextRoute) {
-    await setAuthTokens(
-      loginData.accessToken,
-      loginData.refreshToken,
-      loginData.expiresIn,
-    );
-    await setUserData(loginData.user);
-    redirect(nextRoute);
-  }
-
-  return { globalError: "SERVER_ERROR", serverMessage: "Đăng ký thành công nhưng không thể đăng nhập tự động." };
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -329,54 +369,43 @@ export async function resendVerificationAction(
       };
     }
 
-    // ─── Dev mode: auto-verify if verificationLink is present ──
+    // Auto-verify if verificationLink is present and password provided
     if (result.data.verificationLink) {
-      try {
-        const url = new URL(result.data.verificationLink);
-        const token = url.searchParams.get("token");
+      const token = extractToken(result.data.verificationLink);
 
-        if (token) {
+      if (token && password) {
+        try {
+          const verifyLoginResult = await verifyAndLogin(token, email, password);
+
+          if (!("error" in verifyLoginResult)) {
+            await setAuthTokens(
+              verifyLoginResult.loginData.accessToken,
+              verifyLoginResult.loginData.refreshToken,
+              verifyLoginResult.loginData.expiresIn,
+            );
+            await setUserData(verifyLoginResult.loginData.user);
+
+            return {
+              success: true,
+              autoVerifiedRedirect: verifyLoginResult.nextRoute,
+            };
+          }
+        } catch {
+          // Auto-verify failed silently, fall through
+        }
+      } else if (token) {
+        // No password but have token → verify only, redirect to login
+        try {
           const verifyResult = await apiVerifyEmail(token);
-
           if (
             verifyResult.status === "1" ||
             verifyResult.error_code === "EMAIL_ALREADY_VERIFIED"
           ) {
-            // Auto-login if password was provided
-            if (password) {
-              const loginResult = await apiLogin({ email, password });
-
-              if (loginResult.status === "1") {
-                await setAuthTokens(
-                  loginResult.data.accessToken,
-                  loginResult.data.refreshToken,
-                  loginResult.data.expiresIn,
-                );
-                await setUserData(loginResult.data.user);
-
-                const rawData = loginResult.data as unknown as Record<string, string | undefined>;
-                const nextRoute =
-                  rawData.nextRoute ||
-                  rawData["next-route"] ||
-                  rawData.next_route ||
-                  "/dashboard";
-
-                return {
-                  success: true,
-                  autoVerifiedRedirect: nextRoute,
-                };
-              }
-            }
-
-            // No password → just report success, user can go to login
-            return {
-              success: true,
-              autoVerifiedRedirect: "/login",
-            };
+            return { success: true, autoVerifiedRedirect: "/login" };
           }
+        } catch {
+          // fall through
         }
-      } catch {
-        // Auto-verify failed silently, fall through to normal response
       }
     }
 
@@ -398,7 +427,6 @@ export async function logoutAction(): Promise<void> {
     const accessToken = await getAccessToken();
     const refreshToken = await getRefreshToken();
 
-    // Call backend to invalidate tokens
     if (accessToken) {
       await apiLogout(accessToken, {
         refreshToken: refreshToken || undefined,
@@ -408,10 +436,7 @@ export async function logoutAction(): Promise<void> {
     // Even if API call fails, we still clear local tokens
   }
 
-  // Clear all auth cookies
   await clearAuthTokens();
-
-  // Redirect to login
   redirect("/login");
 }
 
