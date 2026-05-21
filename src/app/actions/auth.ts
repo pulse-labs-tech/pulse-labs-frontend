@@ -20,6 +20,7 @@ import {
   apiRegister,
   apiResendVerification,
   apiLogout,
+  apiVerifyEmail,
 } from "@/lib/auth-api";
 import {
   setAuthTokens,
@@ -279,4 +280,37 @@ export async function logoutAction(): Promise<void> {
 
   // Redirect to login
   redirect("/login");
+}
+
+// ────────────────────────────────────────────────────────────────
+// 6. Verify Email Action
+// ────────────────────────────────────────────────────────────────
+
+export interface VerifyEmailResult {
+  success?: boolean;
+  error?: AuthErrorCode;
+  serverMessage?: string;
+  nextRoute?: string;
+}
+
+export async function verifyEmailAction(
+  token: string,
+): Promise<VerifyEmailResult> {
+  try {
+    const result = await apiVerifyEmail(token);
+
+    if (result.status === "0") {
+      return {
+        error: mapErrorCode(result.error_code),
+        serverMessage: result.msg,
+      };
+    }
+
+    return {
+      success: true,
+      nextRoute: result.data.nextRoute || "/login",
+    };
+  } catch {
+    return { error: "NETWORK_ERROR" };
+  }
 }
