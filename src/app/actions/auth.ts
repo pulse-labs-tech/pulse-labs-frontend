@@ -29,7 +29,7 @@ import {
   getAccessToken,
   getRefreshToken,
 } from "@/lib/token-storage";
-import type { AuthErrorCode } from "@/types/auth";
+import type { AuthErrorCode, LoginResponseData } from "@/types/auth";
 
 // ────────────────────────────────────────────────────────────────
 // Known error codes (for type-safe mapping)
@@ -98,7 +98,7 @@ export async function loginAction(
     const result = await apiLogin({ email, password });
 
     if (result.status === "0") {
-      const data = result.data as any;
+      const data = result.data as unknown as { retryAfterSeconds?: number };
       return {
         globalError: mapErrorCode(result.error_code),
         serverMessage: result.msg,
@@ -163,13 +163,13 @@ export async function registerAction(
   // 2. Call auth API
   const { email, password } = validatedFields.data;
   let nextRoute = "";
-  let loginData: any = null;
+  let loginData: LoginResponseData | null = null;
 
   try {
     const result = await apiRegister(validatedFields.data);
 
     if (result.status === "0") {
-      const data = result.data as any;
+      const data = result.data as unknown as { retryAfterSeconds?: number };
       return {
         globalError: mapErrorCode(result.error_code),
         serverMessage: result.msg,
@@ -301,7 +301,7 @@ export async function resendVerificationAction(
     const result = await apiResendVerification(email);
 
     if (result.status === "0") {
-      const data = result.data as any;
+      const data = result.data as unknown as { retryAfterSeconds?: number };
       return {
         error: mapErrorCode(result.error_code),
         serverMessage: result.msg,

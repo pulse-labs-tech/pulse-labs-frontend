@@ -6,34 +6,35 @@ import Link from "next/link";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { verifyEmailAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
+import type { AuthErrorCode } from "@/types/auth";
 
 export function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    token ? "loading" : "error"
+  );
   const [countdown, setCountdown] = useState(3);
   const [nextRoute, setNextRoute] = useState("/login");
   const [errorDetails, setErrorDetails] = useState<{
-    code: any;
+    code: AuthErrorCode;
     message?: string;
-  } | null>(null);
+  } | null>(
+    token
+      ? null
+      : {
+          code: "TOKEN_MISSING",
+          message: "Link xác minh không hợp lệ hoặc thiếu token.",
+        }
+  );
 
   const hasCalled = useRef(false);
 
   useEffect(() => {
-    if (hasCalled.current) return;
+    if (!token || hasCalled.current) return;
     hasCalled.current = true;
-
-    if (!token) {
-      setStatus("error");
-      setErrorDetails({
-        code: "TOKEN_MISSING",
-        message: "Link xác minh không hợp lệ hoặc thiếu token.",
-      });
-      return;
-    }
 
     const verify = async () => {
       try {
