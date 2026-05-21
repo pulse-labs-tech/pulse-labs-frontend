@@ -10,10 +10,10 @@
  * On success → shows "check your email" verification screen.
  */
 
-import { useActionState, useState, useCallback } from "react";
+import { useActionState, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff, Mail } from "lucide-react";
-import { registerAction } from "@/app/actions/auth";
+import { registerAction, resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 
 export function RegisterForm() {
@@ -52,40 +52,10 @@ export function RegisterForm() {
   // ─── Success state → "Check your email" screen ──
   if (state?.success) {
     return (
-      <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
-        <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
-          {/* Success icon */}
-          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-950/30">
-            <Mail className="h-6 w-6 text-emerald-400" />
-          </div>
-
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
-            Kiểm tra email
-          </h2>
-          <p className="mt-2 text-[13px] leading-relaxed text-auth-text-2 3xl:text-sm">
-            Chúng tôi đã gửi email xác minh đến{" "}
-            <span className="font-semibold text-auth-text">
-              {state.email}
-            </span>
-            . Vui lòng kiểm tra hộp thư và nhấn vào link xác minh.
-          </p>
-
-          {state.resendAvailableInSeconds && (
-            <p className="mt-3 text-xs text-auth-text-3">
-              Có thể gửi lại sau {state.resendAvailableInSeconds} giây.
-            </p>
-          )}
-
-          <div className="mt-8 flex flex-col gap-3">
-            <Link
-              href="/login"
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] 3xl:text-sm 3xl:py-3.5"
-            >
-              Đi tới đăng nhập →
-            </Link>
-          </div>
-        </div>
-      </div>
+      <VerifyEmailScreen
+        email={state.email || ""}
+        initialCountdown={state.resendAvailableInSeconds || 60}
+      />
     );
   }
 
@@ -398,3 +368,117 @@ export function RegisterForm() {
 }
 
 
+// ────────────────────────────────────────────────────────────────
+// Verify Email Screen — Countdown timer + Resend
+// ────────────────────────────────────────────────────────────────
+
+function VerifyEmailScreen({
+  email,
+  initialCountdown,
+}: {
+  email: string;
+  initialCountdown: number;
+}) {
+  const [countdown, setCountdown] = useState(initialCountdown);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+
+  // Countdown timer
+  useEffect(() => {
+    if (countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  // Handle resend
+  const handleResend = useCallback(async () => {
+    if (countdown > 0 || isResending) return;
+
+    setIsResending(true);
+    setResendMessage(null);
+
+    try {
+      const result = await resendVerificationAction(email);
+
+      if (result.success) {
+        setCountdown(result.resendAvailableInSeconds || 60);
+        setResendMessage("✓ Đã gửi lại email xác minh");
+      } else {
+        setResendMessage("Không thể gửi lại. Vui lòng thử lại sau.");
+      }
+    } catch {
+      setResendMessage("Lỗi kết nối. Vui lòng thử lại.");
+    } finally {
+      setIsResending(false);
+    }
+  }, [countdown, isResending, email]);
+
+  return (
+    <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
+      <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
+        {/* Success icon */}
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-950/30">
+          <Mail className="h-6 w-6 text-emerald-400" />
+        </div>
+
+        <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
+          Kiểm tra email
+        </h2>
+        <p className="mt-2 text-[13px] leading-relaxed text-auth-text-2 3xl:text-sm">
+          Chúng tôi đã gửi email xác minh đến{" "}
+          <span className="font-semibold text-auth-text">
+            {email}
+          </span>
+          . Vui lòng kiểm tra hộp thư và nhấn vào link xác minh.
+        </p>
+
+        {/* Countdown + resend */}
+        <div className="mt-3">
+          {countdown > 0 ? (
+            <p className="text-xs text-auth-text-3">
+              Có thể gửi lại sau{" "}
+              <span className="font-mono font-semibold text-auth-text-2">
+                {countdown}
+              </span>{" "}
+              giây.
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={isResending}
+              className="text-xs font-medium text-auth-accent hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isResending ? "Đang gửi..." : "Gửi lại email xác minh →"}
+            </button>
+          )}
+
+          {resendMessage && (
+            <p className="mt-1 text-xs text-emerald-400">
+              {resendMessage}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-8 flex flex-col gap-3">
+          <Link
+            href="/login"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] 3xl:text-sm 3xl:py-3.5"
+          >
+            Đi tới đăng nhập →
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
