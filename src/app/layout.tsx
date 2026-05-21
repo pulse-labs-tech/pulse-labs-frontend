@@ -4,6 +4,7 @@ import { siteConfig } from "@/config/site";
 import { generateOrganizationJsonLd } from "@/lib/seo";
 import { getUserData } from "@/lib/token-storage";
 import { AuthProvider } from "@/contexts/auth-context";
+import { NavigationProgress } from "@/components/ui/navigation-progress";
 import "./globals.css";
 
 /* ============================================================
@@ -143,6 +144,8 @@ export default async function RootLayout({
 
         {/* Auth state provider — reads initial user from cookie */}
         <AuthProvider initialUser={initialUser}>
+          {/* Navigation progress bar — shown on every route transition */}
+          <NavigationProgress />
           {/* Content — pages handle their own layout structure */}
           <div className="flex-1">
             {children}
