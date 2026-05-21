@@ -12,7 +12,7 @@
 
 import { useActionState, useState, useCallback } from "react";
 import Link from "next/link";
-import { Loader2, Eye, EyeOff, Check, Mail } from "lucide-react";
+import { Loader2, Eye, EyeOff, Mail } from "lucide-react";
 import { registerAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 
@@ -28,10 +28,26 @@ export function RegisterForm() {
     setShowPassword((prev) => !prev);
   }, []);
 
-  // ─── Password strength indicators ──
+  // ─── Password strength ──
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+
+  const strengthScore =
+    (hasMinLength ? 1 : 0) +
+    (hasUppercase ? 1 : 0) +
+    (hasNumber ? 1 : 0) +
+    (hasSpecialChar ? 1 : 0);
+
+  const strengthLabels = [
+    "Tối thiểu 8 ký tự, 1 chữ hoa, 1 số",
+    "⚠ Yếu — thêm chữ hoa hoặc số",
+    "~ Trung bình",
+    "✓ Tốt",
+    "✓✓ Rất mạnh",
+  ];
+  const strengthLabel = strengthLabels[strengthScore];
 
   // ─── Success state → "Check your email" screen ──
   if (state?.success) {
@@ -289,15 +305,31 @@ export function RegisterForm() {
               </p>
             )}
 
-            {/* Password strength indicators */}
+            {/* Password strength bar */}
             {password.length > 0 && (
               <div
                 id="register-password-strength"
-                className="mt-1 flex flex-col gap-1"
+                className="mt-1 flex flex-col gap-1.5"
               >
-                <StrengthRule met={hasMinLength} label="Ít nhất 8 ký tự" />
-                <StrengthRule met={hasUppercase} label="1 chữ in hoa" />
-                <StrengthRule met={hasNumber} label="1 chữ số" />
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-[3px] flex-1 rounded-full transition-all duration-200 ${
+                        i < strengthScore
+                          ? strengthScore <= 1
+                            ? "bg-red-500"
+                            : strengthScore === 2
+                              ? "bg-orange-500"
+                              : "bg-emerald-500"
+                          : "bg-auth-border"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] text-auth-text-3">
+                  {strengthLabel}
+                </span>
               </div>
             )}
           </div>
@@ -365,29 +397,4 @@ export function RegisterForm() {
   );
 }
 
-// ────────────────────────────────────────────────────────────────
-// Password strength rule indicator
-// ────────────────────────────────────────────────────────────────
 
-function StrengthRule({ met, label }: { met: boolean; label: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div
-        className={`flex h-3.5 w-3.5 items-center justify-center rounded-full transition-all duration-200 ${
-          met
-            ? "bg-emerald-500/20 text-emerald-400"
-            : "bg-auth-border/30 text-auth-text-3"
-        }`}
-      >
-        <Check className="h-2.5 w-2.5" />
-      </div>
-      <span
-        className={`text-[11px] transition-colors duration-200 ${
-          met ? "text-emerald-400" : "text-auth-text-3"
-        }`}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
