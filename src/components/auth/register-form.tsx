@@ -330,6 +330,7 @@ export function RegisterForm() {
               Tôi đồng ý với{" "}
               <Link
                 href="/terms"
+                prefetch={false}
                 className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
               >
                 Điều khoản sử dụng
@@ -337,6 +338,7 @@ export function RegisterForm() {
               và{" "}
               <Link
                 href="/privacy"
+                prefetch={false}
                 className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
               >
                 Chính sách bảo mật

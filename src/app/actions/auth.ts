@@ -161,6 +161,10 @@ export async function registerAction(
   }
 
   // 2. Call auth API
+  const { email, password } = validatedFields.data;
+  let nextRoute = "";
+  let loginData: any = null;
+
   try {
     const result = await apiRegister(validatedFields.data);
 
@@ -173,15 +177,73 @@ export async function registerAction(
       };
     }
 
-    // Success — return data for "check your email" UI state
-    return {
-      success: true,
-      email: result.data.email,
-      resendAvailableInSeconds: result.data.resendAvailableInSeconds,
-    };
-  } catch {
+    // Success — Auto verify if verificationLink is present
+    if (result.data.verificationLink) {
+      const url = new URL(result.data.verificationLink);
+      const token = url.searchParams.get("token");
+      if (token) {
+        // Verify email
+        const verifyResult = await apiVerifyEmail(token);
+        if (verifyResult.status === "1" || verifyResult.error_code === "EMAIL_ALREADY_VERIFIED") {
+          // Immediately login
+          const loginResult = await apiLogin({ email, password });
+          if (loginResult.status === "1") {
+            loginData = loginResult.data;
+            nextRoute = loginResult.data.nextRoute || "/dashboard";
+          } else {
+            return {
+              globalError: mapErrorCode(loginResult.error_code),
+              serverMessage: loginResult.msg,
+            };
+          }
+        } else {
+          return {
+            globalError: mapErrorCode(verifyResult.error_code),
+            serverMessage: verifyResult.msg,
+          };
+        }
+      } else {
+        return {
+          globalError: "TOKEN_INVALID",
+          serverMessage: "Không tìm thấy mã xác thực trong đường dẫn đăng ký.",
+        };
+      }
+    } else {
+      // No verification link (silent register policy, email already exists / already verified)
+      const loginResult = await apiLogin({ email, password });
+      if (loginResult.status === "1") {
+        loginData = loginResult.data;
+        nextRoute = loginResult.data.nextRoute || "/dashboard";
+      } else {
+        if (loginResult.error_code === "INVALID_CREDENTIALS") {
+          return {
+            globalError: "EMAIL_ALREADY_VERIFIED",
+            serverMessage: "Email này đã được sử dụng. Vui lòng đăng nhập bằng tài khoản của bạn.",
+          };
+        }
+        return {
+          globalError: mapErrorCode(loginResult.error_code),
+          serverMessage: loginResult.msg,
+        };
+      }
+    }
+  } catch (err) {
+    console.error("Registration/Auto-verification error:", err);
     return { globalError: "NETWORK_ERROR" };
   }
+
+  // 3. Store tokens & redirect outside try-catch
+  if (loginData && nextRoute) {
+    await setAuthTokens(
+      loginData.accessToken,
+      loginData.refreshToken,
+      loginData.expiresIn,
+    );
+    await setUserData(loginData.user);
+    redirect(nextRoute);
+  }
+
+  return { globalError: "SERVER_ERROR", serverMessage: "Đăng ký thành công nhưng không thể đăng nhập tự động." };
 }
 
 // ────────────────────────────────────────────────────────────────

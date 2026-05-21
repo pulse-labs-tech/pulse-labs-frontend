@@ -37,7 +37,17 @@ export function Footer() {
           <div>
             <h4 className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-auth-text-2">Hỗ trợ</h4>
             <ul className="flex flex-col gap-2.5">
-              {footerLinks.support.map((l) => (<li key={l.href}><Link href={l.href} className="text-xs text-auth-text-3 transition-colors duration-200 hover:text-auth-text-2">{l.label}</Link></li>))}
+              {footerLinks.support.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    prefetch={false}
+                    className="text-xs text-auth-text-3 transition-colors duration-200 hover:text-auth-text-2"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

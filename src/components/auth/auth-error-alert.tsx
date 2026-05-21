@@ -36,10 +36,9 @@ const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
     variant: "error",
   },
   EMAIL_NOT_VERIFIED: {
-    message: "Tài khoản cần xác minh email trước khi sử dụng.",
+    message: "Tài khoản cần xác minh email trước khi sử dụng. Vui lòng đăng ký lại để tự động xác minh.",
     icon: <MailWarning className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
-    action: { label: "Gửi lại email xác minh" },
   },
   ACCOUNT_LOCKED: {
     message:
@@ -71,13 +70,11 @@ const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
     message: "Link xác minh không hợp lệ hoặc đã được sử dụng.",
     icon: <Link2Off className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
-    action: { label: "Gửi lại email xác minh" },
   },
   TOKEN_EXPIRED: {
-    message: "Link xác minh đã hết hạn. Vui lòng gửi lại.",
+    message: "Link xác minh đã hết hạn.",
     icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
-    action: { label: "Gửi lại" },
   },
   EMAIL_ALREADY_VERIFIED: {
     message: "Email đã được xác minh trước đó.",

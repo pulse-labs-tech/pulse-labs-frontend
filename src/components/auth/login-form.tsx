@@ -7,46 +7,14 @@
  * Handles: idle, editing, submitting, field errors, global errors.
  */
 
-import { useActionState, useState, useCallback } from "react";
+import { useActionState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { loginAction, resendVerificationAction } from "@/app/actions/auth";
+import { loginAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
-  const [resendMessage, setResendMessage] = useState<string | null>(null);
-  const [isResending, setIsResending] = useState(false);
-
-  const handleResend = useCallback(async () => {
-    if (isResending) return;
-
-    const emailInput = document.getElementById("login-email") as HTMLInputElement | null;
-    const email = emailInput?.value;
-    if (!email) {
-      setResendMessage("Vui lòng nhập email trước khi yêu cầu gửi lại.");
-      return;
-    }
-
-    setIsResending(true);
-    setResendMessage(null);
-
-    try {
-      const result = await resendVerificationAction(email);
-      if (result.success) {
-        setResendMessage(
-          `✓ Đã gửi lại email xác minh thành công. Vui lòng kiểm tra hộp thư.`
-        );
-      } else {
-        const errorMsg = result.serverMessage || "Không thể gửi lại. Vui lòng thử lại sau.";
-        setResendMessage(`❌ ${errorMsg}`);
-      }
-    } catch {
-      setResendMessage("❌ Lỗi kết nối. Vui lòng thử lại.");
-    } finally {
-      setIsResending(false);
-    }
-  }, [isResending]);
 
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
@@ -101,19 +69,7 @@ export function LoginForm() {
               code={state.globalError}
               serverMessage={state.serverMessage}
               retryAfterSeconds={state.retryAfterSeconds}
-              onAction={handleResend}
             />
-          )}
-
-          {/* Resend status message */}
-          {resendMessage && (
-            <div className={`text-xs p-2.5 rounded-lg border leading-normal ${
-              resendMessage.startsWith("✓")
-                ? "border-emerald-500/20 bg-emerald-950/30 text-emerald-400"
-                : "border-auth-error/20 bg-auth-error-dim text-auth-error"
-            }`}>
-              {isResending ? "Đang gửi yêu cầu..." : resendMessage}
-            </div>
           )}
 
           {/* Email field */}
@@ -218,6 +174,7 @@ export function LoginForm() {
             Bằng cách đăng nhập, bạn đồng ý với{" "}
             <Link
               href="/terms"
+              prefetch={false}
               className="text-auth-text-2 hover:text-auth-text"
             >
               Điều khoản sử dụng
@@ -225,6 +182,7 @@ export function LoginForm() {
             và{" "}
             <Link
               href="/privacy"
+              prefetch={false}
               className="text-auth-text-2 hover:text-auth-text"
             >
               Chính sách bảo mật
