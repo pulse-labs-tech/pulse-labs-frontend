@@ -16,30 +16,30 @@
   --breakpoint-4xl: 160rem; /* 2560px — QHD / Ultra-wide */
   --breakpoint-5xl: 240rem; /* 3840px — 4K UHD */
 
-  /* --- Colors: Pulse Labs Brand Palette --- */
-  --color-brand-50: oklch(0.97 0.01 250);
-  --color-brand-100: oklch(0.94 0.02 250);
-  --color-brand-200: oklch(0.88 0.05 250);
-  --color-brand-300: oklch(0.78 0.10 250);
-  --color-brand-400: oklch(0.68 0.15 250);
-  --color-brand-500: oklch(0.58 0.19 250);
-  --color-brand-600: oklch(0.50 0.19 250);
-  --color-brand-700: oklch(0.42 0.16 250);
-  --color-brand-800: oklch(0.35 0.12 250);
-  --color-brand-900: oklch(0.28 0.08 250);
-  --color-brand-950: oklch(0.20 0.05 250);
+  /* --- Colors: Pulse Labs Brand Palette (Jade-Emerald Green — matches auth-accent) --- */
+  --color-brand-50:  oklch(0.97 0.02 160);
+  --color-brand-100: oklch(0.94 0.04 160);
+  --color-brand-200: oklch(0.88 0.08 160);
+  --color-brand-300: oklch(0.78 0.14 160);
+  --color-brand-400: oklch(0.70 0.18 160);
+  --color-brand-500: oklch(0.62 0.20 160);
+  --color-brand-600: oklch(0.54 0.19 160);
+  --color-brand-700: oklch(0.44 0.16 160);
+  --color-brand-800: oklch(0.35 0.11 160);
+  --color-brand-900: oklch(0.26 0.07 160);
+  --color-brand-950: oklch(0.18 0.04 160);
 
-  /* --- Accent (Energy / CTA) --- */
-  --color-accent-50: oklch(0.97 0.02 160);
-  --color-accent-100: oklch(0.94 0.04 160);
-  --color-accent-200: oklch(0.88 0.08 160);
-  --color-accent-300: oklch(0.78 0.14 160);
-  --color-accent-400: oklch(0.68 0.18 160);
-  --color-accent-500: oklch(0.60 0.20 160);
-  --color-accent-600: oklch(0.52 0.18 160);
-  --color-accent-700: oklch(0.44 0.14 160);
-  --color-accent-800: oklch(0.36 0.10 160);
-  --color-accent-900: oklch(0.28 0.06 160);
+  /* --- Accent (Teal — complementary to brand green) --- */
+  --color-accent-50:  oklch(0.97 0.02 175);
+  --color-accent-100: oklch(0.94 0.04 175);
+  --color-accent-200: oklch(0.88 0.08 175);
+  --color-accent-300: oklch(0.78 0.13 175);
+  --color-accent-400: oklch(0.68 0.17 175);
+  --color-accent-500: oklch(0.60 0.19 175);
+  --color-accent-600: oklch(0.52 0.17 175);
+  --color-accent-700: oklch(0.44 0.14 175);
+  --color-accent-800: oklch(0.36 0.09 175);
+  --color-accent-900: oklch(0.28 0.06 175);
 
   /* --- Surface / Neutral --- */
   --color-surface-50: oklch(0.985 0 0);
@@ -196,10 +196,10 @@
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 oklch(0.58 0.19 250 / 0.4);
+    box-shadow: 0 0 0 0 oklch(0.75 0.19 160 / 0.4);
   }
   50% {
-    box-shadow: 0 0 20px 4px oklch(0.58 0.19 250 / 0.15);
+    box-shadow: 0 0 20px 4px oklch(0.75 0.19 160 / 0.15);
   }
 }
 
@@ -420,12 +420,12 @@ select:focus {
   }
 }
 
-/* Gradient text */
+/* Gradient text — Jade green → Teal */
 .text-gradient {
   background: linear-gradient(
     135deg,
-    var(--color-brand-400),
-    var(--color-accent-400)
+    oklch(0.75 0.19 160),
+    oklch(0.72 0.17 175)
   );
   -webkit-background-clip: text;
   background-clip: text;

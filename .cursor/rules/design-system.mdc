@@ -1,0 +1,300 @@
+---
+description: Pulse Labs Frontend — Design System Rules (always apply when writing UI code)
+globs: ["**/*.tsx", "**/*.css", "**/*.ts"]
+alwaysApply: true
+---
+
+# Pulse Labs — Design System Rules
+
+> **Always follow these rules when generating any UI code for this project.**
+
+---
+
+## 1. App Context
+
+**App:** Pulse Knowledge — Personal AI Knowledge Base manager  
+**Stack:** Next.js 16 (App Router), TypeScript, TailwindCSS v4, Lucide React icons  
+**Theme:** Dark-only. No light mode. Full-app dark background.  
+**Language:** Vietnamese UI (all user-facing text must be in Vietnamese).
+
+---
+
+## 2. Color System — ALWAYS USE THESE TOKENS
+
+The SINGLE source of truth is `src/app/globals.css` (`@theme inline` block).
+
+### Primary Green (Brand Identity)
+
+The **entire app uses jade-emerald green** as its primary identity color. This is non-negotiable.
+
+```css
+/* Core green tokens — use these for ALL CTAs, focus states, active states, links */
+--color-auth-accent:       oklch(0.75 0.19 160)   /* Primary CTA / active */
+--color-auth-accent-dim:   oklch(0.75 0.19 160 / 0.12) /* Subtle bg on dark surface */
+--color-auth-accent-dark:  oklch(0.65 0.19 160)   /* Hover state */
+--color-auth-accent-glow:  oklch(0.75 0.19 160 / 0.35) /* Glow/shadow on hover */
+```
+
+### Tailwind Token Aliases
+
+In Tailwind classes, these map as:
+- **Primary CTA button**: `bg-auth-accent hover:bg-auth-accent-dark text-black font-semibold`
+- **CTA gradient button**: `bg-gradient-to-r from-emerald-500 to-teal-500`
+- **Active nav link**: `bg-auth-accent-dim text-auth-accent border border-auth-accent/20`
+- **Focus ring**: `focus:border-auth-accent` (auto-applied via globals.css)
+- **Text accent**: `text-auth-accent`
+- **Icon dim bg**: `bg-auth-accent-dim text-auth-accent`
+
+### Dark Surfaces (app-wide)
+
+```
+bg-auth-bg        → oklch(0.12 0.006 260) — page background
+bg-auth-surface   → oklch(0.16 0.008 260) — card/panel
+bg-auth-elevated  → oklch(0.20 0.008 260) — input / dropdown / raised element
+border-auth-border → oklch(0.28 0.006 260) — all borders
+```
+
+### Text Hierarchy
+
+```
+text-auth-text    → oklch(0.98 0 0)       — primary / headings
+text-auth-text-2  → oklch(0.70 0.01 260)  — secondary / descriptions
+text-auth-text-3  → oklch(0.48 0.01 260)  — muted / labels / placeholders
+```
+
+### Secondary Palette (use sparingly, for data viz only)
+
+```
+text-auth-purple / bg-auth-purple-dim   → Storage / roles
+text-auth-orange / bg-auth-orange-dim   → Limits / warnings context  
+text-auth-cyan / bg-auth-cyan-dim       → Processing / real-time states
+text-auth-error / bg-auth-error-dim     → Errors
+```
+
+---
+
+## 3. Never Do This ❌
+
+```tsx
+// ❌ WRONG — plain Tailwind blue/indigo
+className="bg-blue-500 text-indigo-400 border-purple-500"
+
+// ❌ WRONG — light backgrounds
+className="bg-white text-gray-900"
+
+// ❌ WRONG — hardcoded hex/rgb colors
+style={{ background: "#22c55e", color: "#fff" }}
+
+// ❌ WRONG — using brand-* tokens directly in components (use auth-* tokens instead)
+className="bg-brand-500 text-brand-400"
+
+// ❌ WRONG — generic Tailwind emerald without glow/shadow
+className="bg-emerald-500" // alone, without shadow/hover states
+```
+
+---
+
+## 4. Always Do This ✅
+
+### CTA / Primary Button
+
+```tsx
+// ✅ Standard primary button
+<button className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-black font-bold rounded-xl shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.35)] active:scale-[0.98] transition-all text-sm tracking-wide">
+  Hành động chính
+</button>
+
+// ✅ Secondary / ghost button
+<button className="w-full py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-sm transition-all">
+  Thao tác phụ
+</button>
+```
+
+### Card / Panel
+
+```tsx
+// ✅ Standard card
+<div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden">
+  {/* Accent top border line */}
+  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+  ...content...
+</div>
+```
+
+### Input Field
+
+```tsx
+// ✅ Standard input
+<input className="w-full bg-auth-elevated border border-auth-border rounded-xl px-4 py-3 text-sm text-auth-text placeholder:text-auth-text-3 focus:border-auth-accent transition-all" />
+```
+
+### Status Badge
+
+```tsx
+// ✅ Success
+<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
+  <CheckCircle2 className="h-3 w-3" /> Hoàn thành
+</span>
+
+// ✅ Warning  
+<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+  <AlertTriangle className="h-3 w-3" /> Cảnh báo
+</span>
+
+// ✅ Error
+<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
+  <XCircle className="h-3 w-3" /> Lỗi
+</span>
+```
+
+### Navigation Active State
+
+```tsx
+// ✅ Active nav link (green pill)
+<Link className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20">
+  Dashboard
+</Link>
+
+// ✅ Inactive nav link
+<Link className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors">
+  Wiki
+</Link>
+```
+
+### Icon Container
+
+```tsx
+// ✅ Green icon container
+<div className="h-10 w-10 rounded-xl bg-auth-accent-dim text-auth-accent flex items-center justify-center">
+  <Brain className="h-5 w-5" />
+</div>
+
+// ✅ Subtle icon container
+<div className="h-10 w-10 rounded-xl bg-auth-elevated text-auth-text-3 flex items-center justify-center">
+  <Database className="h-5 w-5" />
+</div>
+```
+
+---
+
+## 5. Typography Rules
+
+- **ALL Tailwind text sizing should prefer fluid classes**: `text-fluid-xs`, `text-fluid-sm`, `text-fluid-base`, `text-fluid-lg`, `text-fluid-xl`, `text-fluid-2xl`
+- **Section headings**: `text-sm font-bold tracking-tight uppercase text-auth-text-3`
+- **Card subtitles**: `text-xs text-auth-text-2`
+- **Labels**: `text-[10px] font-bold uppercase tracking-wider text-auth-text-3`
+- **Accent gradient text** (brand name): `bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent`
+
+### Brand Name Rendering
+
+```tsx
+// ✅ Always render brand name like this:
+Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+```
+
+---
+
+## 6. Animation & Motion Rules
+
+- **Hover lift**: use `.hover-lift` utility class (defined in globals.css)
+- **Fade in**: use `animate-fade-in` (defined in globals.css)  
+- **Button active**: always add `active:scale-[0.98]` for tactile feedback
+- **Transitions**: always `transition-all` or `transition-colors` — never omit
+- **Glow on hover for CTAs**: `hover:shadow-[0_0_30px_rgba(52,211,153,0.35)]`
+- **Spinning loader**: always `<Loader2 className="animate-spin text-auth-accent" />`
+
+---
+
+## 7. Page Structure
+
+Every page **must** use this background:
+
+```tsx
+<div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden">
+  {/* Optional: ambient glow effect */}
+  <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]"
+    style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.1) 0%, transparent 70%)" }}
+    aria-hidden="true" />
+  ...
+</div>
+```
+
+---
+
+## 8. Layout Rules
+
+- **Container**: always use `.container-responsive` (defined in globals.css, responsive max-widths)
+- **Section gaps**: `py-8 flex flex-col gap-6` inside main
+- **Grid**: prefer `grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4` for stats; `lg:grid-cols-3` for panels
+- **Header**: `sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16`
+
+---
+
+## 9. Error States
+
+### Full-Screen (auth failures only)
+```tsx
+<div className="flex min-h-screen items-center justify-center bg-auth-bg">
+  <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center relative overflow-hidden">
+    <div className="absolute top-0 left-0 right-0 h-[3px] bg-auth-error" />
+    ...
+  </div>
+</div>
+```
+
+### Non-Blocking Warning Banner
+```tsx
+<div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300">
+  <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+  <span className="flex-1">{message}</span>
+</div>
+```
+
+---
+
+## 10. API Integration Pattern
+
+- Server Actions in `src/app/actions/*.ts` — always `"use server"` at top
+- `authClient.get/post/put/delete()` for authenticated endpoints
+- Response envelope: `{ status: "1"|"0", error_code, msg, data }`
+- Always handle `status === "0"` before using `data`
+- Auth errors (`UNAUTHORIZED`) → `clearAuth()` + `router.push("/login")`
+- Non-auth errors → graceful degradation (show empty state + warning banner)
+
+---
+
+## 11. File Conventions
+
+```
+src/app/(auth)/           → Auth pages (login, register, forgot-password)
+src/app/actions/          → Server Actions (dashboard.ts, auth.ts, onboarding.ts)
+src/components/auth/      → Auth UI components
+src/components/dashboard/ → Dashboard components
+src/components/onboarding/→ Onboarding wizard
+src/types/                → TypeScript types
+src/lib/                  → Utilities (auth-api.ts, authenticated-client.ts, token-storage.ts)
+src/contexts/             → React contexts (auth-context.tsx)
+src/hooks/                → Custom hooks (use-auth.ts)
+```
+
+---
+
+## 12. Key Color Reference Card
+
+| Purpose | Tailwind Class | OKLCH Value |
+|---|---|---|
+| Page BG | `bg-auth-bg` | `oklch(0.12 0.006 260)` |
+| Card surface | `bg-auth-surface` | `oklch(0.16 0.008 260)` |
+| Input / raised | `bg-auth-elevated` | `oklch(0.20 0.008 260)` |
+| Border | `border-auth-border` | `oklch(0.28 0.006 260)` |
+| **Green CTA** | `bg-auth-accent` | `oklch(0.75 0.19 160)` |
+| Green dim bg | `bg-auth-accent-dim` | `oklch(0.75 0.19 160 / 0.12)` |
+| Green hover | `bg-auth-accent-dark` | `oklch(0.65 0.19 160)` |
+| Green glow | `shadow-auth-accent` | `oklch(0.75 0.19 160 / 0.35)` |
+| Primary text | `text-auth-text` | `oklch(0.98 0 0)` |
+| Secondary text | `text-auth-text-2` | `oklch(0.70 0.01 260)` |
+| Muted text | `text-auth-text-3` | `oklch(0.48 0.01 260)` |
+| Error | `text-auth-error` | `oklch(0.63 0.24 25)` |
+| Purple (data) | `text-auth-purple` | `oklch(0.68 0.18 280)` |
+| Cyan (live) | `text-auth-cyan` | `oklch(0.78 0.14 195)` |
+| Orange (limit) | `text-auth-orange` | `oklch(0.72 0.16 55)` |
