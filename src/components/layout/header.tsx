@@ -30,14 +30,14 @@ export function Header() {
           {navLinks.map((l) => (<a key={l.href} href={l.href} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">{l.label}</a>))}
         </div>
         <div className="hidden items-center gap-4 md:flex">
-          <LocaleSwitcher />
+          <LocaleSwitcher id="desktop" />
           <Link href={`/${locale}/login`} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">{t("auth.login.title")}</Link>
           <Link href={`/${locale}/register`}>
             <Button variant="primary" size="md" pill={true} className="px-5">{t("landing.ctaStart")}</Button>
           </Link>
         </div>
         <div className="flex items-center gap-3 md:hidden">
-          <LocaleSwitcher />
+          <LocaleSwitcher id="mobile" />
           <Button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
