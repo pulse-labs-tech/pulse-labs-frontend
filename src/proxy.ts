@@ -9,12 +9,13 @@
  * Runs BEFORE every matched request. Checks auth cookies
  * and redirects accordingly:
  *
- * 1. Protected route + no session → redirect /login?returnUrl=...
- * 2. Auth route + has session + not onboarded → redirect /onboarding
- * 3. Auth route + has session + onboarded → redirect /dashboard
- * 4. Onboarding route + onboarded → redirect /dashboard
- * 5. Protected route + not onboarded → redirect /onboarding
- * 6. Otherwise → proceed normally
+ * 1. Missing locale segment → redirect to /:locale/...
+ * 2. Protected route + no session → redirect /:locale/login?returnUrl=...
+ * 3. Auth route + has session + not onboarded → redirect /:locale/onboarding
+ * 4. Auth route + has session + onboarded → redirect /:locale/dashboard
+ * 5. Onboarding route + onboarded → redirect /:locale/dashboard
+ * 6. Protected route + not onboarded → redirect /:locale/onboarding
+ * 7. Otherwise → proceed normally
  *
  * @see node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md
  * @see /features/api-docs/API_Auth_Docs.md
@@ -25,10 +26,13 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
 // ────────────────────────────────────────────────────────────────
-// Route Definitions
+// Localization and Route Definitions
 // ────────────────────────────────────────────────────────────────
 
-/** Routes accessible without authentication */
+const LOCALES = ["vi", "en"];
+const DEFAULT_LOCALE = "vi";
+
+/** Routes accessible without authentication (subpath check) */
 const PUBLIC_ROUTES = [
   "/",
   "/login",
@@ -44,7 +48,7 @@ const PUBLIC_ROUTES = [
   "/pricing",
 ];
 
-/** Auth routes — redirect away if already logged in */
+/** Auth routes — redirect away if already logged in (subpath check) */
 const AUTH_ROUTES = [
   "/login",
   "/register",
@@ -55,6 +59,7 @@ const AUTH_ROUTES = [
 const ACCESS_TOKEN_COOKIE = "pulse_at";
 const REFRESH_TOKEN_COOKIE = "pulse_rt";
 const USER_DATA_COOKIE = "pulse_user";
+const LOCALE_COOKIE = "pulse_locale";
 
 // ────────────────────────────────────────────────────────────────
 // Helpers
@@ -88,6 +93,17 @@ function isOnboardingRoute(pathname: string): boolean {
   return pathname === "/onboarding" || pathname.startsWith("/onboarding/");
 }
 
+/** Extract locale and subpath from pathname */
+function getLocaleAndSubpath(pathname: string): { locale: string | null; subpath: string } {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length > 0 && LOCALES.includes(segments[0])) {
+    const locale = segments[0];
+    const subpath = "/" + segments.slice(1).join("/");
+    return { locale, subpath };
+  }
+  return { locale: null, subpath: pathname };
+}
+
 // ────────────────────────────────────────────────────────────────
 // Proxy (formerly Middleware)
 // ────────────────────────────────────────────────────────────────
@@ -95,27 +111,45 @@ function isOnboardingRoute(pathname: string): boolean {
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Extract locale and relative subpath (e.g. "/vi/dashboard" -> "vi", "/dashboard")
+  const { locale: pathLocale, subpath } = getLocaleAndSubpath(pathname);
+
   // Read cookies — proxy uses request.cookies (sync) or await cookies()
   const cookieStore = await cookies();
+
+  // Determine preferred locale
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+  const preferredLocale = cookieLocale && LOCALES.includes(cookieLocale)
+    ? cookieLocale
+    : DEFAULT_LOCALE;
+
+  // ─── Case 0: Missing locale segment → Redirect to /:locale/... ──
+  if (!pathLocale) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = `/${preferredLocale}${pathname === "/" ? "" : pathname}`;
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Session state
   const hasAccessToken = !!cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
   const hasRefreshToken = !!cookieStore.get(REFRESH_TOKEN_COOKIE)?.value;
   const hasSession = hasAccessToken || hasRefreshToken;
 
   // Determine route type
   const isPublic = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/"),
+    (route) => subpath === route || subpath.startsWith(route + "/"),
   );
   const isAuthRoute = AUTH_ROUTES.some(
-    (route) => pathname === route,
+    (route) => subpath === route,
   );
 
   // ─── Case 1: Protected route, no session → redirect to login ──
   if (!isPublic && !hasSession) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
+    loginUrl.pathname = `/${pathLocale}/login`;
 
-    // Preserve the intended destination for post-login redirect
-    if (pathname !== "/") {
+    // Preserve the intended destination for post-login redirect (retaining locale)
+    if (pathname !== `/${pathLocale}`) {
       loginUrl.searchParams.set("returnUrl", pathname);
     }
 
@@ -130,18 +164,22 @@ export default async function proxy(request: NextRequest) {
     // ── Auth route + session → redirect based on onboarding ──
     if (isAuthRoute) {
       return NextResponse.redirect(
-        new URL(isOnboarded ? "/dashboard" : "/onboarding", request.url),
+        new URL(`/${pathLocale}${isOnboarded ? "/dashboard" : "/onboarding"}`, request.url),
       );
     }
 
     // ── Onboarding route + already onboarded → redirect to dashboard ──
-    if (isOnboardingRoute(pathname) && isOnboarded) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    if (isOnboardingRoute(subpath) && isOnboarded) {
+      return NextResponse.redirect(
+        new URL(`/${pathLocale}/dashboard`, request.url),
+      );
     }
 
     // ── Protected route + not onboarded → redirect to onboarding ──
-    if (!isPublic && !isOnboardingRoute(pathname) && !isOnboarded) {
-      return NextResponse.redirect(new URL("/onboarding", request.url));
+    if (!isPublic && !isOnboardingRoute(subpath) && !isOnboarded) {
+      return NextResponse.redirect(
+        new URL(`/${pathLocale}/onboarding`, request.url),
+      );
     }
   }
 
@@ -164,3 +202,4 @@ export const config = {
     "/((?!api|_next/static|_next/image|.*\\.png$|.*\\.ico$|.*\\.svg$|.*\\.jpg$|.*\\.css$|.*\\.js$).*)",
   ],
 };
+

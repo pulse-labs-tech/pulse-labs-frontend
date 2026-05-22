@@ -2,20 +2,25 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { BrandPanel } from "@/components/auth/brand-panel";
-import { LoginForm } from "@/components/auth/login-form";
+import { VerifyEmailForm } from "@/components/auth/verify-email-form";
 import { generatePageMetadata, generateWebPageJsonLd } from "@/lib/seo";
+import { getDictionary } from "@/dictionaries";
 
-/**
- * Login Page — SEO metadata.
- */
-export const metadata: Metadata = generatePageMetadata({
-  title: "Đăng nhập — Pulse Knowledge",
-  description:
-    "Đăng nhập vào Pulse Knowledge — AI Researcher cá nhân hoá theo domain. Tích lũy knowledge, tự động research khi thiếu.",
-  path: "/login",
-});
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = await getDictionary(locale);
+  return generatePageMetadata({
+    title: `${dict.auth.verify.title} — Pulse Knowledge`,
+    description: dict.auth.verify.subtitle,
+    path: `/${locale}/verify-email`,
+  });
+}
 
-function LoginFallback() {
+function VerifyEmailFallback() {
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
@@ -37,32 +42,37 @@ function LoginFallback() {
           </span>
         </div>
 
-        {/* Form header */}
-        <div className="mb-6 flex flex-col gap-1.5">
-          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl 4xl:text-[28px]">
-            Đăng nhập
-          </h2>
-          <p className="text-[13px] text-auth-text-2 3xl:text-sm">
-            Đang tải trang đăng nhập...
-          </p>
-        </div>
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
+        {/* Card Content Fallback */}
+        <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-auth-accent/20 bg-auth-accent-dim">
+              <Loader2 className="h-6 w-6 animate-spin text-auth-accent" />
+            </div>
+            <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
+              Pulse Knowledge
+            </h2>
+            <p className="text-[13px] text-auth-text-2 max-w-[320px] leading-relaxed">
+              Loading...
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-/**
- * Login Page — Server Component shell.
- */
-export default function LoginPage() {
+export default async function VerifyEmailPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const dict = await getDictionary(locale);
+
   const jsonLd = generateWebPageJsonLd({
-    title: "Đăng nhập — Pulse Knowledge",
-    description:
-      "Đăng nhập vào Pulse Knowledge để truy cập AI Researcher chuyên sâu theo lĩnh vực của bạn.",
-    path: "/login",
+    title: `${dict.auth.verify.title} — Pulse Knowledge`,
+    description: dict.auth.verify.subtitle,
+    path: `/${locale}/verify-email`,
   });
 
   return (
@@ -76,11 +86,11 @@ export default function LoginPage() {
       </div>
 
       {/* Left: Brand Panel */}
-      <BrandPanel />
+      <BrandPanel locale={locale} />
 
-      {/* Right: Login Form */}
-      <Suspense fallback={<LoginFallback />}>
-        <LoginForm />
+      {/* Right: Verify Email Form (Wrapped in Suspense because of useSearchParams) */}
+      <Suspense fallback={<VerifyEmailFallback />}>
+        <VerifyEmailForm />
       </Suspense>
     </>
   );

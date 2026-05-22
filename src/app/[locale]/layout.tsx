@@ -4,8 +4,10 @@ import { siteConfig } from "@/config/site";
 import { generateOrganizationJsonLd } from "@/lib/seo";
 import { getUserData } from "@/lib/token-storage";
 import { AuthProvider } from "@/contexts/auth-context";
+import { LocaleProvider } from "@/contexts/locale-context";
+import { getDictionary } from "@/dictionaries";
 import { NavigationProgress } from "@/components/ui/navigation-progress";
-import "./globals.css";
+import "../globals.css";
 
 /* ============================================================
    Fonts — Self-hosted via next/font for zero layout shift
@@ -111,16 +113,20 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }>) {
   // Read user data from cookie (server-side) for AuthProvider hydration
   const initialUser = await getUserData();
   const organizationJsonLd = generateOrganizationJsonLd();
+  const { locale } = await params;
+  const dictionary = await getDictionary(locale);
 
   return (
     <html
-      lang="vi"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -144,12 +150,15 @@ export default async function RootLayout({
 
         {/* Auth state provider — reads initial user from cookie */}
         <AuthProvider initialUser={initialUser}>
-          {/* Navigation progress bar — shown on every route transition */}
-          <NavigationProgress />
-          {/* Content — pages handle their own layout structure */}
-          <div className="flex-1">
-            {children}
-          </div>
+          {/* Translation provider for client/server components context */}
+          <LocaleProvider locale={locale} dictionary={dictionary}>
+            {/* Navigation progress bar — shown on every route transition */}
+            <NavigationProgress />
+            {/* Content — pages handle their own layout structure */}
+            <div className="flex-1">
+              {children}
+            </div>
+          </LocaleProvider>
         </AuthProvider>
       </body>
     </html>

@@ -13,11 +13,13 @@ import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
+import { useTranslation } from "@/contexts/locale-context";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl") || "";
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
+  const { t, locale } = useTranslation();
 
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
@@ -46,15 +48,15 @@ export function LoginForm() {
             className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl 4xl:text-[28px]"
             id="login-heading"
           >
-            Đăng nhập
+            {t("auth.login.title")}
           </h2>
           <p className="text-[13px] text-auth-text-2 3xl:text-sm">
-            Chưa có tài khoản?{" "}
+            {t("auth.login.noAccount")}{" "}
             <Link
-              href="/register"
+              href={`/${locale}/register`}
               className="font-medium text-auth-accent hover:underline"
             >
-              Tạo tài khoản miễn phí →
+              {t("auth.login.registerNow")} →
             </Link>
           </p>
         </div>
@@ -83,7 +85,7 @@ export function LoginForm() {
               htmlFor="login-email"
               className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
             >
-              Email
+              {t("auth.login.email")}
             </label>
             <input
               type="email"
@@ -120,13 +122,13 @@ export function LoginForm() {
                 htmlFor="login-password"
                 className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
               >
-                Mật khẩu
+                {t("auth.login.password")}
               </label>
               <Link
-                href="/forgot-password"
+                href={`/${locale}/forgot-password`}
                 className="text-xs font-medium text-auth-accent hover:underline"
               >
-                Quên mật khẩu?
+                {t("auth.login.forgotPassword")}
               </Link>
             </div>
             <input
@@ -166,26 +168,26 @@ export function LoginForm() {
             isLoading={isPending}
             aria-busy={isPending}
           >
-            Đăng nhập →
+            {t("auth.login.button")} →
           </Button>
 
           {/* Footer — Terms */}
           <p className="text-center text-xs leading-relaxed text-auth-text-3">
-            Bằng cách đăng nhập, bạn đồng ý với{" "}
+            {t("auth.login.agreement")}{" "}
             <Link
-              href="/terms"
+              href={`/${locale}/terms`}
               prefetch={false}
-              className="text-auth-text-2 hover:text-auth-text"
+              className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
             >
-              Điều khoản sử dụng
+              {t("auth.login.terms")}
             </Link>{" "}
-            và{" "}
+            {t("auth.login.and")}{" "}
             <Link
-              href="/privacy"
+              href={`/${locale}/privacy`}
               prefetch={false}
-              className="text-auth-text-2 hover:text-auth-text"
+              className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
             >
-              Chính sách bảo mật
+              {t("auth.login.privacy")}
             </Link>
           </p>
         </form>

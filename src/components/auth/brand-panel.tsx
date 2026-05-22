@@ -7,26 +7,29 @@
 
 import { Brain, Search, Target } from "lucide-react";
 import { PulseLogo } from "@/components/shared/pulse-logo";
+import { getDictionary } from "@/dictionaries";
 
-const valueProps = [
-  {
-    icon: Brain,
-    title: "Knowledge Base cá nhân hoá theo Role",
-    description: "KB riêng theo domain, không shared với ai",
-  },
-  {
-    icon: Search,
-    title: "Tự động Research khi KB chưa đủ",
-    description: "Không cần chờ — hệ thống tự bổ sung khi cần",
-  },
-  {
-    icon: Target,
-    title: "Expert Advisor, không phải chatbot",
-    description: "Chuyên gia theo domain, trả lời có chiều sâu",
-  },
-];
+export async function BrandPanel({ locale = "vi" }: { locale?: string }) {
+  const dict = await getDictionary(locale);
 
-export function BrandPanel() {
+  const valueProps = [
+    {
+      icon: Brain,
+      title: dict.auth.brand.prop1Title,
+      description: dict.auth.brand.prop1Desc,
+    },
+    {
+      icon: Search,
+      title: dict.auth.brand.prop2Title,
+      description: dict.auth.brand.prop2Desc,
+    },
+    {
+      icon: Target,
+      title: dict.auth.brand.prop3Title,
+      description: dict.auth.brand.prop3Desc,
+    },
+  ];
+
   return (
     <div className="relative hidden flex-col justify-center gap-10 overflow-hidden border-r border-white/[0.06] bg-auth-bg px-10 py-16 lg:flex lg:px-14 xl:px-16 3xl:px-20 4xl:px-28">
       {/* Ambient glow — top left Royal Indigo */}
@@ -59,13 +62,12 @@ export function BrandPanel() {
       {/* Hero text */}
       <div className="relative flex flex-col gap-3">
         <h1 className="text-[28px] font-extrabold leading-[1.2] tracking-[-0.04em] text-auth-text 3xl:text-[32px] 4xl:text-[36px]">
-          KB tích lũy theo domain —
+          {dict.auth.brand.title1}
           <br />
-          <span className="text-auth-accent">AI không bao giờ quên</span>
+          <span className="text-auth-accent">{dict.auth.brand.title2}</span>
         </h1>
         <p className="max-w-[340px] text-sm leading-[1.7] text-auth-text-2 3xl:max-w-[400px] 3xl:text-[15px]">
-          AI Researcher chuyên sâu theo lĩnh vực của bạn. Tích lũy knowledge,
-          tự động research khi thiếu — dù 10 năm sau vẫn còn đó.
+          {dict.auth.brand.subtitle}
         </p>
       </div>
 

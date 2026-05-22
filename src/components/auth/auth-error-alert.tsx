@@ -1,6 +1,8 @@
+"use client";
+
 /**
  * Auth Error Alert — Reusable error/warning block for auth pages.
- * Maps API error codes to Vietnamese user-facing messages.
+ * Maps API error codes to localized user-facing messages.
  *
  * @see /features/api-docs/API_Auth_Docs.md — Error Code Catalog
  */
@@ -17,115 +19,105 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { AuthErrorCode } from "@/types/auth";
+import { useTranslation } from "@/contexts/locale-context";
 
 // Re-export for backward compatibility
 export type { AuthErrorCode } from "@/types/auth";
 
 interface AuthErrorConfig {
-  message: string;
   icon: ReactNode;
   variant: "error" | "warning";
-  action?: { label: string; href?: string };
+  actionKey?: string;
+  actionHref?: string;
 }
 
 const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
   // ── Auth Errors ──
   INVALID_CREDENTIALS: {
-    message: "Email hoặc mật khẩu không đúng.",
     icon: <AlertCircle className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   EMAIL_NOT_VERIFIED: {
-    message: "Tài khoản cần xác minh email trước khi sử dụng. Vui lòng đăng ký lại để tự động xác minh.",
     icon: <MailWarning className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
   },
   ACCOUNT_LOCKED: {
-    message:
-      "Tài khoản đang bị tạm khoá. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
     icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
-    action: { label: "Liên hệ hỗ trợ", href: "/contact" },
+    actionKey: "contactSupport",
+    actionHref: "/contact",
   },
   RATE_LIMITED: {
-    message: "Bạn thử quá nhiều lần. Vui lòng thử lại sau ít phút.",
     icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
   },
 
   // ── Validation ──
   VALIDATION_ERROR: {
-    message: "Vui lòng kiểm tra lại thông tin.",
     icon: <AlertCircle className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
 
   // ── Token / Verify Email ──
   TOKEN_MISSING: {
-    message: "Link xác minh không hợp lệ.",
     icon: <Link2Off className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   TOKEN_INVALID: {
-    message: "Link xác minh không hợp lệ hoặc đã được sử dụng.",
     icon: <Link2Off className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   TOKEN_EXPIRED: {
-    message: "Link xác minh đã hết hạn.",
     icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
   },
   EMAIL_ALREADY_VERIFIED: {
-    message: "Email đã được xác minh trước đó.",
     icon: <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
-    action: { label: "Đăng nhập", href: "/login" },
+    actionKey: "login",
+    actionHref: "/login",
   },
 
   // ── Session / Access Token ──
   UNAUTHORIZED: {
-    message: "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
     icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
-    action: { label: "Đăng nhập", href: "/login" },
+    actionKey: "login",
+    actionHref: "/login",
   },
 
   // ── Refresh Token ──
   MISSING_REFRESH_TOKEN: {
-    message: "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.",
     icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
-    action: { label: "Đăng nhập", href: "/login" },
+    actionKey: "login",
+    actionHref: "/login",
   },
   INVALID_REFRESH_TOKEN: {
-    message: "Phiên đăng nhập đã bị thu hồi. Vui lòng đăng nhập lại.",
     icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
-    action: { label: "Đăng nhập", href: "/login" },
+    actionKey: "login",
+    actionHref: "/login",
   },
   REFRESH_TOKEN_EXPIRED: {
-    message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
     icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
-    action: { label: "Đăng nhập", href: "/login" },
+    actionKey: "login",
+    actionHref: "/login",
   },
   REFRESH_TOKEN_REUSED: {
-    message:
-      "Phát hiện hoạt động bất thường. Tất cả phiên đã bị đăng xuất vì lý do bảo mật.",
     icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
-    action: { label: "Đăng nhập lại", href: "/login" },
+    actionKey: "loginAgain",
+    actionHref: "/login",
   },
 
   // ── Client-side Errors ──
   SERVER_ERROR: {
-    message: "Hệ thống đang bận. Vui lòng thử lại.",
     icon: <ServerCrash className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   NETWORK_ERROR: {
-    message: "Không kết nối được máy chủ. Kiểm tra mạng và thử lại.",
     icon: <WifiOff className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
@@ -146,15 +138,22 @@ export function AuthErrorAlert({
   onAction,
   className = "",
 }: AuthErrorAlertProps) {
+  const { t, locale } = useTranslation();
   const config = errorConfigs[code];
   if (!config) return null;
 
   const isWarning = config.variant === "warning";
 
-  let messageToDisplay = serverMessage || config.message;
+  let messageToDisplay = serverMessage || t(`auth.errors.${code}`);
   if (code === "RATE_LIMITED" && retryAfterSeconds && retryAfterSeconds > 0) {
-    messageToDisplay = `Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ${retryAfterSeconds} giây.`;
+    messageToDisplay = t("auth.errors.RATE_LIMITED_RETRY").replace(
+      "{seconds}",
+      String(retryAfterSeconds),
+    );
   }
+
+  const actionHref = config.actionHref ? `/${locale}${config.actionHref}` : undefined;
+  const actionLabel = config.actionKey ? t(`auth.errors.${config.actionKey}`) : undefined;
 
   return (
     <div
@@ -169,15 +168,15 @@ export function AuthErrorAlert({
       <span className="mt-0.5">{config.icon}</span>
       <span className="flex-1">
         {messageToDisplay}
-        {config.action && (
+        {actionLabel && (
           <>
             {" "}
-            {config.action.href ? (
+            {actionHref ? (
               <a
-                href={config.action.href}
+                href={actionHref}
                 className="ml-1 font-medium underline underline-offset-2 hover:no-underline"
               >
-                {config.action.label}
+                {actionLabel}
               </a>
             ) : (
               <button
@@ -185,7 +184,7 @@ export function AuthErrorAlert({
                 onClick={onAction}
                 className="ml-1 font-medium underline underline-offset-2 hover:no-underline"
               >
-                {config.action.label}
+                {actionLabel}
               </button>
             )}
           </>

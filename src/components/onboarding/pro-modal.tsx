@@ -3,6 +3,7 @@
 import { X, Check, Gem, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui";
+import { useTranslation } from "@/contexts/locale-context";
 
 interface ProModalProps {
   isOpen: boolean;
@@ -10,6 +11,8 @@ interface ProModalProps {
 }
 
 export function ProModal({ isOpen, onClose }: ProModalProps) {
+  const { t } = useTranslation();
+
   const handleUpgrade = () => {
     // Redirect to upgrade page (or mock payment activation path)
     window.location.href = "/settings/plan/upgrade";
@@ -50,10 +53,10 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                     id="modal-title"
                     className="text-2xl font-bold text-auth-text"
                   >
-                    Nâng cấp lên Pro Plan
+                    {t("onboarding.proModal.title")}
                   </h2>
                   <p className="text-sm text-auth-text-2 mt-1">
-                    Mở khoá đa vai trò (Multi-role), tăng giới hạn lưu trữ và số lượng truy vấn AI.
+                    {t("onboarding.proModal.subtitle")}
                   </p>
                 </div>
                 <Button
@@ -72,33 +75,35 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                 {/* Free Plan */}
                 <div className="flex flex-col rounded-xl border border-auth-border bg-auth-elevated p-5">
                   <span className="text-xs font-semibold text-auth-text-3 uppercase tracking-wider">
-                    Gói hiện tại
+                    {t("onboarding.proModal.currentPlan")}
                   </span>
-                  <div className="text-lg font-bold text-auth-text-2 mt-1">Free Plan</div>
+                  <div className="text-lg font-bold text-auth-text-2 mt-1">
+                    {t("onboarding.proModal.freePlan")}
+                  </div>
                   <div className="text-2xl font-mono font-bold text-auth-text mt-2">
-                    $0<span className="text-xs text-auth-text-3 font-sans font-normal"> / tháng</span>
+                    $0<span className="text-xs text-auth-text-3 font-sans font-normal">{t("onboarding.proModal.month")}</span>
                   </div>
 
                   <div className="flex flex-col gap-3 mt-6 flex-grow">
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-2">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>1 Role KB (Không thể chuyển đổi)</span>
+                      <span>{t("onboarding.proModal.freeFeature1")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-2">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>50 queries AI / tháng</span>
+                      <span>{t("onboarding.proModal.freeFeature2")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-2">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>50 MB dung lượng seed KB</span>
+                      <span>{t("onboarding.proModal.freeFeature3")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-3 line-through">
                       <X className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
-                      <span>Sử dụng đồng thời nhiều Role KB</span>
+                      <span>{t("onboarding.proModal.freeFeature4")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-3 line-through">
                       <X className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
-                      <span>Không gian làm việc chung (Team)</span>
+                      <span>{t("onboarding.proModal.freeFeature5")}</span>
                     </div>
                   </div>
                 </div>
@@ -106,38 +111,38 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                 {/* Pro Plan */}
                 <div className="flex flex-col rounded-xl border border-auth-accent bg-auth-accent-dim p-5 relative overflow-hidden">
                   <div className="absolute top-0 right-0 bg-auth-accent text-auth-text px-3 py-0.5 rounded-bl-lg text-[10px] font-bold">
-                    KHUYÊN DÙNG
+                    {t("onboarding.proModal.recommended")}
                   </div>
                   <span className="text-xs font-semibold text-auth-accent uppercase tracking-wider">
-                    Đề xuất nâng cấp
+                    {t("onboarding.proModal.recommendedSub")}
                   </span>
                   <div className="text-lg font-bold text-auth-text mt-1">
-                    Pro Plan
+                    {t("onboarding.proModal.proPlan")}
                   </div>
                   <div className="text-2xl font-mono font-bold text-auth-text mt-2">
-                    $19<span className="text-xs text-auth-text-3 font-sans font-normal"> / tháng</span>
+                    $19<span className="text-xs text-auth-text-3 font-sans font-normal">{t("onboarding.proModal.month")}</span>
                   </div>
 
                   <div className="flex flex-col gap-3 mt-6 flex-grow">
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>Tối đa 5 Role KB trong Onboarding MVP</span>
+                      <span>{t("onboarding.proModal.proFeature1")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>1,000 queries AI / tháng</span>
+                      <span>{t("onboarding.proModal.proFeature2")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>500 MB dung lượng seed KB</span>
+                      <span>{t("onboarding.proModal.proFeature3")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>Sử dụng đồng thời nhiều Role KB</span>
+                      <span>{t("onboarding.proModal.proFeature4")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
-                      <span>Không gian làm việc chung (Team)</span>
+                      <span>{t("onboarding.proModal.proFeature5")}</span>
                     </div>
                   </div>
                 </div>
@@ -147,7 +152,7 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
               <div className="flex items-start gap-2 bg-auth-orange-dim border border-auth-orange/20 rounded-lg p-3 text-xs text-auth-text-2 mb-6">
                 <ShieldAlert className="h-4 w-4 text-auth-orange shrink-0 mt-0.5" />
                 <span>
-                  <strong>Lưu ý:</strong> Gói Pro sẽ hỗ trợ cấu hình tới 5 vị trí công việc (Role KB) cùng một lúc ngay trong bước thiết lập ban đầu này.
+                  <strong>{t("onboarding.proModal.notice")}</strong> {t("onboarding.proModal.noticeText")}
                 </span>
               </div>
 
@@ -159,7 +164,7 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                   size="lg"
                   className="flex-1"
                 >
-                  Nâng cấp Pro ngay →
+                  {t("onboarding.proModal.upgradeBtn")}
                 </Button>
                 <Button
                   onClick={onClose}
@@ -167,7 +172,7 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                   size="lg"
                   className="flex-1"
                 >
-                  Tiếp tục dùng bản Free
+                  {t("onboarding.proModal.continueBtn")}
                 </Button>
               </div>
             </div>

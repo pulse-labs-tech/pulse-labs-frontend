@@ -7,17 +7,19 @@ import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { verifyEmailAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import type { AuthErrorCode } from "@/types/auth";
+import { useTranslation } from "@/contexts/locale-context";
 
 export function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
+  const { t, locale } = useTranslation();
 
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     token ? "loading" : "error"
   );
   const [countdown, setCountdown] = useState(3);
-  const [nextRoute, setNextRoute] = useState("/login");
+  const [nextRoute, setNextRoute] = useState(`/${locale}/login`);
   const [errorDetails, setErrorDetails] = useState<{
     code: AuthErrorCode;
     message?: string;
@@ -26,7 +28,7 @@ export function VerifyEmailForm() {
       ? null
       : {
           code: "TOKEN_MISSING",
-          message: "Link xác minh không hợp lệ hoặc thiếu token.",
+          message: t("auth.errors.TOKEN_MISSING"),
         }
   );
 
@@ -41,7 +43,10 @@ export function VerifyEmailForm() {
         const result = await verifyEmailAction(token);
         if (result.success) {
           if (result.nextRoute) {
-            setNextRoute(result.nextRoute);
+            const cleanRoute = result.nextRoute.startsWith("/")
+              ? result.nextRoute
+              : `/${result.nextRoute}`;
+            setNextRoute(`/${locale}${cleanRoute}`);
           }
           setStatus("success");
         } else {
@@ -60,7 +65,7 @@ export function VerifyEmailForm() {
     };
 
     verify();
-  }, [token]);
+  }, [token, locale]);
 
   // Countdown and redirect effect
   useEffect(() => {
@@ -106,10 +111,10 @@ export function VerifyEmailForm() {
                 <Loader2 className="h-6 w-6 animate-spin text-auth-accent" />
               </div>
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
-                Đang xác minh email
+                {t("auth.verify.verifyingTitle")}
               </h2>
               <p className="text-[13px] text-auth-text-2 max-w-[320px] leading-relaxed">
-                Hệ thống đang kiểm tra token xác minh của bạn. Vui lòng đợi trong giây lát...
+                {t("auth.verify.verifyingSubtitle")}
               </p>
             </div>
           )}
@@ -120,16 +125,16 @@ export function VerifyEmailForm() {
                 <CheckCircle2 className="h-6 w-6 text-brand-400" />
               </div>
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
-                Xác minh thành công!
+                {t("auth.verify.successTitle")}
               </h2>
               <p className="text-[13px] text-auth-text-2 max-w-[320px] leading-relaxed">
-                Tài khoản của bạn đã được kích hoạt. Trình duyệt sẽ tự động chuyển hướng về trang Đăng nhập sau {countdown} giây.
+                {t("auth.verify.successSubtitle").replace("{countdown}", countdown.toString())}
               </p>
               <Link
-                href="/login"
+                href={`/${locale}/login`}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-accent-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.72_0.11_145_/_0.20)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_oklch(0.72_0.11_145_/_0.45)] 3xl:text-sm 3xl:py-3.5"
               >
-                Đăng nhập ngay →
+                {t("auth.verify.successButton")}
               </Link>
             </div>
           )}
@@ -140,10 +145,10 @@ export function VerifyEmailForm() {
                 <AlertCircle className="h-6 w-6 text-auth-error" />
               </div>
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
-                Xác minh thất bại
+                {t("auth.verify.failedTitle")}
               </h2>
               <p className="text-[13px] text-auth-text-2 max-w-[320px] leading-relaxed mb-2">
-                Đã xảy ra lỗi trong quá trình xác minh tài khoản của bạn.
+                {t("auth.verify.failedSubtitle")}
               </p>
               
               {errorDetails && (
@@ -156,10 +161,10 @@ export function VerifyEmailForm() {
               )}
 
               <Link
-                href="/login"
+                href={`/${locale}/login`}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-auth-border bg-auth-elevated px-4 py-3 text-[13px] font-bold text-auth-text transition-all duration-200 hover:bg-auth-border active:scale-[0.98] 3xl:text-sm 3xl:py-3.5"
               >
-                Quay lại Đăng nhập
+                {t("auth.verify.failedButton")}
               </Link>
             </div>
           )}

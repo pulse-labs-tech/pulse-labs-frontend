@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui";
 import { ProModal } from "./pro-modal";
+import { useTranslation } from "@/contexts/locale-context";
 import {
   getOnboardingStateAction,
   getRoleOptionsAction,
@@ -104,6 +105,7 @@ function generateIdempotencyKey() {
 export function OnboardingWizard() {
   const router = useRouter();
   const { user, setUser } = useAuth();
+  const { t, locale } = useTranslation();
 
   // Wizard state
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("welcome");
@@ -155,47 +157,16 @@ export function OnboardingWizard() {
   // Error Mapping Handler (Vietnamese Copy Mapping)
   // ────────────────────────────────────────────────────────────────
   const handleErrorCode = useCallback((code: string, fallbackMsg: string) => {
-    switch (code) {
-      case "UNAUTHORIZED":
-        setErrorMsg("Phiên đăng nhập không tồn tại. Vui lòng đăng nhập để tiếp tục.");
-        router.push(`/login?returnUrl=/onboarding`);
-        break;
-      case "EMAIL_NOT_VERIFIED":
-        setErrorMsg("Vui lòng xác thực email trước khi thiết lập Pulse Knowledge.");
-        break;
-      case "ROLE_REQUIRED":
-        setErrorMsg("Chọn một role để Pulse tạo Knowledge Base đầu tiên cho bạn.");
-        break;
-      case "PLAN_LIMIT_REACHED":
-        setErrorMsg("Free plan hỗ trợ 1 Role KB. Nâng cấp Pro để thêm role.");
-        break;
-      case "VALIDATION_ERROR":
-        setErrorMsg("Dữ liệu không hợp lệ. Vui lòng thử lại.");
-        break;
-      case "UNSUPPORTED_SOURCE_TYPE":
-        setErrorMsg("Nguồn tài liệu này chưa được hỗ trợ.");
-        break;
-      case "FILE_TOO_LARGE":
-        setErrorMsg("File vượt quá giới hạn gói hiện tại. Free tối đa 10 MB, Pro tối đa 25 MB.");
-        break;
-      case "STORAGE_LIMIT_EXCEEDED":
-        setErrorMsg("Dung lượng seed onboarding đã đầy. Nâng cấp hoặc dùng nguồn nhỏ hơn.");
-        break;
-      case "COMPILE_FAILED":
-        setErrorMsg("Chưa compile được nguồn này. Bạn có thể thử lại hoặc thêm nguồn khác sau.");
-        break;
-      case "RATE_LIMITED":
-        setErrorMsg("Bạn thao tác quá nhanh. Thử lại sau ít phút nhé.");
-        setRateLimitCooldown(60); // default cooldown window
-        break;
-      case "SERVER_ERROR":
-      case "NETWORK_ERROR":
-        setErrorMsg("Không kết nối được máy chủ. Kiểm tra mạng và thử lại.");
-        break;
-      default:
-        setErrorMsg(fallbackMsg || "Có lỗi xảy ra. Vui lòng thử lại.");
+    if (code === "UNAUTHORIZED") {
+      router.push(`/${locale}/login?returnUrl=/onboarding`);
     }
-  }, [router]);
+    const msgKey = `onboarding.errors.${code}`;
+    const translated = t(msgKey, fallbackMsg || t("onboarding.errors.setupError"));
+    setErrorMsg(translated);
+    if (code === "RATE_LIMITED") {
+      setRateLimitCooldown(60); // default cooldown window
+    }
+  }, [router, locale, t]);
 
   // ────────────────────────────────────────────────────────────────
   // 1. Initial State Sync (State Bootstrap & Resume)
@@ -264,7 +235,7 @@ export function OnboardingWizard() {
         }
       } catch (err) {
         console.error("Bootstrap error:", err);
-        setErrorMsg("Không kết nối được máy chủ. Kiểm tra mạng và thử lại.");
+        setErrorMsg(t("auth.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Kiểm tra mạng và thử lại."));
       } finally {
         setIsInitializing(false);
       }
@@ -302,7 +273,7 @@ export function OnboardingWizard() {
       if (compileJob.status === "failed") {
         setTimeout(() => {
           setCompileError(
-            "Chưa compile được nguồn này. Bạn có thể thử lại hoặc thêm nguồn khác sau.",
+            t("onboarding.seed.compileError", "Chưa compile được nguồn này. Bạn có thể thử lại hoặc thêm nguồn khác sau."),
           );
         }, 0);
       }
@@ -376,7 +347,7 @@ export function OnboardingWizard() {
     } else {
       // Pro Limit up to 5 roles
       if (selectedRoles.length >= 5) {
-        setErrorMsg("Pro plan hỗ trợ tối đa 5 Role KB trong giai đoạn thiết lập ban đầu.");
+        setErrorMsg(t("onboarding.pickRole.customLimit", "Pro plan hỗ trợ tối đa 5 Role KB trong giai đoạn thiết lập ban đầu."));
         return;
       }
       setSelectedRoles([
@@ -391,7 +362,7 @@ export function OnboardingWizard() {
     if (!trimmed) return;
 
     if (trimmed.length < 2 || trimmed.length > 80) {
-      setErrorMsg("Role cần ít nhất từ 2 đến 80 ký tự.");
+      setErrorMsg(t("onboarding.pickRole.customLengthError", "Role cần ít nhất từ 2 đến 80 ký tự."));
       return;
     }
 
@@ -404,7 +375,7 @@ export function OnboardingWizard() {
       setCustomRoleInput("");
     } else {
       if (selectedRoles.length >= 5) {
-        setErrorMsg("Pro plan hỗ trợ tối đa 5 Role KB trong giai đoạn thiết lập ban đầu.");
+        setErrorMsg(t("onboarding.pickRole.customLimit", "Pro plan hỗ trợ tối đa 5 Role KB trong giai đoạn thiết lập ban đầu."));
         return;
       }
       setSelectedRoles([
@@ -422,7 +393,7 @@ export function OnboardingWizard() {
   // Step 2 Submission (Save Roles)
   const handleSaveRoles = async () => {
     if (selectedRoles.length === 0) {
-      setErrorMsg("Chọn một role để Pulse tạo Knowledge Base đầu tiên cho bạn.");
+      setErrorMsg(t("onboarding.errors.ROLE_REQUIRED", "Chọn một role để Pulse tạo Knowledge Base đầu tiên cho bạn."));
       return;
     }
 
@@ -450,7 +421,7 @@ export function OnboardingWizard() {
       }
     } catch (err) {
       console.error("Save roles action error:", err);
-      setErrorMsg("Không kết nối được máy chủ. Kiểm tra mạng và thử lại.");
+      setErrorMsg(t("auth.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Kiểm tra mạng và thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -464,17 +435,17 @@ export function OnboardingWizard() {
     if (seedType === "text") {
       const trimmed = seedText.trim();
       if (trimmed.length < 50) {
-        setErrorMsg("Nội dung cần ít nhất 50 ký tự để phân tích.");
+        setErrorMsg(t("onboarding.seed.limitTextMin", "Nội dung cần ít nhất 50 ký tự để phân tích."));
         return;
       }
       if (trimmed.length > 50000) {
-        setErrorMsg("Nội dung vượt quá giới hạn 50,000 ký tự.");
+        setErrorMsg(t("onboarding.seed.limitTextMax", "Nội dung vượt quá giới hạn 50,000 ký tự."));
         return;
       }
     } else {
       const trimmedUrl = seedUrl.trim();
       if (!trimmedUrl.startsWith("http://") && !trimmedUrl.startsWith("https://")) {
-        setErrorMsg("Link không hợp lệ. Vui lòng nhập URL bắt đầu bằng http:// hoặc https://.");
+        setErrorMsg(t("onboarding.seed.limitUrl", "Link không hợp lệ. Vui lòng nhập URL bắt đầu bằng http:// hoặc https://."));
         return;
       }
     }
@@ -501,7 +472,7 @@ export function OnboardingWizard() {
       }
     } catch (err) {
       console.error("Submit seed action error:", err);
-      setErrorMsg("Không kết nối được máy chủ. Kiểm tra mạng và thử lại.");
+      setErrorMsg(t("auth.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Kiểm tra mạng và thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -533,7 +504,7 @@ export function OnboardingWizard() {
       }
     } catch (err) {
       console.error("Complete onboarding error:", err);
-      setErrorMsg("Không kết nối được máy chủ. Kiểm tra mạng và thử lại.");
+      setErrorMsg(t("auth.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Kiểm tra mạng và thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -543,27 +514,31 @@ export function OnboardingWizard() {
   const getStageLabel = (stage: string) => {
     switch (stage) {
       case "queued":
-        return "Đang xếp hàng (Queued)";
+        return t("dashboard.stage.queued", "Đang xếp hàng (Queued)");
       case "validating":
-        return "Xác thực nguồn dữ liệu...";
+        return t("dashboard.stage.validating", "Xác thực nguồn dữ liệu...");
       case "fetching_or_uploading":
-        return "Đang tải nguồn (Uploading)";
+      case "fetching":
+        return t("dashboard.stage.fetching", "Đang tải nguồn (Uploading)");
       case "extracting":
-        return "Đang trích xuất văn bản (Parsing)";
+        return t("dashboard.stage.extracting", "Đang trích xuất văn bản (Parsing)");
       case "normalizing":
-        return "Đang chuẩn hoá văn bản...";
+        return t("dashboard.stage.normalizing", "Đang chuẩn hoá văn bản...");
       case "chunking":
-        return "Chia nhỏ tài liệu (Scanning source)";
+        return t("dashboard.stage.chunking", "Chia nhỏ tài liệu (Scanning source)");
       case "summarizing":
-        return "Tạo bản tóm tắt...";
+        return t("dashboard.stage.summarizing", "Tạo bản tóm tắt...");
       case "indexing":
-        return "Đang biên dịch kiến thức (Compiling to Wiki)";
+        return t("dashboard.stage.indexing", "Đang biên dịch kiến thức (Compiling to Wiki)");
       case "wiki_ready":
-        return "Biên dịch thành công (Wiki item ready)";
+      case "wikiReady":
+        return t("dashboard.stage.wikiReady", "Biên dịch thành công (Wiki item ready)");
       case "failed":
-        return "Biên dịch thất bại — Thử lại";
+        return t("dashboard.stage.failed", "Biên dịch thất bại — Thử lại");
+      case "cancelled":
+        return t("dashboard.stage.cancelled", "Đã hủy bỏ");
       default:
-        return "Đang xử lý...";
+        return t("dashboard.stage.compiling", "Đang xử lý...");
     }
   };
 
@@ -572,7 +547,7 @@ export function OnboardingWizard() {
       <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
-          <p className="text-sm text-auth-text-2">Đang tải trạng thái thiết lập...</p>
+          <p className="text-sm text-auth-text-2">{t("onboarding.seed.progressLoading", "Đang tải trạng thái thiết lập...")}</p>
         </div>
       </div>
     );
@@ -647,13 +622,13 @@ export function OnboardingWizard() {
             {/* Labels */}
             <div className="flex justify-between text-[11px] text-auth-text-3 font-semibold uppercase tracking-wider">
               <span className={currentStep === "welcome" ? "text-auth-accent" : "text-auth-accent"}>
-                Welcome
+                {t("onboarding.welcome.stepName", "Welcome")}
               </span>
               <span className={currentStep === "pick_role" ? "text-auth-accent" : ""}>
-                Chọn Vai Trò
+                {t("onboarding.pickRole.stepName", "Chọn Vai Trò")}
               </span>
               <span className={currentStep === "seed_kb" ? "text-auth-accent" : ""}>
-                Nạp Kiến Thức
+                {t("onboarding.seed.stepName", "Nạp Kiến Thức")}
               </span>
             </div>
           </div>
@@ -666,11 +641,11 @@ export function OnboardingWizard() {
                 onClick={() => setErrorMsg(null)}
               />
               <div className="flex-grow">
-                <p className="font-semibold">Lỗi thiết lập</p>
+                <p className="font-semibold">{t("onboarding.errors.setupError", "Lỗi thiết lập")}</p>
                 <p className="text-auth-text-2 mt-0.5 text-xs">{errorMsg}</p>
                 {rateLimitCooldown !== null && (
                   <p className="text-xs text-auth-text-3 mt-1.5 font-mono">
-                    Vui lòng chờ {rateLimitCooldown}s để thử lại.
+                    {t("auth.errors.RATE_LIMITED_RETRY", "Bạn đã thử quá nhiều lần. Vui lòng thử lại sau {seconds} giây.").replace("{seconds}", String(rateLimitCooldown))}
                   </p>
                 )}
               </div>
@@ -682,15 +657,14 @@ export function OnboardingWizard() {
             <div className="flex flex-col gap-6 animate-fade-in">
               <div>
                 <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-auth-text">
-                  Chào mừng đến Pulse Knowledge
+                  {t("onboarding.welcome.title")}
                 </h1>
                 <p className="text-sm text-auth-text-2 mt-3 leading-relaxed">
                   <strong className="text-auth-text text-gradient">
-                     KB tích lũy theo domain — AI không bao giờ quên.
+                     {t("onboarding.welcome.tagline")}
                   </strong>
                   <br />
-                  Khác với chatbot thông thường, Pulse Knowledge lưu trữ và tích lũy tri thức chuyên
-                  biệt, tự động nghiên cứu khi thiếu và không bao giờ quên thông tin của bạn.
+                  {t("onboarding.welcome.desc")}
                 </p>
               </div>
 
@@ -701,10 +675,10 @@ export function OnboardingWizard() {
                     <Brain className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
-                    Knowledge Base riêng
+                    {t("onboarding.welcome.feat1Title")}
                   </h3>
                   <p className="text-xs text-auth-text-2 leading-relaxed">
-                    KB cá nhân + Role KB chia sẻ đồng bộ trong toàn bộ team.
+                    {t("onboarding.welcome.feat1Desc")}
                   </p>
                 </div>
 
@@ -713,10 +687,10 @@ export function OnboardingWizard() {
                     <Search className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
-                    Auto Research
+                    {t("onboarding.welcome.feat2Title")}
                   </h3>
                   <p className="text-xs text-auth-text-2 leading-relaxed">
-                    Tự động tìm kiếm Internet khi KB thiếu hụt hoặc dữ liệu cũ.
+                    {t("onboarding.welcome.feat2Desc")}
                   </p>
                 </div>
 
@@ -725,24 +699,24 @@ export function OnboardingWizard() {
                     <Target className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
-                    Expert Advisor
+                    {t("onboarding.welcome.feat3Title")}
                   </h3>
                   <p className="text-xs text-auth-text-2 leading-relaxed">
-                    Cố vấn chuyên môn cao sâu theo từng lĩnh vực chuyên ngành.
+                    {t("onboarding.welcome.feat3Desc")}
                   </p>
                 </div>
               </div>
 
               {/* Bottom Actions */}
               <div className="flex justify-between items-center border-t border-auth-border-subtle pt-6">
-                <span className="text-xs text-auth-text-3 font-semibold">Bước 1 / 3</span>
+                <span className="text-xs text-auth-text-3 font-semibold">{t("onboarding.step1Of3")}</span>
                 <Button
                   variant="primary"
                   size="md"
                   onClick={() => setCurrentStep("pick_role")}
                   rightIcon={<ChevronRight className="h-4 w-4" />}
                 >
-                  Bắt đầu thiết lập
+                  {t("onboarding.welcome.btn")}
                 </Button>
               </div>
             </div>
@@ -753,16 +727,15 @@ export function OnboardingWizard() {
             <div className="flex flex-col gap-6 animate-fade-in">
               <div>
                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-auth-text">
-                  Bạn là chuyên gia trong lĩnh vực nào?
+                  {t("onboarding.pickRole.title")}
                 </h1>
                 <p className="text-xs text-auth-text-2 mt-2 leading-relaxed">
-                  Pulse Knowledge sẽ tự động cấu hình Knowledge Base, System Prompt và bộ lọc phân loại
-                  dữ liệu tối ưu theo đúng chuyên ngành của bạn.
+                  {t("onboarding.pickRole.subtitle")}
                   <br />
                   <span className="text-auth-accent font-medium mt-1 inline-block">
                     {plan === "free"
-                      ? "Gói Free: Hỗ trợ 1 vị trí công việc (Role KB)."
-                      : "Gói Pro: Hỗ trợ cấu hình tối đa 5 Role KB."}
+                      ? t("onboarding.pickRole.freeLimit")
+                      : t("onboarding.pickRole.proLimit")}
                   </span>
                 </p>
               </div>
@@ -771,7 +744,7 @@ export function OnboardingWizard() {
               {selectedRoles.length > 0 && (
                 <div className="flex flex-col gap-2 bg-auth-elevated/40 border border-auth-border rounded-xl p-3">
                   <div className="text-[10px] font-bold text-auth-text-3 uppercase tracking-wider">
-                    Vị trí đã chọn ({selectedRoles.length}/{roleLimit})
+                    {t("onboarding.pickRole.selectedRoles")} ({selectedRoles.length}/{roleLimit})
                   </div>
                   <div className="flex flex-wrap gap-2 mt-1">
                     {selectedRoles.map((role) => (
@@ -779,7 +752,7 @@ export function OnboardingWizard() {
                         key={role.id}
                         className="inline-flex items-center gap-1.5 py-1 pl-2.5 pr-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim border border-auth-accent text-auth-accent"
                       >
-                        {role.label}
+                        {t("onboarding.groups." + role.group + ".roles." + role.id + ".label", role.label)}
                         <button
                           onClick={() => handleRemoveRole(role.id)}
                           className="hover:bg-auth-accent-dark/20 rounded p-0.5"
@@ -795,7 +768,7 @@ export function OnboardingWizard() {
               {/* Domain Chips */}
               <div className="flex flex-col gap-2">
                 <span className="text-[11px] font-bold text-auth-text-3 uppercase tracking-wider">
-                  ① Chọn nhóm ngành chính
+                  {t("onboarding.pickRole.selectGroup")}
                 </span>
                 <div className="flex gap-2 flex-wrap">
                   {roleGroups.map((group) => (
@@ -808,7 +781,7 @@ export function OnboardingWizard() {
                           : "bg-auth-elevated border-auth-border text-auth-text-2 hover:border-auth-text-3 hover:text-auth-text"
                       }`}
                     >
-                      {group.label}
+                      {t("onboarding.groups." + group.id + ".label", group.label)}
                     </button>
                   ))}
                 </div>
@@ -817,7 +790,7 @@ export function OnboardingWizard() {
               {/* Roles Cards Grid */}
               <div className="flex flex-col gap-2">
                 <span className="text-[11px] font-bold text-auth-text-3 uppercase tracking-wider">
-                  ② Chọn chi tiết vị trí công việc
+                  {t("onboarding.pickRole.selectRole")}
                 </span>
 
                 {activeGroup !== "other" ? (
@@ -837,11 +810,13 @@ export function OnboardingWizard() {
                             }`}
                           >
                             <div className="flex justify-between items-start w-full">
-                              <span className="text-xs font-bold text-auth-text">{role.label}</span>
+                              <span className="text-xs font-bold text-auth-text">
+                                {t("onboarding.groups." + activeGroup + ".roles." + role.id + ".label", role.label)}
+                              </span>
                               {isSelected && <Check className="h-3 w-3 text-auth-accent shrink-0" />}
                             </div>
                             <span className="text-[10px] text-auth-text-3 leading-normal mt-1">
-                              {role.description}
+                              {t("onboarding.groups." + activeGroup + ".roles." + role.id + ".desc", role.description)}
                             </span>
                           </button>
                         );
@@ -853,7 +828,7 @@ export function OnboardingWizard() {
                       htmlFor="custom-role"
                       className="text-xs font-bold text-auth-text-2 uppercase tracking-wide"
                     >
-                      Nhập tên vị trí / lĩnh vực khác
+                      {t("onboarding.pickRole.customLabel")}
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -861,7 +836,7 @@ export function OnboardingWizard() {
                         type="text"
                         value={customRoleInput}
                         onChange={(e) => setCustomRoleInput(e.target.value)}
-                        placeholder="VD: Legal, HR, Content Creator..."
+                        placeholder={t("onboarding.pickRole.customPlaceholder")}
                         className="flex-grow bg-auth-surface border border-auth-border rounded-lg px-4 py-2 text-xs text-auth-text placeholder:text-auth-text-3 focus:border-auth-accent"
                         maxLength={80}
                       />
@@ -870,7 +845,7 @@ export function OnboardingWizard() {
                         variant="secondary"
                         size="md"
                       >
-                        Thêm
+                        {t("common.add")}
                       </Button>
                     </div>
                   </div>
@@ -883,8 +858,9 @@ export function OnboardingWizard() {
                   <div className="flex items-center gap-2">
                     <Gem className="h-4.5 w-4.5 text-auth-accent animate-pulse" />
                     <span>
-                      Muốn thêm vai trò? <strong>VD: Frontend + DevOps</strong>. Gói Free chỉ hỗ trợ
-                      1.
+                      {t("onboarding.pickRole.proNudgePrefix")}
+                      <strong>{t("onboarding.pickRole.proNudgeHighlight")}</strong>
+                      {t("onboarding.pickRole.proNudgeSuffix")}
                     </span>
                   </div>
                   <button
@@ -894,7 +870,7 @@ export function OnboardingWizard() {
                     }}
                     className="text-auth-accent font-semibold hover:underline shrink-0"
                   >
-                    Xem Pro Plan →
+                    {t("onboarding.pickRole.viewPro")}
                   </button>
                 </div>
               )}
@@ -907,10 +883,10 @@ export function OnboardingWizard() {
                   onClick={() => setCurrentStep("welcome")}
                   leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
                 >
-                  Quay lại
+                  {t("common.back")}
                 </Button>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-auth-text-3 font-semibold">Bước 2 / 3</span>
+                  <span className="text-xs text-auth-text-3 font-semibold">{t("onboarding.step2Of3")}</span>
                   <Button
                     variant="primary"
                     size="md"
@@ -919,7 +895,7 @@ export function OnboardingWizard() {
                     disabled={selectedRoles.length === 0 || isSubmitting || rateLimitCooldown !== null}
                     rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
                   >
-                    Tiếp tục
+                    {t("common.next")}
                   </Button>
                 </div>
               </div>
@@ -931,14 +907,13 @@ export function OnboardingWizard() {
             <div className="flex flex-col gap-6 animate-fade-in">
               <div>
                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-auth-text">
-                  Bắt đầu với tài liệu kiến thức đầu tiên
+                  {t("onboarding.seed.title")}
                 </h1>
                 <p className="text-xs text-auth-text-2 mt-2 leading-relaxed">
-                  Nhập link bài viết/tài liệu công khai hoặc dán đoạn văn bản trực tiếp. Hệ thống sẽ tự
-                  động trích xuất và nạp vào cơ sở tri thức cá nhân của bạn.
+                  {t("onboarding.seed.subtitle")}
                   <br />
                   <span className="text-auth-text-3 font-medium">
-                    Không bắt buộc. Bạn hoàn toàn có thể bỏ qua bước này và thêm sau tại Dashboard.
+                    {t("onboarding.seed.optional")}
                   </span>
                 </p>
               </div>
@@ -948,7 +923,7 @@ export function OnboardingWizard() {
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-5 flex flex-col gap-4 animate-fade-in">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-auth-text uppercase tracking-wider">
-                      Tiến độ phân tích tri thức
+                      {t("onboarding.seed.progressTitle")}
                     </span>
                     <span className="text-xs font-mono font-bold text-auth-accent">
                       {compileJob.progress}%
@@ -995,8 +970,7 @@ export function OnboardingWizard() {
                   {pollTimeoutReached && (
                     <div className="flex items-start gap-2 bg-auth-orange-dim border border-auth-orange/20 rounded-lg p-3 text-xs text-auth-text-2">
                       <span>
-                        ⚠️ Nguồn đang được xử lý lâu hơn dự kiến. Bạn có thể vào Dashboard trước để
-                        theo dõi sau.
+                        {t("onboarding.seed.timeoutWarning")}
                       </span>
                     </div>
                   )}
@@ -1012,7 +986,7 @@ export function OnboardingWizard() {
                           setCompileError(null);
                         }}
                       >
-                        Thử lại nguồn khác
+                        {t("onboarding.seed.tryAnother")}
                       </Button>
                     )}
 
@@ -1024,8 +998,8 @@ export function OnboardingWizard() {
                       rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
                     >
                       {compileJob.status === "wiki_ready"
-                        ? "Tiếp tục vào Dashboard"
-                        : "Tiếp tục thiết lập"}
+                        ? t("onboarding.seed.goToDashboard")
+                        : t("onboarding.seed.continue")}
                     </Button>
                   </div>
                 </div>
@@ -1035,17 +1009,17 @@ export function OnboardingWizard() {
                   <div className="border border-dashed border-auth-border bg-auth-elevated/40 rounded-xl p-6 text-center flex flex-col gap-3 items-center relative overflow-hidden">
                     <div className="absolute top-2 right-2 bg-auth-accent-dim border border-auth-accent/20 text-auth-accent text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
                       <Lock className="h-3 w-3" />
-                      Sắp ra mắt
+                      {t("onboarding.seed.comingSoon")}
                     </div>
                     <div className="w-11 h-11 rounded-lg bg-auth-elevated border border-auth-border flex items-center justify-center text-auth-text-3">
                       <UploadCloud className="h-5 w-5" />
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-auth-text-3">
-                        Kéo thả file tài liệu vào đây để tự động phân tích
+                        {t("onboarding.seed.dragDrop")}
                       </h4>
                       <p className="text-[10px] text-auth-text-3 mt-1">
-                        Hỗ trợ PDF, TXT, Markdown (Tối đa 10 MB).
+                        {t("onboarding.seed.dragDropDesc")}
                       </p>
                     </div>
                   </div>
@@ -1060,7 +1034,7 @@ export function OnboardingWizard() {
                           : "border-transparent text-auth-text-3 hover:text-auth-text-2"
                       }`}
                     >
-                      Nạp qua Link (URL)
+                      {t("onboarding.seed.tabUrl")}
                     </button>
                     <button
                       onClick={() => setSeedType("text")}
@@ -1070,7 +1044,7 @@ export function OnboardingWizard() {
                           : "border-transparent text-auth-text-3 hover:text-auth-text-2"
                       }`}
                     >
-                      Dán văn bản trực tiếp (Text)
+                      {t("onboarding.seed.tabText")}
                     </button>
                   </div>
 
@@ -1081,7 +1055,7 @@ export function OnboardingWizard() {
                         htmlFor="seed-url"
                         className="text-[10px] font-bold text-auth-text-2 uppercase tracking-wide"
                       >
-                        Nhập liên kết bài viết / tài liệu
+                        {t("onboarding.seed.labelUrl")}
                       </label>
                       <input
                         id="seed-url"
@@ -1098,17 +1072,17 @@ export function OnboardingWizard() {
                         htmlFor="seed-text"
                         className="text-[10px] font-bold text-auth-text-2 uppercase tracking-wide"
                       >
-                        Dán nội dung kiến thức (Tối thiểu 50 ký tự)
+                        {t("onboarding.seed.labelText")}
                       </label>
                       <textarea
                         id="seed-text"
                         value={seedText}
                         onChange={(e) => setSeedText(e.target.value)}
-                        placeholder="Dán hoặc nhập tài liệu kỹ thuật, ghi chú, quy định tại đây..."
+                        placeholder={t("onboarding.seed.placeholderText")}
                         className="bg-auth-elevated border border-auth-border rounded-lg px-4 py-3 text-xs text-auth-text placeholder:text-auth-text-3 focus:border-auth-accent focus:ring-1 focus:ring-auth-accent min-h-[90px] resize-y"
                       />
                       <div className="text-right text-[10px] text-auth-text-3 font-mono">
-                        {seedText.length} ký tự
+                        {seedText.length} {t("onboarding.seed.chars")}
                       </div>
                     </div>
                   )}
@@ -1121,7 +1095,7 @@ export function OnboardingWizard() {
                       onClick={() => setCurrentStep("pick_role")}
                       leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
                     >
-                      Quay lại
+                      {t("common.back")}
                     </Button>
                     <div className="flex items-center gap-3">
                       <Button
@@ -1131,7 +1105,7 @@ export function OnboardingWizard() {
                         disabled={isSubmitting || rateLimitCooldown !== null}
                         isLoading={isSubmitting}
                       >
-                        Bỏ qua bước này
+                        {t("onboarding.seed.skip")}
                       </Button>
                       <Button
                         variant="primary"
@@ -1145,7 +1119,7 @@ export function OnboardingWizard() {
                         }
                         rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
                       >
-                        Gửi phân tích
+                        {t("onboarding.seed.submit")}
                       </Button>
                     </div>
                   </div>

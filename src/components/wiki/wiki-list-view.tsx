@@ -36,6 +36,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemsAction } from "@/app/actions/wiki";
 import type { WikiItemCard, WikiDomain, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
+import { useTranslation } from "@/contexts/locale-context";
 
 // ────────────────────────────────────────────────────────────────
 // Helpers
@@ -62,58 +63,58 @@ function getSourceTypeIcon(type: WikiSourceType) {
   }
 }
 
-function getSourceTypeLabel(type: WikiSourceType): string {
+function getSourceTypeLabel(type: WikiSourceType, t: any): string {
   switch (type) {
-    case "text": return "Văn bản";
-    case "url": return "URL";
+    case "text": return t("wiki.sourceTypes.text", "Raw Text");
+    case "url": return t("wiki.sourceTypes.url", "URL Link");
     case "file_pdf": return "PDF";
     case "file_txt": return "TXT";
     case "file_md": return "Markdown";
     case "query_output": return "AI Output";
-    case "manual_note": return "Ghi chú";
-    default: return "Tài liệu";
+    case "manual_note": return t("wiki.sourceTypes.manual_note", "Manual Note");
+    default: return t("wiki.sourceTypes.default", "Document");
   }
 }
 
-function getStatusBadge(status: WikiRetrievalStatus) {
+function getStatusBadge(status: WikiRetrievalStatus, t: any) {
   switch (status) {
     case "indexed":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-          <CheckCircle2 className="h-2.5 w-2.5" /> Sẵn sàng
+          <CheckCircle2 className="h-2.5 w-2.5" /> {t("wiki.statuses.ready", "Indexed")}
         </span>
       );
     case "pending":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
-          <Clock className="h-2.5 w-2.5" /> Đang xử lý
+          <Clock className="h-2.5 w-2.5" /> {t("wiki.statuses.pending", "Processing")}
         </span>
       );
     case "degraded":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-          <AlertTriangle className="h-2.5 w-2.5" /> Chất lượng thấp
+          <AlertTriangle className="h-2.5 w-2.5" /> {t("wiki.statuses.lowQuality", "Low Quality")}
         </span>
       );
     case "failed":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-          <XCircle className="h-2.5 w-2.5" /> Lỗi
+          <XCircle className="h-2.5 w-2.5" /> {t("wiki.statuses.failed", "Index Error")}
         </span>
       );
     default:
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-auth-elevated border border-auth-border text-auth-text-3">
-          Chưa rõ
+          {t("wiki.statuses.unknown", "Unknown")}
         </span>
       );
   }
 }
 
-function formatDateVN(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   if (!dateStr) return "—";
   try {
-    return new Intl.DateTimeFormat("vi-VN", {
+    return new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -140,12 +141,13 @@ function getSortParam(sortByVal: "compiledAt" | "title" | "updatedAt"): WikiSort
 // ────────────────────────────────────────────────────────────────
 
 function WikiCard({ item }: { item: WikiItemCard }) {
+  const { t, locale } = useTranslation();
   const visibleTags = item.tags.slice(0, 2);
   const extraTagCount = item.tags.length - 2;
 
   return (
     <Link
-      href={`/wiki/items/${item.id}`}
+      href={`/${locale}/wiki/items/${item.id}`}
       className="group relative bg-auth-surface/40 border border-white/[0.06] rounded-2xl p-5 hover:-translate-y-1 hover:border-white/[0.12] transition-all flex flex-col gap-3 overflow-hidden"
     >
       {/* Subtle left border glow on hover */}
@@ -156,7 +158,7 @@ function WikiCard({ item }: { item: WikiItemCard }) {
         <div className="flex items-center gap-1.5">
           {getSourceTypeIcon(item.sourceType)}
           <span className="text-[10px] font-semibold text-auth-text-3 uppercase tracking-wider">
-            {getSourceTypeLabel(item.sourceType)}
+            {getSourceTypeLabel(item.sourceType, t)}
           </span>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -166,7 +168,7 @@ function WikiCard({ item }: { item: WikiItemCard }) {
               {item.domain.name}
             </span>
           )}
-          {getStatusBadge(item.retrievalStatus)}
+          {getStatusBadge(item.retrievalStatus, t)}
         </div>
       </div>
 
@@ -199,7 +201,7 @@ function WikiCard({ item }: { item: WikiItemCard }) {
           )}
         </div>
         <span className="text-[10px] text-auth-text-3 shrink-0">
-          {formatDateVN(item.compiledAt || item.createdAt)}
+          {formatDate(item.compiledAt || item.createdAt, locale)}
         </span>
       </div>
     </Link>
@@ -211,9 +213,10 @@ function WikiCard({ item }: { item: WikiItemCard }) {
 // ────────────────────────────────────────────────────────────────
 
 function WikiRow({ item }: { item: WikiItemCard }) {
+  const { t, locale } = useTranslation();
   return (
     <Link
-      href={`/wiki/items/${item.id}`}
+      href={`/${locale}/wiki/items/${item.id}`}
       className="group flex items-start gap-4 bg-auth-surface/30 border border-white/[0.06] rounded-xl px-4 py-3.5 hover:border-white/[0.12] hover:bg-auth-surface/50 transition-all"
     >
       {/* Source icon */}
@@ -225,7 +228,7 @@ function WikiRow({ item }: { item: WikiItemCard }) {
           <span className="text-sm font-bold text-auth-text group-hover:text-auth-accent transition-colors truncate">
             {item.title}
           </span>
-          {getStatusBadge(item.retrievalStatus)}
+          {getStatusBadge(item.retrievalStatus, t)}
         </div>
         {item.summarySnippet && (
           <p className="text-xs text-auth-text-2 line-clamp-2 leading-relaxed">
@@ -256,7 +259,7 @@ function WikiRow({ item }: { item: WikiItemCard }) {
 
       {/* Date */}
       <div className="shrink-0 text-[10px] text-auth-text-3 text-right mt-0.5">
-        {formatDateVN(item.compiledAt || item.createdAt)}
+        {formatDate(item.compiledAt || item.createdAt, locale)}
       </div>
     </Link>
   );
@@ -309,6 +312,7 @@ export function WikiListView() {
   const searchParams = useSearchParams();
   const { user: authUser, clearAuth } = useAuth();
   const [isPending, startTransition] = useTransition();
+  const { t, locale } = useTranslation();
 
   // Filter state
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
@@ -377,22 +381,22 @@ export function WikiListView() {
         } else {
           if (res.error_code === "UNAUTHORIZED") {
             clearAuth();
-            router.push("/login?returnUrl=/wiki");
+            router.push(`/${locale}/login?returnUrl=/${locale}/wiki`);
             return;
           }
-          setApiWarning(res.msg || "Không thể tải dữ liệu Wiki. Vui lòng thử lại.");
+          setApiWarning(res.msg || t("wiki.detail.loadError", "Failed to load data"));
           setItems([]);
           setTotal(0);
         }
       } catch {
-        setApiWarning("Không kết nối được máy chủ. Kiểm tra lại kết nối mạng.");
+        setApiWarning(t("wiki.detail.networkError", "Cannot connect to server. Please check your network connection."));
         setItems([]);
         setTotal(0);
       } finally {
         setIsLoading(false);
       }
     },
-    [search, statusFilter, domainFilter, tagFilter, page, roleKbId, sortBy, clearAuth, router]
+    [search, statusFilter, domainFilter, tagFilter, page, roleKbId, sortBy, clearAuth, router, locale, t]
   );
 
   // Initial load
@@ -477,29 +481,29 @@ export function WikiListView() {
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
         <div className="container-responsive flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
             <nav className="hidden items-center gap-1.5 md:flex">
               <Link
-                href="/dashboard"
+                href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+                <LayoutDashboard className="h-3.5 w-3.5" /> {t("common.dashboard", "Dashboard")}
               </Link>
               <Link
-                href={roleKbId ? `/query?roleKbId=${roleKbId}` : "/query"}
+                href={roleKbId ? `/${locale}/query?roleKbId=${roleKbId}` : `/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <MessageSquare className="h-3.5 w-3.5" /> Hỏi đáp AI
+                <MessageSquare className="h-3.5 w-3.5" /> {t("common.query", "Ask AI")}
               </Link>
               <Link
-                href="/wiki"
+                href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                <BookOpen className="h-3.5 w-3.5" /> Wiki Cá nhân
+                <BookOpen className="h-3.5 w-3.5" /> {t("common.wiki", "Personal Wiki")}
               </Link>
             </nav>
           </div>
@@ -507,17 +511,17 @@ export function WikiListView() {
           <div className="flex items-center gap-4">
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
-                {authUser?.displayName || authUser?.email || "Người dùng"}
+                {authUser?.displayName || authUser?.email || (locale === "vi" ? "Người dùng" : "User")}
               </div>
               <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-0.5 text-[10px] font-semibold text-auth-accent">
-                {authUser?.plan === "pro" ? "Pro Plan" : "Free Plan"}
+                {authUser?.plan === "pro" ? t("common.proPlan", "Pro Plan") : t("common.freePlan", "Free Plan")}
               </span>
             </div>
             <button
               onClick={handleLogout}
               disabled={isPending}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
-              title="Đăng xuất"
+              title={t("common.logout", "Log Out")}
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
@@ -541,7 +545,7 @@ export function WikiListView() {
               onClick={() => { setApiWarning(null); fetchItems(); }}
               className="ml-2 shrink-0 rounded-lg bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300 hover:bg-amber-500/20 transition-colors"
             >
-              Thử lại
+              {t("common.retry", "Retry")}
             </button>
             <button onClick={() => setApiWarning(null)} className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors">
               <X className="h-4 w-4" />
@@ -556,14 +560,14 @@ export function WikiListView() {
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-fluid-xl font-extrabold tracking-tight">Thư viện Wiki</h1>
+              <h1 className="text-fluid-xl font-extrabold tracking-tight">{t("wiki.title", "Wiki Library")}</h1>
               <p className="text-xs text-auth-text-2 mt-0.5">
-                Toàn bộ kiến thức được biên soạn và lập chỉ mục
+                {t("wiki.subtitle", "All knowledge compiled and indexed")}
               </p>
             </div>
             {!isLoading && total > 0 && (
               <span className="ml-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-auth-accent-dim text-auth-accent border border-auth-accent/20">
-                {total.toLocaleString("vi-VN")} mục
+                {total.toLocaleString(locale === "vi" ? "vi-VN" : "en-US")} {locale === "vi" ? "mục" : "items"}
               </span>
             )}
           </div>
@@ -577,7 +581,7 @@ export function WikiListView() {
                   ? "bg-auth-accent-dim text-auth-accent"
                   : "text-auth-text-3 hover:text-auth-text"
               }`}
-              title="Xem lưới"
+              title={locale === "vi" ? "Xem lưới" : "Grid view"}
             >
               <Grid3X3 className="h-3.5 w-3.5" />
             </button>
@@ -588,7 +592,7 @@ export function WikiListView() {
                   ? "bg-auth-accent-dim text-auth-accent"
                   : "text-auth-text-3 hover:text-auth-text"
               }`}
-              title="Xem danh sách"
+              title={locale === "vi" ? "Xem danh sách" : "List view"}
             >
               <List className="h-3.5 w-3.5" />
             </button>
@@ -607,7 +611,7 @@ export function WikiListView() {
                 type="text"
                 value={search}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Tìm kiếm concept, tựa đề..."
+                placeholder={t("wiki.searchPlaceholder", "Search knowledge...")}
                 className="w-full bg-auth-elevated border border-auth-border rounded-xl pl-9 pr-4 py-2 text-sm text-auth-text placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/60 transition-colors"
               />
               {search && (
@@ -626,7 +630,7 @@ export function WikiListView() {
             {/* Sort */}
             <div className="flex items-center gap-2">
               <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">
-                <SlidersHorizontal className="h-3 w-3 inline mr-1" />Sắp xếp
+                <SlidersHorizontal className="h-3 w-3 inline mr-1" />{t("wiki.sortBy.label", "Sort by")}
               </label>
               <div className="relative">
                 <select
@@ -634,9 +638,9 @@ export function WikiListView() {
                   onChange={(e) => setSortBy(e.target.value as "compiledAt" | "title" | "updatedAt")}
                   className="appearance-none bg-auth-elevated border border-auth-border rounded-xl pl-3 pr-7 py-2 text-xs text-auth-text focus:outline-none focus:border-auth-accent/60 transition-colors cursor-pointer"
                 >
-                  <option value="compiledAt">Mới nhất</option>
-                  <option value="updatedAt">Cập nhật</option>
-                  <option value="title">Theo tên</option>
+                  <option value="compiledAt">{t("wiki.sortBy.newest", "Newest")}</option>
+                  <option value="updatedAt">{t("wiki.sortBy.updated", "Recently Updated")}</option>
+                  <option value="title">{t("wiki.sortBy.title", "Alphabetical")}</option>
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-auth-text-3" />
               </div>
@@ -646,13 +650,13 @@ export function WikiListView() {
           {/* Filter pills row */}
           <div className="flex items-center gap-2 flex-wrap">
             {/* Status pills */}
-            <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">Trạng thái:</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">{t("wiki.status.label", "Status:")}</span>
             {(
               [
-                { label: "Tất cả", value: "" },
-                { label: "Sẵn sàng", value: "indexed" },
-                { label: "Đang xử lý", value: "pending" },
-                { label: "Lỗi", value: "failed" },
+                { label: t("wiki.status.all", "All"), value: "" },
+                { label: t("wiki.status.ready", "Ready"), value: "indexed" },
+                { label: t("wiki.status.pending", "Processing"), value: "pending" },
+                { label: t("wiki.status.failed", "Failed"), value: "failed" },
               ] as { label: string; value: WikiRetrievalStatus | "" }[]
             ).map(({ label, value }) => (
               <button
@@ -671,14 +675,14 @@ export function WikiListView() {
             {/* Domain filter */}
             {domains.length > 0 && (
               <>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">Domain:</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">{t("dashboard.selectDomain", "Domain")}:</span>
                 <div className="relative">
                   <select
                     value={domainFilter}
                     onChange={(e) => handleDomainFilter(e.target.value)}
                     className="appearance-none bg-auth-elevated border border-auth-border rounded-full pl-3 pr-7 py-1 text-xs text-auth-text focus:outline-none focus:border-auth-accent/60 transition-colors cursor-pointer"
                   >
-                    <option value="">Tất cả domain</option>
+                    <option value="">{locale === "vi" ? "Tất cả domain" : "All domains"}</option>
                     {domains.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.name}
@@ -700,7 +704,7 @@ export function WikiListView() {
                     onChange={(e) => handleTagFilter(e.target.value)}
                     className="appearance-none bg-auth-elevated border border-auth-border rounded-full pl-3 pr-7 py-1 text-xs text-auth-text focus:outline-none focus:border-auth-accent/60 transition-colors cursor-pointer"
                   >
-                    <option value="">Tất cả tags</option>
+                    <option value="">{locale === "vi" ? "Tất cả tags" : "All tags"}</option>
                     {allTags.map((t) => (
                       <option key={t} value={t}>
                         #{t}
@@ -718,7 +722,7 @@ export function WikiListView() {
                 onClick={clearAllFilters}
                 className="inline-flex items-center gap-1 ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-red-950/30 border border-red-500/20 text-red-400 hover:bg-red-950/50 transition-colors"
               >
-                <X className="h-3 w-3" /> Xóa bộ lọc
+                <X className="h-3 w-3" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
               </button>
             )}
           </div>
@@ -736,16 +740,16 @@ export function WikiListView() {
                 <Search className="h-8 w-8" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-auth-text">Không tìm thấy kết quả</h3>
+                <h3 className="text-base font-bold text-auth-text">{t("wiki.noResults", "No results found")}</h3>
                 <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs">
-                  Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm wiki items khác.
+                  {t("wiki.noResultsDesc", "Try changing your keywords or filters to find other wiki items.")}
                 </p>
               </div>
               <button
                 onClick={clearAllFilters}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-sm font-semibold transition-all"
               >
-                <X className="h-4 w-4" /> Xóa bộ lọc
+                <X className="h-4 w-4" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
               </button>
             </div>
           ) : (
@@ -755,16 +759,16 @@ export function WikiListView() {
                 <Brain className="h-10 w-10" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-auth-text">Chưa có kiến thức nào</h3>
+                <h3 className="text-base font-bold text-auth-text">{t("wiki.empty", "No knowledge items yet")}</h3>
                 <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
-                  Bắt đầu bằng cách nạp tài liệu đầu tiên vào hệ thống để xây dựng thư viện wiki cá nhân.
+                  {t("wiki.emptyDesc", "Start by ingesting your first document to build your personal wiki library.")}
                 </p>
               </div>
               <Link
-                href={roleKbId ? `/compile/new?roleKbId=${roleKbId}` : "/compile/new"}
+                href={roleKbId ? `/${locale}/compile/new?roleKbId=${roleKbId}` : `/${locale}/compile/new`}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
               >
-                <Upload className="h-4 w-4" /> Nạp tài liệu đầu tiên
+                <Upload className="h-4 w-4" /> {t("wiki.uploadCta", "Ingest your first document")}
               </Link>
             </div>
           )
@@ -788,7 +792,9 @@ export function WikiListView() {
         {!isLoading && totalPages > 1 && (
           <div className="flex items-center justify-between gap-4 pt-2">
             <p className="text-xs text-auth-text-3">
-              Trang {page}/{totalPages} · {total.toLocaleString("vi-VN")} mục
+              {locale === "vi"
+                ? `Trang ${page}/${totalPages} · ${total.toLocaleString("vi-VN")} mục`
+                : `Page ${page}/${totalPages} · ${total.toLocaleString("en-US")} items`}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -796,7 +802,7 @@ export function WikiListView() {
                 disabled={page <= 1}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <ChevronLeft className="h-3.5 w-3.5" /> Trước
+                <ChevronLeft className="h-3.5 w-3.5" /> {locale === "vi" ? "Trước" : "Back"}
               </button>
 
               {/* Page number pills */}
@@ -833,7 +839,7 @@ export function WikiListView() {
                 disabled={page >= totalPages}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Tiếp <ChevronRight className="h-3.5 w-3.5" />
+                {t("common.next", "Next")} <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>

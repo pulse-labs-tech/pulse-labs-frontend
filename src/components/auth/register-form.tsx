@@ -16,8 +16,10 @@ import { Loader2, Eye, EyeOff, Mail } from "lucide-react";
 import { registerAction, resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
+import { useTranslation } from "@/contexts/locale-context";
 
 export function RegisterForm() {
+  const { t, locale } = useTranslation();
   const [state, formAction, isPending] = useActionState(
     registerAction,
     undefined,
@@ -42,11 +44,11 @@ export function RegisterForm() {
     (hasSpecialChar ? 1 : 0);
 
   const strengthLabels = [
-    "Tối thiểu 8 ký tự, 1 chữ hoa, 1 số",
-    "⚠ Yếu — thêm chữ hoa hoặc số",
-    "~ Trung bình",
-    "✓ Tốt",
-    "✓✓ Rất mạnh",
+    t("auth.register.strengthMin"),
+    t("auth.register.strengthWeak"),
+    t("auth.register.strengthMedium"),
+    t("auth.register.strengthGood"),
+    t("auth.register.strengthStrong"),
   ];
   const strengthLabel = strengthLabels[strengthScore];
 
@@ -92,15 +94,15 @@ export function RegisterForm() {
             className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl 4xl:text-[28px]"
             id="register-heading"
           >
-            Tạo tài khoản
+            {t("auth.register.title")}
           </h2>
           <p className="text-[13px] text-auth-text-2 3xl:text-sm">
-            Đã có tài khoản?{" "}
+            {t("auth.register.hasAccount")}{" "}
             <Link
-              href="/login"
+              href={`/${locale}/login`}
               className="font-medium text-auth-accent hover:underline"
             >
-              Đăng nhập →
+              {t("auth.register.loginNow")} →
             </Link>
           </p>
         </div>
@@ -129,13 +131,13 @@ export function RegisterForm() {
                 htmlFor="register-firstName"
                 className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
               >
-                Tên
+                {t("auth.register.firstName")}
               </label>
               <input
                 type="text"
                 id="register-firstName"
                 name="firstName"
-                placeholder="Tên"
+                placeholder={t("auth.register.firstName")}
                 autoComplete="given-name"
                 required
                 aria-invalid={!!state?.errors?.firstName}
@@ -167,13 +169,13 @@ export function RegisterForm() {
                 htmlFor="register-lastName"
                 className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
               >
-                Họ
+                {t("auth.register.lastName")}
               </label>
               <input
                 type="text"
                 id="register-lastName"
                 name="lastName"
-                placeholder="Họ"
+                placeholder={t("auth.register.lastName")}
                 autoComplete="family-name"
                 required
                 aria-invalid={!!state?.errors?.lastName}
@@ -206,7 +208,7 @@ export function RegisterForm() {
               htmlFor="register-email"
               className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
             >
-              Email
+              {t("auth.register.email")}
             </label>
             <input
               type="email"
@@ -242,7 +244,7 @@ export function RegisterForm() {
               htmlFor="register-password"
               className="text-xs font-semibold uppercase tracking-wider text-auth-text-2"
             >
-              Mật khẩu
+              {t("auth.register.password")}
             </label>
             <div className="relative">
               <input
@@ -329,21 +331,21 @@ export function RegisterForm() {
               htmlFor="register-terms"
               className="text-xs leading-relaxed text-auth-text-3 cursor-pointer select-none"
             >
-              Tôi đồng ý với{" "}
+              {t("auth.register.agreement")}{" "}
               <Link
-                href="/terms"
+                href={`/${locale}/terms`}
                 prefetch={false}
                 className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
               >
-                Điều khoản sử dụng
+                {t("auth.register.terms")}
               </Link>{" "}
-              và{" "}
+              {t("auth.register.and")}{" "}
               <Link
-                href="/privacy"
+                href={`/${locale}/privacy`}
                 prefetch={false}
                 className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
               >
-                Chính sách bảo mật
+                {t("auth.register.privacy")}
               </Link>
             </label>
           </div>
@@ -363,7 +365,7 @@ export function RegisterForm() {
             aria-busy={isPending}
             className="mt-1"
           >
-            Tạo tài khoản miễn phí →
+            {t("auth.register.button")}
           </Button>
         </form>
       </div>
@@ -385,6 +387,7 @@ function VerifyEmailScreen({
   password?: string;
   initialCountdown: number;
 }) {
+  const { t, locale } = useTranslation();
   const [countdown, setCountdown] = useState(initialCountdown);
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
@@ -419,22 +422,22 @@ function VerifyEmailScreen({
       if (result.success) {
         // Auto-verified — redirect immediately
         if (result.autoVerifiedRedirect) {
-          setResendMessage("✓ Email đã xác minh! Đang chuyển hướng...");
+          setResendMessage(t("auth.register.verifiedRedirecting"));
           window.location.href = result.autoVerifiedRedirect;
           return;
         }
 
         setCountdown(result.resendAvailableInSeconds || 60);
-        setResendMessage("✓ Đã gửi lại email xác minh");
+        setResendMessage(t("auth.register.verificationResent"));
       } else {
-        setResendMessage(result.serverMessage || "Không thể gửi lại. Vui lòng thử lại sau.");
+        setResendMessage(result.serverMessage || t("auth.register.resendFailed"));
       }
     } catch {
-      setResendMessage("Lỗi kết nối. Vui lòng thử lại.");
+      setResendMessage(t("auth.register.connectionError"));
     } finally {
       setIsResending(false);
     }
-  }, [countdown, isResending, email, password]);
+  }, [countdown, isResending, email, password, t]);
 
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
@@ -445,25 +448,21 @@ function VerifyEmailScreen({
         </div>
 
         <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
-          Kiểm tra email
+          {t("auth.register.checkEmail")}
         </h2>
         <p className="mt-2 text-[13px] leading-relaxed text-auth-text-2 3xl:text-sm">
-          Chúng tôi đã gửi email xác minh đến{" "}
+          {t("auth.register.sentEmailTo")}{" "}
           <span className="font-semibold text-auth-text">
             {email}
           </span>
-          . Vui lòng kiểm tra hộp thư và nhấn vào link xác minh.
+          . {t("auth.register.checkInbox")}
         </p>
 
         {/* Countdown + resend */}
         <div className="mt-3">
           {countdown > 0 ? (
             <p className="text-xs text-auth-text-3">
-              Có thể gửi lại sau{" "}
-              <span className="font-mono font-semibold text-auth-text-2">
-                {countdown}
-              </span>{" "}
-              giây.
+              {t("auth.register.canResend").replace("{seconds}", countdown.toString())}
             </p>
           ) : (
             <Button
@@ -473,7 +472,7 @@ function VerifyEmailScreen({
               isLoading={isResending}
               onClick={handleResend}
             >
-              Gửi lại email xác minh →
+              {t("auth.register.resendButton")}
             </Button>
           )}
 
@@ -490,10 +489,10 @@ function VerifyEmailScreen({
 
         <div className="mt-8">
           <Link
-            href="/login"
+            href={`/${locale}/login`}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.72_0.11_145_/_0.20)] transition-colors duration-200 hover:shadow-[0_0_28px_oklch(0.72_0.11_145_/_0.45)] hover:-translate-y-[1px] active:scale-[0.97] 3xl:text-sm"
           >
-            Đi tới đăng nhập →
+            {t("auth.register.goToLogin")}
           </Link>
         </div>
       </div>

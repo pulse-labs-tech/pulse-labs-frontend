@@ -39,6 +39,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
+import { useTranslation } from "@/contexts/locale-context";
 import { createSourceAction, getCompileJobAction } from "@/app/actions/compile";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { CompileJob } from "@/types/compile";
@@ -63,32 +64,34 @@ function generateIdempotencyKey(): string {
 // Stage / Status helpers
 // ────────────────────────────────────────────────────────────────
 
-function translateStage(stage: string): string {
+function translateStage(stage: string, t: (path: string, defaultValue?: string) => string): string {
   switch (stage) {
     case "queued":
-      return "Xếp hàng";
+      return t("dashboard.stage.queued", "Đang xếp hàng (Queued)");
     case "validating":
-      return "Xác thực";
+      return t("dashboard.stage.validating", "Xác thực nguồn dữ liệu...");
     case "fetching_or_uploading":
-      return "Tải nội dung";
+    case "fetching":
+      return t("dashboard.stage.fetching", "Đang tải nguồn (Uploading)");
     case "extracting":
-      return "Trích xuất văn bản";
+      return t("dashboard.stage.extracting", "Đang trích xuất văn bản (Parsing)");
     case "normalizing":
-      return "Chuẩn hóa";
+      return t("dashboard.stage.normalizing", "Đang chuẩn hoá văn bản...");
     case "chunking":
-      return "Phân mảnh";
+      return t("dashboard.stage.chunking", "Chia nhỏ tài liệu (Scanning source)");
     case "summarizing":
-      return "Tóm tắt";
+      return t("dashboard.stage.summarizing", "Tạo bản tóm tắt...");
     case "indexing":
-      return "Lập chỉ mục";
+      return t("dashboard.stage.indexing", "Đang biên dịch kiến thức (Compiling to Wiki)");
     case "wiki_ready":
-      return "Hoàn thành";
+    case "wikiReady":
+      return t("dashboard.stage.wikiReady", "Biên dịch thành công (Wiki item ready)");
     case "failed":
-      return "Lỗi xử lý";
+      return t("dashboard.stage.failed", "Biên dịch thất bại — Thử lại");
     case "cancelled":
-      return "Đã hủy";
+      return t("dashboard.stage.cancelled", "Đã hủy bỏ");
     default:
-      return "Đang xử lý";
+      return t("dashboard.stage.compiling", "Đang xử lý...");
   }
 }
 
@@ -188,6 +191,7 @@ interface StageProgressBarProps {
 }
 
 function StageProgressBar({ job }: StageProgressBarProps) {
+  const { t } = useTranslation();
   const stages: CompileJob["stage"][] = [
     "queued",
     "validating",
@@ -243,9 +247,11 @@ function StageProgressBar({ job }: StageProgressBarProps) {
       {/* Stage label */}
       <div className="flex items-center justify-between text-xs">
         <span className={`font-semibold ${job.status === "failed" ? "text-red-400" : "text-auth-accent"}`}>
-          {translateStage(job.stage)}
+          {translateStage(job.stage, t)}
         </span>
-        <span className="text-auth-text-3">{job.progress ?? 0}% hoàn thành</span>
+        <span className="text-auth-text-3">
+          {t("compile.labels.progressCompleted").replace("{progress}", String(job.progress ?? 0))}
+        </span>
       </div>
 
       {job.message && (
@@ -264,6 +270,7 @@ export function CompileView() {
   const searchParams = useSearchParams();
   const { user: authUser, clearAuth } = useAuth();
   const [isPending, startTransition] = useTransition();
+  const { t, locale } = useTranslation();
 
   // ── URL param ──
   const roleKbIdFromUrl = searchParams.get("roleKbId") ?? "";
@@ -347,7 +354,7 @@ export function CompileView() {
 
         if (pollCountRef.current > MAX_POLLS) {
           stopPolling();
-          setPollError("Quá thời gian chờ. Vui lòng kiểm tra lại trang Dashboard để xem kết quả.");
+          setPollError(t("compile.errors.pollTimeout", "Quá thời gian chờ. Vui lòng kiểm tra lại trang Dashboard để xem kết quả."));
           return;
         }
 
@@ -398,19 +405,26 @@ export function CompileView() {
     if (selectedSourceType === "text") {
       const trimmed = text.trim();
       if (trimmed.length < MIN_TEXT_CHARS) {
-        setTextError(`Văn bản phải có ít nhất ${MIN_TEXT_CHARS} ký tự (hiện tại: ${trimmed.length}).`);
+        setTextError(
+          t("compile.errors.textMin", "Văn bản phải có ít nhất {min} ký tự (hiện tại: {count}).")
+            .replace("{min}", String(MIN_TEXT_CHARS))
+            .replace("{count}", String(trimmed.length))
+        );
         valid = false;
       } else if (trimmed.length > MAX_TEXT_CHARS) {
-        setTextError(`Văn bản không được vượt quá ${MAX_TEXT_CHARS.toLocaleString()} ký tự.`);
+        setTextError(
+          t("compile.errors.textMax", "Văn bản không được vượt quá {max} ký tự.")
+            .replace("{max}", MAX_TEXT_CHARS.toLocaleString())
+        );
         valid = false;
       }
     } else {
       const trimmedUrl = url.trim();
       if (!trimmedUrl) {
-        setUrlError("Vui lòng nhập URL cần nạp.");
+        setUrlError(t("compile.errors.urlEmpty", "Vui lòng nhập URL cần nạp."));
         valid = false;
       } else if (!isURLValid(trimmedUrl)) {
-        setUrlError("URL không hợp lệ. Vui lòng nhập đúng định dạng https://...");
+        setUrlError(t("compile.errors.urlInvalid", "URL không hợp lệ. Vui lòng nhập đúng định dạng https://..."));
         valid = false;
       }
     }
@@ -454,7 +468,7 @@ export function CompileView() {
         startPolling(job.id);
       }
     } else {
-      setSubmitError(res.msg || "Không thể bắt đầu xử lý tài liệu. Vui lòng thử lại.");
+      setSubmitError(res.msg || t("compile.errors.submitFailed", "Không thể bắt đầu xử lý tài liệu. Vui lòng thử lại."));
     }
   }
 
@@ -486,7 +500,11 @@ export function CompileView() {
   // RENDER
   // ────────────────────────────────────────────────────────────────
 
-  const stepLabel = ["Chọn loại nguồn", "Nhập nội dung", "Xử lý tài liệu"];
+  const stepLabel = [
+    t("compile.steps.step1", "Chọn loại nguồn"),
+    t("compile.steps.step2", "Nhập nội dung"),
+    t("compile.steps.step3", "Xử lý tài liệu")
+  ];
 
   return (
     <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
@@ -506,39 +524,39 @@ export function CompileView() {
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
         <div className="container-responsive flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
             <nav className="hidden items-center gap-1.5 md:flex">
               <Link
-                href="/dashboard"
+                href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LayoutDashboard className="h-3.5 w-3.5" />
-                Dashboard
+                {t("common.dashboard", "Dashboard")}
               </Link>
               <Link
-                href="/query"
+                href={`/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <MessageSquare className="h-3.5 w-3.5" />
-                Hỏi đáp AI
+                {t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
               </Link>
               <Link
-                href="/wiki"
+                href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <BookOpen className="h-3.5 w-3.5" />
-                Wiki Cá nhân
+                {t("compile.labels.sidebarWiki", "Wiki Cá nhân")}
               </Link>
               <Link
-                href={`/compile/new${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                href={`/${locale}/compile/new${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <Upload className="h-3.5 w-3.5" />
-                Nạp tài liệu
+                {t("compile.labels.sidebarCompile", "Nạp tài liệu")}
               </Link>
             </nav>
           </div>
@@ -550,7 +568,7 @@ export function CompileView() {
                   {authUser.displayName || authUser.email}
                 </div>
                 <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-px text-[10px] font-semibold text-auth-accent">
-                  {authUser.plan === "pro" ? "Pro Plan" : "Free Plan"}
+                  {authUser.plan === "pro" ? t("common.proPlan", "Pro Plan") : t("common.freePlan", "Free Plan")}
                 </span>
               </div>
             )}
@@ -558,7 +576,7 @@ export function CompileView() {
               onClick={handleLogout}
               disabled={isPending}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
-              title="Đăng xuất"
+              title={t("common.logout", "Đăng xuất")}
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
@@ -575,17 +593,17 @@ export function CompileView() {
         {/* Page title */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-auth-text-3 text-xs">
-            <Link href="/dashboard" className="hover:text-auth-text transition-colors">
-              Dashboard
+            <Link href={`/${locale}/dashboard`} className="hover:text-auth-text transition-colors">
+              {t("common.dashboard", "Dashboard")}
             </Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-auth-text">Nạp nguồn tài liệu</span>
+            <span className="text-auth-text">{t("compile.labels.headerTitle", "Nạp nguồn tài liệu")}</span>
           </div>
           <h1 className="text-fluid-xl font-extrabold tracking-tight mt-1">
-            Nạp nguồn tài liệu mới
+            {t("compile.labels.headerTitleNew", "Nạp nguồn tài liệu mới")}
           </h1>
           <p className="text-xs text-auth-text-2">
-            Trích xuất tri thức từ văn bản hoặc trang web thành Wiki item có cấu trúc.
+            {t("compile.labels.headerDesc", "Trích xuất tri thức từ văn bản hoặc trang web thành Wiki item có cấu trúc.")}
           </p>
         </div>
 
@@ -628,32 +646,32 @@ export function CompileView() {
 
             <div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
-                Bước 1 — Chọn loại nguồn tài liệu
+                {t("compile.labels.step1Title", "Bước 1 — Chọn loại nguồn tài liệu")}
               </h2>
               <p className="text-xs text-auth-text-2 mt-1">
-                Chọn định dạng nguồn bạn muốn nạp vào Knowledge Base.
+                {t("compile.labels.step1Desc", "Chọn định dạng nguồn bạn muốn nạp vào Knowledge Base.")}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <SourceTypeCard
                 icon={<FileText className="h-5 w-5" />}
-                title="Văn bản thuần"
-                description="Dán văn bản, ghi chú, bài viết hoặc tài liệu của bạn vào đây."
+                title={t("compile.labels.sourceText", "Văn bản thuần")}
+                description={t("compile.labels.sourceTextDesc", "Dán văn bản, ghi chú, bài viết hoặc tài liệu của bạn vào đây.")}
                 selected={selectedSourceType === "text"}
                 onClick={() => setSelectedSourceType("text")}
               />
               <SourceTypeCard
                 icon={<Link2 className="h-5 w-5" />}
-                title="URL / Website"
-                description="Crawl nội dung từ một trang web, bài blog hoặc tài liệu online."
+                title={t("compile.labels.sourceUrl", "URL / Website")}
+                description={t("compile.labels.sourceUrlDesc", "Crawl nội dung từ một trang web, bài blog hoặc tài liệu online.")}
                 selected={selectedSourceType === "url"}
                 onClick={() => setSelectedSourceType("url")}
               />
               <SourceTypeCard
                 icon={<Lock className="h-5 w-5" />}
-                title="Tải tệp lên"
-                description="PDF, TXT, Markdown — tính năng dành riêng cho gói Pro."
+                title={t("compile.labels.sourceFile", "Tải tệp lên")}
+                description={t("compile.labels.sourceFileDesc", "PDF, TXT, Markdown — tính năng dành riêng cho gói Pro.")}
                 selected={false}
                 disabled
                 badge="Pro"
@@ -667,7 +685,7 @@ export function CompileView() {
                 onClick={() => setStep(2)}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
               >
-                Tiếp tục
+                {t("compile.labels.btnContinue", "Tiếp tục")}
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -682,24 +700,24 @@ export function CompileView() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
-                  Bước 2 — Nhập nội dung
+                  {t("compile.labels.step2Title", "Bước 2 — Nhập nội dung")}
                 </h2>
                 <p className="text-xs text-auth-text-2 mt-1">
                   {selectedSourceType === "text"
-                    ? "Dán hoặc nhập văn bản bạn muốn phân tích."
-                    : "Nhập URL trang web cần trích xuất nội dung."}
+                    ? t("compile.labels.step2DescText", "Dán hoặc nhập văn bản bạn muốn phân tích.")
+                    : t("compile.labels.step2DescUrl", "Nhập URL trang web cần trích xuất nội dung.")}
                 </p>
               </div>
               <div className="flex items-center gap-2 text-xs text-auth-text-3">
                 {selectedSourceType === "text" ? (
                   <>
                     <FileText className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="text-emerald-400 font-semibold">Văn bản</span>
+                    <span className="text-emerald-400 font-semibold">{t("compile.labels.badgeText", "Văn bản")}</span>
                   </>
                 ) : (
                   <>
                     <Link2 className="h-3.5 w-3.5 text-blue-400" />
-                    <span className="text-blue-400 font-semibold">URL</span>
+                    <span className="text-blue-400 font-semibold">{t("compile.labels.badgeUrl", "URL")}</span>
                   </>
                 )}
               </div>
@@ -708,12 +726,12 @@ export function CompileView() {
             {/* Knowledge Base selector */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
-                Knowledge Base đích <span className="text-red-400">*</span>
+                {t("compile.labels.kbDestination", "Knowledge Base đích")} <span className="text-red-400">*</span>
               </label>
               {rolesLoading ? (
                 <div className="h-10 bg-auth-elevated border border-auth-border rounded-xl flex items-center px-3 gap-2">
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-auth-accent" />
-                  <span className="text-xs text-auth-text-3">Đang tải...</span>
+                  <span className="text-xs text-auth-text-3">{t("compile.labels.kbLoading", "Đang tải...")}</span>
                 </div>
               ) : userRoles.length > 1 ? (
                 <div className="relative">
@@ -741,7 +759,7 @@ export function CompileView() {
               ) : (
                 <div className="h-10 bg-red-950/20 border border-red-500/20 rounded-xl flex items-center px-3 gap-2">
                   <AlertCircle className="h-3.5 w-3.5 text-red-400" />
-                  <span className="text-xs text-red-400">Không tìm thấy Knowledge Base. Hoàn tất onboarding trước.</span>
+                  <span className="text-xs text-red-400">{t("compile.errors.noKb", "Không tìm thấy Knowledge Base. Hoàn tất onboarding trước.")}</span>
                 </div>
               )}
             </div>
@@ -751,7 +769,7 @@ export function CompileView() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
-                    Nội dung văn bản <span className="text-red-400">*</span>
+                    {t("compile.labels.labelText", "Nội dung văn bản")} <span className="text-red-400">*</span>
                   </label>
                   <span
                     className={`text-[10px] font-semibold tabular-nums transition-colors
@@ -768,7 +786,7 @@ export function CompileView() {
                     setTextError(null);
                   }}
                   rows={12}
-                  placeholder="Dán văn bản, bài viết, tài liệu, ghi chú... vào đây. Tối thiểu 100 ký tự."
+                  placeholder={t("compile.labels.labelTextPlaceholder", "Dán văn bản, bài viết, tài liệu, ghi chú... vào đây. Tối thiểu 100 ký tự.")}
                   className="w-full resize-y bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm px-4 py-3 focus:border-auth-accent focus:outline-none transition-all leading-relaxed"
                 />
                 {textError && (
@@ -781,7 +799,7 @@ export function CompileView() {
             ) : (
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
-                  Địa chỉ URL <span className="text-red-400">*</span>
+                  {t("compile.labels.labelUrl", "Địa chỉ URL")} <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3" />
@@ -792,7 +810,7 @@ export function CompileView() {
                       setUrl(e.target.value);
                       setUrlError(null);
                     }}
-                    placeholder="https://example.com/article"
+                    placeholder={t("compile.labels.labelUrlPlaceholder", "https://example.com/article")}
                     className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm pl-10 pr-4 py-3 focus:border-auth-accent focus:outline-none transition-all"
                   />
                 </div>
@@ -814,18 +832,18 @@ export function CompileView() {
             {/* Title hint */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
-                Tiêu đề gợi ý <span className="text-auth-text-3 font-normal normal-case">(tùy chọn)</span>
+                {t("compile.labelTitle", "Tiêu đề gợi ý")} <span className="text-auth-text-3 font-normal normal-case">({t("common.optional", "tùy chọn")})</span>
               </label>
               <input
                 type="text"
                 value={titleHint}
                 onChange={(e) => setTitleHint(e.target.value)}
-                placeholder="Ví dụ: Giới thiệu về React Server Components"
+                placeholder={t("compile.labels.labelTitlePlaceholder", "VD: Hướng dẫn cấu hình Deploy (Tùy chọn)")}
                 maxLength={200}
                 className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm px-4 py-3 focus:border-auth-accent focus:outline-none transition-all"
               />
               <p className="text-[10px] text-auth-text-3">
-                Cung cấp tiêu đề giúp hệ thống phân loại tài liệu chính xác hơn.
+                {t("compile.labels.labelTitleDesc", "Cung cấp tiêu đề giúp hệ thống phân loại tài liệu chính xác hơn.")}
               </p>
             </div>
 
@@ -845,7 +863,7 @@ export function CompileView() {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-sm transition-all"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Quay lại
+                {t("compile.labels.btnBack", "Quay lại")}
               </button>
               <button
                 type="button"
@@ -856,12 +874,12 @@ export function CompileView() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Đang gửi...
+                    {t("common.sending", "Đang gửi...")}
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Bắt đầu phân tích
+                    {t("compile.labels.btnCompile", "Bắt đầu Ingest")}
                   </>
                 )}
               </button>
@@ -885,10 +903,10 @@ export function CompileView() {
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
-                      Bước 3 — Xử lý tài liệu
+                      {t("compile.labels.step3Title", "Bước 3 — Xử lý tài liệu")}
                     </h2>
                     <p className="text-xs text-auth-text-2 mt-1">
-                      {currentJob.title || "Tài liệu đang được phân tích..."}
+                      {currentJob.title || t("compile.labels.statusProcessing", "Tài liệu đang được phân tích...")}
                     </p>
                   </div>
 
@@ -896,22 +914,22 @@ export function CompileView() {
                   {currentJob.status === "wiki_ready" ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
                       <CheckCircle2 className="h-3.5 w-3.5" />
-                      Hoàn thành
+                      {t("common.success", "Hoàn thành")}
                     </span>
                   ) : currentJob.status === "failed" ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-950/40 border border-red-500/20 text-red-400">
                       <XCircle className="h-3.5 w-3.5" />
-                      Lỗi xử lý
+                      {t("common.error", "Lỗi xử lý")}
                     </span>
                   ) : currentJob.status === "cancelled" ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-950/40 border border-amber-500/20 text-amber-400">
                       <AlertCircle className="h-3.5 w-3.5" />
-                      Đã hủy
+                      {t("common.cancel", "Đã hủy")}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Đang xử lý
+                      {t("compile.labels.statusProcessing", "Đang xử lý")}
                     </span>
                   )}
                 </div>
@@ -932,7 +950,7 @@ export function CompileView() {
                   <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
                     <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                     <div className="flex flex-col gap-1">
-                      <p className="text-xs font-semibold text-red-400">Chi tiết lỗi</p>
+                      <p className="text-xs font-semibold text-red-400">{t("compile.labels.detailPrefix", "Chi tiết lỗi")}</p>
                       <p className="text-xs text-red-400/80">{currentJob.error}</p>
                     </div>
                   </div>
@@ -950,9 +968,9 @@ export function CompileView() {
                     <CheckCircle2 className="h-8 w-8 text-emerald-400" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-auth-text">Tài liệu đã được biên soạn thành công!</h3>
+                    <h3 className="text-base font-bold text-auth-text">{t("compile.success", "Tài liệu đã được biên soạn thành công!")}</h3>
                     <p className="text-xs text-auth-text-2 mt-1">
-                      Wiki item đã được tạo và lập chỉ mục vào Knowledge Base của bạn.
+                      {t("compile.labels.successDesc", "Wiki item đã được tạo và lập chỉ mục vào Knowledge Base của bạn.")}
                     </p>
                   </div>
                 </div>
@@ -960,11 +978,11 @@ export function CompileView() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   {currentJob.outputKnowledgeItemId && (
                     <Link
-                      href={`/wiki/items/${currentJob.outputKnowledgeItemId}`}
+                      href={`/${locale}/wiki/items/${currentJob.outputKnowledgeItemId}`}
                       className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
                     >
                       <BookOpen className="h-4 w-4" />
-                      Xem Wiki item
+                      {t("compile.labels.btnViewWiki", "Xem Wiki item")}
                       <ExternalLink className="h-3.5 w-3.5" />
                     </Link>
                   )}
@@ -974,14 +992,14 @@ export function CompileView() {
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
                     <Upload className="h-4 w-4" />
-                    Nạp tài liệu mới
+                    {t("compile.labels.btnNewDoc", "Nạp tài liệu mới")}
                   </button>
                   <Link
-                    href="/dashboard"
+                    href={`/${locale}/dashboard`}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
                     <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
+                    {t("common.dashboard", "Dashboard")}
                   </Link>
                 </div>
               </div>
@@ -997,11 +1015,11 @@ export function CompileView() {
                     <XCircle className="h-8 w-8 text-red-400" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-auth-text">Xử lý thất bại</h3>
+                    <h3 className="text-base font-bold text-auth-text">{t("compile.errors.compileFailed", "Xử lý thất bại")}</h3>
                     <p className="text-xs text-auth-text-2 mt-1">
                       {currentJob.retryable
-                        ? "Đã xảy ra lỗi trong quá trình biên soạn. Bạn có thể thử lại."
-                        : "Tài liệu không thể xử lý được. Vui lòng kiểm tra lại nguồn dữ liệu."}
+                        ? t("compile.errors.retryable", "Đã xảy ra lỗi trong quá trình biên soạn. Bạn có thể thử lại.")
+                        : t("compile.errors.unsupported", "Tài liệu không thể xử lý được. Vui lòng kiểm tra lại nguồn dữ liệu.")}
                     </p>
                   </div>
                 </div>
@@ -1014,7 +1032,7 @@ export function CompileView() {
                       className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
                     >
                       <RefreshCw className="h-4 w-4" />
-                      Thử lại
+                      {t("common.retry", "Thử lại")}
                     </button>
                   )}
                   <button
@@ -1023,14 +1041,14 @@ export function CompileView() {
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
                     <Upload className="h-4 w-4" />
-                    Nạp tài liệu mới
+                    {t("compile.labels.btnNewDoc", "Nạp tài liệu mới")}
                   </button>
                   <Link
-                    href="/dashboard"
+                    href={`/${locale}/dashboard`}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
                     <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
+                    {t("common.dashboard", "Dashboard")}
                   </Link>
                 </div>
               </div>
@@ -1041,7 +1059,7 @@ export function CompileView() {
               <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3">
                 <Loader2 className="h-4 w-4 text-blue-400 animate-spin shrink-0" />
                 <p className="text-xs text-blue-400">
-                  Hệ thống đang biên soạn. Trang sẽ tự cập nhật — bạn không cần làm gì thêm.
+                  {t("compile.labels.step3Desc", "Hệ thống đang biên soạn. Trang sẽ tự cập nhật — bạn không cần làm gì thêm.")}
                 </p>
               </div>
             )}

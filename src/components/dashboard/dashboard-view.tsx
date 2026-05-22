@@ -58,6 +58,7 @@ import type {
   SectionError,
 } from "@/types/dashboard";
 import type { RoleKbDto } from "@/types/onboarding";
+import { useTranslation } from "@/contexts/locale-context";
 
 interface TechItem {
   icon: string;
@@ -186,6 +187,7 @@ export function DashboardView() {
   const router = useRouter();
   const { user: authUser, clearAuth } = useAuth();
   const [isPending, startTransition] = useTransition();
+  const { t, locale } = useTranslation();
 
   // Core Dashboard State
   const [summary, setSummary] = useState<DashboardSummaryData | null>(null);
@@ -220,34 +222,34 @@ export function DashboardView() {
     (code: string, fallbackMsg: string) => {
       switch (code) {
         case "UNAUTHORIZED":
-          setGlobalErrorMsg("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          setGlobalErrorMsg(t("dashboard.errors.UNAUTHORIZED", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."));
           clearAuth();
-          router.push("/login?returnUrl=/dashboard");
+          router.push(`/${locale}/login?returnUrl=/${locale}/dashboard`);
           break;
         case "EMAIL_NOT_VERIFIED":
-          setGlobalErrorMsg("Vui lòng xác thực email để tiếp tục sử dụng hệ thống.");
+          setGlobalErrorMsg(t("dashboard.errors.EMAIL_NOT_VERIFIED", "Vui lòng xác thực email để tiếp tục sử dụng hệ thống."));
           break;
         case "ONBOARDING_REQUIRED":
-          setGlobalErrorMsg("Hoàn tất thiết lập ban đầu (onboarding) để tạo knowledge base đầu tiên.");
-          router.push("/onboarding");
+          setGlobalErrorMsg(t("dashboard.errors.ONBOARDING_REQUIRED", "Hoàn tất thiết lập ban đầu (onboarding) để tạo knowledge base đầu tiên."));
+          router.push(`/${locale}/onboarding`);
           break;
         case "ROLE_KB_NOT_FOUND":
-          setGlobalErrorMsg("Không tìm thấy dữ liệu vị trí chuyên ngành này.");
+          setGlobalErrorMsg(t("dashboard.errors.ROLE_NOT_FOUND", "Không tìm thấy dữ liệu vị trí chuyên ngành này."));
           break;
         case "FORBIDDEN":
-          setGlobalErrorMsg("Bạn không có quyền truy cập vào dashboard này.");
+          setGlobalErrorMsg(t("dashboard.errors.UNAUTHORIZED_ACCESS", "Bạn không có quyền truy cập vào dashboard này."));
           break;
         case "RATE_LIMITED":
-          setGlobalErrorMsg("Thao tác quá nhanh. Vui lòng đợi và thử lại sau ít phút.");
+          setGlobalErrorMsg(t("dashboard.errors.RATE_LIMITED", "Thao tác quá nhanh. Vui lòng đợi và thử lại sau ít phút."));
           break;
         case "SERVER_ERROR":
-          setGlobalErrorMsg("Hệ thống gặp sự cố tải dữ liệu. Vui lòng thử lại.");
+          setGlobalErrorMsg(t("dashboard.errors.SERVER_ERROR", "Hệ thống gặp sự cố tải dữ liệu. Vui lòng thử lại."));
           break;
         default:
-          setGlobalErrorMsg(fallbackMsg || "Có lỗi xảy ra. Thử lại sau.");
+          setGlobalErrorMsg(fallbackMsg || t("dashboard.errors.SERVER_ERROR", "Có lỗi xảy ra. Thử lại sau."));
       }
     },
-    [clearAuth, router]
+    [clearAuth, router, t, locale]
   );
 
   // ────────────────────────────────────────────────────────────────
@@ -265,8 +267,8 @@ export function DashboardView() {
       },
       role: {
         roleKbId: "",
-        roleName: "Đang tải...",
-        roleGroup: "Khác",
+        roleName: t("dashboard.errors.noKb", "Đang tải..."),
+        roleGroup: locale === "vi" ? "Khác" : "Other",
         isPrimary: true,
         createdAt: new Date().toISOString(),
       },
@@ -294,7 +296,7 @@ export function DashboardView() {
       sectionErrors: [],
       serverTime: new Date().toISOString(),
     };
-  }, [authUser]);
+  }, [authUser, t, locale]);
 
   // ────────────────────────────────────────────────────────────────
   // 2. Initial Data Fetch (Bootstrap)
@@ -333,20 +335,20 @@ export function DashboardView() {
           } else {
             // Non-auth error (API not ready, network, etc.) → graceful degradation
             if (!summary) setSummary(buildFallbackSummary());
-            setApiWarning(summaryRes.msg || "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật.");
+            setApiWarning(summaryRes.msg || t("dashboard.errors.loadFailed", "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật."));
           }
         }
       } catch (err) {
         console.error("fetchDashboardData error:", err);
         // Network error → degrade gracefully, never block the whole dashboard
         if (!summary) setSummary(buildFallbackSummary());
-        setApiWarning("Không kết nối được máy chủ. Một số dữ liệu có thể chưa cập nhật.");
+        setApiWarning(t("dashboard.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Một số dữ liệu có thể chưa cập nhật."));
       } finally {
         setIsLoading(false);
         setIsChangingRole(false);
       }
     },
-    [handleGlobalError, summary, buildFallbackSummary]
+    [handleGlobalError, summary, buildFallbackSummary, t]
   );
 
   useEffect(() => {
@@ -469,31 +471,31 @@ export function DashboardView() {
       case "indexed":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-auth-accent-dim border border-auth-accent/20 text-auth-accent">
-            Sẵn sàng
+            {t("dashboard.status.ready", "Sẵn sàng")}
           </span>
         );
       case "pending":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
-            <Clock className="h-3 w-3" /> Đang chỉ mục
+            <Clock className="h-3 w-3" /> {t("dashboard.status.indexing", "Đang chỉ mục")}
           </span>
         );
       case "degraded":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-            <AlertTriangle className="h-3 w-3" /> Chất lượng thấp
+            <AlertTriangle className="h-3 w-3" /> {t("dashboard.status.lowQuality", "Chất lượng thấp")}
           </span>
         );
       case "failed":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-            <XCircle className="h-3 w-3" /> Lỗi
+            <XCircle className="h-3 w-3" /> {t("dashboard.status.error", "Lỗi")}
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-auth-elevated border border-auth-border text-auth-text-2">
-            Chưa rõ
+            {t("dashboard.status.unknown", "Chưa rõ")}
           </span>
         );
     }
@@ -502,46 +504,46 @@ export function DashboardView() {
   const getJobStatusLabel = (status: string) => {
     switch (status) {
       case "queued":
-        return "Đang chờ xử lý";
+        return t("dashboard.status.pending", "Đang chờ xử lý");
       case "processing":
-        return "Đang phân tích";
+        return t("dashboard.status.analyzing", "Đang phân tích");
       case "wiki_ready":
-        return "Đã hoàn thành";
+        return t("dashboard.status.completed", "Đã hoàn thành");
       case "failed":
-        return "Thất bại";
+        return t("dashboard.status.failed", "Thất bại");
       case "cancelled":
-        return "Đã hủy";
+        return t("dashboard.status.cancelled", "Đã hủy");
       default:
-        return "Đang chạy";
+        return t("dashboard.status.running", "Đang chạy");
     }
   };
 
   const getJobStageTranslation = (stage: string) => {
     switch (stage) {
       case "queued":
-        return "Xếp hàng đợi";
+        return t("dashboard.stage.queued", "Xếp hàng đợi");
       case "validating":
-        return "Xác thực dữ liệu";
+        return t("dashboard.stage.validating", "Xác thực dữ liệu");
       case "fetching_or_uploading":
-        return "Tải nội dung nguồn";
+        return t("dashboard.stage.fetching", "Tải nội dung nguồn");
       case "extracting":
-        return "Trích xuất văn bản";
+        return t("dashboard.stage.extracting", "Trích xuất văn bản");
       case "normalizing":
-        return "Chuẩn hóa dữ liệu";
+        return t("dashboard.stage.normalizing", "Chuẩn hóa dữ liệu");
       case "chunking":
-        return "Phân mảnh văn bản";
+        return t("dashboard.stage.chunking", "Phân mảnh văn bản");
       case "summarizing":
-        return "Tóm tắt thông tin";
+        return t("dashboard.stage.summarizing", "Tóm tắt thông tin");
       case "indexing":
-        return "Lập chỉ mục vector";
+        return t("dashboard.stage.indexing", "Lập chỉ mục vector");
       case "wiki_ready":
-        return "Hoàn tất Wiki item";
+        return t("dashboard.stage.wikiReady", "Hoàn tất Wiki item");
       case "failed":
-        return "Xử lý lỗi";
+        return t("dashboard.stage.failed", "Xử lý lỗi");
       case "cancelled":
-        return "Đã hủy bỏ";
+        return t("dashboard.stage.cancelled", "Đã hủy bỏ");
       default:
-        return "Đang biên dịch";
+        return t("dashboard.stage.compiling", "Đang biên dịch");
     }
   };
 
@@ -563,7 +565,7 @@ export function DashboardView() {
       <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-auth-accent" />
-          <p className="text-sm text-auth-text-2">Đang tải trung tâm điều khiển...</p>
+          <p className="text-sm text-auth-text-2">{t("dashboard.loading", "Đang tải trung tâm điều khiển...")}</p>
         </div>
       </div>
     );
@@ -578,7 +580,7 @@ export function DashboardView() {
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-bold text-auth-text">Không thể kết nối dữ liệu</h2>
+          <h2 className="text-lg font-bold text-auth-text">{t("dashboard.errors.connectionFailed", "Không thể kết nối dữ liệu")}</h2>
           <p className="text-sm text-auth-text-2 mt-2 leading-relaxed">{globalErrorMsg}</p>
           <div className="mt-6 flex flex-col gap-2">
             <Button
@@ -588,7 +590,7 @@ export function DashboardView() {
               onClick={() => fetchDashboardData(selectedRoleKbId || undefined, true)}
               leftIcon={<RefreshCw className="h-4 w-4" />}
             >
-              Thử lại
+              {t("dashboard.btnRetry", "Thử lại")}
             </Button>
             <Button
               variant="ghost"
@@ -596,7 +598,7 @@ export function DashboardView() {
               fullWidth
               onClick={handleLogout}
             >
-              Đăng xuất
+              {t("dashboard.btnLogout", "Đăng xuất")}
             </Button>
           </div>
         </div>
@@ -605,7 +607,9 @@ export function DashboardView() {
   }
 
   const { user: userCtx, role: roleCtx, stats } = summary!;
-  const planName = userCtx.plan === "pro" ? "Pro Plan" : "Free Plan";
+  const planName = userCtx.plan === "pro"
+    ? (locale === "vi" ? "Gói Pro" : "Pro Plan")
+    : (locale === "vi" ? "Gói Miễn phí" : "Free Plan");
 
   const sortedTechs = [...DEFAULT_TECHS].sort((a, b) => {
     if (sortBy === "name") {
@@ -633,20 +637,20 @@ export function DashboardView() {
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#09090b]/75 backdrop-blur-2xl">
         <div className="container-responsive flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-white">
                 Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
             <nav className="hidden items-center gap-1.5 md:flex">
               <Link
-                href="/dashboard"
+                href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                Dashboard
+                {t("dashboard.title", "Dashboard")}
               </Link>
               <Link
-                href={stats.totalItems > 0 ? "/query" : "#"}
+                href={stats.totalItems > 0 ? `/${locale}/query` : "#"}
                 onClick={(e) => {
                   if (stats.totalItems === 0) e.preventDefault();
                 }}
@@ -656,13 +660,13 @@ export function DashboardView() {
                     : "text-[#52525b] cursor-not-allowed"
                 }`}
               >
-                Hỏi đáp AI
+                {t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
               </Link>
               <Link
-                href="/wiki"
+                href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
               >
-                Wiki Cá nhân
+                {t("compile.labels.sidebarWiki", "Wiki Cá nhân")}
               </Link>
             </nav>
           </div>
@@ -684,8 +688,8 @@ export function DashboardView() {
               size="icon"
               onClick={handleLogout}
               isLoading={isPending}
-              aria-label="Đăng xuất"
-              title="Đăng xuất"
+              aria-label={t("dashboard.btnLogout", "Đăng xuất")}
+              title={t("dashboard.btnLogout", "Đăng xuất")}
             >
               <LogOut className="h-4 w-4" />
             </Button>
@@ -699,7 +703,7 @@ export function DashboardView() {
           <div className="absolute inset-0 bg-[#09090b]/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-brand-400" />
-              <p className="text-sm text-[#a1a1aa]">Đang đồng bộ vai trò chuyên môn...</p>
+              <p className="text-sm text-[#a1a1aa]">{t("dashboard.errors.syncingRoles", "Đang đồng bộ vai trò chuyên môn...")}</p>
             </div>
           </div>
         )}
@@ -713,7 +717,7 @@ export function DashboardView() {
               onClick={() => { setApiWarning(null); fetchDashboardData(selectedRoleKbId || undefined, true); }}
               className="ml-2 shrink-0 rounded-lg bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer"
             >
-              Thử lại
+              {t("dashboard.btnRetry", "Thử lại")}
             </button>
             <button onClick={() => setApiWarning(null)} className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors cursor-pointer">
               <XCircle className="h-4 w-4" />
@@ -726,17 +730,17 @@ export function DashboardView() {
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-500/40 to-transparent" />
           <div>
             <h1 className="text-fluid-lg font-extrabold tracking-tight">
-              Xin chào, {userCtx.displayName || "Bạn"} 👋
+              {t("dashboard.welcome.hello", "Xin chào, {name} 👋").replace("{name}", userCtx.displayName || (locale === "vi" ? "Bạn" : "User"))}
             </h1>
             <p className="text-xs text-[#a1a1aa] mt-1">
-              Hệ thống đã sẵn sàng hỗ trợ nghiên cứu và tích lũy tri thức công việc.
+              {t("dashboard.welcome.subtitle", "Hệ thống đã sẵn sàng hỗ trợ nghiên cứu và tích lũy tri thức công việc.")}
             </p>
           </div>
 
           {/* Role selection dropdown */}
           <div className="flex flex-col gap-1.5 min-w-[240px]">
             <label className="text-[10px] font-bold text-[#52525b] uppercase tracking-wider">
-              Knowledge Base Chuyên Ngành
+              {t("dashboard.kbHeader", "Knowledge Base Chuyên Ngành")}
             </label>
             {userCtx.plan === "pro" && userRoles.length > 1 ? (
               <div className="relative">
@@ -749,7 +753,7 @@ export function DashboardView() {
                   className="w-full bg-[#18181b] border border-[#27272a] hover:border-auth-accent/40 text-xs text-[#fafafa] font-semibold rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-all duration-300"
                 >
                   <span>
-                    {userRoles.find((r) => r.id === selectedRoleKbId)?.roleName || "Chọn Chuyên Ngành"}
+                    {userRoles.find((r) => r.id === selectedRoleKbId)?.roleName || t("dashboard.selectDomain", "Chọn Chuyên Ngành")}
                   </span>
                   <ChevronRight className={`h-4 w-4 text-[#52525b] transition-transform duration-300 ${kbDropdownOpen ? "-rotate-90" : "rotate-90"}`} />
                 </button>
@@ -778,9 +782,9 @@ export function DashboardView() {
               </div>
             ) : (
               <div className="bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-semibold text-auth-accent flex items-center gap-2">
-                <span>{roleCtx?.roleName || "Chưa xác định"}</span>
+                <span>{roleCtx?.roleName || t("dashboard.status.unknown", "Chưa xác định")}</span>
                 <span className="text-[10px] text-[#52525b] font-normal">
-                  ({roleCtx?.roleGroup || "Khác"})
+                  ({roleCtx?.roleGroup || (locale === "vi" ? "Khác" : "Other")})
                 </span>
               </div>
             )}
@@ -793,11 +797,15 @@ export function DashboardView() {
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 to-transparent" />
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">Tiến trình nạp kiến thức</h2>
-                <p className="text-xs text-[#a1a1aa] mt-1">Các tài liệu đang được phân tích sang Wiki dạng cấu trúc.</p>
+                <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">
+                  {locale === "vi" ? "Tiến trình nạp kiến thức" : "Knowledge Ingestion Progress"}
+                </h2>
+                <p className="text-xs text-[#a1a1aa] mt-1">
+                  {locale === "vi" ? "Các tài liệu đang được phân tích sang Wiki dạng cấu trúc." : "Documents are being compiled into structured Wiki items."}
+                </p>
               </div>
               <span className="flex items-center gap-1.5 text-xs text-brand-400 font-semibold animate-pulse">
-                <Loader2 className="h-3 w-3 animate-spin" /> Đang cập nhật...
+                <Loader2 className="h-3 w-3 animate-spin" /> {t("query.loading", "Đang tải...")}
               </span>
             </div>
 
@@ -811,7 +819,7 @@ export function DashboardView() {
                     <div className="flex items-center gap-2 min-w-0">
                       {getSourceTypeIcon(job.sourceType)}
                       <span className="text-xs font-bold text-white truncate">
-                        {job.title || "Tài liệu nạp..."}
+                        {job.title || (locale === "vi" ? "Tài liệu nạp..." : "Ingesting document...")}
                       </span>
                     </div>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
@@ -840,7 +848,7 @@ export function DashboardView() {
                       {getJobStageTranslation(job.stage)}
                     </span>
                     <span>
-                      {job.message || `${job.progress || 0}% hoàn thành`}
+                      {job.message || t("compile.labels.progressCompleted", "{progress}% hoàn thành").replace("{progress}", String(job.progress || 0))}
                     </span>
                   </div>
                 </div>
@@ -859,15 +867,19 @@ export function DashboardView() {
           <section className="bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-4">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 to-transparent" />
             <div>
-              <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">Giới hạn tài khoản</h2>
-              <p className="text-xs text-[#a1a1aa] mt-1">Hạn mức tài nguyên theo gói {planName}.</p>
+              <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">
+                {locale === "vi" ? "Giới hạn tài khoản" : "Account Resource Limits"}
+              </h2>
+              <p className="text-xs text-[#a1a1aa] mt-1">
+                {(locale === "vi" ? "Hạn mức tài nguyên theo gói {planName}." : "Resource limits under {planName}.").replace("{planName}", planName)}
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
               {/* 1. Storage Quota */}
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-[#a1a1aa]">Dung lượng lưu trữ</span>
+                  <span className="font-semibold text-[#a1a1aa]">{locale === "vi" ? "Dung lượng lưu trữ" : "Storage Capacity"}</span>
                   <span className="text-[10px] text-[#52525b] font-mono">
                     {formatBytes(quota.storage.usedBytes)} / {formatBytes(quota.storage.limitBytes)}
                   </span>
@@ -884,15 +896,15 @@ export function DashboardView() {
                     style={{ width: `${quota.storage.percentage || 0}%` }}
                   />
                 </div>
-                <span className="text-[9px] text-[#52525b]">Gói hỗ trợ biên soạn tài liệu</span>
+                <span className="text-[9px] text-[#52525b]">{locale === "vi" ? "Gói hỗ trợ biên soạn tài liệu" : "Document compilation size support"}</span>
                </div>
 
                {/* 2. Queries Quota */}
                <div className="flex flex-col gap-1.5">
                  <div className="flex justify-between text-xs">
-                   <span className="font-semibold text-[#a1a1aa]">Lượt hỏi AI hàng ngày</span>
+                   <span className="font-semibold text-[#a1a1aa]">{locale === "vi" ? "Lượt hỏi AI hàng ngày" : "Daily AI Queries"}</span>
                    <span className="text-[10px] text-[#52525b] font-mono">
-                     {quota.queries.used} / {quota.queries.limit} lượt
+                     {quota.queries.used} / {quota.queries.limit} {locale === "vi" ? "lượt" : "queries"}
                    </span>
                  </div>
                  <div className="w-full bg-[#09090b] h-2 rounded-full overflow-hidden border border-white/[0.04]">
@@ -913,16 +925,16 @@ export function DashboardView() {
                    />
                  </div>
                  <span className="text-[9px] text-[#52525b] font-medium">
-                   Tự động làm mới hàng ngày
+                   {locale === "vi" ? "Tự động làm mới hàng ngày" : "Resets daily"}
                  </span>
                </div>
 
                {/* 3. Compiles Quota */}
                <div className="flex flex-col gap-1.5">
                  <div className="flex justify-between text-xs">
-                   <span className="font-semibold text-[#a1a1aa]">Hạn mức biên dịch tháng</span>
+                   <span className="font-semibold text-[#a1a1aa]">{locale === "vi" ? "Hạn mức biên dịch tháng" : "Monthly Compilation Limit"}</span>
                    <span className="text-[10px] text-[#52525b] font-mono">
-                     {quota.compiles.used} / {quota.compiles.limit} nguồn
+                     {quota.compiles.used} / {quota.compiles.limit} {locale === "vi" ? "nguồn" : "sources"}
                    </span>
                  </div>
                  <div className="w-full bg-[#09090b] h-2 rounded-full overflow-hidden border border-white/[0.04]">
@@ -942,8 +954,8 @@ export function DashboardView() {
                      }}
                    />
                  </div>
-                <span className="text-[9px] text-[#52525b]">Làm mới vào đầu tháng tiếp theo</span>
-              </div>
+                 <span className="text-[9px] text-[#52525b]">{locale === "vi" ? "Làm mới vào đầu tháng tiếp theo" : "Resets at the start of next month"}</span>
+               </div>
             </div>
           </section>
         )}
@@ -952,7 +964,7 @@ export function DashboardView() {
         <div className="recent-strip">
           <div className="recent-strip-label flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            Recently Viewed
+            {locale === "vi" ? "Xem gần đây" : "Recently Viewed"}
           </div>
           <div className="recent-strip-items flex flex-wrap gap-2">
             {(summary?.recentItems && summary.recentItems.length > 0
@@ -963,7 +975,7 @@ export function DashboardView() {
                 }))
               : DEFAULT_RECENT_ITEMS
             ).map((item) => {
-              const dest = item.id ? `/wiki/items/${item.id}` : "/wiki";
+              const dest = item.id ? `/${locale}/wiki/items/${item.id}` : `/${locale}/wiki`;
               return (
                 <Link key={item.id || item.name} href={dest} className="recent-chip">
                   {item.name}
@@ -982,9 +994,9 @@ export function DashboardView() {
             <div className="section-block">
               <div className="card-label">
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div className="card-label-title">Domain Knowledge</div>
-                  <Link className="view-more" href="/wiki">
-                    Xem tất cả {summary?.domainSnapshot?.length || 0} domains{" "}
+                  <div className="card-label-title">{locale === "vi" ? "Kiến thức Lĩnh vực" : "Domain Knowledge"}</div>
+                  <Link className="view-more" href={`/${locale}/wiki`}>
+                    {(locale === "vi" ? "Xem tất cả {count} chuyên ngành" : "View all {count} domains").replace("{count}", String(summary?.domainSnapshot?.length || 0))}{" "}
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
@@ -997,7 +1009,7 @@ export function DashboardView() {
                     return (
                       <Link
                         key={dom.id}
-                        href={`/wiki?domainId=${dom.id}`}
+                        href={`/${locale}/wiki?domainId=${dom.id}`}
                         className="domain-kcard"
                         role="button"
                         tabIndex={0}
@@ -1007,7 +1019,7 @@ export function DashboardView() {
                           {getIconComponent(iconName)}
                         </div>
                         <div className="dk-name">{dom.name}</div>
-                        <div className="dk-count">{dom.itemCount} items</div>
+                        <div className="dk-count">{(locale === "vi" ? "{count} mục" : "{count} items").replace("{count}", String(dom.itemCount))}</div>
                         <div className="dk-bar">
                           <div
                             className="dk-bar-fill bg-auth-accent"
@@ -1027,14 +1039,14 @@ export function DashboardView() {
             <div className="section-block">
               <div className="card-label">
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div className="card-label-title">Tech Stack Knowledge</div>
-                  <Link className="view-more" href="/wiki">
-                    Xem tất cả 12 công nghệ{" "}
+                  <div className="card-label-title">{locale === "vi" ? "Kiến thức Công nghệ" : "Tech Stack Knowledge"}</div>
+                  <Link className="view-more" href={`/${locale}/wiki`}>
+                    {locale === "vi" ? "Xem tất cả 12 công nghệ" : "View all 12 technologies"}{" "}
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }} className="relative">
-                  <span className="tech-sort-label">Sắp xếp</span>
+                  <span className="tech-sort-label">{t("wiki.sortBy.label", "Sắp xếp")}</span>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -1044,10 +1056,10 @@ export function DashboardView() {
                     className="tech-sort-select text-left"
                     style={{ minWidth: "110px" }}
                   >
-                    {sortBy === "name" && "Tên"}
-                    {sortBy === "domain" && "Lĩnh vực"}
-                    {sortBy === "pct" && "Độ thành thạo"}
-                    {sortBy === "updated" && "Mới nhất"}
+                    {sortBy === "name" && t("wiki.sortBy.title", "Tên")}
+                    {sortBy === "domain" && (locale === "vi" ? "Lĩnh vực" : "Domain")}
+                    {sortBy === "pct" && (locale === "vi" ? "Độ thành thạo" : "Proficiency")}
+                    {sortBy === "updated" && (locale === "vi" ? "Mới nhất" : "Latest")}
                   </button>
 
                   {sortDropdownOpen && (
@@ -1056,10 +1068,10 @@ export function DashboardView() {
                       className="absolute right-0 top-full mt-1.5 w-[140px] z-50 glass-premium rounded-xl overflow-hidden py-1.5 shadow-2xl animate-dropdown-enter"
                     >
                       {[
-                        { value: "name", label: "Tên" },
-                        { value: "domain", label: "Lĩnh vực" },
-                        { value: "pct", label: "Độ thành thạo" },
-                        { value: "updated", label: "Mới nhất" }
+                        { value: "name", label: t("wiki.sortBy.title", "Tên") },
+                        { value: "domain", label: locale === "vi" ? "Lĩnh vực" : "Domain" },
+                        { value: "pct", label: locale === "vi" ? "Độ thành thạo" : "Proficiency" },
+                        { value: "updated", label: locale === "vi" ? "Mới nhất" : "Latest" }
                       ].map((item) => (
                         <button
                           key={item.value}
@@ -1082,30 +1094,30 @@ export function DashboardView() {
                 <table className="tech-table">
                   <thead>
                     <tr>
-                      <th>Công nghệ</th>
-                      <th>Phân loại</th>
-                      <th>Độ thành thạo</th>
-                      <th style={{ textAlign: "right", paddingRight: "24px" }}>Tài liệu</th>
-                      <th>Cập nhật</th>
+                      <th>{locale === "vi" ? "Công nghệ" : "Technology"}</th>
+                      <th>{locale === "vi" ? "Phân loại" : "Category"}</th>
+                      <th>{locale === "vi" ? "Độ thành thạo" : "Proficiency"}</th>
+                      <th style={{ textAlign: "right", paddingRight: "24px" }}>{locale === "vi" ? "Tài liệu" : "Docs"}</th>
+                      <th>{locale === "vi" ? "Cập nhật" : "Updated"}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedTechs.map((t) => {
-                      const dest = t.wikiId ? `/wiki/items/${t.wikiId}` : "/wiki";
+                    {sortedTechs.map((tech) => {
+                      const dest = tech.wikiId ? `/${locale}/wiki/items/${tech.wikiId}` : `/${locale}/wiki`;
                       return (
                         <tr
-                          key={t.name}
+                          key={tech.name}
                           onClick={() => router.push(dest)}
                           style={{ cursor: "pointer" }}
                         >
                           <td>
                             <div className="tech-name font-bold text-white text-xs py-1">
-                              {t.name}
+                              {tech.name}
                             </div>
                           </td>
                           <td>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#18181b] border border-[#27272a] text-[#a1a1aa]">
-                              {t.cat}
+                              {tech.cat}
                             </span>
                           </td>
                           <td>
@@ -1114,15 +1126,15 @@ export function DashboardView() {
                                 <div
                                   className="tech-bar-fill h-full bg-[var(--color-auth-accent)] rounded-full"
                                   style={{
-                                    width: `${t.pct}%`,
+                                    width: `${tech.pct}%`,
                                   }}
                                 />
                               </div>
-                              <span className="text-[10px] text-auth-text-3 font-semibold font-mono">{t.pct}%</span>
+                              <span className="text-[10px] text-auth-text-3 font-semibold font-mono">{tech.pct}%</span>
                             </div>
                           </td>
-                          <td style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--text-2)" }}>{t.items}</td>
-                          <td style={{ fontSize: "12px", color: "var(--text-2)" }}>{t.updated}</td>
+                          <td style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--text-2)" }}>{tech.items}</td>
+                          <td style={{ fontSize: "12px", color: "var(--text-2)" }}>{tech.updated}</td>
                         </tr>
                       );
                     })}
@@ -1140,9 +1152,9 @@ export function DashboardView() {
             <div className="section-block">
               <div className="card-label">
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div className="card-label-title">Toolkit</div>
-                  <Link className="view-more" href="/wiki">
-                    Xem thêm <ArrowRight className="h-3 w-3" />
+                  <div className="card-label-title">{locale === "vi" ? "Bộ Công Cụ" : "Toolkit"}</div>
+                  <Link className="view-more" href={`/${locale}/wiki`}>
+                    {t("dashboard.viewAll", "Xem thêm")} <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
               </div>
@@ -1151,7 +1163,7 @@ export function DashboardView() {
                   {TOOLKIT_ITEMS.map((item) => (
                     <Link
                       key={item.id}
-                      href={`/wiki/items/${item.id}`}
+                      href={`/${locale}/wiki/items/${item.id}`}
                       className="group/item flex items-center justify-between py-2 border-b border-[#27272a]/40 text-xs text-auth-text-2 hover:text-white transition-colors"
                     >
                       <span>{item.label}</span>
@@ -1166,24 +1178,26 @@ export function DashboardView() {
             <div className="section-block">
               <div className="card-label">
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div className="card-label-title">Workflow</div>
-                  <Link className="view-more" href="/wiki">
-                    Xem thêm <ArrowRight className="h-3 w-3" />
+                  <div className="card-label-title">{locale === "vi" ? "Quy Trình Công Việc" : "Workflow"}</div>
+                  <Link className="view-more" href={`/${locale}/wiki`}>
+                    {t("dashboard.viewAll", "Xem thêm")} <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
               </div>
               <div className="role-panel">
                 <div className="rp-empty" style={{ flex: 1 }}>
                   <div className="rp-empty-label" style={{ fontSize: "13px", lineHeight: "1.7", marginBottom: "12px" }}>
-                    Chưa có quy trình công việc nào.<br />Yêu cầu AI thiết kế quy trình ngay.
+                    {locale === "vi" 
+                      ? "Chưa có quy trình công việc nào.\nYêu cầu AI thiết kế quy trình ngay." 
+                      : "No workflows created yet.\nAsk AI to draft a custom workflow."}
                   </div>
                   <Link
-                    href={`/query?prompt=${encodeURIComponent(
+                    href={`/${locale}/query?prompt=${encodeURIComponent(
                       "Help me document my ITBA Workflow. I want to create a structured knowledge entry covering the 3 core ITBA phases: Research Phase, Design & Validate Phase, and Spec & Handoff Protocol. Please provide a step-by-step workflow with inputs, outputs, and gate conditions for each phase."
                     )}`}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-auth-accent text-white hover:bg-auth-accent-dark transition-all active:scale-[0.98] shadow-[0_0_15px_var(--color-auth-accent-glow)]"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Vẽ quy trình AI
+                    <Plus className="h-3.5 w-3.5" /> {locale === "vi" ? "Vẽ quy trình AI" : "Generate AI Workflow"}
                   </Link>
                 </div>
               </div>
@@ -1193,9 +1207,9 @@ export function DashboardView() {
             <div className="section-block">
               <div className="card-label">
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div className="card-label-title">Skills</div>
-                  <Link className="view-more" href="/wiki">
-                    Xem thêm <ArrowRight className="h-3.5 w-3.5" />
+                  <div className="card-label-title">{locale === "vi" ? "Kỹ Năng Chuyên Môn" : "Skills"}</div>
+                  <Link className="view-more" href={`/${locale}/wiki`}>
+                    {t("dashboard.viewAll", "Xem thêm")} <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               </div>
@@ -1204,7 +1218,7 @@ export function DashboardView() {
                   {SKILLS_ITEMS.map((item) => (
                     <Link
                       key={item.id}
-                      href={`/wiki/items/${item.id}`}
+                      href={`/${locale}/wiki/items/${item.id}`}
                       className="group/item flex items-center justify-between py-2 border-b border-[#27272a]/40 text-xs text-auth-text-2 hover:text-white transition-colors"
                     >
                       <span>{item.label}</span>
@@ -1224,18 +1238,18 @@ export function DashboardView() {
 
       {/* Floating Action Button */}
       <Link
-        href={`/compile/new?roleKbId=${selectedRoleKbId}`}
+        href={`/${locale}/compile/new?roleKbId=${selectedRoleKbId}`}
         className="fab-compile group"
-        title="Compile new knowledge"
+        title={t("compile.labels.sidebarCompile", "Compile new knowledge")}
       >
         <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-        <span>Compile</span>
+        <span>{t("dashboard.stage.compiling", "Compile")}</span>
       </Link>
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06] bg-[#09090b] py-6 text-center text-xs text-[#52525b] z-10">
         <div className="container-responsive">
-          <p>© 2026 Pulse Knowledge. Tất cả quyền được bảo lưu.</p>
+          <p>{locale === "vi" ? "© 2026 Pulse Knowledge. Tất cả quyền được bảo lưu." : "© 2026 Pulse Knowledge. All rights reserved."}</p>
         </div>
       </footer>
     </div>

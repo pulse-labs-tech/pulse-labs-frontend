@@ -35,6 +35,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
 import { createQuerySessionAction, submitQueryMessageAction } from "@/app/actions/query";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
+import { useTranslation } from "@/contexts/locale-context";
 import type { QueryCitation } from "@/types/query";
 import type { RoleKbDto } from "@/types/onboarding";
 
@@ -58,29 +59,22 @@ function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("vi-VN", {
+function formatTime(iso: string, locale: string) {
+  return new Date(iso).toLocaleTimeString(locale === "en" ? "en-US" : "vi-VN", {
     hour: "2-digit",
     minute: "2-digit",
   });
 }
-
-const EXAMPLE_QUESTIONS = [
-  "Giải thích khái niệm chính trong lĩnh vực của bạn...",
-  "So sánh hai phương pháp phổ biến trong KB của bạn...",
-  "Tóm tắt quy trình thực hiện theo tài liệu đã nạp...",
-  "Những điểm quan trọng cần lưu ý khi áp dụng...",
-];
 
 // ────────────────────────────────────────────────────────────────
 // Sub-components
 // ────────────────────────────────────────────────────────────────
 
 /** Pulsing 3-dot loading animation */
-function TypingIndicator() {
+function TypingIndicator({ t }: { t: (path: string) => string }) {
   return (
     <div className="flex items-center gap-1.5 py-3 px-1">
-      <span className="text-xs text-auth-text-3 mr-1">Đang phân tích</span>
+      <span className="text-xs text-auth-text-3 mr-1">{t("query.analyzing")}</span>
       {[0, 1, 2].map((i) => (
         <span
           key={i}
@@ -93,20 +87,20 @@ function TypingIndicator() {
 }
 
 /** Confidence level pill badge */
-function ConfidenceBadge({ level }: { level: "high" | "medium" | "low" }) {
+function ConfidenceBadge({ level, t }: { level: "high" | "medium" | "low"; t: (path: string) => string }) {
   const map = {
     high: {
-      label: "Độ tin cậy cao",
+      label: t("query.confidenceHigh"),
       cls: "bg-emerald-950/40 border border-emerald-500/20 text-emerald-400",
       Icon: CheckCircle2,
     },
     medium: {
-      label: "Độ tin cậy vừa",
+      label: t("query.confidenceMedium"),
       cls: "bg-amber-950/40 border border-amber-500/20 text-amber-400",
       Icon: TrendingUp,
     },
     low: {
-      label: "Độ tin cậy thấp",
+      label: t("query.confidenceLow"),
       cls: "bg-red-950/40 border border-red-500/20 text-red-400",
       Icon: AlertTriangle,
     },
@@ -123,7 +117,7 @@ function ConfidenceBadge({ level }: { level: "high" | "medium" | "low" }) {
 }
 
 /** Single citation card */
-function CitationCard({ citation, index }: { citation: QueryCitation; index: number }) {
+function CitationCard({ citation, index, t }: { citation: QueryCitation; index: number; t: (path: string) => string }) {
   const score = Math.round((citation.score || 0) * 100);
   return (
     <a
@@ -168,7 +162,7 @@ function CitationCard({ citation, index }: { citation: QueryCitation; index: num
 }
 
 /** Citations collapsible panel */
-function CitationsPanel({ citations }: { citations: QueryCitation[] }) {
+function CitationsPanel({ citations, t }: { citations: QueryCitation[]; t: (path: string, defaultValue?: string) => string }) {
   const [open, setOpen] = useState(false);
 
   if (!citations || citations.length === 0) return null;
@@ -180,7 +174,7 @@ function CitationsPanel({ citations }: { citations: QueryCitation[] }) {
         className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
       >
         <BookOpen className="h-3 w-3" />
-        {citations.length} nguồn trích dẫn
+        {t("query.citationsCount", "{count} sources").replace("{count}", citations.length.toString())}
         {open ? (
           <ChevronUp className="h-3 w-3" />
         ) : (
@@ -191,7 +185,7 @@ function CitationsPanel({ citations }: { citations: QueryCitation[] }) {
       {open && (
         <div className="mt-2 flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {citations.map((c, i) => (
-            <CitationCard key={c.id} citation={c} index={i} />
+            <CitationCard key={c.id} citation={c} index={i} t={t} />
           ))}
         </div>
       )}
@@ -200,20 +194,20 @@ function CitationsPanel({ citations }: { citations: QueryCitation[] }) {
 }
 
 /** KB Gap warning box */
-function KbGapWarning({ suggestion }: { suggestion: string | null }) {
+function KbGapWarning({ suggestion, locale, t }: { suggestion: string | null; locale: string; t: (path: string) => string }) {
   return (
     <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
       <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
       <div>
-        <p className="text-xs font-bold text-amber-300">Phát hiện khoảng trống kiến thức</p>
+        <p className="text-xs font-bold text-amber-300">{t("query.gapTitle")}</p>
         {suggestion && (
           <p className="text-xs text-amber-200/70 mt-1 leading-relaxed">{suggestion}</p>
         )}
         <Link
-          href="/compile/new"
+          href={`/${locale}/compile/new`}
           className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
         >
-          <Plus className="h-3 w-3" /> Nạp thêm tài liệu
+          <Plus className="h-3 w-3" /> {t("query.gapButton")}
         </Link>
       </div>
     </div>
@@ -221,7 +215,7 @@ function KbGapWarning({ suggestion }: { suggestion: string | null }) {
 }
 
 /** User message bubble */
-function UserMessage({ msg }: { msg: QueryMessage }) {
+function UserMessage({ msg, locale }: { msg: QueryMessage; locale: string }) {
   return (
     <div className="flex justify-end">
       <div className="max-w-[75%]">
@@ -230,14 +224,14 @@ function UserMessage({ msg }: { msg: QueryMessage }) {
             {msg.content}
           </p>
         </div>
-        <p className="text-[10px] text-auth-text-3 mt-1 text-right">{formatTime(msg.createdAt)}</p>
+        <p className="text-[10px] text-auth-text-3 mt-1 text-right">{formatTime(msg.createdAt, locale)}</p>
       </div>
     </div>
   );
 }
 
 /** Assistant message (no bubble) */
-function AssistantMessage({ msg }: { msg: QueryMessage }) {
+function AssistantMessage({ msg, locale, t }: { msg: QueryMessage; locale: string; t: (path: string, defaultValue?: string) => string }) {
   return (
     <div className="flex justify-start">
       <div className="w-full max-w-[90%]">
@@ -250,10 +244,10 @@ function AssistantMessage({ msg }: { msg: QueryMessage }) {
             Pulse AI
           </span>
           {msg.confidenceLevel && (
-            <ConfidenceBadge level={msg.confidenceLevel} />
+            <ConfidenceBadge level={msg.confidenceLevel} t={t} />
           )}
           <span className="ml-auto text-[10px] text-auth-text-3">
-            {formatTime(msg.createdAt)}
+            {formatTime(msg.createdAt, locale)}
           </span>
         </div>
 
@@ -266,16 +260,16 @@ function AssistantMessage({ msg }: { msg: QueryMessage }) {
 
         {/* KB Gap warning */}
         {msg.kbGapDetected && (
-          <KbGapWarning suggestion={msg.kbGapSuggestion} />
+          <KbGapWarning suggestion={msg.kbGapSuggestion} locale={locale} t={t} />
         )}
 
         {/* Citations */}
-        <CitationsPanel citations={msg.citations} />
+        <CitationsPanel citations={msg.citations} t={t} />
 
         {/* Used items info */}
         {msg.usedItems > 0 && (
           <p className="mt-2 text-[10px] text-auth-text-3">
-            Tổng hợp từ {msg.usedItems} mục kiến thức trong Knowledge Base
+            {t("query.sourceSummary", "Synthesized from {count} knowledge items").replace("{count}", msg.usedItems.toString())}
           </p>
         )}
       </div>
@@ -286,9 +280,18 @@ function AssistantMessage({ msg }: { msg: QueryMessage }) {
 /** Empty state (no messages) */
 function EmptyState({
   onExampleClick,
+  t,
 }: {
   onExampleClick: (q: string) => void;
+  t: (path: string) => string;
 }) {
+  const examples = [
+    t("query.suggested.0"),
+    t("query.suggested.1"),
+    t("query.suggested.2"),
+    t("query.suggested.3"),
+  ];
+
   return (
     <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
       {/* Icon */}
@@ -303,18 +306,18 @@ function EmptyState({
       </div>
 
       <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2">
-        Bắt đầu hỏi đáp
+        {t("query.startTitle")}
       </h2>
       <p className="text-xs text-auth-text-2 max-w-sm leading-relaxed mb-8">
-        Đặt câu hỏi dựa trên Knowledge Base của bạn. AI sẽ trả lời có trích dẫn nguồn minh bạch từ tài liệu đã nạp.
+        {t("query.startDesc")}
       </p>
 
       {/* Example chips */}
       <div className="flex flex-col gap-2.5 w-full max-w-md">
         <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1">
-          Câu hỏi gợi ý
+          {t("query.suggestedQuestions")}
         </p>
-        {EXAMPLE_QUESTIONS.map((q) => (
+        {examples.map((q) => (
           <button
             key={q}
             onClick={() => onExampleClick(q)}
@@ -330,44 +333,44 @@ function EmptyState({
 }
 
 /** Special empty KB error state */
-function KbEmptyState() {
+function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => string }) {
   return (
     <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
       <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center mb-6">
         <Database className="h-10 w-10 text-amber-400" />
       </div>
       <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2">
-        Knowledge Base trống
+        {t("query.emptyKbTitle")}
       </h2>
       <p className="text-xs text-auth-text-2 max-w-sm leading-relaxed mb-6">
-        Bạn cần nạp ít nhất một tài liệu vào Knowledge Base trước khi có thể sử dụng tính năng Hỏi đáp AI.
+        {t("query.emptyKbDesc")}
       </p>
       <Link
-        href="/compile/new"
+        href={`/${locale}/compile/new`}
         className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full px-6 py-2.5 text-sm shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all"
       >
         <Plus className="h-4 w-4" />
-        Nạp tài liệu đầu tiên
+        {t("query.emptyKbButton")}
       </Link>
     </div>
   );
 }
 
 /** Quota exceeded state */
-function QuotaExceededBanner() {
+function QuotaExceededBanner({ locale, t }: { locale: string; t: (path: string) => string }) {
   return (
     <div className="mx-4 mb-4 rounded-xl border border-red-500/20 bg-red-950/20 p-4 flex items-start gap-3">
       <AlertCircle className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
       <div className="flex-1">
-        <p className="text-sm font-bold text-red-300">Hết lượt hỏi đáp hôm nay</p>
+        <p className="text-sm font-bold text-red-300">{t("query.limitTitle")}</p>
         <p className="text-xs text-red-200/70 mt-1">
-          Bạn đã sử dụng hết hạn mức hỏi đáp AI trong ngày hôm nay. Nâng cấp lên Pro để có thêm lượt hỏi.
+          {t("query.limitDesc")}
         </p>
         <Link
-          href="/settings/billing"
+          href={`/${locale}/settings/billing`}
           className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors"
         >
-          <Zap className="h-3.5 w-3.5" /> Nâng cấp lên Pro
+          <Zap className="h-3.5 w-3.5" /> {t("query.limitButton")}
         </Link>
       </div>
     </div>
@@ -383,6 +386,7 @@ export function QueryView() {
   const searchParams = useSearchParams();
   const { user: authUser, clearAuth } = useAuth();
   const [isPending, startTransition] = useTransition();
+  const { t, locale } = useTranslation();
 
   // Conversation state
   const [messages, setMessages] = useState<QueryMessage[]>([]);
@@ -662,14 +666,14 @@ export function QueryView() {
                 {authUser?.displayName || authUser?.email}
               </div>
               <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-0.5 text-[10px] font-semibold text-auth-accent">
-                {authUser?.plan === "pro" ? "Pro Plan" : "Free Plan"}
+                {authUser?.plan === "pro" ? t("common.proPlan", "Pro Plan") : t("common.freePlan", "Free Plan")}
               </span>
             </div>
             <button
               onClick={handleLogout}
               disabled={isPending}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
-              title="Đăng xuất"
+              title={t("common.logout", "Đăng xuất")}
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
@@ -690,13 +694,13 @@ export function QueryView() {
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
 
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-3">
-              Knowledge Base đang dùng
+              {t("query.sidebarKb", "Knowledge Base đang dùng")}
             </p>
 
             {isLoadingRoles ? (
               <div className="flex items-center gap-2 text-xs text-auth-text-3">
                 <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
-                Đang tải...
+                {t("common.loading", "Đang tải...")}
               </div>
             ) : selectedRole ? (
               <>
@@ -719,7 +723,7 @@ export function QueryView() {
                 {userRoles.length > 1 && (
                   <div className="mb-3">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 block mb-1.5">
-                      Chuyển KB
+                      {t("query.changeKb", "Chuyển KB")}
                     </label>
                     <select
                       value={selectedRoleKbId}
@@ -736,14 +740,14 @@ export function QueryView() {
                 )}
               </>
             ) : (
-              <p className="text-xs text-auth-text-3">Chưa chọn Knowledge Base</p>
+              <p className="text-xs text-auth-text-3">{t("query.noKbSelected", "Chưa chọn Knowledge Base")}</p>
             )}
 
             {/* Conversation info */}
             {conversationId && (
               <div className="mt-3 pt-3 border-t border-white/[0.06]">
                 <p className="text-[10px] text-auth-text-3">
-                  Phiên hội thoại đang hoạt động
+                  {t("query.activeSession", "Phiên hội thoại đang hoạt động")}
                 </p>
                 <p className="text-[10px] font-mono text-auth-text-3 truncate mt-0.5">
                   {conversationId.slice(0, 18)}...
@@ -757,15 +761,15 @@ export function QueryView() {
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
 
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1">
-              Thao tác
+              {t("query.actions", "Thao tác")}
             </p>
 
             <Link
-              href="/compile/new"
+              href={`/${locale}/compile/new`}
               className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-white transition-all"
             >
               <Plus className="h-4 w-4 text-auth-accent" />
-              Nạp thêm tài liệu
+              {t("query.gapButton", "Nạp thêm tài liệu")}
             </Link>
 
             <button
@@ -774,20 +778,20 @@ export function QueryView() {
               className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-red-950/30 hover:border-red-500/20 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-red-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Trash2 className="h-4 w-4" />
-              Xóa cuộc hội thoại
+              {t("query.deleteSession", "Xóa cuộc hội thoại")}
             </button>
           </div>
 
           {/* Tips */}
           <div className="rounded-2xl border border-white/[0.04] bg-auth-surface/20 p-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-2">
-              Mẹo sử dụng
+              {t("query.tips", "Mẹo sử dụng")}
             </p>
             <ul className="space-y-1.5">
               {[
-                "Đặt câu hỏi cụ thể để có câu trả lời chính xác hơn",
-                "Enter để gửi, Shift+Enter để xuống dòng",
-                "Trích dẫn có thể mở rộng để xem nguồn đầy đủ",
+                t("query.tipsList.0", "Đặt câu hỏi cụ thể để có câu trả lời chính xác hơn"),
+                t("query.tipsList.1", "Enter để gửi, Shift+Enter để xuống dòng"),
+                t("query.tipsList.2", "Trích dẫn có thể mở rộng để xem nguồn đầy đủ"),
               ].map((tip) => (
                 <li key={tip} className="text-[11px] text-auth-text-3 flex items-start gap-1.5">
                   <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
@@ -809,9 +813,9 @@ export function QueryView() {
                 <Sparkles className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-bold text-auth-text">Hỏi đáp AI</p>
+                <p className="text-sm font-bold text-auth-text">{t("query.headerTitle", "Hỏi đáp AI")}</p>
                 <p className="text-[10px] text-auth-text-3">
-                  {selectedRole ? selectedRole.roleName : "Chọn Knowledge Base để bắt đầu"}
+                  {selectedRole ? selectedRole.roleName : t("query.selectKbPlaceholder", "Chọn Knowledge Base để bắt đầu")}
                 </p>
               </div>
             </div>
@@ -823,30 +827,30 @@ export function QueryView() {
               className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs text-auth-text-2 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Xóa hội thoại</span>
+              <span className="hidden sm:inline">{t("query.btnDelete", "Xóa hội thoại")}</span>
             </button>
           </div>
 
           {/* Quota exceeded banner */}
           {quotaExceeded && (
             <div className="px-4 pt-4 shrink-0">
-              <QuotaExceededBanner />
+              <QuotaExceededBanner locale={locale} t={t} />
             </div>
           )}
 
           {/* ── Messages area ── */}
           <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6 min-h-0 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {showKbEmpty ? (
-              <KbEmptyState />
+              <KbEmptyState locale={locale} t={t} />
             ) : messages.length === 0 && !isAnswering ? (
-              <EmptyState onExampleClick={handleExampleClick} />
+              <EmptyState onExampleClick={handleExampleClick} t={t} />
             ) : (
               <>
                 {messages.map((msg) =>
                   msg.role === "user" ? (
-                    <UserMessage key={msg.id} msg={msg} />
+                    <UserMessage key={msg.id} msg={msg} locale={locale} />
                   ) : (
-                    <AssistantMessage key={msg.id} msg={msg} />
+                    <AssistantMessage key={msg.id} msg={msg} locale={locale} t={t} />
                   )
                 )}
 
@@ -857,7 +861,7 @@ export function QueryView() {
                       <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
                         <Sparkles className="h-3 w-3 text-white" />
                       </div>
-                      <TypingIndicator />
+                      <TypingIndicator t={t} />
                     </div>
                   </div>
                 )}
@@ -872,7 +876,7 @@ export function QueryView() {
                         onClick={handleRetry}
                         className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-red-400 hover:text-red-300 transition-colors"
                       >
-                        <RefreshCw className="h-3 w-3" /> Thử lại
+                        <RefreshCw className="h-3 w-3" /> {t("common.retry")}
                       </button>
                     </div>
                   </div>
@@ -891,7 +895,7 @@ export function QueryView() {
                   KB:
                 </label>
                 {isLoadingRoles ? (
-                  <span className="text-[10px] text-auth-text-3 animate-pulse">Đang tải...</span>
+                  <span className="text-[10px] text-auth-text-3 animate-pulse">{t("common.loading", "Đang tải...")}</span>
                 ) : (
                   <select
                     value={selectedRoleKbId}
@@ -899,7 +903,7 @@ export function QueryView() {
                     className="bg-auth-elevated border border-auth-border rounded-lg text-auth-text text-[11px] font-semibold px-2.5 py-1 appearance-none cursor-pointer focus:border-auth-accent/50 transition-colors max-w-[180px]"
                   >
                     {userRoles.length === 0 && (
-                      <option value="">Chưa có KB</option>
+                      <option value="">{t("query.noKb", "Chưa có KB")}</option>
                     )}
                     {userRoles.map((r) => (
                       <option key={r.id} value={r.id} className="bg-auth-surface">
@@ -918,7 +922,7 @@ export function QueryView() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)"
+                    placeholder={t("query.placeholderTextarea", "Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)")}
                     disabled={isAnswering || quotaExceeded}
                     rows={1}
                     className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm px-4 py-3 resize-none focus:outline-none focus:border-auth-accent/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed leading-relaxed"
@@ -930,7 +934,7 @@ export function QueryView() {
                   onClick={handleSubmit}
                   disabled={!canSend || quotaExceeded}
                   className="shrink-0 h-12 w-12 flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-                  title="Gửi câu hỏi"
+                  title={t("query.button", "Gửi")}
                 >
                   {isAnswering ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -942,7 +946,7 @@ export function QueryView() {
 
               {/* Disclaimer */}
               <p className="mt-2 text-center text-[10px] text-auth-text-3">
-                Hỏi đáp dựa trên Knowledge Base của bạn. Câu trả lời có trích dẫn nguồn.
+                {t("query.subtitle", "Hỏi đáp dựa trên Knowledge Base của bạn. Câu trả lời có trích dẫn nguồn.")}
               </p>
             </div>
           )}
