@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     /** Optimize package imports for smaller bundles */
     optimizePackageImports: [
       "lucide-react",
+      "framer-motion",
       "date-fns",
       "lodash-es",
     ],

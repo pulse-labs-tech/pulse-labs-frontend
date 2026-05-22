@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Loader2, Eye, EyeOff, Mail } from "lucide-react";
 import { registerAction, resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
+import { Button } from "@/components/ui";
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(
@@ -143,7 +144,7 @@ export function RegisterForm() {
                     ? "register-firstName-error"
                     : undefined
                 }
-                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-colors duration-200 3xl:text-sm 3xl:py-3 ${
                   state?.errors?.firstName
                     ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                     : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -181,7 +182,7 @@ export function RegisterForm() {
                     ? "register-lastName-error"
                     : undefined
                 }
-                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-colors duration-200 3xl:text-sm 3xl:py-3 ${
                   state?.errors?.lastName
                     ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                     : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -218,7 +219,7 @@ export function RegisterForm() {
               aria-describedby={
                 state?.errors?.email ? "register-email-error" : undefined
               }
-              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-colors duration-200 3xl:text-sm 3xl:py-3 ${
                 state?.errors?.email
                   ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                   : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -255,7 +256,7 @@ export function RegisterForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 aria-invalid={!!state?.errors?.password}
                 aria-describedby="register-password-strength"
-                className={`w-full rounded-lg border bg-auth-elevated px-3.5 py-2.5 pr-10 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+                className={`w-full rounded-lg border bg-auth-elevated px-3.5 py-2.5 pr-10 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-colors duration-200 3xl:text-sm 3xl:py-3 ${
                   state?.errors?.password
                     ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                     : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -290,7 +291,7 @@ export function RegisterForm() {
                   {[0, 1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className={`h-[3px] flex-1 rounded-full transition-all duration-200 ${
+                      className={`h-[3px] flex-1 rounded-full transition-colors duration-200 ${
                         i < strengthScore
                           ? strengthScore <= 1
                             ? "bg-red-500"
@@ -321,7 +322,7 @@ export function RegisterForm() {
               value="true"
               required
               aria-invalid={!!state?.errors?.acceptedTerms}
-              className="mt-0.5 h-4 w-4 shrink-0 appearance-none rounded border border-auth-border bg-auth-elevated transition-all duration-200 checked:border-emerald-500 checked:bg-emerald-500 focus:ring-2 focus:ring-auth-accent-dim cursor-pointer relative
+              className="mt-0.5 h-4 w-4 shrink-0 appearance-none rounded border border-auth-border bg-auth-elevated transition-colors duration-200 checked:border-emerald-500 checked:bg-emerald-500 focus:ring-2 focus:ring-auth-accent-dim cursor-pointer relative
               checked:after:content-['✓'] checked:after:text-white checked:after:text-[10px] checked:after:font-bold checked:after:absolute checked:after:inset-0 checked:after:flex checked:after:items-center checked:after:justify-center"
             />
             <label
@@ -353,21 +354,17 @@ export function RegisterForm() {
           )}
 
           {/* Submit button */}
-          <button
+          <Button
             type="submit"
-            disabled={isPending}
+            variant="primary"
+            size="lg"
+            fullWidth
+            isLoading={isPending}
             aria-busy={isPending}
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60 3xl:text-sm 3xl:py-3.5"
+            className="mt-1"
           >
-            {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang tạo tài khoản...
-              </>
-            ) : (
-              "Tạo tài khoản miễn phí →"
-            )}
-          </button>
+            Tạo tài khoản miễn phí →
+          </Button>
         </form>
       </div>
     </div>
@@ -469,14 +466,15 @@ function VerifyEmailScreen({
               giây.
             </p>
           ) : (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
+              isLoading={isResending}
               onClick={handleResend}
-              disabled={isResending}
-              className="text-xs font-medium text-auth-accent hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isResending ? "Đang gửi..." : "Gửi lại email xác minh →"}
-            </button>
+              Gửi lại email xác minh →
+            </Button>
           )}
 
           {resendMessage && (
@@ -490,10 +488,10 @@ function VerifyEmailScreen({
           )}
         </div>
 
-        <div className="mt-8 flex flex-col gap-3">
+        <div className="mt-8">
           <Link
             href="/login"
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] 3xl:text-sm 3xl:py-3.5"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.75_0.19_160_/_0.20)] transition-colors duration-200 hover:shadow-[0_0_28px_oklch(0.75_0.19_160_/_0.45)] hover:-translate-y-[1px] active:scale-[0.97] 3xl:text-sm"
           >
             Đi tới đăng nhập →
           </Link>

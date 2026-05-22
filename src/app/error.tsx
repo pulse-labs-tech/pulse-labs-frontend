@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui";
 
 /**
  * Global error boundary.
@@ -41,13 +42,15 @@ export default function Error({
           </pre>
         )}
 
-        <button
+        <Button
           onClick={reset}
-          className="group mt-10 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-7 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(52,211,153,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_0_40px_rgba(52,211,153,0.5)] active:scale-95"
+          variant="primary"
+          size="lg"
+          className="group mt-10"
+          leftIcon={<RotateCcw className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-180" />}
         >
-          <RotateCcw className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-180" />
           Thử lại
-        </button>
+        </Button>
       </div>
     </div>
   );

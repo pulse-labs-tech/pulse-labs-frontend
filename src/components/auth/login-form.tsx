@@ -10,9 +10,9 @@
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
 import { loginAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
+import { Button } from "@/components/ui";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -96,7 +96,7 @@ export function LoginForm() {
               aria-describedby={
                 state?.errors?.email ? "login-email-error" : undefined
               }
-              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-colors duration-200 3xl:text-sm 3xl:py-3 ${
                 state?.errors?.email
                   ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                   : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -140,7 +140,7 @@ export function LoginForm() {
               aria-describedby={
                 state?.errors?.password ? "login-password-error" : undefined
               }
-              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-all duration-200 3xl:text-sm 3xl:py-3 ${
+              className={`rounded-lg border bg-auth-elevated px-3.5 py-2.5 text-base md:text-[13px] text-auth-text outline-none placeholder:text-auth-text-3 transition-colors duration-200 3xl:text-sm 3xl:py-3 ${
                 state?.errors?.password
                   ? "border-auth-error shadow-[0_0_0_3px_var(--color-auth-error-dim)]"
                   : "border-auth-border focus:border-auth-accent focus:shadow-[0_0_0_3px_var(--color-auth-accent-dim)]"
@@ -158,21 +158,16 @@ export function LoginForm() {
           </div>
 
           {/* Submit button */}
-          <button
+          <Button
             type="submit"
-            disabled={isPending}
+            variant="primary"
+            size="lg"
+            fullWidth
+            isLoading={isPending}
             aria-busy={isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60 3xl:text-sm 3xl:py-3.5"
           >
-            {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang đăng nhập...
-              </>
-            ) : (
-              "Đăng nhập →"
-            )}
-          </button>
+            Đăng nhập →
+          </Button>
 
           {/* Footer — Terms */}
           <p className="text-center text-xs leading-relaxed text-auth-text-3">

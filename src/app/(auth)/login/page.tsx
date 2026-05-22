@@ -67,11 +67,13 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {/* JSON-LD (hidden to prevent grid item displacement) */}
+      <div className="hidden" aria-hidden="true">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </div>
 
       {/* Left: Brand Panel */}
       <BrandPanel />

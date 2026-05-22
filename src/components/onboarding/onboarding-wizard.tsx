@@ -16,6 +16,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui";
 import { ProModal } from "./pro-modal";
 import {
   getOnboardingStateAction,
@@ -220,7 +221,14 @@ export function OnboardingWizard() {
           setRoleLimit(limits?.roleLimit ?? 1);
 
           // Restore step state (FR-ONB-011 Resume rules)
-          if (step === "done" || step === "welcome") {
+          if (step === "done") {
+            // Onboarding already completed — redirect to dashboard
+            if (user) {
+              setUser({ ...user, onboardingStatus: "completed" });
+            }
+            router.replace("/dashboard");
+            return; // Don't set isInitializing to false — keep loading screen
+          } else if (step === "welcome") {
             setCurrentStep("welcome");
           } else {
             setCurrentStep(step);
@@ -728,13 +736,14 @@ export function OnboardingWizard() {
               {/* Bottom Actions */}
               <div className="flex justify-between items-center border-t border-auth-border-subtle pt-6">
                 <span className="text-xs text-auth-text-3 font-semibold">Bước 1 / 3</span>
-                <button
+                <Button
+                  variant="primary"
+                  size="md"
                   onClick={() => setCurrentStep("pick_role")}
-                  className="py-2.5 px-6 bg-auth-accent hover:bg-auth-accent-dark text-black font-semibold rounded-lg text-sm transition-all hover:shadow-auth hover:shadow-auth-accent-glow flex items-center gap-1.5"
+                  rightIcon={<ChevronRight className="h-4 w-4" />}
                 >
                   Bắt đầu thiết lập
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -856,12 +865,13 @@ export function OnboardingWizard() {
                         className="flex-grow bg-auth-surface border border-auth-border rounded-lg px-4 py-2 text-xs text-auth-text placeholder:text-auth-text-3 focus:border-auth-accent"
                         maxLength={80}
                       />
-                      <button
+                      <Button
                         onClick={handleCustomRoleSubmit}
-                        className="px-4 py-2 bg-auth-elevated border border-auth-border text-auth-text hover:border-auth-text-3 text-xs font-semibold rounded-lg"
+                        variant="secondary"
+                        size="md"
                       >
                         Thêm
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -891,27 +901,26 @@ export function OnboardingWizard() {
 
               {/* Bottom Actions */}
               <div className="flex justify-between items-center border-t border-auth-border-subtle pt-6">
-                <button
+                <Button
+                  variant="ghost"
+                  size="md"
                   onClick={() => setCurrentStep("welcome")}
-                  className="py-2.5 px-4 bg-auth-elevated border border-auth-border text-auth-text-2 hover:text-auth-text hover:bg-auth-card-hover text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                  leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
                 >
-                  <ArrowLeft className="h-3.5 w-3.5" />
                   Quay lại
-                </button>
+                </Button>
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-auth-text-3 font-semibold">Bước 2 / 3</span>
-                  <button
+                  <Button
+                    variant="primary"
+                    size="md"
                     onClick={handleSaveRoles}
+                    isLoading={isSubmitting}
                     disabled={selectedRoles.length === 0 || isSubmitting || rateLimitCooldown !== null}
-                    className="py-2.5 px-6 bg-auth-accent disabled:opacity-40 disabled:cursor-not-allowed hover:bg-auth-accent-dark text-black font-bold rounded-lg text-sm transition-all flex items-center gap-1.5"
+                    rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
                   >
-                    {isSubmitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-black" />
-                    ) : (
-                      "Tiếp tục"
-                    )}
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                    Tiếp tục
+                  </Button>
                 </div>
               </div>
             </div>
@@ -995,26 +1004,29 @@ export function OnboardingWizard() {
                   {/* Polling Terminal Options */}
                   <div className="flex justify-end gap-3 mt-2 border-t border-auth-border-subtle pt-4">
                     {compileJob.status === "failed" && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => {
                           setCompileJob(null);
                           setCompileError(null);
                         }}
-                        className="py-1.5 px-3 bg-auth-elevated border border-auth-border text-auth-text hover:border-auth-text-3 text-xs font-semibold rounded-lg"
                       >
                         Thử lại nguồn khác
-                      </button>
+                      </Button>
                     )}
 
-                    <button
+                    <Button
+                      variant="primary"
+                      size="md"
                       onClick={() => handleOnboardingComplete(false)}
-                      disabled={isSubmitting}
-                      className="py-1.5 px-4 bg-auth-accent hover:bg-auth-accent-dark text-black text-xs font-bold rounded-lg transition-all"
+                      isLoading={isSubmitting}
+                      rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
                     >
                       {compileJob.status === "wiki_ready"
-                        ? "Tiếp tục vào Dashboard →"
-                        : "Tiếp tục thiết lập →"}
-                    </button>
+                        ? "Tiếp tục vào Dashboard"
+                        : "Tiếp tục thiết lập"}
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -1103,37 +1115,38 @@ export function OnboardingWizard() {
 
                   {/* Bottom Actions */}
                   <div className="flex justify-between items-center border-t border-auth-border-subtle pt-6">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="md"
                       onClick={() => setCurrentStep("pick_role")}
-                      className="py-2.5 px-4 bg-auth-elevated border border-auth-border text-auth-text-2 hover:text-auth-text hover:bg-auth-card-hover text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                      leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
                     >
-                      <ArrowLeft className="h-3.5 w-3.5" />
                       Quay lại
-                    </button>
+                    </Button>
                     <div className="flex items-center gap-3">
-                      <button
+                      <Button
+                        variant="secondary"
+                        size="md"
                         onClick={() => handleOnboardingComplete(true)}
                         disabled={isSubmitting || rateLimitCooldown !== null}
-                        className="py-2.5 px-4 border border-auth-border text-auth-text-2 hover:text-auth-text hover:bg-auth-card-hover text-xs font-semibold rounded-lg"
+                        isLoading={isSubmitting}
                       >
                         Bỏ qua bước này
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="md"
                         onClick={handleSeedIngest}
+                        isLoading={isSubmitting}
                         disabled={
                           isSubmitting ||
                           rateLimitCooldown !== null ||
                           (seedType === "text" ? seedText.length < 50 : !seedUrl)
                         }
-                        className="py-2.5 px-6 bg-auth-accent disabled:opacity-40 disabled:cursor-not-allowed hover:bg-auth-accent-dark text-black font-bold rounded-lg text-sm transition-all flex items-center gap-1.5"
+                        rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
                       >
-                        {isSubmitting ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-black" />
-                        ) : (
-                          "Gửi phân tích"
-                        )}
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
+                        Gửi phân tích
+                      </Button>
                     </div>
                   </div>
                 </div>

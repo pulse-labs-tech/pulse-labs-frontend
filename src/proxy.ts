@@ -10,8 +10,11 @@
  * and redirects accordingly:
  *
  * 1. Protected route + no session → redirect /login?returnUrl=...
- * 2. Auth route (login/register) + has session → redirect /dashboard
- * 3. Otherwise → proceed normally
+ * 2. Auth route + has session + not onboarded → redirect /onboarding
+ * 3. Auth route + has session + onboarded → redirect /dashboard
+ * 4. Onboarding route + onboarded → redirect /dashboard
+ * 5. Protected route + not onboarded → redirect /onboarding
+ * 6. Otherwise → proceed normally
  *
  * @see node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md
  * @see /features/api-docs/API_Auth_Docs.md
@@ -51,6 +54,31 @@ const AUTH_ROUTES = [
 /** Cookie keys (must match token-storage.ts) */
 const ACCESS_TOKEN_COOKIE = "pulse_at";
 const REFRESH_TOKEN_COOKIE = "pulse_rt";
+const USER_DATA_COOKIE = "pulse_user";
+
+// ────────────────────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────────────────────
+
+/** Read onboardingStatus from the pulse_user cookie. */
+function getOnboardingStatus(
+  cookieStore: Awaited<ReturnType<typeof cookies>>,
+): "completed" | "pending" | null {
+  const raw = cookieStore.get(USER_DATA_COOKIE)?.value;
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as { onboardingStatus?: string };
+    return parsed.onboardingStatus === "completed" ? "completed" : "pending";
+  } catch {
+    return null;
+  }
+}
+
+/** Check if pathname matches an onboarding route. */
+function isOnboardingRoute(pathname: string): boolean {
+  return pathname === "/onboarding" || pathname.startsWith("/onboarding/");
+}
 
 // ────────────────────────────────────────────────────────────────
 // Proxy (formerly Middleware)
@@ -86,12 +114,30 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // ─── Case 2: Auth route, has session → redirect to dashboard ──
-  if (isAuthRoute && hasSession) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // ─── Case 2+: Has session → route based on onboardingStatus ──
+  if (hasSession) {
+    const onboardingStatus = getOnboardingStatus(cookieStore);
+    const isOnboarded = onboardingStatus === "completed";
+
+    // ── Auth route + session → redirect based on onboarding ──
+    if (isAuthRoute) {
+      return NextResponse.redirect(
+        new URL(isOnboarded ? "/dashboard" : "/onboarding", request.url),
+      );
+    }
+
+    // ── Onboarding route + already onboarded → redirect to dashboard ──
+    if (isOnboardingRoute(pathname) && isOnboarded) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // ── Protected route + not onboarded → redirect to onboarding ──
+    if (!isPublic && !isOnboardingRoute(pathname) && !isOnboarded) {
+      return NextResponse.redirect(new URL("/onboarding", request.url));
+    }
   }
 
-  // ─── Case 3: Proceed normally ──
+  // ─── Default: Proceed normally ──
   return NextResponse.next();
 }
 

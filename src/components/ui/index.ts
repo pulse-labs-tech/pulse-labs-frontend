@@ -1,8 +1,6 @@
 /**
  * UI components barrel export.
- * Add component exports here as they are created.
- *
- * Example:
- * export { Button } from "./button";
- * export { Card } from "./card";
  */
+
+export { Button } from "./button";
+export type { ButtonProps } from "./button";

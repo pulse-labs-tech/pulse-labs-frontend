@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -16,40 +15,68 @@ interface ScrollRevealProps {
   direction?: "up" | "down" | "left" | "right" | "none";
 }
 
+/**
+ * ScrollReveal — CSS-only scroll reveal with IntersectionObserver.
+ *
+ * Replaces Framer Motion whileInView for jank-free, GPU-composited
+ * reveal animations. Zero JS animation overhead — uses CSS transitions
+ * on `transform` and `opacity` only (compositor-only properties).
+ *
+ * @see /knowledge/animation-performance-kit.md
+ */
 export function ScrollReveal({
   children,
   className,
   delay = 0,
   direction = "up",
 }: ScrollRevealProps) {
-  const directionOffset = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { x: 40, y: 0 },
-    right: { x: -40, y: 0 },
-    none: { x: 0, y: 0 },
-  };
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // Respect reduced motion preference
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (prefersReduced.matches) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -80px 0px" },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const directionClass = {
+    up: "sr-up",
+    down: "sr-down",
+    left: "sr-left",
+    right: "sr-right",
+    none: "sr-none",
+  }[direction];
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        ...directionOffset[direction],
-      }}
-      whileInView={{
-        opacity: 1,
-        x: 0,
-        y: 0,
-      }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{
-        duration: 0.7,
-        delay,
-        ease: [0.21, 0.47, 0.32, 0.98], // Custom ease-out cubic
-      }}
-      className={cn("w-full", className)}
+    <div
+      ref={ref}
+      className={cn("sr-base", directionClass, isVisible && "sr-visible", className)}
+      style={
+        delay > 0
+          ? ({ "--sr-delay": `${delay * 1000}ms` } as React.CSSProperties)
+          : undefined
+      }
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

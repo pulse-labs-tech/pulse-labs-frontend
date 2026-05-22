@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { PulseLogo } from "@/components/shared/pulse-logo";
+import { Button } from "@/components/ui";
 
 const navLinks = [
   { href: "#features", label: "Tính năng" },
@@ -26,11 +27,19 @@ export function Header() {
         </div>
         <div className="hidden items-center gap-4 md:flex">
           <Link href="/login" className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">Đăng nhập</Link>
-          <Link href="/register" className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.25)] transition-all duration-300 hover:-translate-y-px hover:scale-105 hover:shadow-[0_0_25px_rgba(52,211,153,0.45)] active:scale-95 3xl:text-sm">Bắt đầu miễn phí</Link>
+          <Link href="/register" className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.75_0.19_160_/_0.20)] transition-all duration-200 hover:-translate-y-[1px] hover:scale-[1.02] hover:shadow-[0_0_28px_oklch(0.75_0.19_160_/_0.45)] active:scale-[0.97] 3xl:text-sm">Bắt đầu miễn phí</Link>
         </div>
-        <button type="button" onClick={() => setMobileOpen(!mobileOpen)} className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-95 md:hidden" aria-label={mobileOpen ? "Đóng menu" : "Mở menu"} aria-expanded={mobileOpen}>
+        <Button
+          type="button"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
+          aria-expanded={mobileOpen}
+        >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        </Button>
       </nav>
       {mobileOpen && (
         <div className="border-t border-white/[0.06] bg-auth-bg/95 px-5 pb-6 pt-4 backdrop-blur-2xl md:hidden">
@@ -38,7 +47,7 @@ export function Header() {
             {navLinks.map((l) => (<a key={l.href} href={l.href} onClick={() => setMobileOpen(false)} className="text-sm font-medium text-auth-text-2 transition-colors hover:text-white">{l.label}</a>))}
             <hr className="border-white/[0.06]" />
             <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-auth-text-2 hover:text-white">Đăng nhập</Link>
-            <Link href="/register" onClick={() => setMobileOpen(false)} className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(52,211,153,0.3)] active:scale-95">Bắt đầu miễn phí</Link>
+            <Link href="/register" onClick={() => setMobileOpen(false)} className="block w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_oklch(0.75_0.19_160_/_0.20)] transition-all duration-200 hover:shadow-[0_0_28px_oklch(0.75_0.19_160_/_0.45)] active:scale-[0.97]">Bắt đầu miễn phí</Link>
           </div>
         </div>
       )}

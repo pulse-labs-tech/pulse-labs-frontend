@@ -2,6 +2,7 @@
 
 import { X, Check, Gem, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui";
 
 interface ProModalProps {
   isOpen: boolean;
@@ -56,13 +57,15 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                     Mở khoá đa vai trò (Multi-role), tăng giới hạn lưu trữ và số lượng truy vấn AI.
                   </p>
                 </div>
-                <button
+                <Button
                   onClick={onClose}
-                  className="rounded-lg p-1.5 border border-auth-border bg-auth-elevated text-auth-text-3 hover:text-auth-text hover:bg-auth-card-hover transition-colors"
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 text-auth-text-3 hover:text-auth-text"
                   aria-label="Close modal"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
 
               {/* Plans Comparison */}
@@ -151,18 +154,22 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <button
+                <Button
                   onClick={handleUpgrade}
-                  className="flex-1 py-3 px-4 bg-auth-accent hover:bg-auth-accent-dark text-black font-semibold rounded-lg text-sm text-center shadow-lg shadow-auth-accent-glow transition-all hover:-translate-y-0.5 active:translate-y-0"
+                  variant="primary"
+                  size="lg"
+                  className="flex-1"
                 >
                   Nâng cấp Pro ngay →
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={onClose}
-                  className="flex-1 py-3 px-4 border border-auth-border bg-auth-elevated text-auth-text-2 hover:text-auth-text hover:bg-auth-card-hover rounded-lg text-sm text-center transition-colors"
+                  variant="secondary"
+                  size="lg"
+                  className="flex-1"
                 >
                   Tiếp tục dùng bản Free
-                </button>
+                </Button>
               </div>
             </div>
           </motion.div>
