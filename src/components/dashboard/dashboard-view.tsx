@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { Button, ScrollToTop } from "@/components/ui";
 import {
   LayoutDashboard,
   Brain,
@@ -123,47 +123,6 @@ const SKILLS_ITEMS: RolePanelItem[] = [
   { id: 19, iconName: "bot", color: "#f97316", bg: "rgba(249,115,22,.15)", label: "Stakeholder Mgmt" },
 ];
 
-interface DomainVisuals {
-  color: string;
-  badgeClass: string;
-  badgeText: string;
-  icon: string;
-}
-
-const getDomainVisuals = (name: string): DomainVisuals => {
-  const lowercase = name?.toLowerCase() || "";
-  if (lowercase.includes("fintech")) {
-    return { color: "#10b981", badgeClass: "badge-green", badgeText: "Active", icon: "landmark" };
-  }
-  if (lowercase.includes("rag") || lowercase.includes("llm")) {
-    return { color: "#f97316", badgeClass: "badge-orange", badgeText: "Hot", icon: "bot" };
-  }
-  if (lowercase.includes("devops")) {
-    return { color: "#3b82f6", badgeClass: "badge-blue", badgeText: "Active", icon: "server" };
-  }
-  if (lowercase.includes("toolkit") || lowercase.includes("ba")) {
-    return { color: "#8b5cf6", badgeClass: "badge-purple", badgeText: "Active", icon: "clipboard" };
-  }
-  if (lowercase.includes("blockchain")) {
-    return { color: "#d97706", badgeClass: "badge-muted", badgeText: "Active", icon: "link" };
-  }
-  if (lowercase.includes("security")) {
-    return { color: "#ef4444", badgeClass: "badge-muted", badgeText: "New", icon: "shield" };
-  }
-  if (lowercase.includes("ai") || lowercase.includes("ml")) {
-    return { color: "#a855f7", badgeClass: "badge-purple", badgeText: "Hot", icon: "cpu" };
-  }
-  if (lowercase.includes("data") || lowercase.includes("db") || lowercase.includes("database")) {
-    return { color: "#06b6d4", badgeClass: "badge-blue", badgeText: "Active", icon: "database" };
-  }
-  if (lowercase.includes("cloud")) {
-    return { color: "#f59e0b", badgeClass: "badge-orange", badgeText: "Active", icon: "zap" };
-  }
-  if (lowercase.includes("design") || lowercase.includes("product")) {
-    return { color: "#ec4899", badgeClass: "badge-muted", badgeText: "New", icon: "star" };
-  }
-  return { color: "#10b981", badgeClass: "badge-green", badgeText: "Active", icon: "file-text" };
-};
 
 const getDomainIcon = (name: string): string => {
   const lowercase = name?.toLowerCase() || "";
@@ -237,6 +196,10 @@ export function DashboardView() {
 
   // UI Page States
   const [sortBy, setSortBy] = useState<"name" | "domain" | "pct" | "updated">("updated");
+
+  // Custom Dropdown States (DeepMind design style)
+  const [kbDropdownOpen, setKbDropdownOpen] = useState(false);
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
 
   // UI Page States
   const [isLoading, setIsLoading] = useState(true);
@@ -394,6 +357,17 @@ export function DashboardView() {
     return () => clearTimeout(timer);
   }, [fetchDashboardData]);
 
+  // Handle click outside to close custom dropdown menus (DeepMind design switcher)
+  useEffect(() => {
+    if (!kbDropdownOpen && !sortDropdownOpen) return;
+    const handleClose = () => {
+      setKbDropdownOpen(false);
+      setSortDropdownOpen(false);
+    };
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, [kbDropdownOpen, sortDropdownOpen]);
+
   // ────────────────────────────────────────────────────────────────
   // 3. Active Jobs Polling Management
   // ────────────────────────────────────────────────────────────────
@@ -482,7 +456,7 @@ export function DashboardView() {
   const getSourceTypeIcon = (type: string) => {
     switch (type) {
       case "text":
-        return <FileText className="h-4 w-4 text-emerald-400" />;
+        return <FileText className="h-4 w-4 text-brand-400" />;
       case "url":
         return <Link2 className="h-4 w-4 text-blue-400" />;
       default:
@@ -494,8 +468,8 @@ export function DashboardView() {
     switch (status) {
       case "indexed":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-            <CheckCircle2 className="h-3 w-3" /> Sẵn sàng
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-auth-accent-dim border border-auth-accent/20 text-auth-accent">
+            Sẵn sàng
           </span>
         );
       case "pending":
@@ -650,10 +624,10 @@ export function DashboardView() {
   });
 
   return (
-    <div className="dashboard-page min-h-screen bg-[#09090b] text-[#fafafa] relative overflow-hidden flex flex-col">
+    <div className="dashboard-page min-h-screen bg-[#09090b] text-[#fafafa] relative overflow-hidden flex flex-col animate-fade-in">
       {/* Glow Effects */}
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]" style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.1) 0%, transparent 70%)" }} aria-hidden="true" />
-      <div className="pointer-events-none absolute -right-[100px] top-[10%] h-[400px] w-[400px] blur-[100px]" style={{ background: "radial-gradient(circle, oklch(0.75 0.19 160 / 0.05) 0%, transparent 70%)" }} aria-hidden="true" />
+      <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]" style={{ background: "radial-gradient(ellipse, var(--color-auth-accent-glow) 0%, transparent 70%)" }} aria-hidden="true" />
+      <div className="pointer-events-none absolute -right-[100px] top-[10%] h-[400px] w-[400px] blur-[100px]" style={{ background: "radial-gradient(circle, var(--color-auth-accent-dim) 0%, transparent 70%)" }} aria-hidden="true" />
 
       {/* ────────────────── Header / Navigation ────────────────── */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#09090b]/75 backdrop-blur-2xl">
@@ -661,15 +635,15 @@ export function DashboardView() {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-white">
-                Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+                Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
             <nav className="hidden items-center gap-1.5 md:flex">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/40 text-[#10b981] border border-emerald-500/20"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+                Dashboard
               </Link>
               <Link
                 href={stats.totalItems > 0 ? "/query" : "#"}
@@ -682,13 +656,13 @@ export function DashboardView() {
                     : "text-[#52525b] cursor-not-allowed"
                 }`}
               >
-                <MessageSquare className="h-3.5 w-3.5" /> Hỏi đáp AI
+                Hỏi đáp AI
               </Link>
               <Link
                 href="/wiki"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
               >
-                <BookOpen className="h-3.5 w-3.5" /> Wiki Cá nhân
+                Wiki Cá nhân
               </Link>
             </nav>
           </div>
@@ -699,7 +673,7 @@ export function DashboardView() {
               <div className="text-xs font-bold text-white">
                 {userCtx.displayName || userCtx.email}
               </div>
-              <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-950/40 px-2 py-0.2 text-[10px] font-semibold text-[#10b981]">
+              <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-border bg-auth-elevated px-2 py-0.2 text-[10px] font-semibold text-auth-text-2">
                 {planName}
               </span>
             </div>
@@ -724,7 +698,7 @@ export function DashboardView() {
         {isChangingRole && (
           <div className="absolute inset-0 bg-[#09090b]/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="h-8 w-8 animate-spin text-[#10b981]" />
+              <Loader2 className="h-8 w-8 animate-spin text-brand-400" />
               <p className="text-sm text-[#a1a1aa]">Đang đồng bộ vai trò chuyên môn...</p>
             </div>
           </div>
@@ -749,7 +723,7 @@ export function DashboardView() {
 
         {/* Welcome & Role context Switcher row */}
         <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500/40 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-500/40 to-transparent" />
           <div>
             <h1 className="text-fluid-lg font-extrabold tracking-tight">
               Xin chào, {userCtx.displayName || "Bạn"} 👋
@@ -766,24 +740,44 @@ export function DashboardView() {
             </label>
             {userCtx.plan === "pro" && userRoles.length > 1 ? (
               <div className="relative">
-                <select
-                  value={selectedRoleKbId}
-                  onChange={(e) => handleRoleChange(e.target.value)}
-                  className="w-full bg-[#18181b] border border-[#27272a] text-xs text-[#fafafa] font-semibold rounded-lg px-3 py-2 cursor-pointer focus:border-[#10b981] transition-all appearance-none"
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setKbDropdownOpen(!kbDropdownOpen);
+                  }}
+                  className="w-full bg-[#18181b] border border-[#27272a] hover:border-auth-accent/40 text-xs text-[#fafafa] font-semibold rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-all duration-300"
                 >
-                  {userRoles.map((r) => (
-                    <option key={r.id} value={r.id} className="bg-[#111113] text-[#fafafa]">
-                      {r.roleName} ({r.roleGroup})
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#52525b]">
-                  <ChevronRight className="h-4 w-4 rotate-90" />
-                </div>
+                  <span>
+                    {userRoles.find((r) => r.id === selectedRoleKbId)?.roleName || "Chọn Chuyên Ngành"}
+                  </span>
+                  <ChevronRight className={`h-4 w-4 text-[#52525b] transition-transform duration-300 ${kbDropdownOpen ? "-rotate-90" : "rotate-90"}`} />
+                </button>
+                
+                {kbDropdownOpen && (
+                  <div 
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-0 top-full mt-1.5 w-full min-w-[240px] z-50 glass-premium rounded-xl overflow-hidden py-1.5 shadow-2xl animate-dropdown-enter"
+                  >
+                    {userRoles.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => {
+                          handleRoleChange(r.id);
+                          setKbDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2.5 text-xs font-semibold flex items-center justify-between transition-colors duration-200 hover:bg-white/5 ${r.id === selectedRoleKbId ? "text-auth-accent bg-auth-accent-dim/30" : "text-auth-text-2"}`}
+                      >
+                        <span>{r.roleName} ({r.roleGroup})</span>
+                        {r.id === selectedRoleKbId && <span className="h-1.5 w-1.5 rounded-full bg-auth-accent" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-semibold text-[#10b981] flex items-center gap-2">
-                <Compass className="h-4 w-4 shrink-0 text-[#10b981]" />
+              <div className="bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-semibold text-auth-accent flex items-center gap-2">
                 <span>{roleCtx?.roleName || "Chưa xác định"}</span>
                 <span className="text-[10px] text-[#52525b] font-normal">
                   ({roleCtx?.roleGroup || "Khác"})
@@ -802,7 +796,7 @@ export function DashboardView() {
                 <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">Tiến trình nạp kiến thức</h2>
                 <p className="text-xs text-[#a1a1aa] mt-1">Các tài liệu đang được phân tích sang Wiki dạng cấu trúc.</p>
               </div>
-              <span className="flex items-center gap-1.5 text-xs text-[#10b981] font-semibold animate-pulse">
+              <span className="flex items-center gap-1.5 text-xs text-brand-400 font-semibold animate-pulse">
                 <Loader2 className="h-3 w-3 animate-spin" /> Đang cập nhật...
               </span>
             </div>
@@ -823,9 +817,7 @@ export function DashboardView() {
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                       job.status === "failed"
                         ? "bg-red-950/40 border border-red-500/20 text-red-400"
-                        : job.status === "wiki_ready"
-                          ? "bg-emerald-950/40 border border-emerald-500/20 text-emerald-400"
-                          : "bg-emerald-950/40 border border-[#10b981]/20 text-[#10b981]"
+                        : "bg-auth-accent-dim border border-auth-accent/20 text-auth-accent"
                     }`}>
                       {getJobStatusLabel(job.status)}
                     </span>
@@ -837,16 +829,14 @@ export function DashboardView() {
                       className={`h-full transition-all duration-500 rounded-full ${
                         job.status === "failed"
                           ? "bg-red-500"
-                          : job.status === "wiki_ready"
-                            ? "bg-[#10b981]"
-                            : "bg-gradient-to-r from-[#10b981] to-cyan-500"
+                          : "bg-[var(--color-auth-accent)]"
                       }`}
                       style={{ width: `${job.progress || 0}%` }}
                     />
                   </div>
 
                   <div className="flex justify-between items-center text-[10px] text-[#a1a1aa]">
-                    <span className="font-semibold text-[#10b981]">
+                    <span className="font-semibold text-brand-400">
                       {getJobStageTranslation(job.stage)}
                     </span>
                     <span>
@@ -889,69 +879,69 @@ export function DashboardView() {
                         ? "bg-red-500"
                         : quota.storage.status === "warning"
                           ? "bg-amber-400"
-                          : "bg-[#10b981]"
+                          : "bg-[var(--color-auth-accent)]"
                     }`}
                     style={{ width: `${quota.storage.percentage || 0}%` }}
                   />
                 </div>
                 <span className="text-[9px] text-[#52525b]">Gói hỗ trợ biên soạn tài liệu</span>
-              </div>
+               </div>
 
-              {/* 2. Queries Quota */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-[#a1a1aa]">Lượt hỏi AI hàng ngày</span>
-                  <span className="text-[10px] text-[#52525b] font-mono">
-                    {quota.queries.used} / {quota.queries.limit} lượt
-                  </span>
-                </div>
-                <div className="w-full bg-[#09090b] h-2 rounded-full overflow-hidden border border-white/[0.04]">
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      quota.queries.status === "exceeded"
-                        ? "bg-red-500"
-                        : quota.queries.status === "warning"
-                          ? "bg-amber-400"
-                          : "bg-[#10b981]"
-                    }`}
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        (quota.queries.used / (quota.queries.limit || 1)) * 100
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <span className="text-[9px] text-[#52525b] font-medium">
-                  Tự động làm mới hàng ngày
-                </span>
-              </div>
+               {/* 2. Queries Quota */}
+               <div className="flex flex-col gap-1.5">
+                 <div className="flex justify-between text-xs">
+                   <span className="font-semibold text-[#a1a1aa]">Lượt hỏi AI hàng ngày</span>
+                   <span className="text-[10px] text-[#52525b] font-mono">
+                     {quota.queries.used} / {quota.queries.limit} lượt
+                   </span>
+                 </div>
+                 <div className="w-full bg-[#09090b] h-2 rounded-full overflow-hidden border border-white/[0.04]">
+                   <div
+                     className={`h-full rounded-full transition-all duration-300 ${
+                       quota.queries.status === "exceeded"
+                         ? "bg-red-500"
+                         : quota.queries.status === "warning"
+                           ? "bg-amber-400"
+                           : "bg-[var(--color-auth-accent)]"
+                     }`}
+                     style={{
+                       width: `${Math.min(
+                         100,
+                         (quota.queries.used / (quota.queries.limit || 1)) * 100
+                       )}%`,
+                     }}
+                   />
+                 </div>
+                 <span className="text-[9px] text-[#52525b] font-medium">
+                   Tự động làm mới hàng ngày
+                 </span>
+               </div>
 
-              {/* 3. Compiles Quota */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-[#a1a1aa]">Hạn mức biên dịch tháng</span>
-                  <span className="text-[10px] text-[#52525b] font-mono">
-                    {quota.compiles.used} / {quota.compiles.limit} nguồn
-                  </span>
-                </div>
-                <div className="w-full bg-[#09090b] h-2 rounded-full overflow-hidden border border-white/[0.04]">
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      quota.compiles.status === "exceeded"
-                        ? "bg-red-500"
-                        : quota.compiles.status === "warning"
-                          ? "bg-amber-400"
-                          : "bg-[#10b981]"
-                    }`}
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        (quota.compiles.used / (quota.compiles.limit || 1)) * 100
-                      )}%`,
-                    }}
-                  />
-                </div>
+               {/* 3. Compiles Quota */}
+               <div className="flex flex-col gap-1.5">
+                 <div className="flex justify-between text-xs">
+                   <span className="font-semibold text-[#a1a1aa]">Hạn mức biên dịch tháng</span>
+                   <span className="text-[10px] text-[#52525b] font-mono">
+                     {quota.compiles.used} / {quota.compiles.limit} nguồn
+                   </span>
+                 </div>
+                 <div className="w-full bg-[#09090b] h-2 rounded-full overflow-hidden border border-white/[0.04]">
+                   <div
+                     className={`h-full rounded-full transition-all duration-300 ${
+                       quota.compiles.status === "exceeded"
+                         ? "bg-red-500"
+                         : quota.compiles.status === "warning"
+                           ? "bg-amber-400"
+                           : "bg-indigo-500"
+                     }`}
+                     style={{
+                       width: `${Math.min(
+                         100,
+                         (quota.compiles.used / (quota.compiles.limit || 1)) * 100
+                       )}%`,
+                     }}
+                   />
+                 </div>
                 <span className="text-[9px] text-[#52525b]">Làm mới vào đầu tháng tiếp theo</span>
               </div>
             </div>
@@ -976,7 +966,6 @@ export function DashboardView() {
               const dest = item.id ? `/wiki/items/${item.id}` : "/wiki";
               return (
                 <Link key={item.id || item.name} href={dest} className="recent-chip">
-                  {getIconComponent(item.icon)}
                   {item.name}
                 </Link>
               );
@@ -1003,38 +992,27 @@ export function DashboardView() {
               <div className="domain-card-section fade-up">
                 <div className="domain-grid">
                   {summary?.domainSnapshot?.map((dom) => {
-                    const visuals = getDomainVisuals(dom.name);
+                    const iconName = getDomainIcon(dom.name);
                     const pctVal = dom.itemCount > 0 ? Math.round((dom.indexedCount / dom.itemCount) * 100) : 0;
                     return (
                       <Link
                         key={dom.id}
                         href={`/wiki?domainId=${dom.id}`}
                         className="domain-kcard"
-                        style={{ "--accent-color": visuals.color } as React.CSSProperties}
                         role="button"
                         tabIndex={0}
                         aria-label={`${dom.name} — ${dom.itemCount} items`}
                       >
-                        <div
-                          className="dk-icon-box"
-                          style={{
-                            backgroundColor: `${visuals.color}18`,
-                            color: visuals.color,
-                          }}
-                        >
-                          {getIconComponent(visuals.icon)}
+                        <div className="dk-icon-box bg-auth-accent-dim text-auth-accent border border-auth-accent/20">
+                          {getIconComponent(iconName)}
                         </div>
                         <div className="dk-name">{dom.name}</div>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <div className="dk-count">{dom.itemCount} items</div>
-                          <span className={`badge ${visuals.badgeClass}`} style={{ fontSize: "10px" }}>{visuals.badgeText}</span>
-                        </div>
+                        <div className="dk-count">{dom.itemCount} items</div>
                         <div className="dk-bar">
                           <div
-                            className="dk-bar-fill"
+                            className="dk-bar-fill bg-auth-accent"
                             style={{
                               width: `${pctVal}%`,
-                              backgroundColor: visuals.color,
                             }}
                           />
                         </div>
@@ -1055,18 +1033,49 @@ export function DashboardView() {
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }} className="relative">
                   <span className="tech-sort-label">Sắp xếp</span>
-                  <select
-                    className="tech-sort-select"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSortDropdownOpen(!sortDropdownOpen);
+                    }}
+                    className="tech-sort-select text-left"
+                    style={{ minWidth: "110px" }}
                   >
-                    <option value="name">Tên</option>
-                    <option value="domain">Lĩnh vực</option>
-                    <option value="pct">Độ thành thạo</option>
-                    <option value="updated">Mới nhất</option>
-                  </select>
+                    {sortBy === "name" && "Tên"}
+                    {sortBy === "domain" && "Lĩnh vực"}
+                    {sortBy === "pct" && "Độ thành thạo"}
+                    {sortBy === "updated" && "Mới nhất"}
+                  </button>
+
+                  {sortDropdownOpen && (
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute right-0 top-full mt-1.5 w-[140px] z-50 glass-premium rounded-xl overflow-hidden py-1.5 shadow-2xl animate-dropdown-enter"
+                    >
+                      {[
+                        { value: "name", label: "Tên" },
+                        { value: "domain", label: "Lĩnh vực" },
+                        { value: "pct", label: "Độ thành thạo" },
+                        { value: "updated", label: "Mới nhất" }
+                      ].map((item) => (
+                        <button
+                          key={item.value}
+                          type="button"
+                          onClick={() => {
+                            setSortBy(item.value as any);
+                            setSortDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs font-semibold flex items-center justify-between transition-colors duration-200 hover:bg-white/5 ${sortBy === item.value ? "text-auth-accent bg-auth-accent-dim/30" : "text-auth-text-2"}`}
+                        >
+                          <span>{item.label}</span>
+                          {sortBy === item.value && <span className="h-1.5 w-1.5 rounded-full bg-auth-accent" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="tech-section fade-up">
@@ -1090,26 +1099,26 @@ export function DashboardView() {
                           style={{ cursor: "pointer" }}
                         >
                           <td>
-                            <div className="tech-name">
-                              <div className="tech-emoji-icon" style={{ color: t.color }}>
-                                {getIconComponent(t.icon)}
-                              </div>
+                            <div className="tech-name font-bold text-white text-xs py-1">
                               {t.name}
                             </div>
                           </td>
-                          <td><span className={`badge ${t.catBadge}`}>{t.cat}</span></td>
                           <td>
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                              <div className="tech-bar">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#18181b] border border-[#27272a] text-[#a1a1aa]">
+                              {t.cat}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="flex items-center gap-2.5">
+                              <div className="tech-bar h-1 w-20 bg-[#1c1c1f] rounded-full overflow-hidden">
                                 <div
-                                  className="tech-bar-fill"
+                                  className="tech-bar-fill h-full bg-[var(--color-auth-accent)] rounded-full"
                                   style={{
                                     width: `${t.pct}%`,
-                                    backgroundColor: t.color,
                                   }}
                                 />
                               </div>
-                              <span style={{ fontSize: "11px", color: "var(--text-2)", fontFamily: "var(--mono)" }}>{t.pct}%</span>
+                              <span className="text-[10px] text-auth-text-3 font-semibold font-mono">{t.pct}%</span>
                             </div>
                           </td>
                           <td style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--text-2)" }}>{t.items}</td>
@@ -1143,18 +1152,10 @@ export function DashboardView() {
                     <Link
                       key={item.id}
                       href={`/wiki/items/${item.id}`}
-                      className="role-item"
+                      className="group/item flex items-center justify-between py-2 border-b border-[#27272a]/40 text-xs text-auth-text-2 hover:text-white transition-colors"
                     >
-                      <div
-                        className="role-item-icon"
-                        style={{
-                          backgroundColor: item.bg,
-                          color: item.color,
-                        }}
-                      >
-                        {getIconComponent(item.iconName)}
-                      </div>
-                      {item.label}
+                      <span>{item.label}</span>
+                      <ChevronRight className="h-3.5 w-3.5 text-auth-text-3 opacity-0 transform -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
                     </Link>
                   ))}
                 </div>
@@ -1180,8 +1181,7 @@ export function DashboardView() {
                     href={`/query?prompt=${encodeURIComponent(
                       "Help me document my ITBA Workflow. I want to create a structured knowledge entry covering the 3 core ITBA phases: Research Phase, Design & Validate Phase, and Spec & Handoff Protocol. Please provide a step-by-step workflow with inputs, outputs, and gate conditions for each phase."
                     )}`}
-                    className="btn btn-primary btn-sm"
-                    style={{ margin: "0 auto", display: "inline-flex" }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-auth-accent text-white hover:bg-auth-accent-dark transition-all active:scale-[0.98] shadow-[0_0_15px_var(--color-auth-accent-glow)]"
                   >
                     <Plus className="h-3.5 w-3.5" /> Vẽ quy trình AI
                   </Link>
@@ -1205,18 +1205,10 @@ export function DashboardView() {
                     <Link
                       key={item.id}
                       href={`/wiki/items/${item.id}`}
-                      className="role-item"
+                      className="group/item flex items-center justify-between py-2 border-b border-[#27272a]/40 text-xs text-auth-text-2 hover:text-white transition-colors"
                     >
-                      <div
-                        className="role-item-icon"
-                        style={{
-                          backgroundColor: item.bg,
-                          color: item.color,
-                        }}
-                      >
-                        {getIconComponent(item.iconName)}
-                      </div>
-                      {item.label}
+                      <span>{item.label}</span>
+                      <ChevronRight className="h-3.5 w-3.5 text-auth-text-3 opacity-0 transform -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
                     </Link>
                   ))}
                 </div>
@@ -1227,14 +1219,17 @@ export function DashboardView() {
         </div>
       </main>
 
+      {/* Scroll to Top */}
+      <ScrollToTop className="bottom-[96px] right-[32px]" />
+
       {/* Floating Action Button */}
       <Link
         href={`/compile/new?roleKbId=${selectedRoleKbId}`}
-        className="fab-compile"
+        className="fab-compile group"
         title="Compile new knowledge"
       >
-        <Plus className="h-4 w-4" />
-        Compile
+        <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+        <span>Compile</span>
       </Link>
 
       {/* Footer */}

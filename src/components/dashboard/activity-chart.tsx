@@ -198,12 +198,12 @@ export function ActivityChart() {
             <defs>
               {/* Gradients matching spec */}
               <linearGradient id="compileGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0.01} />
+                <stop offset="0%" stopColor="var(--color-auth-accent)" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="var(--color-auth-accent)" stopOpacity={0.01} />
               </linearGradient>
               <linearGradient id="queryGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.15} />
-                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.01} />
+                <stop offset="0%" stopColor="var(--color-auth-text-3)" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="var(--color-auth-text-3)" stopOpacity={0.01} />
               </linearGradient>
             </defs>
 
@@ -281,7 +281,7 @@ export function ActivityChart() {
               <path
                 d={compilePath}
                 fill="none"
-                stroke="#10b981"
+                stroke="var(--color-auth-accent)"
                 strokeWidth={2}
                 strokeLinecap="round"
               />
@@ -290,7 +290,7 @@ export function ActivityChart() {
               <path
                 d={queryPath}
                 fill="none"
-                stroke="#8b5cf6"
+                stroke="var(--color-auth-text-3)"
                 strokeWidth={2}
                 strokeLinecap="round"
               />
@@ -318,7 +318,7 @@ export function ActivityChart() {
                   cx={pt.x}
                   cy={pt.y}
                   r={isHovered ? 5 : 3}
-                  fill="#10b981"
+                  fill="var(--color-auth-accent)"
                   stroke="#141416"
                   strokeWidth={isHovered ? 2 : 1}
                   className="transition-all duration-75"
@@ -335,7 +335,7 @@ export function ActivityChart() {
                   cx={pt.x}
                   cy={pt.y}
                   r={isHovered ? 5 : 3}
-                  fill="#8b5cf6"
+                  fill="var(--color-auth-text-3)"
                   stroke="#141416"
                   strokeWidth={isHovered ? 2 : 1}
                   className="transition-all duration-75"
@@ -357,11 +357,11 @@ export function ActivityChart() {
           >
             <div className="font-bold text-[#fafafa] mb-1">{labels[hoveredIdx]}</div>
             <div className="flex items-center gap-1.5 text-[#a1a1aa] mb-0.5">
-              <span className="w-2 h-2 rounded-full bg-[#10b981]" />
+              <span className="w-2 h-2 rounded-full bg-[var(--color-auth-accent)]" />
               <span>Compiled: <strong className="text-white">{compile[hoveredIdx]}</strong></span>
             </div>
             <div className="flex items-center gap-1.5 text-[#a1a1aa]">
-              <span className="w-2 h-2 rounded-full bg-[#8b5cf6]" />
+              <span className="w-2 h-2 rounded-full bg-[var(--color-auth-text-3)]" />
               <span>Queries: <strong className="text-white">{query[hoveredIdx]}</strong></span>
             </div>
           </div>

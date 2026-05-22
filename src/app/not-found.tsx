@@ -10,30 +10,30 @@ export default function NotFound() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-auth-bg px-5 text-auth-text">
       {/* Ambient glows */}
-      <div className="pointer-events-none absolute left-1/2 top-[20%] h-[500px] w-[700px] -translate-x-1/2 blur-[120px]" style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.10) 0%, transparent 70%)" }} aria-hidden="true" />
+      <div className="pointer-events-none absolute left-1/2 top-[20%] h-[500px] w-[700px] -translate-x-1/2 blur-[120px]" style={{ background: "radial-gradient(ellipse, oklch(0.72 0.11 145 / 0.10) 0%, transparent 70%)" }} aria-hidden="true" />
       <div className="pointer-events-none absolute -right-[50px] bottom-[20%] h-[350px] w-[350px] blur-[100px]" style={{ background: "radial-gradient(circle, oklch(0.68 0.18 280 / 0.06) 0%, transparent 70%)" }} aria-hidden="true" />
 
       <div className="relative flex max-w-lg flex-col items-center text-center">
         {/* Floating animated logo */}
         <div className="relative mb-6 animate-[float_3s_ease-in-out_infinite]">
-          <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-[0_0_30px_rgba(52,211,153,0.3)]">
+          <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-[0_0_30px_oklch(0.72_0.11_145_/_0.30)]">
             <Image src="/images/logo-512.png" alt="Pulse Knowledge" width={64} height={64} className="h-full w-full object-cover" priority />
           </div>
           {/* Shimmer ring */}
-          <div className="absolute -inset-1 -z-10 rounded-[18px] bg-gradient-conic from-emerald-400/30 via-transparent to-emerald-400/30 animate-[spin_4s_linear_infinite] blur-[2px]" />
+          <div className="absolute -inset-1 -z-10 rounded-[18px] bg-gradient-conic from-[var(--color-brand-400)]/30 via-transparent to-[var(--color-brand-400)]/30 animate-[spin_4s_linear_infinite] blur-[2px]" />
         </div>
 
         {/* Brand name */}
         <Link href="/" className="mb-8 text-sm font-bold tracking-tight opacity-70 transition-opacity hover:opacity-100 animate-[fadeUp_0.5s_ease-out_0.1s_both]">
-          Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+          Pulse<span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">Knowledge</span>
         </Link>
 
         {/* 404 number — large gradient with glow */}
         <div className="relative animate-[fadeUp_0.5s_ease-out_0.2s_both]">
-          <p className="bg-gradient-to-b from-emerald-400 via-teal-300 to-emerald-400/20 bg-clip-text text-[10rem] font-black leading-none tracking-tighter text-transparent sm:text-[12rem]">
+          <p className="bg-gradient-to-b from-[var(--color-brand-400)] via-[var(--color-accent-300)] to-[var(--color-brand-400)]/20 bg-clip-text text-[10rem] font-black leading-none tracking-tighter text-transparent sm:text-[12rem]">
             404
           </p>
-          <div className="pointer-events-none absolute inset-0 blur-[60px]" style={{ background: "radial-gradient(circle, oklch(0.75 0.19 160 / 0.12) 0%, transparent 60%)" }} aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 blur-[60px]" style={{ background: "radial-gradient(circle, oklch(0.72 0.11 145 / 0.12) 0%, transparent 60%)" }} aria-hidden="true" />
         </div>
 
         {/* Message */}
@@ -46,7 +46,7 @@ export default function NotFound() {
 
         {/* Action buttons */}
         <div className="mt-10 flex flex-col gap-3 sm:flex-row animate-[fadeUp_0.5s_ease-out_0.5s_both]">
-          <Link href="/" className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-7 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(52,211,153,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_0_40px_rgba(52,211,153,0.5)] active:scale-95">
+          <Link href="/" className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] px-7 py-3 text-sm font-bold text-white shadow-[0_0_20px_oklch(0.72_0.11_145_/_0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_0_40px_oklch(0.72_0.11_145_/_0.5)] active:scale-95">
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
             Về trang chủ
           </Link>

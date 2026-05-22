@@ -24,7 +24,7 @@ export function LoginForm() {
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
         {/* Mobile logo — shown only on small screens */}
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_12px_rgba(52,211,153,0.3)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent-500)] shadow-[0_0_12px_oklch(0.72_0.11_145_/_0.3)]">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -36,7 +36,7 @@ export function LoginForm() {
             </svg>
           </div>
           <span className="text-sm font-bold tracking-tight text-auth-text">
-            Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+            Pulse<span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">Knowledge</span>
           </span>
         </div>
 

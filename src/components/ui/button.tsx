@@ -27,12 +27,24 @@ import { Loader2 } from "lucide-react";
 
 const variantClasses: Record<string, string> = {
   primary: [
-    "bg-gradient-to-r from-emerald-500 to-teal-500 text-white",
-    "shadow-[0_0_15px_oklch(0.75_0.19_160_/_0.20)]",
-    "hover:shadow-[0_0_28px_oklch(0.75_0.19_160_/_0.45)] hover:-translate-y-[1px]",
+    "bg-[var(--color-auth-accent)] text-white",
+    "shadow-[0_0_15px_var(--color-auth-accent-glow)]",
+    "hover:bg-[var(--color-auth-accent-dark)] hover:shadow-[0_0_28px_var(--color-auth-accent-glow)] hover:-translate-y-[1px]",
     "active:scale-[0.97] active:shadow-none",
     "disabled:opacity-60 disabled:pointer-events-none disabled:shadow-none",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-auth-accent)]",
+  ].join(" "),
+
+  premium: [
+    "relative overflow-hidden z-0",
+    "bg-[var(--color-auth-bg)] border border-[var(--color-auth-border)] text-white",
+    "hover:border-transparent",
+    "hover:shadow-[0_0_20px_var(--color-auth-accent-glow)] hover:-translate-y-[1px]",
+    "active:scale-[0.97] active:shadow-none",
+    "disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-auth-accent)]",
+    "before:absolute before:inset-[-150%] before:z-[-2] before:bg-[conic-gradient(from_0deg,transparent_45%,var(--color-auth-accent)_50%,transparent_55%)] before:animate-[spin_4s_linear_infinite] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300",
+    "after:absolute after:inset-[1px] after:z-[-1] after:bg-[var(--color-auth-bg)] after:rounded-[inherit] hover:after:bg-[var(--color-auth-surface)] after:transition-colors after:duration-200",
   ].join(" "),
 
   secondary: [
@@ -91,6 +103,8 @@ export interface ButtonProps
   rightIcon?: React.ReactNode;
   /** Makes the button expand to 100% width */
   fullWidth?: boolean;
+  /** Makes the button pill-shaped (rounded-full) */
+  pill?: boolean;
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────
@@ -104,6 +118,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       leftIcon,
       rightIcon,
       fullWidth = false,
+      pill = false,
       children,
       disabled,
       className = "",
@@ -111,13 +126,24 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    let variantCls = variantClasses[variant] || "";
+    let sizeCls = sizeClasses[size] || "";
+
+    if (pill) {
+      // Remove any existing non-full rounded classes to avoid styling conflicts
+      variantCls = variantCls.replace(/\brounded-(?:lg|xl|md|sm|2xl)\b/g, "");
+      sizeCls = sizeCls.replace(/\brounded-(?:lg|xl|md|sm|2xl)\b/g, "");
+      sizeCls += " rounded-full";
+    }
+
     const base = [
       "inline-flex items-center justify-center",
-      "transition-all duration-200",
+      "transition-all duration-300 ease-premium",
       "cursor-pointer select-none",
       "whitespace-nowrap",
-      variantClasses[variant],
-      sizeClasses[size],
+      "group", // Enable hover group transitions for child icons
+      variantCls,
+      sizeCls,
       fullWidth ? "w-full" : "",
       className,
     ]
@@ -142,13 +168,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           <>
             {leftIcon && (
-              <span className="shrink-0" aria-hidden="true">
+              <span className="shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" aria-hidden="true">
                 {leftIcon}
               </span>
             )}
-            {size !== "icon" && children}
+            {children}
             {rightIcon && (
-              <span className="shrink-0" aria-hidden="true">
+              <span className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
                 {rightIcon}
               </span>
             )}

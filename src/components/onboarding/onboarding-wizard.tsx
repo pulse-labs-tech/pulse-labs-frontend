@@ -41,7 +41,7 @@ import type {
 const STATIC_ROLE_GROUPS: RoleGroupOption[] = [
   {
     id: "engineering",
-    label: "⚙️ Engineering",
+    label: "Engineering",
     icon: "settings",
     roles: [
       { id: "frontend", label: "Frontend Dev", description: "React, Vue, CSS, UI, Performance" },
@@ -54,7 +54,7 @@ const STATIC_ROLE_GROUPS: RoleGroupOption[] = [
   },
   {
     id: "business",
-    label: "💼 Business",
+    label: "Business",
     icon: "briefcase",
     roles: [
       { id: "ba", label: "Business Analyst", description: "Requirements, BPMN, User Stories" },
@@ -67,7 +67,7 @@ const STATIC_ROLE_GROUPS: RoleGroupOption[] = [
   },
   {
     id: "design",
-    label: "🎨 Design & Product",
+    label: "Design & Product",
     icon: "palette",
     roles: [
       { id: "ux", label: "UX Designer", description: "Research, Wireframe, Usability" },
@@ -77,7 +77,7 @@ const STATIC_ROLE_GROUPS: RoleGroupOption[] = [
   },
   {
     id: "data",
-    label: "📊 Data & AI",
+    label: "Data & AI",
     icon: "bar-chart",
     roles: [
       { id: "data_analyst", label: "Data Analyst", description: "SQL, BI, Dashboard, Insight" },
@@ -87,7 +87,7 @@ const STATIC_ROLE_GROUPS: RoleGroupOption[] = [
   },
   {
     id: "other",
-    label: "+ Khác",
+    label: "Khác",
     icon: "plus",
     roles: [],
   },
@@ -579,15 +579,15 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-auth-bg text-auth-text py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col justify-between bg-auth-bg text-auth-text py-12 px-4 relative overflow-hidden animate-fade-in">
       {/* Background gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-auth-accent/5 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-auth-purple-dim/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-auth-accent-glow/5 rounded-full blur-[120px]" />
 
       <main className="flex-grow flex items-center justify-center z-10 w-full">
         <div className="w-full max-w-2xl bg-auth-surface border border-auth-border rounded-2xl p-6 md:p-10 shadow-auth shadow-black/40 flex flex-col gap-8 relative overflow-hidden backdrop-blur-md">
           {/* Top indicator glow */}
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-auth-accent to-auth-purple" />
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-auth-accent" />
 
           {/* ────────────────── Progress bar (Top) ────────────────── */}
           <div className="flex flex-col gap-2">
@@ -682,11 +682,11 @@ export function OnboardingWizard() {
             <div className="flex flex-col gap-6 animate-fade-in">
               <div>
                 <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-auth-text">
-                  Chào mừng đến Pulse Knowledge 👋
+                  Chào mừng đến Pulse Knowledge
                 </h1>
                 <p className="text-sm text-auth-text-2 mt-3 leading-relaxed">
                   <strong className="text-auth-text text-gradient">
-                    KB tích lũy theo domain — AI không bao giờ quên.
+                     KB tích lũy theo domain — AI không bao giờ quên.
                   </strong>
                   <br />
                   Khác với chatbot thông thường, Pulse Knowledge lưu trữ và tích lũy tri thức chuyên
@@ -697,7 +697,7 @@ export function OnboardingWizard() {
               {/* Feature Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-start hover:border-auth-text-3 transition-colors hover-lift">
-                  <div className="w-9 h-9 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <Brain className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
@@ -709,7 +709,7 @@ export function OnboardingWizard() {
                 </div>
 
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-start hover:border-auth-text-3 transition-colors hover-lift">
-                  <div className="w-9 h-9 rounded-lg bg-auth-purple-dim text-auth-purple flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <Search className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
@@ -721,7 +721,7 @@ export function OnboardingWizard() {
                 </div>
 
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-start hover:border-auth-text-3 transition-colors hover-lift">
-                  <div className="w-9 h-9 rounded-lg bg-auth-orange-dim text-auth-orange flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <Target className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
@@ -879,9 +879,9 @@ export function OnboardingWizard() {
 
               {/* Pro Upgrade Nudge (Free plan role limit check nudges) */}
               {showProNudge && plan === "free" && (
-                <div className="flex justify-between items-center bg-auth-elevated border border-auth-purple/40 rounded-xl p-3.5 text-xs text-auth-text-2 animate-fade-up">
+                <div className="flex justify-between items-center bg-auth-elevated border border-auth-accent/30 rounded-xl p-3.5 text-xs text-auth-text-2 animate-fade-up">
                   <div className="flex items-center gap-2">
-                    <Gem className="h-4.5 w-4.5 text-auth-purple animate-pulse" />
+                    <Gem className="h-4.5 w-4.5 text-auth-accent animate-pulse" />
                     <span>
                       Muốn thêm vai trò? <strong>VD: Frontend + DevOps</strong>. Gói Free chỉ hỗ trợ
                       1.
@@ -1033,7 +1033,7 @@ export function OnboardingWizard() {
                 <div className="flex flex-col gap-4">
                   {/* File Upload Zone (MVP hidden/disabled with "Coming Soon" badge) */}
                   <div className="border border-dashed border-auth-border bg-auth-elevated/40 rounded-xl p-6 text-center flex flex-col gap-3 items-center relative overflow-hidden">
-                    <div className="absolute top-2 right-2 bg-auth-purple-dim border border-auth-purple/30 text-auth-purple text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                    <div className="absolute top-2 right-2 bg-auth-accent-dim border border-auth-accent/20 text-auth-accent text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
                       <Lock className="h-3 w-3" />
                       Sắp ra mắt
                     </div>

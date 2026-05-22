@@ -82,7 +82,7 @@ export function VerifyEmailForm() {
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
         {/* Mobile logo — shown only on small screens */}
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_12px_rgba(52,211,153,0.3)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 to-accent-500 shadow-[0_0_12px_var(--color-auth-accent-glow)]">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -94,7 +94,7 @@ export function VerifyEmailForm() {
             </svg>
           </div>
           <span className="text-sm font-bold tracking-tight text-auth-text">
-            Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+            Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
           </span>
         </div>
 
@@ -116,8 +116,8 @@ export function VerifyEmailForm() {
 
           {status === "success" && (
             <div className="flex flex-col items-center gap-4 w-full">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-950/30">
-                <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-brand-500/20 bg-brand-950/30">
+                <CheckCircle2 className="h-6 w-6 text-brand-400" />
               </div>
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
                 Xác minh thành công!
@@ -127,7 +127,7 @@ export function VerifyEmailForm() {
               </p>
               <Link
                 href="/login"
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] 3xl:text-sm 3xl:py-3.5"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-accent-500 px-4 py-3 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.72_0.11_145_/_0.20)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_25px_oklch(0.72_0.11_145_/_0.45)] 3xl:text-sm 3xl:py-3.5"
               >
                 Đăng nhập ngay →
               </Link>

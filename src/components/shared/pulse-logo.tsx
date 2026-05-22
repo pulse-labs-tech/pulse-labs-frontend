@@ -30,8 +30,8 @@ export function PulseLogo({ size = 40, className = "" }: PulseLogoProps) {
       <defs>
         {/* Emerald → Teal icon gradient */}
         <linearGradient id={`${uid}-g`} x1="4" y1="4" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#2dd4bf" />
+          <stop offset="0%" stopColor="var(--color-brand-400)" />
+          <stop offset="100%" stopColor="var(--color-accent-400)" />
         </linearGradient>
 
         {/* Soft glow for the waveform */}

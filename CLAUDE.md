@@ -5,8 +5,8 @@ This is the **Pulse Knowledge** Next.js 16 frontend. Always follow the design sy
 ## Quick Reference
 
 - **Theme**: Dark-only. All pages use `bg-auth-bg` (`oklch(0.12 0.006 260)`).
-- **Primary color**: Jade-emerald green `oklch(0.75 0.19 160)` → `text-auth-accent`, `bg-auth-accent`.
-- **CTA button pattern**: `bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_25px_rgba(52,211,153,0.4)] active:scale-[0.98]`
+- **Primary color**: Softer Jade-emerald green `oklch(0.68 0.15 160)` → `text-auth-accent`, `bg-auth-accent`.
+- **CTA button pattern**: `bg-[var(--color-auth-accent)] text-white hover:bg-[var(--color-auth-accent-dark)] shadow-[0_0_15px_var(--color-auth-accent-glow)] active:scale-[0.98]`
 - **Language**: All UI text must be in **Vietnamese**.
 - **CSS framework**: TailwindCSS v4 — tokens in `src/app/globals.css` `@theme inline {}` block, NO `tailwind.config.ts`.
 - **Component pattern**: Server Actions (`src/app/actions/*.ts`) + React 19 `useActionState`.
@@ -14,6 +14,6 @@ This is the **Pulse Knowledge** Next.js 16 frontend. Always follow the design sy
 
 ## Never
 - Use light backgrounds (`bg-white`, `bg-gray-50`)
-- Use blue/indigo colors for UI chrome
-- Hardcode hex/rgb colors
+- Hardcode hex/rgb colors (unless absolutely necessary in charts/SVG)
 - Use English for user-facing text
+- Use excessive multi-colored icon highlights or sparkles (keep UI minimalist)

@@ -67,7 +67,7 @@ export function RegisterForm() {
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
         {/* Mobile logo — shown only on small screens */}
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_12px_rgba(52,211,153,0.3)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent-500)] shadow-[0_0_12px_oklch(0.72_0.11_145_/_0.3)]">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -80,7 +80,7 @@ export function RegisterForm() {
           </div>
           <span className="text-sm font-bold tracking-tight text-auth-text">
             Pulse
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">
               Knowledge
             </span>
           </span>
@@ -297,7 +297,7 @@ export function RegisterForm() {
                             ? "bg-red-500"
                             : strengthScore === 2
                               ? "bg-orange-500"
-                              : "bg-emerald-500"
+                              : "bg-[var(--color-brand-500)]"
                           : "bg-auth-border"
                       }`}
                     />
@@ -322,7 +322,7 @@ export function RegisterForm() {
               value="true"
               required
               aria-invalid={!!state?.errors?.acceptedTerms}
-              className="mt-0.5 h-4 w-4 shrink-0 appearance-none rounded border border-auth-border bg-auth-elevated transition-colors duration-200 checked:border-emerald-500 checked:bg-emerald-500 focus:ring-2 focus:ring-auth-accent-dim cursor-pointer relative
+              className="mt-0.5 h-4 w-4 shrink-0 appearance-none rounded border border-auth-border bg-auth-elevated transition-colors duration-200 checked:border-[var(--color-auth-accent)] checked:bg-[var(--color-auth-accent)] focus:ring-2 focus:ring-auth-accent-dim cursor-pointer relative
               checked:after:content-['✓'] checked:after:text-white checked:after:text-[10px] checked:after:font-bold checked:after:absolute checked:after:inset-0 checked:after:flex checked:after:items-center checked:after:justify-center"
             />
             <label
@@ -440,8 +440,8 @@ function VerifyEmailScreen({
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
         {/* Success icon */}
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-950/30">
-          <Mail className="h-6 w-6 text-emerald-400" />
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--color-auth-accent)]/20 bg-[var(--color-auth-accent-dim)]">
+          <Mail className="h-6 w-6 text-[var(--color-auth-accent)]" />
         </div>
 
         <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
@@ -480,7 +480,7 @@ function VerifyEmailScreen({
           {resendMessage && (
             <p className={`mt-1 text-xs ${
               resendMessage.startsWith("✓")
-                ? "text-emerald-400"
+                ? "text-[var(--color-auth-accent)]"
                 : "text-auth-error"
             }`}>
               {resendMessage}
@@ -491,7 +491,7 @@ function VerifyEmailScreen({
         <div className="mt-8">
           <Link
             href="/login"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.75_0.19_160_/_0.20)] transition-colors duration-200 hover:shadow-[0_0_28px_oklch(0.75_0.19_160_/_0.45)] hover:-translate-y-[1px] active:scale-[0.97] 3xl:text-sm"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.72_0.11_145_/_0.20)] transition-colors duration-200 hover:shadow-[0_0_28px_oklch(0.72_0.11_145_/_0.45)] hover:-translate-y-[1px] active:scale-[0.97] 3xl:text-sm"
           >
             Đi tới đăng nhập →
           </Link>

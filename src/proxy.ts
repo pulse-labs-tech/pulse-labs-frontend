@@ -68,8 +68,16 @@ function getOnboardingStatus(
   if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(raw) as { onboardingStatus?: string };
-    return parsed.onboardingStatus === "completed" ? "completed" : "pending";
+    // 1. Try to parse directly (if Next.js already decoded it)
+    try {
+      const parsed = JSON.parse(raw) as { onboardingStatus?: string };
+      return parsed.onboardingStatus === "completed" ? "completed" : "pending";
+    } catch {
+      // 2. Try decoding if it was URL-encoded (common in middleware/proxy environment)
+      const decoded = decodeURIComponent(raw);
+      const parsed = JSON.parse(decoded) as { onboardingStatus?: string };
+      return parsed.onboardingStatus === "completed" ? "completed" : "pending";
+    }
   } catch {
     return null;
   }

@@ -18,7 +18,7 @@ export default function Loading() {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px]"
         style={{
           background:
-            "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.18) 0%, transparent 65%)",
+            "radial-gradient(ellipse, oklch(0.72 0.11 145 / 0.18) 0%, transparent 65%)",
         }}
       />
       <div
@@ -38,20 +38,20 @@ export default function Loading() {
           {/* Outer spinning orbital ring */}
           <div
             aria-hidden="true"
-            className="absolute h-28 w-28 rounded-full border border-emerald-400/20"
+            className="absolute h-28 w-28 rounded-full border border-[var(--color-brand-400)]/20"
             style={{ animation: "loading-orbit 3s linear infinite" }}
           />
           {/* Dashed inner ring counter-rotation */}
           <div
             aria-hidden="true"
-            className="absolute h-20 w-20 rounded-full border border-dashed border-teal-400/15"
+            className="absolute h-20 w-20 rounded-full border border-dashed border-[var(--color-accent-400)]/15"
             style={{ animation: "loading-orbit-rev 4s linear infinite" }}
           />
 
           {/* Pulsing glow disc */}
           <div
             aria-hidden="true"
-            className="absolute h-16 w-16 rounded-full bg-emerald-500/10"
+            className="absolute h-16 w-16 rounded-full bg-[var(--color-brand-500)]/10"
             style={{ animation: "loading-glow-pulse 2s ease-in-out infinite" }}
           />
 
@@ -62,7 +62,7 @@ export default function Loading() {
               background:
                 "linear-gradient(135deg, oklch(0.16 0.008 260) 0%, oklch(0.20 0.01 200) 100%)",
               boxShadow:
-                "0 8px 32px oklch(0 0 0 / 0.6), 0 0 40px oklch(0.75 0.19 160 / 0.2)",
+                "0 8px 32px oklch(0 0 0 / 0.6), 0 0 40px oklch(0.72 0.11 145 / 0.2)",
               animation:
                 "loading-icon-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both",
             }}
@@ -77,8 +77,8 @@ export default function Loading() {
             >
               <defs>
                 <linearGradient id="ll-g" x1="4" y1="4" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#34d399" />
-                  <stop offset="100%" stopColor="#2dd4bf" />
+                  <stop offset="0%" stopColor="var(--color-brand-400)" />
+                  <stop offset="100%" stopColor="var(--color-accent-400)" />
                 </linearGradient>
                 <filter id="ll-glow" x="-30%" y="-60%" width="160%" height="220%">
                   <feGaussianBlur stdDeviation="1.5" result="blur" />
@@ -141,7 +141,7 @@ export default function Loading() {
             Pulse
             <span
               style={{
-                background: "linear-gradient(90deg, #34d399, #2dd4bf, #34d399)",
+                background: "linear-gradient(90deg, var(--color-brand-400), var(--color-accent-400), var(--color-brand-400))",
                 backgroundSize: "200% auto",
                 WebkitBackgroundClip: "text",
                 backgroundClip: "text",
@@ -152,7 +152,7 @@ export default function Loading() {
               Knowledge
             </span>
           </p>
-          <p className="text-xs font-medium tracking-[0.15em] text-emerald-400/60 uppercase">
+          <p className="text-xs font-medium tracking-[0.15em] text-[var(--color-brand-400)]/60 uppercase">
             AI Researcher cá nhân hoá
           </p>
         </div>
@@ -171,7 +171,7 @@ export default function Loading() {
             className="h-full rounded-full"
             style={{
               background:
-                "linear-gradient(90deg, transparent 0%, #34d399 40%, #2dd4bf 60%, transparent 100%)",
+                "linear-gradient(90deg, transparent 0%, var(--color-brand-400) 40%, var(--color-accent-400) 60%, transparent 100%)",
               animation: "progress-travel 1.8s ease-in-out infinite",
               width: "60%",
             }}

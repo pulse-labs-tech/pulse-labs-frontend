@@ -33,7 +33,32 @@ export async function getOnboardingStateAction(): Promise<
   AuthApiResponse<OnboardingStateResponse>
 > {
   try {
-    return await authClient.get<OnboardingStateResponse>("/v1/onboarding/state");
+    const res = await authClient.get<OnboardingStateResponse>("/v1/onboarding/state");
+    if (res.status === "1" && res.data) {
+      if (res.data.currentStep === "done" || res.data.status === "completed") {
+        const user = await getUserData();
+        if (user) {
+          await setUserData({
+            ...user,
+            onboardingStatus: "completed",
+            plan: (res.data.plan === "pro" ? "pro" : "free") as "free" | "pro",
+          });
+        } else {
+          await setUserData({
+            id: "",
+            email: "",
+            firstName: "",
+            lastName: "",
+            displayName: "",
+            emailVerified: true,
+            plan: (res.data.plan === "pro" ? "pro" : "free") as "free" | "pro",
+            selectedPlanIntent: (res.data.plan === "pro" ? "pro" : "free") as "free" | "pro",
+            onboardingStatus: "completed",
+          });
+        }
+      }
+    }
+    return res;
   } catch (error) {
     console.error("getOnboardingStateAction error:", error);
     return {
@@ -152,6 +177,18 @@ export async function completeOnboardingAction(
       if (user) {
         await setUserData({
           ...user,
+          onboardingStatus: "completed",
+        });
+      } else {
+        await setUserData({
+          id: "",
+          email: "",
+          firstName: "",
+          lastName: "",
+          displayName: "",
+          emailVerified: true,
+          plan: "free",
+          selectedPlanIntent: "free",
           onboardingStatus: "completed",
         });
       }

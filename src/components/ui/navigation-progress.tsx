@@ -129,9 +129,9 @@ function ProgressBar() {
     top: 0,
     height: "100%",
     width: `${progress}%`,
-    background: "linear-gradient(90deg, #34d399 0%, #2dd4bf 50%, #34d399 100%)",
+    background: "linear-gradient(90deg, var(--color-auth-accent) 0%, var(--color-auth-purple) 50%, var(--color-auth-accent) 100%)",
     backgroundSize: "200% 100%",
-    boxShadow: "0 0 12px rgba(52, 211, 153, 0.85), 0 0 4px rgba(45, 212, 191, 0.5)",
+    boxShadow: "0 0 12px var(--color-auth-accent-glow), 0 0 4px var(--color-auth-accent-glow)",
     // Complete immediately, ramp slowly
     transition: completing
       ? "width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out 0.25s"
@@ -148,8 +148,8 @@ function ProgressBar() {
     width: "6px",
     height: "6px",
     borderRadius: "50%",
-    background: "#5eead4",
-    boxShadow: "0 0 10px 3px rgba(52, 211, 153, 0.9)",
+    background: "var(--color-auth-accent)",
+    boxShadow: "0 0 10px 3px var(--color-auth-accent-glow)",
     transition: completing
       ? "right 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
       : "right 0.5s cubic-bezier(0.1, 0.4, 0.5, 1)",

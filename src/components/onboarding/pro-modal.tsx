@@ -40,7 +40,7 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
             aria-labelledby="modal-title"
           >
             {/* Top header pattern */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent via-auth-purple to-auth-cyan" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-auth-accent" />
 
             <div className="p-6 md:p-8">
               {/* Header */}
@@ -48,9 +48,8 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                 <div>
                   <h2
                     id="modal-title"
-                    className="text-2xl font-bold text-auth-text flex items-center gap-2"
+                    className="text-2xl font-bold text-auth-text"
                   >
-                    <Gem className="h-6 w-6 text-auth-accent animate-pulse" />
                     Nâng cấp lên Pro Plan
                   </h2>
                   <p className="text-sm text-auth-text-2 mt-1">
@@ -75,7 +74,7 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                   <span className="text-xs font-semibold text-auth-text-3 uppercase tracking-wider">
                     Gói hiện tại
                   </span>
-                  <div className="text-lg font-bold text-auth-text-2 mt-1">🆓 Free Plan</div>
+                  <div className="text-lg font-bold text-auth-text-2 mt-1">Free Plan</div>
                   <div className="text-2xl font-mono font-bold text-auth-text mt-2">
                     $0<span className="text-xs text-auth-text-3 font-sans font-normal"> / tháng</span>
                   </div>
@@ -105,15 +104,15 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                 </div>
 
                 {/* Pro Plan */}
-                <div className="flex flex-col rounded-xl border border-auth-purple bg-auth-purple-dim p-5 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 bg-auth-purple text-auth-text px-3 py-0.5 rounded-bl-lg text-[10px] font-bold">
+                <div className="flex flex-col rounded-xl border border-auth-accent bg-auth-accent-dim p-5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-auth-accent text-auth-text px-3 py-0.5 rounded-bl-lg text-[10px] font-bold">
                     KHUYÊN DÙNG
                   </div>
-                  <span className="text-xs font-semibold text-auth-purple uppercase tracking-wider">
+                  <span className="text-xs font-semibold text-auth-accent uppercase tracking-wider">
                     Đề xuất nâng cấp
                   </span>
-                  <div className="text-lg font-bold text-auth-text mt-1 flex items-center gap-1.5">
-                    💎 Pro Plan
+                  <div className="text-lg font-bold text-auth-text mt-1">
+                    Pro Plan
                   </div>
                   <div className="text-2xl font-mono font-bold text-auth-text mt-2">
                     $19<span className="text-xs text-auth-text-3 font-sans font-normal"> / tháng</span>

@@ -113,10 +113,10 @@
   --color-auth-text-3: oklch(0.48 0.01 260);
 
   /* --- Auth Accent (vibrant mint-jade — premium green) --- */
-  --color-auth-accent: oklch(0.75 0.19 160);
-  --color-auth-accent-dim: oklch(0.75 0.19 160 / 0.12);
-  --color-auth-accent-dark: oklch(0.65 0.19 160);
-  --color-auth-accent-glow: oklch(0.75 0.19 160 / 0.35);
+  --color-auth-accent: oklch(0.68 0.15 160);
+  --color-auth-accent-dim: oklch(0.68 0.15 160 / 0.10);
+  --color-auth-accent-dark: oklch(0.58 0.15 160);
+  --color-auth-accent-glow: oklch(0.68 0.15 160 / 0.20);
 
   /* --- Auth Secondary Accents --- */
   --color-auth-purple: oklch(0.68 0.18 280);
@@ -203,10 +203,10 @@
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 oklch(0.75 0.19 160 / 0.4);
+    box-shadow: 0 0 0 0 oklch(0.68 0.15 160 / 0.35);
   }
   50% {
-    box-shadow: 0 0 20px 4px oklch(0.75 0.19 160 / 0.15);
+    box-shadow: 0 0 20px 4px oklch(0.68 0.15 160 / 0.12);
   }
 }
 
@@ -234,6 +234,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -323,13 +334,13 @@ select:focus {
    ============================================================ */
 
 ::selection {
-  background-color: oklch(0.75 0.19 160 / 0.3);
+  background-color: oklch(0.68 0.15 160 / 0.25);
   color: oklch(0.98 0 0);
 }
 
 @media (prefers-color-scheme: dark) {
   ::selection {
-    background-color: oklch(0.75 0.19 160 / 0.3);
+    background-color: oklch(0.68 0.15 160 / 0.25);
     color: oklch(0.98 0 0);
   }
 }
@@ -419,7 +430,11 @@ select:focus {
 .glass {
   background: oklch(1 0 0 / 0.6);
   backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border: 1px solid oklch(1 0 0 / 0.2);
+  /* Promote to compositor layer safely without affecting viewport container queries */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -429,12 +444,36 @@ select:focus {
   }
 }
 
+/* DeepMind-inspired premium glassmorphism: high blur, low transparency dark background, thin borders */
+.glass-premium {
+  background: oklch(0.14 0.008 260 / 0.72) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border: 1px solid oklch(1 0 0 / 0.08) !important;
+  box-shadow: 
+    inset 0 1px 0 0 oklch(1 0 0 / 0.05),
+    0 12px 40px -10px oklch(0 0 0 / 0.6) !important;
+  /* Promote to compositor layer safely to avoid paint stutter during scroll */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Performance optimized compositor transitions & animations */
+.ease-premium {
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.animate-dropdown-enter {
+  animation: dropdown-enter 180ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
 /* Gradient text — Jade green → Teal */
 .text-gradient {
   background: linear-gradient(
     135deg,
-    oklch(0.75 0.19 160),
-    oklch(0.72 0.17 175)
+    oklch(0.68 0.15 160),
+    oklch(0.68 0.14 175)
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -1127,7 +1166,7 @@ select:focus {
   gap: 6px;
   padding: 7px 16px;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(16, 185, 129, .4);
+  border: 1px solid var(--accent-glow);
   background: var(--accent-dim);
   color: var(--accent);
   font-size: 12px;
@@ -1139,7 +1178,7 @@ select:focus {
 }
 
 .dashboard-page .rp-cta-btn:hover {
-  background: rgba(16, 185, 129, .18);
+  background: var(--accent-dim);
   border-color: var(--accent);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px var(--accent-glow);
@@ -1275,7 +1314,7 @@ select:focus {
   font-weight: 600;
   border: none;
   cursor: pointer;
-  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.45);
+  box-shadow: 0 8px 28px var(--accent-glow);
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   text-decoration: none;
 }
@@ -1288,7 +1327,7 @@ select:focus {
 
 .dashboard-page .fab-compile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(16, 185, 129, 0.55);
+  box-shadow: 0 14px 36px var(--accent-glow);
   color: #fff;
 }
 
@@ -1373,3 +1412,51 @@ select:focus {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ============================================================
+   Scroll to Top Premium Button
+   ============================================================ */
+.btn-scroll-top {
+  display: flex;
+  height: 42px;
+  width: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: oklch(0.14 0.008 260 / 0.72);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid oklch(1 0 0 / 0.08);
+  color: var(--color-auth-text-2, oklch(0.70 0.01 260));
+  box-shadow: 
+    inset 0 1px 0 0 oklch(1 0 0 / 0.05),
+    0 8px 32px oklch(0 0 0 / 0.4);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+  outline: none;
+}
+
+.btn-scroll-top:hover {
+  transform: scale(1.08) translateY(-2px);
+  color: #fff;
+  border-color: var(--color-auth-accent, oklch(0.68 0.15 160));
+  box-shadow: 
+    inset 0 1px 0 0 oklch(1 0 0 / 0.15),
+    0 0 20px var(--color-auth-accent-glow, oklch(0.68 0.15 160 / 0.25)),
+    0 12px 32px -8px oklch(0 0 0 / 0.5);
+}
+
+.btn-scroll-top:active {
+  transform: scale(0.96) translateY(0);
+}
+
+.btn-scroll-top svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-scroll-top:hover svg {
+  transform: translateY(-2px);
+}
+

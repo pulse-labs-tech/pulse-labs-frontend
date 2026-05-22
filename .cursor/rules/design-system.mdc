@@ -23,23 +23,22 @@ alwaysApply: true
 
 The SINGLE source of truth is `src/app/globals.css` (`@theme inline` block).
 
-### Primary Green (Brand Identity)
+### Jade-Emerald Green (Brand Identity)
 
-The **entire app uses jade-emerald green** as its primary identity color. This is non-negotiable.
+The **entire app uses Jade-Emerald Green** as its primary identity color.
 
 ```css
-/* Core green tokens — use these for ALL CTAs, focus states, active states, links */
---color-auth-accent:       oklch(0.75 0.19 160)   /* Primary CTA / active */
---color-auth-accent-dim:   oklch(0.75 0.19 160 / 0.12) /* Subtle bg on dark surface */
---color-auth-accent-dark:  oklch(0.65 0.19 160)   /* Hover state */
---color-auth-accent-glow:  oklch(0.75 0.19 160 / 0.35) /* Glow/shadow on hover */
+/* Core emerald jade tokens — use these for ALL CTAs, focus states, active states, links */
+--color-auth-accent:       oklch(0.68 0.15 160)   /* Primary CTA / active */
+--color-auth-accent-dim:   oklch(0.68 0.15 160 / 0.10) /* Subtle bg on dark surface */
+--color-auth-accent-dark:  oklch(0.58 0.15 160)   /* Hover state */
+--color-auth-accent-glow:  oklch(0.68 0.15 160 / 0.20) /* Glow/shadow on hover */
 ```
 
 ### Tailwind Token Aliases
 
 In Tailwind classes, these map as:
-- **Primary CTA button**: `bg-auth-accent hover:bg-auth-accent-dark text-black font-semibold`
-- **CTA gradient button**: `bg-gradient-to-r from-emerald-500 to-teal-500`
+- **Primary CTA button**: `bg-auth-accent hover:bg-auth-accent-dark text-white font-semibold`
 - **Active nav link**: `bg-auth-accent-dim text-auth-accent border border-auth-accent/20`
 - **Focus ring**: `focus:border-auth-accent` (auto-applied via globals.css)
 - **Text accent**: `text-auth-accent`
@@ -88,8 +87,8 @@ style={{ background: "#22c55e", color: "#fff" }}
 // ❌ WRONG — using brand-* tokens directly in components (use auth-* tokens instead)
 className="bg-brand-500 text-brand-400"
 
-// ❌ WRONG — generic Tailwind emerald without glow/shadow
-className="bg-emerald-500" // alone, without shadow/hover states
+// ❌ WRONG — excessive decorative icon clutter next to links or labels
+className="flex items-center gap-2" // showing icons for simple static link menus
 ```
 
 ---
@@ -99,8 +98,8 @@ className="bg-emerald-500" // alone, without shadow/hover states
 ### CTA / Primary Button
 
 ```tsx
-// ✅ Standard primary button
-<button className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-black font-bold rounded-xl shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.35)] active:scale-[0.98] transition-all text-sm tracking-wide">
+// ✅ Standard primary button (solid royal indigo look)
+<button className="w-full py-3 bg-auth-accent text-white font-bold rounded-xl shadow-[0_0_15px_var(--color-auth-accent-glow)] hover:bg-auth-accent-dark hover:shadow-[0_0_28px_var(--color-auth-accent-glow)] active:scale-[0.98] transition-all text-sm tracking-wide">
   Hành động chính
 </button>
 
@@ -113,10 +112,8 @@ className="bg-emerald-500" // alone, without shadow/hover states
 ### Card / Panel
 
 ```tsx
-// ✅ Standard card
-<div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden">
-  {/* Accent top border line */}
-  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+// ✅ Standard card (clean border, minimalist)
+<div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:border-auth-accent/30 hover:shadow-auth-card">
   ...content...
 </div>
 ```
@@ -132,30 +129,20 @@ className="bg-emerald-500" // alone, without shadow/hover states
 
 ```tsx
 // ✅ Success
-<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-  <CheckCircle2 className="h-3 w-3" /> Hoàn thành
-</span>
-
-// ✅ Warning  
-<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-  <AlertTriangle className="h-3 w-3" /> Cảnh báo
-</span>
-
-// ✅ Error
-<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-  <XCircle className="h-3 w-3" /> Lỗi
+<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-auth-elevated border border-auth-border text-auth-text-2">
+  Hoàn thành
 </span>
 ```
 
 ### Navigation Active State
 
 ```tsx
-// ✅ Active nav link (green pill)
+// ✅ Active nav link (clean text-only indicator with subtle bg/border)
 <Link className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20">
   Dashboard
 </Link>
 
-// ✅ Inactive nav link
+// ✅ Inactive nav link (no icons, pure typography)
 <Link className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors">
   Wiki
 </Link>
@@ -164,12 +151,7 @@ className="bg-emerald-500" // alone, without shadow/hover states
 ### Icon Container
 
 ```tsx
-// ✅ Green icon container
-<div className="h-10 w-10 rounded-xl bg-auth-accent-dim text-auth-accent flex items-center justify-center">
-  <Brain className="h-5 w-5" />
-</div>
-
-// ✅ Subtle icon container
+// ✅ Muted subtle icon container
 <div className="h-10 w-10 rounded-xl bg-auth-elevated text-auth-text-3 flex items-center justify-center">
   <Database className="h-5 w-5" />
 </div>
@@ -183,13 +165,13 @@ className="bg-emerald-500" // alone, without shadow/hover states
 - **Section headings**: `text-sm font-bold tracking-tight uppercase text-auth-text-3`
 - **Card subtitles**: `text-xs text-auth-text-2`
 - **Labels**: `text-[10px] font-bold uppercase tracking-wider text-auth-text-3`
-- **Accent gradient text** (brand name): `bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent`
+- **Accent gradient text** (brand name): `bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent` (or `from-brand-400 via-accent-300 to-brand-400 bg-[length:200%_auto] bg-clip-text text-transparent` for large headings)
 
 ### Brand Name Rendering
 
 ```tsx
 // ✅ Always render brand name like this:
-Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
 ```
 
 ---
@@ -200,8 +182,11 @@ Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text
 - **Fade in**: use `animate-fade-in` (defined in globals.css)  
 - **Button active**: always add `active:scale-[0.98]` for tactile feedback
 - **Transitions**: always `transition-all` or `transition-colors` — never omit
-- **Glow on hover for CTAs**: `hover:shadow-[0_0_30px_rgba(52,211,153,0.35)]`
+- **Glow on hover for CTAs**: `hover:shadow-[0_0_30px_var(--color-auth-accent-glow)]`
 - **Spinning loader**: always `<Loader2 className="animate-spin text-auth-accent" />`
+- **GPU Layer Promotion**: To prevent paint jank/stutter on mobile and Safari when scrolling over backdrop blurs, ensure all `.glass` and `.glass-premium` elements are promoted to compositor layers safely using `backface-visibility: hidden` and `-webkit-backface-visibility: hidden`.
+- **Compositor-Only Animations**: Only animate `transform` and `opacity` to avoid triggering layout and paint passes. Use `will-change: transform, opacity` on animated dropdown elements or transitions.
+- **Loading Entry**: Add `animate-fade-in` on main client layouts (e.g. `dashboard-view.tsx`, `onboarding-wizard.tsx`) to smooth the transition out of the initial loading state.
 
 ---
 
@@ -287,10 +272,10 @@ src/hooks/                → Custom hooks (use-auth.ts)
 | Card surface | `bg-auth-surface` | `oklch(0.16 0.008 260)` |
 | Input / raised | `bg-auth-elevated` | `oklch(0.20 0.008 260)` |
 | Border | `border-auth-border` | `oklch(0.28 0.006 260)` |
-| **Green CTA** | `bg-auth-accent` | `oklch(0.75 0.19 160)` |
-| Green dim bg | `bg-auth-accent-dim` | `oklch(0.75 0.19 160 / 0.12)` |
-| Green hover | `bg-auth-accent-dark` | `oklch(0.65 0.19 160)` |
-| Green glow | `shadow-auth-accent` | `oklch(0.75 0.19 160 / 0.35)` |
+| **Green CTA** | `bg-auth-accent` | `oklch(0.68 0.15 160)` |
+| Green dim bg | `bg-auth-accent-dim` | `oklch(0.68 0.15 160 / 0.10)` |
+| Green hover | `bg-auth-accent-dark` | `oklch(0.58 0.15 160)` |
+| Green glow | `shadow-auth-accent` | `oklch(0.68 0.15 160 / 0.20)` |
 | Primary text | `text-auth-text` | `oklch(0.98 0 0)` |
 | Secondary text | `text-auth-text-2` | `oklch(0.70 0.01 260)` |
 | Muted text | `text-auth-text-3` | `oklch(0.48 0.01 260)` |
