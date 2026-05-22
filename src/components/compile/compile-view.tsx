@@ -1,0 +1,1053 @@
+"use client";
+
+/**
+ * CompileView — Source Ingestion Page (/compile/new)
+ *
+ * Premium 3-step flow:
+ *   Step 1 — Chọn loại nguồn (text | url | file [locked])
+ *   Step 2 — Nhập nội dung + tiêu đề gợi ý + chọn Knowledge Base
+ *   Step 3 — Xử lý (live progress bar + stage translation)
+ *
+ * Uses createSourceAction to submit, then polls getCompileJobAction every 3s
+ * until isTerminal === true or max 60 polls.
+ */
+
+import { useState, useEffect, useRef, useTransition, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import {
+  LayoutDashboard,
+  MessageSquare,
+  BookOpen,
+  Upload,
+  FileText,
+  Link2,
+  Lock,
+  LogOut,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  AlertTriangle,
+  RefreshCw,
+  ChevronRight,
+  ArrowRight,
+  ArrowLeft,
+  ExternalLink,
+  Sparkles,
+} from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { logoutAction } from "@/app/actions/auth";
+import { getOnboardingStateAction } from "@/app/actions/onboarding";
+import { createSourceAction, getCompileJobAction } from "@/app/actions/compile";
+import type { RoleKbDto } from "@/types/onboarding";
+import type { CompileJob } from "@/types/compile";
+
+// ────────────────────────────────────────────────────────────────
+// Constants
+// ────────────────────────────────────────────────────────────────
+
+const MAX_TEXT_CHARS = 50_000;
+const MIN_TEXT_CHARS = 100;
+const POLL_INTERVAL_MS = 3_000;
+const MAX_POLLS = 60;
+
+type SourceTypeOption = "text" | "url";
+type Step = 1 | 2 | 3;
+
+function generateIdempotencyKey(): string {
+  return `compile_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+// ────────────────────────────────────────────────────────────────
+// Stage / Status helpers
+// ────────────────────────────────────────────────────────────────
+
+function translateStage(stage: string): string {
+  switch (stage) {
+    case "queued":
+      return "Xếp hàng";
+    case "validating":
+      return "Xác thực";
+    case "fetching_or_uploading":
+      return "Tải nội dung";
+    case "extracting":
+      return "Trích xuất văn bản";
+    case "normalizing":
+      return "Chuẩn hóa";
+    case "chunking":
+      return "Phân mảnh";
+    case "summarizing":
+      return "Tóm tắt";
+    case "indexing":
+      return "Lập chỉ mục";
+    case "wiki_ready":
+      return "Hoàn thành";
+    case "failed":
+      return "Lỗi xử lý";
+    case "cancelled":
+      return "Đã hủy";
+    default:
+      return "Đang xử lý";
+  }
+}
+
+function isURLValid(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// Sub-components
+// ────────────────────────────────────────────────────────────────
+
+interface SourceTypeCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  selected: boolean;
+  disabled?: boolean;
+  badge?: string;
+  onClick: () => void;
+}
+
+function SourceTypeCard({
+  icon,
+  title,
+  description,
+  selected,
+  disabled = false,
+  badge,
+  onClick,
+}: SourceTypeCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`group relative flex flex-col gap-3 rounded-2xl border p-5 text-left transition-all duration-200
+        ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+        ${
+          selected
+            ? "border-auth-accent/60 bg-auth-accent-dim shadow-[0_0_20px_rgba(52,211,153,0.12)]"
+            : disabled
+              ? "border-white/[0.06] bg-auth-surface/20"
+              : "border-white/[0.08] bg-auth-surface/30 hover:border-auth-accent/30 hover:bg-auth-surface/50"
+        }
+      `}
+    >
+      {/* Top accent on selected */}
+      {selected && (
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
+      )}
+
+      {/* Pro badge */}
+      {badge && (
+        <span className="absolute top-3 right-3 rounded-full bg-amber-950/40 border border-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+          {badge}
+        </span>
+      )}
+
+      {/* Icon */}
+      <div
+        className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-all
+          ${selected ? "bg-auth-accent text-black" : "bg-white/[0.06] text-auth-text-2 group-hover:text-auth-accent"}
+        `}
+      >
+        {icon}
+      </div>
+
+      {/* Text */}
+      <div>
+        <p className={`text-sm font-bold ${selected ? "text-auth-accent" : "text-auth-text"}`}>
+          {title}
+        </p>
+        <p className="mt-1 text-xs text-auth-text-3 leading-relaxed">{description}</p>
+      </div>
+
+      {/* Selected check */}
+      {selected && (
+        <div className="absolute bottom-3 right-3 h-5 w-5 rounded-full bg-auth-accent flex items-center justify-center">
+          <CheckCircle2 className="h-3 w-3 text-black" />
+        </div>
+      )}
+    </button>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────
+// Progress bar
+// ────────────────────────────────────────────────────────────────
+
+interface StageProgressBarProps {
+  job: CompileJob;
+}
+
+function StageProgressBar({ job }: StageProgressBarProps) {
+  const stages: CompileJob["stage"][] = [
+    "queued",
+    "validating",
+    "fetching_or_uploading",
+    "extracting",
+    "normalizing",
+    "chunking",
+    "summarizing",
+    "indexing",
+    "wiki_ready",
+  ];
+
+  const currentIdx = stages.indexOf(job.stage);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Animated progress bar */}
+      <div className="w-full h-2 rounded-full bg-auth-bg border border-white/[0.04] overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-700
+            ${
+              job.status === "failed"
+                ? "bg-red-500"
+                : job.status === "wiki_ready"
+                  ? "bg-auth-accent"
+                  : "bg-gradient-to-r from-auth-accent to-teal-400 animate-pulse"
+            }
+          `}
+          style={{ width: `${Math.max(job.progress ?? 0, job.status === "wiki_ready" ? 100 : 0)}%` }}
+        />
+      </div>
+
+      {/* Stage dots */}
+      <div className="flex items-center gap-1 flex-wrap">
+        {stages.slice(0, -1).map((stage, i) => {
+          const passed = i < currentIdx;
+          const active = i === currentIdx && job.status !== "wiki_ready" && job.status !== "failed";
+          return (
+            <div key={stage} className="flex items-center gap-1">
+              <div
+                className={`h-1.5 w-1.5 rounded-full transition-all
+                  ${passed || job.status === "wiki_ready" ? "bg-auth-accent" : active ? "bg-auth-accent animate-pulse" : "bg-white/10"}
+                `}
+              />
+              {i < stages.length - 2 && (
+                <div className={`h-px w-3 ${passed || job.status === "wiki_ready" ? "bg-auth-accent/50" : "bg-white/[0.06]"}`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Stage label */}
+      <div className="flex items-center justify-between text-xs">
+        <span className={`font-semibold ${job.status === "failed" ? "text-red-400" : "text-auth-accent"}`}>
+          {translateStage(job.stage)}
+        </span>
+        <span className="text-auth-text-3">{job.progress ?? 0}% hoàn thành</span>
+      </div>
+
+      {job.message && (
+        <p className="text-xs text-auth-text-2 italic">{job.message}</p>
+      )}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────
+// Main CompileView component
+// ────────────────────────────────────────────────────────────────
+
+export function CompileView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user: authUser, clearAuth } = useAuth();
+  const [isPending, startTransition] = useTransition();
+
+  // ── URL param ──
+  const roleKbIdFromUrl = searchParams.get("roleKbId") ?? "";
+
+  // ── Step state ──
+  const [step, setStep] = useState<Step>(1);
+
+  // ── Step 1 state ──
+  const [selectedSourceType, setSelectedSourceType] = useState<SourceTypeOption>("text");
+
+  // ── Step 2 state ──
+  const [text, setText] = useState("");
+  const [url, setUrl] = useState("");
+  const [titleHint, setTitleHint] = useState("");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(roleKbIdFromUrl);
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [textError, setTextError] = useState<string | null>(null);
+
+  // ── Roles ──
+  const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
+
+  // ── Step 3 / submission state ──
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [currentJob, setCurrentJob] = useState<CompileJob | null>(null);
+  const [pollError, setPollError] = useState<string | null>(null);
+
+  // ── Polling refs ──
+  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pollCountRef = useRef(0);
+  const currentJobIdRef = useRef<string | null>(null);
+
+  // ────────────────────────────────────────────────────────────────
+  // 1. Load roles
+  // ────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    async function loadRoles() {
+      setRolesLoading(true);
+      try {
+        const res = await getOnboardingStateAction();
+        if (res.status === "1" && res.data?.roles?.length) {
+          setUserRoles(res.data.roles);
+          // Default: use URL param if valid, else first role
+          const validRole = res.data.roles.find((r) => r.id === roleKbIdFromUrl);
+          if (validRole) {
+            setSelectedRoleKbId(validRole.id);
+          } else if (!selectedRoleKbId && res.data.roles[0]) {
+            setSelectedRoleKbId(res.data.roles[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("loadRoles error:", err);
+      } finally {
+        setRolesLoading(false);
+      }
+    }
+    loadRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ────────────────────────────────────────────────────────────────
+  // 2. Polling logic
+  // ────────────────────────────────────────────────────────────────
+  const stopPolling = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+    pollCountRef.current = 0;
+  }, []);
+
+  const startPolling = useCallback(
+    (jobId: string) => {
+      stopPolling();
+      currentJobIdRef.current = jobId;
+      pollCountRef.current = 0;
+
+      pollTimerRef.current = setInterval(async () => {
+        pollCountRef.current += 1;
+
+        if (pollCountRef.current > MAX_POLLS) {
+          stopPolling();
+          setPollError("Quá thời gian chờ. Vui lòng kiểm tra lại trang Dashboard để xem kết quả.");
+          return;
+        }
+
+        try {
+          const res = await getCompileJobAction(jobId);
+          if (res.status === "1" && res.data?.compileJob) {
+            const job = res.data.compileJob;
+            setCurrentJob(job);
+            if (job.isTerminal) {
+              stopPolling();
+            }
+          } else {
+            // Non-fatal poll error — keep polling
+            console.warn("poll non-success:", res.msg);
+          }
+        } catch (err) {
+          console.error("poll error:", err);
+          // Don't stop polling on transient network error
+        }
+      }, POLL_INTERVAL_MS);
+    },
+    [stopPolling],
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  // ────────────────────────────────────────────────────────────────
+  // 3. Logout
+  // ────────────────────────────────────────────────────────────────
+  const handleLogout = () => {
+    startTransition(async () => {
+      clearAuth();
+      await logoutAction();
+    });
+  };
+
+  // ────────────────────────────────────────────────────────────────
+  // 4. Validation
+  // ────────────────────────────────────────────────────────────────
+  function validateStep2(): boolean {
+    let valid = true;
+    setTextError(null);
+    setUrlError(null);
+
+    if (selectedSourceType === "text") {
+      const trimmed = text.trim();
+      if (trimmed.length < MIN_TEXT_CHARS) {
+        setTextError(`Văn bản phải có ít nhất ${MIN_TEXT_CHARS} ký tự (hiện tại: ${trimmed.length}).`);
+        valid = false;
+      } else if (trimmed.length > MAX_TEXT_CHARS) {
+        setTextError(`Văn bản không được vượt quá ${MAX_TEXT_CHARS.toLocaleString()} ký tự.`);
+        valid = false;
+      }
+    } else {
+      const trimmedUrl = url.trim();
+      if (!trimmedUrl) {
+        setUrlError("Vui lòng nhập URL cần nạp.");
+        valid = false;
+      } else if (!isURLValid(trimmedUrl)) {
+        setUrlError("URL không hợp lệ. Vui lòng nhập đúng định dạng https://...");
+        valid = false;
+      }
+    }
+
+    if (!selectedRoleKbId) {
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // 5. Submit
+  // ────────────────────────────────────────────────────────────────
+  async function handleSubmit() {
+    if (!validateStep2()) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setCurrentJob(null);
+    setPollError(null);
+
+    const idempotencyKey = generateIdempotencyKey();
+    const payload = {
+      roleKbId: selectedRoleKbId,
+      sourceType: selectedSourceType,
+      idempotencyKey,
+      ...(selectedSourceType === "text" ? { text: text.trim() } : { url: url.trim() }),
+      ...(titleHint.trim() ? { titleHint: titleHint.trim() } : {}),
+    };
+
+    const res = await createSourceAction(payload);
+    setIsSubmitting(false);
+
+    if (res.status === "1" && res.data?.compileJob) {
+      const job = res.data.compileJob;
+      setCurrentJob(job);
+      setStep(3);
+
+      if (!job.isTerminal) {
+        startPolling(job.id);
+      }
+    } else {
+      setSubmitError(res.msg || "Không thể bắt đầu xử lý tài liệu. Vui lòng thử lại.");
+    }
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // 6. Retry
+  // ────────────────────────────────────────────────────────────────
+  function handleRetry() {
+    stopPolling();
+    setCurrentJob(null);
+    setPollError(null);
+    setSubmitError(null);
+    setStep(2);
+  }
+
+  function handleStartNew() {
+    stopPolling();
+    setCurrentJob(null);
+    setPollError(null);
+    setSubmitError(null);
+    setText("");
+    setUrl("");
+    setTitleHint("");
+    setTextError(null);
+    setUrlError(null);
+    setStep(1);
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // RENDER
+  // ────────────────────────────────────────────────────────────────
+
+  const stepLabel = ["Chọn loại nguồn", "Nhập nội dung", "Xử lý tài liệu"];
+
+  return (
+    <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
+      {/* ── Ambient glow ── */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]"
+        style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.1) 0%, transparent 70%)" }}
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -right-[100px] top-[20%] h-[350px] w-[350px] blur-[100px]"
+        style={{ background: "radial-gradient(circle, oklch(0.75 0.19 160 / 0.05) 0%, transparent 70%)" }}
+        aria-hidden="true"
+      />
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
+        <div className="container-responsive flex h-16 items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-base font-bold tracking-tight text-auth-text">
+                Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+              </span>
+            </Link>
+            <nav className="hidden items-center gap-1.5 md:flex">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" />
+                Dashboard
+              </Link>
+              <Link
+                href="/query"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                Hỏi đáp AI
+              </Link>
+              <Link
+                href="/wiki"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                Wiki Cá nhân
+              </Link>
+              <Link
+                href={`/compile/new${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Nạp tài liệu
+              </Link>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {authUser && (
+              <div className="hidden text-right md:block">
+                <div className="text-xs font-bold text-auth-text">
+                  {authUser.displayName || authUser.email}
+                </div>
+                <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-px text-[10px] font-semibold text-auth-accent">
+                  {authUser.plan === "pro" ? "Pro Plan" : "Free Plan"}
+                </span>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              disabled={isPending}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
+              title="Đăng xuất"
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+              ) : (
+                <LogOut className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Main Content ── */}
+      <main className="container-responsive flex-grow py-8 relative z-10 flex flex-col gap-6 max-w-3xl mx-auto w-full">
+        {/* Page title */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-auth-text-3 text-xs">
+            <Link href="/dashboard" className="hover:text-auth-text transition-colors">
+              Dashboard
+            </Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-auth-text">Nạp nguồn tài liệu</span>
+          </div>
+          <h1 className="text-fluid-xl font-extrabold tracking-tight mt-1">
+            Nạp nguồn tài liệu mới
+          </h1>
+          <p className="text-xs text-auth-text-2">
+            Trích xuất tri thức từ văn bản hoặc trang web thành Wiki item có cấu trúc.
+          </p>
+        </div>
+
+        {/* Step indicator */}
+        <div className="flex items-center gap-2">
+          {stepLabel.map((label, i) => {
+            const n = (i + 1) as Step;
+            const isActive = step === n;
+            const isDone = step > n;
+            return (
+              <div key={n} className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all
+                      ${isDone ? "bg-auth-accent border-auth-accent text-black" : isActive ? "border-auth-accent bg-auth-accent-dim text-auth-accent" : "border-white/10 bg-white/5 text-auth-text-3"}
+                    `}
+                  >
+                    {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : n}
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider hidden sm:inline
+                      ${isActive ? "text-auth-text" : isDone ? "text-auth-accent" : "text-auth-text-3"}
+                    `}
+                  >
+                    {label}
+                  </span>
+                </div>
+                {i < stepLabel.length - 1 && (
+                  <div className={`h-px w-8 transition-all ${isDone ? "bg-auth-accent/50" : "bg-white/[0.06]"}`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ────────── STEP 1 — Chọn loại nguồn ────────── */}
+        {step === 1 && (
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+
+            <div>
+              <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
+                Bước 1 — Chọn loại nguồn tài liệu
+              </h2>
+              <p className="text-xs text-auth-text-2 mt-1">
+                Chọn định dạng nguồn bạn muốn nạp vào Knowledge Base.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <SourceTypeCard
+                icon={<FileText className="h-5 w-5" />}
+                title="Văn bản thuần"
+                description="Dán văn bản, ghi chú, bài viết hoặc tài liệu của bạn vào đây."
+                selected={selectedSourceType === "text"}
+                onClick={() => setSelectedSourceType("text")}
+              />
+              <SourceTypeCard
+                icon={<Link2 className="h-5 w-5" />}
+                title="URL / Website"
+                description="Crawl nội dung từ một trang web, bài blog hoặc tài liệu online."
+                selected={selectedSourceType === "url"}
+                onClick={() => setSelectedSourceType("url")}
+              />
+              <SourceTypeCard
+                icon={<Lock className="h-5 w-5" />}
+                title="Tải tệp lên"
+                description="PDF, TXT, Markdown — tính năng dành riêng cho gói Pro."
+                selected={false}
+                disabled
+                badge="Pro"
+                onClick={() => {}}
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
+              >
+                Tiếp tục
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ────────── STEP 2 — Nhập nội dung ────────── */}
+        {step === 2 && (
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
+                  Bước 2 — Nhập nội dung
+                </h2>
+                <p className="text-xs text-auth-text-2 mt-1">
+                  {selectedSourceType === "text"
+                    ? "Dán hoặc nhập văn bản bạn muốn phân tích."
+                    : "Nhập URL trang web cần trích xuất nội dung."}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-auth-text-3">
+                {selectedSourceType === "text" ? (
+                  <>
+                    <FileText className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-semibold">Văn bản</span>
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="h-3.5 w-3.5 text-blue-400" />
+                    <span className="text-blue-400 font-semibold">URL</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Knowledge Base selector */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                Knowledge Base đích <span className="text-red-400">*</span>
+              </label>
+              {rolesLoading ? (
+                <div className="h-10 bg-auth-elevated border border-auth-border rounded-xl flex items-center px-3 gap-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-auth-accent" />
+                  <span className="text-xs text-auth-text-3">Đang tải...</span>
+                </div>
+              ) : userRoles.length > 1 ? (
+                <div className="relative">
+                  <select
+                    value={selectedRoleKbId}
+                    onChange={(e) => setSelectedRoleKbId(e.target.value)}
+                    className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text text-xs font-semibold px-3 py-2.5 cursor-pointer focus:border-auth-accent focus:outline-none transition-all appearance-none"
+                  >
+                    {userRoles.map((r) => (
+                      <option key={r.id} value={r.id} className="bg-auth-surface text-auth-text">
+                        {r.roleName} ({r.roleGroup})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-auth-text-3">
+                    <ChevronRight className="h-4 w-4 rotate-90" />
+                  </div>
+                </div>
+              ) : userRoles.length === 1 ? (
+                <div className="bg-auth-elevated border border-auth-border rounded-xl px-3 py-2.5 text-xs font-semibold text-auth-accent flex items-center gap-2">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                  <span>{userRoles[0].roleName}</span>
+                  <span className="text-[10px] text-auth-text-3 font-normal">({userRoles[0].roleGroup})</span>
+                </div>
+              ) : (
+                <div className="h-10 bg-red-950/20 border border-red-500/20 rounded-xl flex items-center px-3 gap-2">
+                  <AlertCircle className="h-3.5 w-3.5 text-red-400" />
+                  <span className="text-xs text-red-400">Không tìm thấy Knowledge Base. Hoàn tất onboarding trước.</span>
+                </div>
+              )}
+            </div>
+
+            {/* Content input */}
+            {selectedSourceType === "text" ? (
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                    Nội dung văn bản <span className="text-red-400">*</span>
+                  </label>
+                  <span
+                    className={`text-[10px] font-semibold tabular-nums transition-colors
+                      ${text.length < MIN_TEXT_CHARS ? "text-amber-400" : text.length > MAX_TEXT_CHARS ? "text-red-400" : "text-auth-accent"}
+                    `}
+                  >
+                    {text.length.toLocaleString()} / {MAX_TEXT_CHARS.toLocaleString()}
+                  </span>
+                </div>
+                <textarea
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    setTextError(null);
+                  }}
+                  rows={12}
+                  placeholder="Dán văn bản, bài viết, tài liệu, ghi chú... vào đây. Tối thiểu 100 ký tự."
+                  className="w-full resize-y bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm px-4 py-3 focus:border-auth-accent focus:outline-none transition-all leading-relaxed"
+                />
+                {textError && (
+                  <p className="text-xs text-red-400 flex items-center gap-1.5 mt-0.5">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    {textError}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                  Địa chỉ URL <span className="text-red-400">*</span>
+                </label>
+                <div className="relative">
+                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3" />
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => {
+                      setUrl(e.target.value);
+                      setUrlError(null);
+                    }}
+                    placeholder="https://example.com/article"
+                    className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm pl-10 pr-4 py-3 focus:border-auth-accent focus:outline-none transition-all"
+                  />
+                </div>
+                {urlError && (
+                  <p className="text-xs text-red-400 flex items-center gap-1.5 mt-0.5">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    {urlError}
+                  </p>
+                )}
+                {url && isURLValid(url) && (
+                  <div className="flex items-center gap-2 text-xs text-auth-text-2 bg-auth-elevated/50 border border-auth-border/50 rounded-lg px-3 py-2">
+                    <ExternalLink className="h-3.5 w-3.5 text-blue-400 shrink-0" />
+                    <span className="truncate">{url}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Title hint */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                Tiêu đề gợi ý <span className="text-auth-text-3 font-normal normal-case">(tùy chọn)</span>
+              </label>
+              <input
+                type="text"
+                value={titleHint}
+                onChange={(e) => setTitleHint(e.target.value)}
+                placeholder="Ví dụ: Giới thiệu về React Server Components"
+                maxLength={200}
+                className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm px-4 py-3 focus:border-auth-accent focus:outline-none transition-all"
+              />
+              <p className="text-[10px] text-auth-text-3">
+                Cung cấp tiêu đề giúp hệ thống phân loại tài liệu chính xác hơn.
+              </p>
+            </div>
+
+            {/* Submit error */}
+            {submitError && (
+              <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
+                <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-red-400">{submitError}</p>
+              </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={() => { setStep(1); setSubmitError(null); setTextError(null); setUrlError(null); }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-sm transition-all"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Quay lại
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting || rolesLoading || !selectedRoleKbId}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang gửi...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Bắt đầu phân tích
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ────────── STEP 3 — Xử lý ────────── */}
+        {step === 3 && (
+          <div className="flex flex-col gap-4">
+            {/* Processing card */}
+            {currentJob && (
+              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
+                <div
+                  className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r to-transparent
+                    ${currentJob.status === "failed" ? "from-red-500" : currentJob.status === "wiki_ready" ? "from-emerald-400" : "from-auth-accent"}
+                  `}
+                />
+
+                {/* Status header */}
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
+                      Bước 3 — Xử lý tài liệu
+                    </h2>
+                    <p className="text-xs text-auth-text-2 mt-1">
+                      {currentJob.title || "Tài liệu đang được phân tích..."}
+                    </p>
+                  </div>
+
+                  {/* Status badge */}
+                  {currentJob.status === "wiki_ready" ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Hoàn thành
+                    </span>
+                  ) : currentJob.status === "failed" ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-950/40 border border-red-500/20 text-red-400">
+                      <XCircle className="h-3.5 w-3.5" />
+                      Lỗi xử lý
+                    </span>
+                  ) : currentJob.status === "cancelled" ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      Đã hủy
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Đang xử lý
+                    </span>
+                  )}
+                </div>
+
+                {/* Progress bar */}
+                <StageProgressBar job={currentJob} />
+
+                {/* Poll timeout error */}
+                {pollError && (
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
+                    <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-400">{pollError}</p>
+                  </div>
+                )}
+
+                {/* Error details */}
+                {currentJob.status === "failed" && currentJob.error && (
+                  <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
+                    <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                    <div className="flex flex-col gap-1">
+                      <p className="text-xs font-semibold text-red-400">Chi tiết lỗi</p>
+                      <p className="text-xs text-red-400/80">{currentJob.error}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── SUCCESS state ── */}
+            {currentJob?.status === "wiki_ready" && (
+              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-5">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400 to-transparent" />
+
+                <div className="flex flex-col items-center gap-4 py-4 text-center">
+                  <div className="h-16 w-16 rounded-full bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-auth-text">Tài liệu đã được biên soạn thành công!</h3>
+                    <p className="text-xs text-auth-text-2 mt-1">
+                      Wiki item đã được tạo và lập chỉ mục vào Knowledge Base của bạn.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {currentJob.outputKnowledgeItemId && (
+                    <Link
+                      href={`/wiki/items/${currentJob.outputKnowledgeItemId}`}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Xem Wiki item
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleStartNew}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Nạp tài liệu mới
+                  </button>
+                  <Link
+                    href="/dashboard"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* ── FAILED state ── */}
+            {currentJob?.status === "failed" && (
+              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-5">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-transparent" />
+
+                <div className="flex flex-col items-center gap-4 py-4 text-center">
+                  <div className="h-16 w-16 rounded-full bg-red-950/40 border border-red-500/20 flex items-center justify-center">
+                    <XCircle className="h-8 w-8 text-red-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-auth-text">Xử lý thất bại</h3>
+                    <p className="text-xs text-auth-text-2 mt-1">
+                      {currentJob.retryable
+                        ? "Đã xảy ra lỗi trong quá trình biên soạn. Bạn có thể thử lại."
+                        : "Tài liệu không thể xử lý được. Vui lòng kiểm tra lại nguồn dữ liệu."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {currentJob.retryable && (
+                    <button
+                      type="button"
+                      onClick={handleRetry}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Thử lại
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleStartNew}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Nạp tài liệu mới
+                  </button>
+                  <Link
+                    href="/dashboard"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* ── Still processing — waiting state ── */}
+            {currentJob && !currentJob.isTerminal && !pollError && (
+              <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3">
+                <Loader2 className="h-4 w-4 text-blue-400 animate-spin shrink-0" />
+                <p className="text-xs text-blue-400">
+                  Hệ thống đang biên soạn. Trang sẽ tự cập nhật — bạn không cần làm gì thêm.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

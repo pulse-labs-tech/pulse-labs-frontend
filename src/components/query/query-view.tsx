@@ -1,0 +1,953 @@
+"use client";
+
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useTransition,
+  type KeyboardEvent,
+} from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import {
+  MessageSquare,
+  Send,
+  Trash2,
+  Plus,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  LayoutDashboard,
+  LogOut,
+  Loader2,
+  AlertTriangle,
+  AlertCircle,
+  Zap,
+  Database,
+  ExternalLink,
+  Sparkles,
+  RefreshCw,
+  TrendingUp,
+  CheckCircle2,
+} from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { logoutAction } from "@/app/actions/auth";
+import { createQuerySessionAction, submitQueryMessageAction } from "@/app/actions/query";
+import { getOnboardingStateAction } from "@/app/actions/onboarding";
+import type { QueryCitation } from "@/types/query";
+import type { RoleKbDto } from "@/types/onboarding";
+
+export interface QueryMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  citations: QueryCitation[];
+  confidenceLevel: "high" | "medium" | "low" | null;
+  kbGapDetected: boolean;
+  kbGapSuggestion: string | null;
+  usedItems: number;
+  createdAt: string;
+}
+
+// ────────────────────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────────────────────
+
+function generateId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+const EXAMPLE_QUESTIONS = [
+  "Giải thích khái niệm chính trong lĩnh vực của bạn...",
+  "So sánh hai phương pháp phổ biến trong KB của bạn...",
+  "Tóm tắt quy trình thực hiện theo tài liệu đã nạp...",
+  "Những điểm quan trọng cần lưu ý khi áp dụng...",
+];
+
+// ────────────────────────────────────────────────────────────────
+// Sub-components
+// ────────────────────────────────────────────────────────────────
+
+/** Pulsing 3-dot loading animation */
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1.5 py-3 px-1">
+      <span className="text-xs text-auth-text-3 mr-1">Đang phân tích</span>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s`, animationDuration: "0.8s" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Confidence level pill badge */
+function ConfidenceBadge({ level }: { level: "high" | "medium" | "low" }) {
+  const map = {
+    high: {
+      label: "Độ tin cậy cao",
+      cls: "bg-emerald-950/40 border border-emerald-500/20 text-emerald-400",
+      Icon: CheckCircle2,
+    },
+    medium: {
+      label: "Độ tin cậy vừa",
+      cls: "bg-amber-950/40 border border-amber-500/20 text-amber-400",
+      Icon: TrendingUp,
+    },
+    low: {
+      label: "Độ tin cậy thấp",
+      cls: "bg-red-950/40 border border-red-500/20 text-red-400",
+      Icon: AlertTriangle,
+    },
+  };
+  const { label, cls, Icon } = map[level];
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${cls}`}
+    >
+      <Icon className="h-2.5 w-2.5" />
+      {label}
+    </span>
+  );
+}
+
+/** Single citation card */
+function CitationCard({ citation, index }: { citation: QueryCitation; index: number }) {
+  const score = Math.round((citation.score || 0) * 100);
+  return (
+    <a
+      href={citation.sourcePointer?.url || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex-shrink-0 w-64 bg-auth-elevated border border-auth-border hover:border-emerald-500/30 rounded-xl p-3 flex flex-col gap-2 transition-all group hover:shadow-[0_0_15px_rgba(52,211,153,0.08)] cursor-pointer"
+    >
+      {/* Index + domain */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="h-5 w-5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold flex items-center justify-center shrink-0">
+          {index + 1}
+        </span>
+        <span className="text-[9px] font-bold uppercase tracking-wider text-auth-text-3 bg-auth-bg/60 border border-white/[0.06] px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
+          {citation.domain?.name || "Unknown"}
+        </span>
+        <ExternalLink className="h-3 w-3 text-auth-text-3 group-hover:text-emerald-400 transition-colors shrink-0" />
+      </div>
+
+      {/* Title */}
+      <p className="text-xs font-semibold text-auth-text line-clamp-2 leading-snug">
+        {citation.knowledgeItemTitle}
+      </p>
+
+      {/* Snippet */}
+      <p className="text-[11px] text-auth-text-2 line-clamp-2 leading-relaxed">
+        {citation.excerpt}
+      </p>
+
+      {/* Relevance bar */}
+      <div className="flex items-center gap-2 mt-auto">
+        <div className="flex-1 h-1 bg-auth-bg rounded-full overflow-hidden border border-white/[0.04]">
+          <div
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all"
+            style={{ width: `${score}%` }}
+          />
+        </div>
+        <span className="text-[10px] font-bold text-emerald-400">{score}%</span>
+      </div>
+    </a>
+  );
+}
+
+/** Citations collapsible panel */
+function CitationsPanel({ citations }: { citations: QueryCitation[] }) {
+  const [open, setOpen] = useState(false);
+
+  if (!citations || citations.length === 0) return null;
+
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+      >
+        <BookOpen className="h-3 w-3" />
+        {citations.length} nguồn trích dẫn
+        {open ? (
+          <ChevronUp className="h-3 w-3" />
+        ) : (
+          <ChevronDown className="h-3 w-3" />
+        )}
+      </button>
+
+      {open && (
+        <div className="mt-2 flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          {citations.map((c, i) => (
+            <CitationCard key={c.id} citation={c} index={i} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** KB Gap warning box */
+function KbGapWarning({ suggestion }: { suggestion: string | null }) {
+  return (
+    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
+      <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+      <div>
+        <p className="text-xs font-bold text-amber-300">Phát hiện khoảng trống kiến thức</p>
+        {suggestion && (
+          <p className="text-xs text-amber-200/70 mt-1 leading-relaxed">{suggestion}</p>
+        )}
+        <Link
+          href="/compile/new"
+          className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
+        >
+          <Plus className="h-3 w-3" /> Nạp thêm tài liệu
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/** User message bubble */
+function UserMessage({ msg }: { msg: QueryMessage }) {
+  return (
+    <div className="flex justify-end">
+      <div className="max-w-[75%]">
+        <div className="bg-auth-elevated border border-auth-border rounded-2xl rounded-tr-sm px-4 py-3">
+          <p className="text-sm text-auth-text whitespace-pre-wrap leading-relaxed">
+            {msg.content}
+          </p>
+        </div>
+        <p className="text-[10px] text-auth-text-3 mt-1 text-right">{formatTime(msg.createdAt)}</p>
+      </div>
+    </div>
+  );
+}
+
+/** Assistant message (no bubble) */
+function AssistantMessage({ msg }: { msg: QueryMessage }) {
+  return (
+    <div className="flex justify-start">
+      <div className="w-full max-w-[90%]">
+        {/* Header row */}
+        <div className="flex items-center gap-2 mb-2">
+          <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
+            <Sparkles className="h-3 w-3 text-white" />
+          </div>
+          <span className="text-[11px] font-bold text-auth-text-3 uppercase tracking-wider">
+            Pulse AI
+          </span>
+          {msg.confidenceLevel && (
+            <ConfidenceBadge level={msg.confidenceLevel} />
+          )}
+          <span className="ml-auto text-[10px] text-auth-text-3">
+            {formatTime(msg.createdAt)}
+          </span>
+        </div>
+
+        {/* Answer text */}
+        <div className="prose prose-sm prose-invert max-w-none">
+          <p className="text-sm text-auth-text-2 leading-relaxed whitespace-pre-wrap m-0">
+            {msg.content}
+          </p>
+        </div>
+
+        {/* KB Gap warning */}
+        {msg.kbGapDetected && (
+          <KbGapWarning suggestion={msg.kbGapSuggestion} />
+        )}
+
+        {/* Citations */}
+        <CitationsPanel citations={msg.citations} />
+
+        {/* Used items info */}
+        {msg.usedItems > 0 && (
+          <p className="mt-2 text-[10px] text-auth-text-3">
+            Tổng hợp từ {msg.usedItems} mục kiến thức trong Knowledge Base
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Empty state (no messages) */
+function EmptyState({
+  onExampleClick,
+}: {
+  onExampleClick: (q: string) => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
+      {/* Icon */}
+      <div className="relative mb-6">
+        <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.1)]">
+          <MessageSquare className="h-10 w-10 text-emerald-400" />
+        </div>
+        <div
+          className="absolute inset-0 rounded-2xl blur-xl opacity-30"
+          style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160) 0%, transparent 70%)" }}
+        />
+      </div>
+
+      <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2">
+        Bắt đầu hỏi đáp
+      </h2>
+      <p className="text-xs text-auth-text-2 max-w-sm leading-relaxed mb-8">
+        Đặt câu hỏi dựa trên Knowledge Base của bạn. AI sẽ trả lời có trích dẫn nguồn minh bạch từ tài liệu đã nạp.
+      </p>
+
+      {/* Example chips */}
+      <div className="flex flex-col gap-2.5 w-full max-w-md">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1">
+          Câu hỏi gợi ý
+        </p>
+        {EXAMPLE_QUESTIONS.map((q) => (
+          <button
+            key={q}
+            onClick={() => onExampleClick(q)}
+            className="w-full text-left bg-auth-surface/40 border border-white/[0.06] hover:border-emerald-500/30 hover:bg-auth-elevated rounded-xl px-4 py-3 text-xs text-auth-text-2 hover:text-auth-text transition-all group"
+          >
+            <span className="text-emerald-400 mr-2 group-hover:mr-3 transition-all">→</span>
+            {q}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Special empty KB error state */
+function KbEmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
+      <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center mb-6">
+        <Database className="h-10 w-10 text-amber-400" />
+      </div>
+      <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2">
+        Knowledge Base trống
+      </h2>
+      <p className="text-xs text-auth-text-2 max-w-sm leading-relaxed mb-6">
+        Bạn cần nạp ít nhất một tài liệu vào Knowledge Base trước khi có thể sử dụng tính năng Hỏi đáp AI.
+      </p>
+      <Link
+        href="/compile/new"
+        className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full px-6 py-2.5 text-sm shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all"
+      >
+        <Plus className="h-4 w-4" />
+        Nạp tài liệu đầu tiên
+      </Link>
+    </div>
+  );
+}
+
+/** Quota exceeded state */
+function QuotaExceededBanner() {
+  return (
+    <div className="mx-4 mb-4 rounded-xl border border-red-500/20 bg-red-950/20 p-4 flex items-start gap-3">
+      <AlertCircle className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
+      <div className="flex-1">
+        <p className="text-sm font-bold text-red-300">Hết lượt hỏi đáp hôm nay</p>
+        <p className="text-xs text-red-200/70 mt-1">
+          Bạn đã sử dụng hết hạn mức hỏi đáp AI trong ngày hôm nay. Nâng cấp lên Pro để có thêm lượt hỏi.
+        </p>
+        <Link
+          href="/settings/billing"
+          className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors"
+        >
+          <Zap className="h-3.5 w-3.5" /> Nâng cấp lên Pro
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────
+// Main Component
+// ────────────────────────────────────────────────────────────────
+
+export function QueryView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user: authUser, clearAuth } = useAuth();
+  const [isPending, startTransition] = useTransition();
+
+  // Conversation state
+  const [messages, setMessages] = useState<QueryMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const [inputValue, setInputValue] = useState("");
+  const [isAnswering, setIsAnswering] = useState(false);
+  const [inlineError, setInlineError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [quotaExceeded, setQuotaExceeded] = useState(false);
+
+  // Role KB state
+  const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>("");
+  const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+
+  // Refs
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // ─── Bootstrap: load roles ───
+  useEffect(() => {
+    const initRoleKbId = searchParams.get("roleKbId") || "";
+    setSelectedRoleKbId(initRoleKbId);
+
+    const loadRoles = async () => {
+      setIsLoadingRoles(true);
+      try {
+        const res = await getOnboardingStateAction();
+        if (res.status === "1" && res.data?.roles) {
+          setUserRoles(res.data.roles);
+          // If no roleKbId from params, use primary role
+          if (!initRoleKbId) {
+            const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
+            if (primary) setSelectedRoleKbId(primary.id);
+          }
+        }
+      } catch (err) {
+        console.error("loadRoles error:", err);
+      } finally {
+        setIsLoadingRoles(false);
+      }
+    };
+
+    loadRoles();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ─── Scroll to bottom on new messages ───
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isAnswering]);
+
+  // ─── Auto-resize textarea ───
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const maxH = 5 * 24 + 24; // ~5 rows
+    el.style.height = Math.min(el.scrollHeight, maxH) + "px";
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [inputValue, autoResize]);
+
+  // ─── Handle logout ───
+  const handleLogout = () => {
+    startTransition(async () => {
+      clearAuth();
+      await logoutAction();
+    });
+  };
+
+  // ─── Clear conversation ───
+  const handleClearConversation = () => {
+    setMessages([]);
+    setConversationId(undefined);
+    setInlineError(null);
+    setErrorCode(null);
+    setQuotaExceeded(false);
+    textareaRef.current?.focus();
+  };
+
+  // ─── Handle role change ───
+  const handleRoleChange = (roleKbId: string) => {
+    setSelectedRoleKbId(roleKbId);
+    // Clear conversation when switching roles
+    setMessages([]);
+    setConversationId(undefined);
+    setInlineError(null);
+    setErrorCode(null);
+    setQuotaExceeded(false);
+  };
+
+  // ─── Submit question ───
+  const handleSubmit = useCallback(async () => {
+    const question = inputValue.trim();
+    if (!question || isAnswering || !selectedRoleKbId) return;
+
+    setInlineError(null);
+    setErrorCode(null);
+    setQuotaExceeded(false);
+
+    // Optimistic: add user message
+    const userMsg: QueryMessage = {
+      id: generateId(),
+      role: "user",
+      content: question,
+      citations: [],
+      confidenceLevel: null,
+      kbGapDetected: false,
+      kbGapSuggestion: null,
+      usedItems: 0,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setInputValue("");
+    setIsAnswering(true);
+
+    try {
+      let activeSessionId = conversationId;
+      if (!activeSessionId) {
+        // Create session first
+        const sessionRes = await createQuerySessionAction({
+          roleKbId: selectedRoleKbId,
+        });
+        if (sessionRes.status === "1" && sessionRes.data?.session?.id) {
+          activeSessionId = sessionRes.data.session.id;
+          setConversationId(activeSessionId);
+        } else {
+          const code = sessionRes.error_code;
+          setErrorCode(code);
+          if (code === "QUOTA_EXCEEDED") {
+            setQuotaExceeded(true);
+          } else if (code === "UNAUTHORIZED") {
+            clearAuth();
+            router.push("/login?returnUrl=/query");
+          } else {
+            setInlineError(sessionRes.msg || "Không thể tạo phiên hỏi đáp. Vui lòng thử lại.");
+          }
+          setIsAnswering(false);
+          return;
+        }
+      }
+
+      // Submit message
+      const res = await submitQueryMessageAction(activeSessionId, {
+        question,
+        scope: {
+          roleKbId: selectedRoleKbId,
+          domainId: null,
+          knowledgeItemId: null,
+        },
+      });
+
+      if (res.status === "1" && res.data) {
+        const d = res.data;
+        const assistantMsg: QueryMessage = {
+          id: d.assistantMessage.messageId,
+          role: "assistant",
+          content: d.assistantMessage.answer,
+          citations: d.assistantMessage.citations || [],
+          confidenceLevel: d.assistantMessage.confidence?.level || null,
+          kbGapDetected: d.assistantMessage.knowledgeGap?.hasGap || false,
+          kbGapSuggestion: d.assistantMessage.knowledgeGap?.message || null,
+          usedItems: d.assistantMessage.citations?.length || 0,
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+      } else {
+        const code = res.error_code;
+        setErrorCode(code);
+
+        if (code === "QUOTA_EXCEEDED") {
+          setQuotaExceeded(true);
+        } else if (code === "UNAUTHORIZED") {
+          clearAuth();
+          router.push("/login?returnUrl=/query");
+        } else {
+          setInlineError(
+            code === "KB_INSUFFICIENT"
+              ? "KB_INSUFFICIENT"
+              : res.msg || "Không thể xử lý câu hỏi. Vui lòng thử lại."
+          );
+        }
+      }
+    } catch (err) {
+      console.error("handleSubmit error:", err);
+      setInlineError("Không kết nối được máy chủ. Vui lòng thử lại.");
+    } finally {
+      setIsAnswering(false);
+      textareaRef.current?.focus();
+    }
+  }, [inputValue, isAnswering, selectedRoleKbId, conversationId, clearAuth, router]);
+
+  // ─── Keyboard handler ───
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  // ─── Example question click ───
+  const handleExampleClick = (q: string) => {
+    setInputValue(q);
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  };
+
+  // ─── Retry last question ───
+  const handleRetry = () => {
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (lastUser) {
+      // Remove the last user message and re-submit
+      setMessages((prev) => prev.filter((m) => m.id !== lastUser.id));
+      setInputValue(lastUser.content);
+      setInlineError(null);
+      setErrorCode(null);
+    }
+  };
+
+  // ─── Computed values ───
+  const selectedRole = userRoles.find((r) => r.id === selectedRoleKbId);
+  const canSend = inputValue.trim().length > 0 && !isAnswering && !!selectedRoleKbId;
+  const showKbEmpty = errorCode === "KB_INSUFFICIENT" || inlineError === "KB_INSUFFICIENT";
+
+  // ────────────────────────────────────────────────────────────────
+  // RENDER
+  // ────────────────────────────────────────────────────────────────
+
+  return (
+    <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
+      {/* Ambient glow */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]"
+        style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.1) 0%, transparent 70%)" }}
+        aria-hidden="true"
+      />
+
+      {/* ──────────── Header ──────────── */}
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
+        <div className="container-responsive flex h-full items-center justify-between">
+          <div className="flex items-center gap-5">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-base font-bold tracking-tight text-auth-text">
+                Pulse
+                <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                  Knowledge
+                </span>
+              </span>
+            </Link>
+            <nav className="hidden items-center gap-1.5 md:flex">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+              </Link>
+              <Link
+                href="/query"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
+              >
+                <MessageSquare className="h-3.5 w-3.5" /> Hỏi đáp AI
+              </Link>
+              <Link
+                href="/wiki"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
+              >
+                <BookOpen className="h-3.5 w-3.5" /> Wiki Cá nhân
+              </Link>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden text-right md:block">
+              <div className="text-xs font-bold text-auth-text">
+                {authUser?.displayName || authUser?.email}
+              </div>
+              <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-0.5 text-[10px] font-semibold text-auth-accent">
+                {authUser?.plan === "pro" ? "Pro Plan" : "Free Plan"}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              disabled={isPending}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
+              title="Đăng xuất"
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+              ) : (
+                <LogOut className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ──────────── Main Split Layout ──────────── */}
+      <div className="flex flex-1 overflow-hidden container-responsive py-6 gap-6 relative z-10">
+        {/* ──────── Left Sidebar ──────── */}
+        <aside className="hidden lg:flex w-[280px] shrink-0 flex-col gap-4">
+          {/* Context Card */}
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+
+            <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-3">
+              Knowledge Base đang dùng
+            </p>
+
+            {isLoadingRoles ? (
+              <div className="flex items-center gap-2 text-xs text-auth-text-3">
+                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+                Đang tải...
+              </div>
+            ) : selectedRole ? (
+              <>
+                {/* Role name */}
+                <div className="flex items-start gap-2 mb-3">
+                  <div className="h-8 w-8 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
+                    <MessageSquare className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-auth-text truncate">
+                      {selectedRole.roleName}
+                    </p>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-auth-text-3 bg-auth-bg/60 border border-white/[0.06] rounded-full px-2 py-0.5 mt-0.5">
+                      {selectedRole.roleGroup}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Role selector for multi-role */}
+                {userRoles.length > 1 && (
+                  <div className="mb-3">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 block mb-1.5">
+                      Chuyển KB
+                    </label>
+                    <select
+                      value={selectedRoleKbId}
+                      onChange={(e) => handleRoleChange(e.target.value)}
+                      className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text text-xs px-3 py-2 appearance-none cursor-pointer focus:border-auth-accent/50 transition-colors"
+                    >
+                      {userRoles.map((r) => (
+                        <option key={r.id} value={r.id} className="bg-auth-surface text-auth-text">
+                          {r.roleName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-xs text-auth-text-3">Chưa chọn Knowledge Base</p>
+            )}
+
+            {/* Conversation info */}
+            {conversationId && (
+              <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                <p className="text-[10px] text-auth-text-3">
+                  Phiên hội thoại đang hoạt động
+                </p>
+                <p className="text-[10px] font-mono text-auth-text-3 truncate mt-0.5">
+                  {conversationId.slice(0, 18)}...
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Quick actions */}
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+
+            <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1">
+              Thao tác
+            </p>
+
+            <Link
+              href="/compile/new"
+              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-white transition-all"
+            >
+              <Plus className="h-4 w-4 text-auth-accent" />
+              Nạp thêm tài liệu
+            </Link>
+
+            <button
+              onClick={handleClearConversation}
+              disabled={messages.length === 0}
+              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-red-950/30 hover:border-red-500/20 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-red-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Trash2 className="h-4 w-4" />
+              Xóa cuộc hội thoại
+            </button>
+          </div>
+
+          {/* Tips */}
+          <div className="rounded-2xl border border-white/[0.04] bg-auth-surface/20 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-2">
+              Mẹo sử dụng
+            </p>
+            <ul className="space-y-1.5">
+              {[
+                "Đặt câu hỏi cụ thể để có câu trả lời chính xác hơn",
+                "Enter để gửi, Shift+Enter để xuống dòng",
+                "Trích dẫn có thể mở rộng để xem nguồn đầy đủ",
+              ].map((tip) => (
+                <li key={tip} className="text-[11px] text-auth-text-3 flex items-start gap-1.5">
+                  <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+
+        {/* ──────── Main Chat Area ──────── */}
+        <div className="flex-1 flex flex-col min-h-0 bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+
+          {/* Chat header */}
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-[0_0_10px_rgba(52,211,153,0.2)]">
+                <Sparkles className="h-3.5 w-3.5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-auth-text">Hỏi đáp AI</p>
+                <p className="text-[10px] text-auth-text-3">
+                  {selectedRole ? selectedRole.roleName : "Chọn Knowledge Base để bắt đầu"}
+                </p>
+              </div>
+            </div>
+
+            {/* Mobile: clear conversation */}
+            <button
+              onClick={handleClearConversation}
+              disabled={messages.length === 0}
+              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs text-auth-text-2 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Xóa hội thoại</span>
+            </button>
+          </div>
+
+          {/* Quota exceeded banner */}
+          {quotaExceeded && (
+            <div className="px-4 pt-4 shrink-0">
+              <QuotaExceededBanner />
+            </div>
+          )}
+
+          {/* ── Messages area ── */}
+          <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6 min-h-0 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            {showKbEmpty ? (
+              <KbEmptyState />
+            ) : messages.length === 0 && !isAnswering ? (
+              <EmptyState onExampleClick={handleExampleClick} />
+            ) : (
+              <>
+                {messages.map((msg) =>
+                  msg.role === "user" ? (
+                    <UserMessage key={msg.id} msg={msg} />
+                  ) : (
+                    <AssistantMessage key={msg.id} msg={msg} />
+                  )
+                )}
+
+                {/* Typing indicator */}
+                {isAnswering && (
+                  <div className="flex justify-start">
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
+                        <Sparkles className="h-3 w-3 text-white" />
+                      </div>
+                      <TypingIndicator />
+                    </div>
+                  </div>
+                )}
+
+                {/* Inline error (non-KB-empty, non-quota) */}
+                {inlineError && inlineError !== "KB_INSUFFICIENT" && (
+                  <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-xs text-red-300">{inlineError}</p>
+                      <button
+                        onClick={handleRetry}
+                        className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        <RefreshCw className="h-3 w-3" /> Thử lại
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* ── Input area (sticky bottom) ── */}
+          {!showKbEmpty && (
+            <div className="shrink-0 border-t border-white/[0.06] px-5 py-4 bg-auth-bg/40 backdrop-blur-md">
+              {/* Role selector (mobile + top of input) */}
+              <div className="flex items-center justify-end mb-2.5 gap-2">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                  KB:
+                </label>
+                {isLoadingRoles ? (
+                  <span className="text-[10px] text-auth-text-3 animate-pulse">Đang tải...</span>
+                ) : (
+                  <select
+                    value={selectedRoleKbId}
+                    onChange={(e) => handleRoleChange(e.target.value)}
+                    className="bg-auth-elevated border border-auth-border rounded-lg text-auth-text text-[11px] font-semibold px-2.5 py-1 appearance-none cursor-pointer focus:border-auth-accent/50 transition-colors max-w-[180px]"
+                  >
+                    {userRoles.length === 0 && (
+                      <option value="">Chưa có KB</option>
+                    )}
+                    {userRoles.map((r) => (
+                      <option key={r.id} value={r.id} className="bg-auth-surface">
+                        {r.roleName}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Textarea + send button row */}
+              <div className="flex items-end gap-3">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={textareaRef}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)"
+                    disabled={isAnswering || quotaExceeded}
+                    rows={1}
+                    className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm px-4 py-3 resize-none focus:outline-none focus:border-auth-accent/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed leading-relaxed"
+                    style={{ minHeight: "48px", maxHeight: "144px" }}
+                  />
+                </div>
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={!canSend || quotaExceeded}
+                  className="shrink-0 h-12 w-12 flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                  title="Gửi câu hỏi"
+                >
+                  {isAnswering ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+
+              {/* Disclaimer */}
+              <p className="mt-2 text-center text-[10px] text-auth-text-3">
+                Hỏi đáp dựa trên Knowledge Base của bạn. Câu trả lời có trích dẫn nguồn.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
