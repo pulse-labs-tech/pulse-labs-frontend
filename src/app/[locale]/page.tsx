@@ -9,6 +9,7 @@ import { TypewriterWrapper, TypewriterChild } from "@/components/ui/typewriter-e
 import { ScrollToTop } from "@/components/ui";
 import { getDictionary } from "@/dictionaries";
 import type { Variants } from "framer-motion";
+import { ShowcaseVideo } from "@/components/shared/showcase-video";
 
 export async function generateMetadata({
   params,
@@ -114,29 +115,10 @@ export default async function HomePage({
                 </div>
               </ScrollReveal>
 
-              {/* Query mockup */}
+              {/* HLS Video Showcase */}
               <ScrollReveal delay={1.0} direction="up">
-                <div className="mx-auto mt-16 max-w-2xl 3xl:max-w-3xl">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-md">
-                    <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-auth-elevated/80 px-4 py-3.5">
-                      <Search className="h-4 w-4 shrink-0 text-auth-text-3" />
-                      <TypewriterWrapper delay={1.2}>
-                        <span className="text-sm text-auth-text-3">
-                          <span className="text-auth-accent">&quot;{dict.landing.queryMockupSearch}&quot;</span>
-                        </span>
-                      </TypewriterWrapper>
-                    </div>
-                    <ScrollReveal delay={1.8} direction="up">
-                      <div className="mt-4 space-y-2.5 px-1 text-left">
-                        <div className="flex items-center gap-2 text-xs text-auth-text-3">
-                          <div className="h-1.5 w-1.5 rounded-full bg-auth-accent shadow-[0_0_6px_var(--color-auth-accent-glow)]" />
-                          <span>{dict.landing.queryMockupCitations}</span>
-                          <span className="rounded-full border border-auth-border bg-auth-elevated px-2.5 py-0.5 text-[10px] font-semibold text-auth-text-2">Confidence: High</span>
-                        </div>
-                        <p className="text-[13px] leading-relaxed text-auth-text-2">{dict.landing.queryMockupResponse}</p>
-                      </div>
-                    </ScrollReveal>
-                  </div>
+                <div className="mx-auto mt-16 max-w-4xl 3xl:max-w-5xl">
+                  <ShowcaseVideo />
                 </div>
               </ScrollReveal>
               </div>
