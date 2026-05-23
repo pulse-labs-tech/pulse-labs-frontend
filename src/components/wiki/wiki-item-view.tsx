@@ -283,8 +283,8 @@ export function WikiItemView({ id }: WikiItemViewProps) {
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
-        <div className="container-focused flex md:grid md:grid-cols-3 h-16 items-center justify-between">
-          <div className="flex justify-start">
+        <div className="container-focused flex h-16 items-center justify-between relative">
+          <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
@@ -292,7 +292,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
             </Link>
           </div>
 
-          <div className="hidden justify-center items-center gap-1.5 md:flex">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 md:flex">
             <nav className="flex items-center gap-1.5">
               <Link
                 href={`/${locale}/dashboard`}
@@ -315,7 +315,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4 justify-end">
+          <div className="flex items-center gap-4 justify-end z-10">
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
                 {authUser?.displayName || authUser?.email || t("auth.brand.prop3Title")}

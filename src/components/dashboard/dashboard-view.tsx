@@ -635,8 +635,8 @@ export function DashboardView() {
 
       {/* ────────────────── Header / Navigation ────────────────── */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#09090b]/75 backdrop-blur-2xl">
-        <div className="container-focused flex md:grid md:grid-cols-3 h-16 items-center justify-between">
-          <div className="flex justify-start">
+        <div className="container-focused flex h-16 items-center justify-between relative">
+          <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-white">
                 Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
@@ -644,7 +644,7 @@ export function DashboardView() {
             </Link>
           </div>
 
-          <div className="hidden justify-center items-center gap-1.5 md:flex">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 md:flex">
             <nav className="flex items-center gap-1.5">
               <Link
                 href={`/${locale}/dashboard`}
@@ -674,7 +674,7 @@ export function DashboardView() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4 justify-end">
+          <div className="flex items-center gap-4 justify-end z-10">
             {/* User Greeting & Plan */}
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-white">

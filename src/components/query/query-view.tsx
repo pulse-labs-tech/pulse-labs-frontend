@@ -628,8 +628,8 @@ export function QueryView() {
 
       {/* ──────────── Header ──────────── */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
-        <div className="container-focused flex md:grid md:grid-cols-3 h-full items-center justify-between">
-          <div className="flex justify-start">
+        <div className="container-focused flex h-full items-center justify-between relative">
+          <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse
@@ -640,7 +640,7 @@ export function QueryView() {
             </Link>
           </div>
 
-          <div className="hidden justify-center items-center gap-1.5 md:flex">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 md:flex">
             <nav className="flex items-center gap-1.5">
               <Link
                 href={`/${locale}/dashboard`}
@@ -663,7 +663,7 @@ export function QueryView() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4 justify-end">
+          <div className="flex items-center gap-4 justify-end z-10">
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
                 {authUser?.displayName || authUser?.email}

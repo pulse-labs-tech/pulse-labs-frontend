@@ -19,8 +19,8 @@ export function Header() {
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-white/[0.08] glass-premium">
-      <nav className="container-focused flex md:grid md:grid-cols-3 h-14 items-center justify-between 3xl:h-16">
-        <div className="flex justify-start">
+      <nav className="container-focused flex h-14 items-center justify-between 3xl:h-16 relative">
+        <div className="flex justify-start z-10">
           <Link href={`/${locale}`} className="group flex items-center gap-2.5" aria-label="Pulse Knowledge — trang chủ">
             <PulseLogo size={32} className="transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
             <span className="text-sm font-bold tracking-tight text-auth-text 3xl:text-[15px]">
@@ -28,14 +28,14 @@ export function Header() {
             </span>
           </Link>
         </div>
-        <div className="hidden justify-center items-center gap-8 md:flex">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-8 md:flex">
           {navLinks.map((l) => (
             <a key={l.href} href={l.href} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">
               {l.label}
             </a>
           ))}
         </div>
-        <div className="hidden justify-end items-center gap-4 md:flex">
+        <div className="hidden justify-end items-center gap-4 md:flex z-10">
           <LocaleSwitcher id="desktop" />
           <Link href={`/${locale}/login`} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">
             {t("auth.login.title")}
@@ -44,7 +44,7 @@ export function Header() {
             <Button variant="primary" size="md" pill={true} className="px-5">{t("landing.ctaStart")}</Button>
           </Link>
         </div>
-        <div className="flex items-center gap-3 justify-end md:hidden">
+        <div className="flex items-center gap-3 justify-end md:hidden z-10">
           <LocaleSwitcher id="mobile" />
           <Button
             type="button"
