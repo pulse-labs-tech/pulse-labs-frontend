@@ -14,7 +14,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-auth-bg text-auth-text flex flex-col">
       <Header />
-      <main id="main-content" className="flex-1 px-5 py-24 lg:px-8 lg:py-32 max-w-4xl mx-auto w-full">
+      <main id="main-content" className="flex-1 container-focused-narrow py-24 lg:py-32">
         <ScrollReveal direction="up" delay={0.1}>
           <h1 className="text-[32px] md:text-[40px] font-extrabold tracking-tight bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent mb-8">
             Điều khoản Sử dụng

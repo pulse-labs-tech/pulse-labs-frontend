@@ -21,7 +21,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-white/[0.06] bg-auth-bg">
-      <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8 3xl:max-w-[1680px] 4xl:max-w-[2200px]">
+      <div className="container-focused py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <Link href={`/${locale}`} className="group inline-flex items-center gap-2.5">

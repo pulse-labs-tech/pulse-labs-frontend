@@ -283,14 +283,17 @@ export function WikiItemView({ id }: WikiItemViewProps) {
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
-        <div className="container-responsive flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6">
+        <div className="container-focused flex md:grid md:grid-cols-3 h-16 items-center justify-between">
+          <div className="flex justify-start">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
-            <nav className="hidden items-center gap-1.5 md:flex">
+          </div>
+
+          <div className="hidden justify-center items-center gap-1.5 md:flex">
+            <nav className="flex items-center gap-1.5">
               <Link
                 href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
@@ -312,7 +315,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 justify-end">
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
                 {authUser?.displayName || authUser?.email || t("auth.brand.prop3Title")}
@@ -338,7 +341,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
       </header>
 
       {/* Main */}
-      <main className="container-responsive flex-grow py-8 relative z-10">
+      <main className="container-focused flex-grow py-8 relative z-10">
         {children}
       </main>
     </div>

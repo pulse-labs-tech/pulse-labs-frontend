@@ -523,7 +523,7 @@ export function QueryView() {
             setQuotaExceeded(true);
           } else if (code === "UNAUTHORIZED") {
             clearAuth();
-            router.push("/login?returnUrl=/query");
+            router.push(`/${locale}/login?returnUrl=/${locale}/query`);
           } else {
             setInlineError(sessionRes.msg || "Không thể tạo phiên hỏi đáp. Vui lòng thử lại.");
           }
@@ -564,7 +564,7 @@ export function QueryView() {
           setQuotaExceeded(true);
         } else if (code === "UNAUTHORIZED") {
           clearAuth();
-          router.push("/login?returnUrl=/query");
+          router.push(`/${locale}/login?returnUrl=/${locale}/query`);
         } else {
           setInlineError(
             code === "KB_INSUFFICIENT"
@@ -628,9 +628,9 @@ export function QueryView() {
 
       {/* ──────────── Header ──────────── */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
-        <div className="container-responsive flex h-full items-center justify-between">
-          <div className="flex items-center gap-5">
-            <Link href="/" className="flex items-center gap-2">
+        <div className="container-focused flex md:grid md:grid-cols-3 h-full items-center justify-between">
+          <div className="flex justify-start">
+            <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse
                 <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
@@ -638,21 +638,24 @@ export function QueryView() {
                 </span>
               </span>
             </Link>
-            <nav className="hidden items-center gap-1.5 md:flex">
+          </div>
+
+          <div className="hidden justify-center items-center gap-1.5 md:flex">
+            <nav className="flex items-center gap-1.5">
               <Link
-                href="/dashboard"
+                href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
               </Link>
               <Link
-                href="/query"
+                href={`/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <MessageSquare className="h-3.5 w-3.5" /> Hỏi đáp AI
               </Link>
               <Link
-                href="/wiki"
+                href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <BookOpen className="h-3.5 w-3.5" /> Wiki Cá nhân
@@ -660,7 +663,7 @@ export function QueryView() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 justify-end">
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
                 {authUser?.displayName || authUser?.email}
@@ -686,7 +689,7 @@ export function QueryView() {
       </header>
 
       {/* ──────────── Main Split Layout ──────────── */}
-      <div className="flex flex-1 overflow-hidden container-responsive py-6 gap-6 relative z-10">
+      <div className="flex flex-1 overflow-hidden container-focused py-6 gap-6 relative z-10">
         {/* ──────── Left Sidebar ──────── */}
         <aside className="hidden lg:flex w-[280px] shrink-0 flex-col gap-4">
           {/* Context Card */}

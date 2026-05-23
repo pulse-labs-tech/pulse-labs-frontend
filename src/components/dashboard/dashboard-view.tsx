@@ -635,14 +635,17 @@ export function DashboardView() {
 
       {/* ────────────────── Header / Navigation ────────────────── */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#09090b]/75 backdrop-blur-2xl">
-        <div className="container-responsive flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6">
+        <div className="container-focused flex md:grid md:grid-cols-3 h-16 items-center justify-between">
+          <div className="flex justify-start">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-white">
                 Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
-            <nav className="hidden items-center gap-1.5 md:flex">
+          </div>
+
+          <div className="hidden justify-center items-center gap-1.5 md:flex">
+            <nav className="flex items-center gap-1.5">
               <Link
                 href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
@@ -671,7 +674,7 @@ export function DashboardView() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 justify-end">
             {/* User Greeting & Plan */}
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-white">
@@ -698,7 +701,7 @@ export function DashboardView() {
       </header>
 
       {/* ────────────────── Main Content Area ────────────────── */}
-      <main className="container-responsive flex-grow py-8 relative z-10 flex flex-col gap-6">
+      <main className="container-focused flex-grow py-8 relative z-10 flex flex-col gap-6">
         {isChangingRole && (
           <div className="absolute inset-0 bg-[#09090b]/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
             <div className="flex flex-col items-center gap-3">
@@ -1248,7 +1251,7 @@ export function DashboardView() {
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06] bg-[#09090b] py-6 text-center text-xs text-[#52525b] z-10">
-        <div className="container-responsive">
+        <div className="container-focused">
           <p>{locale === "vi" ? "© 2026 Pulse Knowledge. Tất cả quyền được bảo lưu." : "© 2026 Pulse Knowledge. All rights reserved."}</p>
         </div>
       </footer>

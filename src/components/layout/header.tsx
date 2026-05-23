@@ -19,24 +19,32 @@ export function Header() {
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-white/[0.08] glass-premium">
-      <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 lg:px-8 3xl:h-16 3xl:max-w-[1680px] 4xl:max-w-[2200px]">
-        <Link href={`/${locale}`} className="group flex items-center gap-2.5" aria-label="Pulse Knowledge — trang chủ">
-          <PulseLogo size={32} className="transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
-          <span className="text-sm font-bold tracking-tight text-auth-text 3xl:text-[15px]">
-            Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
-          </span>
-        </Link>
-        <div className="hidden items-center gap-8 md:flex">
-          {navLinks.map((l) => (<a key={l.href} href={l.href} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">{l.label}</a>))}
+      <nav className="container-focused flex md:grid md:grid-cols-3 h-14 items-center justify-between 3xl:h-16">
+        <div className="flex justify-start">
+          <Link href={`/${locale}`} className="group flex items-center gap-2.5" aria-label="Pulse Knowledge — trang chủ">
+            <PulseLogo size={32} className="transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
+            <span className="text-sm font-bold tracking-tight text-auth-text 3xl:text-[15px]">
+              Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
+            </span>
+          </Link>
         </div>
-        <div className="hidden items-center gap-4 md:flex">
+        <div className="hidden justify-center items-center gap-8 md:flex">
+          {navLinks.map((l) => (
+            <a key={l.href} href={l.href} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">
+              {l.label}
+            </a>
+          ))}
+        </div>
+        <div className="hidden justify-end items-center gap-4 md:flex">
           <LocaleSwitcher id="desktop" />
-          <Link href={`/${locale}/login`} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">{t("auth.login.title")}</Link>
+          <Link href={`/${locale}/login`} className="text-[13px] font-medium text-auth-text-2 transition-colors duration-200 hover:text-white 3xl:text-sm">
+            {t("auth.login.title")}
+          </Link>
           <Link href={`/${locale}/register`}>
             <Button variant="primary" size="md" pill={true} className="px-5">{t("landing.ctaStart")}</Button>
           </Link>
         </div>
-        <div className="flex items-center gap-3 md:hidden">
+        <div className="flex items-center gap-3 justify-end md:hidden">
           <LocaleSwitcher id="mobile" />
           <Button
             type="button"

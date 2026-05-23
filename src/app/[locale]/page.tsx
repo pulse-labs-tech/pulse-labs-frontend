@@ -72,12 +72,13 @@ export default async function HomePage({
         <Header />
         <main id="main-content">
           {/* HERO */}
-          <section className="relative overflow-hidden px-5 pb-24 pt-32 lg:px-8 lg:pb-32 lg:pt-40 3xl:pb-40 3xl:pt-48">
+          <section className="relative overflow-hidden pb-24 pt-32 lg:pb-32 lg:pt-40 3xl:pb-40 3xl:pt-48">
             <div className="pointer-events-none absolute left-1/2 top-0 h-[700px] w-[900px] -translate-x-1/2 -translate-y-1/4 blur-[120px]" style={{ background: "radial-gradient(ellipse, var(--color-auth-accent-glow) 0%, transparent 70%)" }} aria-hidden="true" />
             <div className="pointer-events-none absolute -right-[100px] top-[20%] h-[500px] w-[500px] blur-[100px]" style={{ background: "radial-gradient(circle, oklch(0.78 0.14 195 / 0.08) 0%, transparent 70%)" }} aria-hidden="true" />
             <div className="pointer-events-none absolute -left-[80px] bottom-[10%] h-[350px] w-[350px] blur-[80px]" style={{ background: "radial-gradient(circle, oklch(0.68 0.18 280 / 0.05) 0%, transparent 70%)" }} aria-hidden="true" />
 
-            <div className="relative mx-auto max-w-4xl text-center 3xl:max-w-5xl">
+            <div className="relative container-focused text-center">
+              <div className="mx-auto max-w-4xl">
               <ScrollReveal delay={0.1}>
                 <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold text-auth-text-2 backdrop-blur-md uppercase tracking-wider">
                   {dict.landing.badge}
@@ -138,13 +139,14 @@ export default async function HomePage({
                   </div>
                 </div>
               </ScrollReveal>
+              </div>
             </div>
           </section>
 
           {/* FEATURES */}
-          <section id="features" className="relative overflow-hidden scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
+          <section id="features" className="relative overflow-hidden scroll-mt-16 py-24 lg:py-32 3xl:py-40">
             <div className="pointer-events-none absolute left-1/2 top-[10%] h-[500px] w-[700px] -translate-x-1/2 blur-[120px]" style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.06) 0%, transparent 70%)" }} aria-hidden="true" />
-            <div className="relative mx-auto max-w-7xl 3xl:max-w-[1680px] 4xl:max-w-[2200px]">
+            <div className="relative container-focused w-full">
               <ScrollReveal direction="up">
                 <div className="mb-16 text-center">
                   <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-auth-accent">{dict.landing.navFeatures}</p>
@@ -174,9 +176,9 @@ export default async function HomePage({
           </section>
 
           {/* HOW IT WORKS */}
-          <section id="how-it-works" className="relative overflow-hidden scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
+          <section id="how-it-works" className="relative overflow-hidden scroll-mt-16 py-24 lg:py-32 3xl:py-40">
             <div className="pointer-events-none absolute right-[10%] top-[30%] h-[400px] w-[400px] blur-[100px]" style={{ background: "radial-gradient(circle, oklch(0.75 0.19 160 / 0.07) 0%, transparent 70%)" }} aria-hidden="true" />
-            <div className="relative mx-auto max-w-5xl 3xl:max-w-6xl">
+            <div className="relative container-focused w-full">
               <ScrollReveal direction="up">
                 <div className="mb-16 text-center">
                   <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-auth-accent">{dict.landing.howItWorks}</p>
@@ -201,9 +203,10 @@ export default async function HomePage({
           </section>
 
           {/* CTA */}
-          <section id="cta" className="relative overflow-hidden scroll-mt-16 px-5 py-24 lg:px-8 lg:py-32 3xl:py-40">
-            <ScrollReveal direction="up" delay={0.2}>
-              <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-12 text-center shadow-[0_8px_40px_rgba(0,0,0,0.4)] backdrop-blur-md sm:p-16 lg:p-20 3xl:max-w-5xl 3xl:p-24">
+          <section id="cta" className="relative overflow-hidden scroll-mt-16 py-24 lg:py-32 3xl:py-40">
+            <div className="relative container-focused w-full">
+              <ScrollReveal direction="up" delay={0.2}>
+                <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-12 text-center shadow-[0_8px_40px_rgba(0,0,0,0.4)] backdrop-blur-md sm:p-16 lg:p-20">
                 <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 blur-[100px]" style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160 / 0.14) 0%, transparent 70%)" }} aria-hidden="true" />
                 <div className="relative">
                   <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-extrabold tracking-tight 3xl:text-[2.75rem]">
@@ -223,6 +226,7 @@ export default async function HomePage({
                 </div>
               </div>
             </ScrollReveal>
+            </div>
           </section>
         </main>
         <Footer />

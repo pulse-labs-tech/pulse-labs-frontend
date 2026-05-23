@@ -422,6 +422,66 @@ select:focus {
   }
 }
 
+.container-focused {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 3vw, 4rem);
+  padding-right: clamp(1rem, 3vw, 4rem);
+  max-width: 1200px;
+}
+
+@media (min-width: 1920px) {
+  .container-focused {
+    padding-left: clamp(2rem, 3vw, 6rem);
+    padding-right: clamp(2rem, 3vw, 6rem);
+  }
+}
+
+@media (min-width: 2560px) {
+  .container-focused {
+    padding-left: clamp(3rem, 4vw, 8rem);
+    padding-right: clamp(3rem, 4vw, 8rem);
+  }
+}
+
+@media (min-width: 3840px) {
+  .container-focused {
+    padding-left: clamp(4rem, 5vw, 12rem);
+    padding-right: clamp(4rem, 5vw, 12rem);
+  }
+}
+
+.container-focused-narrow {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 3vw, 4rem);
+  padding-right: clamp(1rem, 3vw, 4rem);
+  max-width: 800px;
+}
+
+@media (min-width: 1920px) {
+  .container-focused-narrow {
+    padding-left: clamp(2rem, 3vw, 6rem);
+    padding-right: clamp(2rem, 3vw, 6rem);
+  }
+}
+
+@media (min-width: 2560px) {
+  .container-focused-narrow {
+    padding-left: clamp(3rem, 4vw, 8rem);
+    padding-right: clamp(3rem, 4vw, 8rem);
+  }
+}
+
+@media (min-width: 3840px) {
+  .container-focused-narrow {
+    padding-left: clamp(4rem, 5vw, 12rem);
+    padding-right: clamp(4rem, 5vw, 12rem);
+  }
+}
+
 /* ============================================================
    Utility Classes
    ============================================================ */
