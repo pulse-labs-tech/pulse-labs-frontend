@@ -67,7 +67,7 @@ for idx, (filename, caption) in enumerate(image_files):
     mask = Image.new("L", (target_sw, target_sh), 255)
     mask_draw = ImageDraw.Draw(mask)
     # Draw black borders on mask to start fade early
-    fade_px = 25
+    fade_px = 65
     mask_draw.rectangle([0, 0, target_sw, target_sh], fill=255)
     # Apply soft black borders
     for i in range(fade_px):
@@ -75,77 +75,12 @@ for idx, (filename, caption) in enumerate(image_files):
         mask_draw.rectangle([i, i, target_sw - i - 1, target_sh - i - 1], outline=opacity)
     
     # Blur mask for extremely smooth vignette fade
-    mask = mask.filter(ImageFilter.GaussianBlur(15))
+    mask = mask.filter(ImageFilter.GaussianBlur(30))
     
     # Paste screenshot onto black canvas using vignette mask
     canvas.paste(screenshot_resized, (x_offset, y_offset), mask)
     
-    # Draw glass card border (glowing emerald green)
-    draw = ImageDraw.Draw(canvas)
-    border_margin = 2
-    border_box = [
-        x_offset - border_margin, 
-        y_offset - border_margin, 
-        x_offset + target_sw + border_margin, 
-        y_offset + target_sh + border_margin
-    ]
-    # Subtle emerald border: rgb(16, 185, 129, 30% alpha blended on black)
-    # Blend color manually: 16 * 0.3 = 5, 185 * 0.3 = 55, 129 * 0.3 = 38
-    draw.rectangle(border_box, outline=(5, 55, 38), width=2)
-    
-    # Draw ambient glow behind card edges (very subtle)
-    glow_mask = Image.new("L", (width, height), 0)
-    glow_draw = ImageDraw.Draw(glow_mask)
-    # Draw white rectangle at border location
-    glow_draw.rectangle(border_box, fill=80)
-    # Blur heavily to create ambient glow
-    glow_mask = glow_mask.filter(ImageFilter.GaussianBlur(40))
-    glow_color = Image.new("RGB", (width, height), (16, 185, 129))
-    canvas = Image.composite(glow_color, canvas, glow_mask)
-    
-    # Re-draw the card border over the glow
-    draw = ImageDraw.Draw(canvas)
-    draw.rectangle(border_box, outline=(16, 185, 129), width=1)
-    
-    # Draw Heads-Up-Display (HUD) labels
-    # 1. LIVE indicator dot
-    indicator_x, indicator_y = x_offset + 25, y_offset - 25
-    draw.ellipse([indicator_x, indicator_y - 4, indicator_x + 8, indicator_y + 4], fill=(16, 185, 129))
-    
-    try:
-        font_sm = ImageFont.truetype(font_path, 11) if font_path else ImageFont.load_default()
-        font_lg = ImageFont.truetype(font_path, 16) if font_path else ImageFont.load_default()
-    except Exception:
-        font_sm = ImageFont.load_default()
-        font_lg = ImageFont.load_default()
-        
-    draw.text((indicator_x + 16, indicator_y - 8), "LIVE CONTEXT DEMO", fill=(16, 185, 129), font=font_sm)
-    
-    # Draw caption bar at the bottom
-    caption_w = 600
-    caption_h = 42
-    caption_x = (width - caption_w) // 2
-    caption_y = y_offset + target_sh - 21 # Overlaps bottom edge beautifully
-    
-    # Caption pill (glassmorphic dark pill with emerald glow outline)
-    pill_mask = Image.new("L", (width, height), 0)
-    pill_draw = ImageDraw.Draw(pill_mask)
-    pill_draw.rounded_rectangle([caption_x, caption_y, caption_x + caption_w, caption_y + caption_h], radius=21, fill=220)
-    pill_bg = Image.new("RGB", (width, height), (9, 9, 11))
-    canvas = Image.composite(pill_bg, canvas, pill_mask)
-    
-    # Draw pill border
-    draw = ImageDraw.Draw(canvas)
-    draw.rounded_rectangle([caption_x, caption_y, caption_x + caption_w, caption_y + caption_h], radius=21, outline=(16, 185, 129), width=1)
-    
-    # Draw Caption text centered in pill
-    text_bbox = draw.textbbox((0, 0), caption, font=font_lg)
-    text_w = text_bbox[2] - text_bbox[0]
-    text_h = text_bbox[3] - text_bbox[1]
-    text_x = caption_x + (caption_w - text_w) // 2
-    text_y = caption_y + (caption_h - text_h) // 2 - 2
-    draw.text((text_x, text_y), caption, fill=(250, 250, 250), font=font_lg)
-    
+    # No outline, borders, HUD labels, or caption pills - pure frameless mockup
     slide_images.append(canvas)
 
 # 3. Generate Blend Frame Sequence

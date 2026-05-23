@@ -133,7 +133,29 @@ export default async function proxy(request: NextRequest) {
   // Session state
   const hasAccessToken = !!cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
   const hasRefreshToken = !!cookieStore.get(REFRESH_TOKEN_COOKIE)?.value;
-  const hasSession = hasAccessToken || hasRefreshToken;
+  const hasUser = !!cookieStore.get(USER_DATA_COOKIE)?.value;
+  
+  // A valid session requires both user metadata and tokens to be present
+  const hasSession = (hasAccessToken || hasRefreshToken) && hasUser;
+
+  // Clean up mismatched cookie states (orphaned tokens/user) to prevent redirect loops
+  const isOrphaned = (hasAccessToken || hasRefreshToken) !== hasUser;
+
+  if (isOrphaned) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = `/${pathLocale}/login`;
+    
+    // Preserve returnUrl unless we are already on onboarding or login
+    if (pathname !== `/${pathLocale}` && !pathname.includes("/login") && !pathname.includes("/onboarding")) {
+      loginUrl.searchParams.set("returnUrl", pathname);
+    }
+    
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete(ACCESS_TOKEN_COOKIE);
+    response.cookies.delete(REFRESH_TOKEN_COOKIE);
+    response.cookies.delete(USER_DATA_COOKIE);
+    return response;
+  }
 
   // Determine route type
   const isPublic = PUBLIC_ROUTES.some(
@@ -199,7 +221,7 @@ export const config = {
      * - _next/ (Next.js internals)
      * - Static files with extensions (.ico, .png, .jpg, .svg, .css, .js, etc.)
      */
-    "/((?!api|_next/static|_next/image|.*\\.png$|.*\\.ico$|.*\\.svg$|.*\\.jpg$|.*\\.css$|.*\\.js$).*)",
+    "/((?!api|videos/|_next/static|_next/image|.*\\.png$|.*\\.ico$|.*\\.svg$|.*\\.jpg$|.*\\.css$|.*\\.js$|.*\\.m3u8$|.*\\.ts$).*)",
   ],
 };
 
