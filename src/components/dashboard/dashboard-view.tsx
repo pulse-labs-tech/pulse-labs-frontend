@@ -668,10 +668,22 @@ export function DashboardView() {
                 {t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
               </Link>
               <Link
+                href={`/${locale}/research`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
+              >
+                {t("common.research", "Nghiên cứu")}
+              </Link>
+              <Link
                 href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
               >
                 {t("compile.labels.sidebarWiki", "Wiki Cá nhân")}
+              </Link>
+              <Link
+                href={`/${locale}/settings`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
+              >
+                {t("common.settings", "Cài đặt")}
               </Link>
             </nav>
           </div>

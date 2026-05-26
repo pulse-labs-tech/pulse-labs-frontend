@@ -7,6 +7,8 @@ import {
   MessageSquare,
   BookOpen,
   Plus,
+  Microscope,
+  Settings,
 } from "lucide-react";
 import { useTranslation } from "@/contexts/locale-context";
 
@@ -32,6 +34,12 @@ export function AppMobileNav({ locale }: AppMobileNavProps) {
       match: `/${locale}/query`,
     },
     {
+      href: `/${locale}/research`,
+      label: t("common.research", "Nghiên cứu"),
+      icon: Microscope,
+      match: `/${locale}/research`,
+    },
+    {
       href: `/${locale}/wiki`,
       label: t("common.wiki", "Wiki"),
       icon: BookOpen,
@@ -39,9 +47,15 @@ export function AppMobileNav({ locale }: AppMobileNavProps) {
     },
     {
       href: `/${locale}/compile/new`,
-      label: t("common.addDoc", "Nạp tài liệu"),
+      label: t("common.addDoc", "Nạp"),
       icon: Plus,
       match: `/${locale}/compile`,
+    },
+    {
+      href: `/${locale}/settings`,
+      label: t("common.settings", "Cài đặt"),
+      icon: Settings,
+      match: `/${locale}/settings`,
     },
   ];
 

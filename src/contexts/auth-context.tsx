@@ -157,9 +157,22 @@ export function AuthProvider({
     const cookieUser = readUserCookie();
     if (cookieUser) {
       dispatch({ type: "SET_USER", user: cookieUser });
-    } else {
-      dispatch({ type: "CLEAR" });
+      return;
     }
+
+    // Mobile browsers (especially Safari/WebKit) may not expose cookies
+    // immediately after a hard navigation / redirect from a Server Action.
+    // Retry once after a short delay before declaring unauthenticated.
+    const retryTimer = setTimeout(() => {
+      const retryUser = readUserCookie();
+      if (retryUser) {
+        dispatch({ type: "SET_USER", user: retryUser });
+      } else {
+        dispatch({ type: "CLEAR" });
+      }
+    }, 150);
+
+    return () => clearTimeout(retryTimer);
   }, [initialUser]);
 
   const setUser = useCallback((user: AuthUser) => {

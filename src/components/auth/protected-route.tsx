@@ -19,7 +19,7 @@
 
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -34,6 +34,18 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
+/** Default full-screen loading spinner */
+function DefaultSpinner() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-auth-bg">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
+        <p className="text-sm text-auth-text-2">Đang tải...</p>
+      </div>
+    </div>
+  );
+}
+
 export function ProtectedRoute({
   children,
   fallback,
@@ -41,9 +53,12 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  // Track whether we have initiated redirect — keep spinner visible until done
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
+      setIsRedirecting(true);
       let finalRedirectUrl = redirectTo;
       if (typeof window !== "undefined" && redirectTo.startsWith("/login")) {
         const currentPath = window.location.pathname + window.location.search;
@@ -55,23 +70,16 @@ export function ProtectedRoute({
     }
   }, [isLoading, isAuthenticated, router, redirectTo]);
 
-  // ─── Loading state ──
+  // ─── Loading state — auth is still hydrating ──
   if (isLoading) {
-    return (
-      fallback ?? (
-        <div className="flex min-h-screen items-center justify-center bg-auth-bg">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
-            <p className="text-sm text-auth-text-2">Đang tải...</p>
-          </div>
-        </div>
-      )
-    );
+    return fallback ?? <DefaultSpinner />;
   }
 
-  // ─── Not authenticated — will redirect via useEffect ──
+  // ─── Not authenticated — show spinner while redirect fires ──
+  // Never return null here: null causes a black screen on mobile.
+  // The redirect effect has already been queued; show spinner until navigation completes.
   if (!isAuthenticated || !user) {
-    return null;
+    return isRedirecting ? (fallback ?? <DefaultSpinner />) : (fallback ?? <DefaultSpinner />);
   }
 
   // ─── Authenticated — render children ──

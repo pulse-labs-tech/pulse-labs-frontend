@@ -17,6 +17,7 @@
  */
 
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   loginSchema,
   registerSchema,
@@ -330,7 +331,9 @@ export async function registerAction(
             }
           }
         }
-      } catch {
+      } catch (innerErr) {
+        // Re-throw redirect errors — must not be swallowed here
+        if (isRedirectError(innerErr)) throw innerErr;
         // Resend failed — continue to "check email" screen
       }
 
@@ -359,6 +362,8 @@ export async function registerAction(
       resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
     };
   } catch (err) {
+    // Re-throw Next.js redirect errors — they must not be caught here
+    if (isRedirectError(err)) throw err;
     console.error("[registerAction] error:", err);
     return { globalError: "NETWORK_ERROR" };
   }

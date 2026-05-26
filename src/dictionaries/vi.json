@@ -3,6 +3,8 @@
     "dashboard": "Dashboard",
     "query": "Hỏi đáp AI",
     "wiki": "Wiki Cá nhân",
+    "research": "Nghiên cứu AI",
+    "settings": "Cài đặt",
     "logout": "Đăng xuất",
     "loading": "Đang tải...",
     "error": "Lỗi",
@@ -25,6 +27,7 @@
     "product": "Sản phẩm",
     "support": "Hỗ trợ",
     "allRightsReserved": "Bảo lưu mọi quyền.",
+    "addDoc": "Nạp tài liệu",
     "tagline": "AI Researcher cá nhân hoá — tích lũy knowledge theo domain. Hỏi gì cũng có câu trả lời có nguồn."
   },
   "landing": {
@@ -596,6 +599,143 @@
       "stagePrefix": "Giai đoạn:",
       "detailPrefix": "Chi tiết:",
       "successRedirecting": "✓ Biên dịch thành công! Đang chuyển hướng..."
+    }
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "subtitle": "Quản lý tài khoản, gói dịch vụ và hạn mức sử dụng.",
+    "loading": "Đang tải cài đặt...",
+    "account": {
+      "title": "Tài khoản",
+      "verified": "Đã xác thực",
+      "primaryRole": "Role KB:"
+    },
+    "plan": {
+      "title": "Gói dịch vụ hiện tại",
+      "subtitle": "Thông tin gói và hạn mức",
+      "upgradeCta": "Nâng cấp lên Pro",
+      "viewUpgrade": "Xem trạng thái nâng cấp",
+      "freeDesc": "1 Role KB · 500 MB · 20 compiles/tháng · 30 câu hỏi/ngày",
+      "proDesc": "5 Role KB · 10 GB · Unlimited compiles · Unlimited queries",
+      "upgradeIntentRecorded": "Đã ghi nhận yêu cầu nâng cấp. Gói hiện tại vẫn là Free.",
+      "proCurrentNote": "Bạn đang sử dụng gói Pro."
+    },
+    "compare": {
+      "title": "So sánh gói dịch vụ"
+    },
+    "quota": {
+      "title": "Hạn mức sử dụng",
+      "used": "đã dùng",
+      "unlimited": "Không giới hạn",
+      "noData": "Chưa tải được dữ liệu hạn mức.",
+      "statusOk": "Bình thường",
+      "statusWarning": "Sắp đầy",
+      "statusExceeded": "Đã đầy",
+      "statusUnlimited": "Không giới hạn",
+      "statusUnavailable": "Không khả dụng",
+      "unavailableMsg": "Chưa tải được hạn mức này.",
+      "resetsDaily": "Làm mới lúc 00:00 theo giờ của bạn",
+      "resetsMonthly": "Làm mới vào đầu tháng"
+    },
+    "logout": {
+      "title": "Phiên đăng nhập",
+      "desc": "Đăng xuất khỏi tài khoản trên thiết bị này. Dữ liệu của bạn sẽ được bảo toàn."
+    },
+    "planGate": {
+      "ROLE_LIMIT_REACHED": "Gói Free chỉ hỗ trợ 1 Role KB. Nâng cấp Pro để tạo thêm.",
+      "STORAGE_LIMIT_REACHED": "Bạn đã dùng hết dung lượng lưu trữ của gói hiện tại.",
+      "COMPILE_LIMIT_REACHED": "Bạn đã dùng hết lượt compile trong chu kỳ này.",
+      "QUERY_LIMIT_REACHED": "Bạn đã dùng hết lượt hỏi AI hôm nay.",
+      "DOMAIN_LIMIT_REACHED": "Bạn đã dùng hết số domain của gói hiện tại.",
+      "PLAN_REQUIRED": "Tính năng này cần gói Pro.",
+      "default": "Hành động này bị giới hạn bởi gói hiện tại.",
+      "titleRoleLimit": "Đã đạt giới hạn Role KB",
+      "titleStorageLimit": "Đã hết dung lượng lưu trữ",
+      "titleCompileLimit": "Đã hết lượt compile",
+      "titleQueryLimit": "Đã hết lượt hỏi AI",
+      "titleDomainLimit": "Đã hết số domain",
+      "titlePlanRequired": "Cần gói Pro",
+      "titleDefault": "Giới hạn gói Free",
+      "upgradeCta": "Nâng cấp lên Pro",
+      "viewSettings": "Xem hạn mức →",
+      "viewQuota": "Xem chi tiết hạn mức",
+      "currentPlanFree": "Gói Free hiện tại",
+      "currentPlanPro": "Gói Pro hiện tại",
+      "currentUsage": "Sử dụng hiện tại",
+      "resetsInfo": "Hạn mức tự động làm mới theo chu kỳ",
+      "usage": "Sử dụng:",
+      "resets": "Làm mới theo chu kỳ",
+      "notice": "Gói của bạn sẽ không thay đổi cho đến khi được xác nhận."
+    },
+    "errors": {
+      "loadFailed": "Không tải được Settings",
+      "partialLoad": "Một số phần Settings chưa tải được. Thông tin còn lại vẫn hiển thị đầy đủ."
+    }
+  },
+  "research": {
+    "title": "Nghiên cứu AI",
+    "subtitle": "Nghiên cứu chuyên sâu tự động có nguồn gốc xác minh từ web.",
+    "create": {
+      "title": "Tạo nghiên cứu mới",
+      "queryLabel": "Chủ đề nghiên cứu",
+      "placeholder": "Nhập chủ đề hoặc câu hỏi bạn muốn nghiên cứu... (ví dụ: Best practices để deploy Next.js lên Vercel với Edge Runtime)",
+      "asyncNote": "Nghiên cứu chạy nền — bạn có thể xem tiến độ sau.",
+      "button": "Bắt đầu nghiên cứu"
+    },
+    "active": {
+      "title": "Đang chạy"
+    },
+    "history": {
+      "title": "Lịch sử nghiên cứu",
+      "empty": "Chưa có nghiên cứu nào",
+      "emptyDesc": "Tạo nghiên cứu đầu tiên để bắt đầu xây dựng kho nghiên cứu có nguồn gốc.",
+      "loadMore": "Tải thêm"
+    },
+    "status": {
+      "queued": "Đang chờ",
+      "planning": "Lên kế hoạch",
+      "searching": "Đang tìm kiếm",
+      "selectingSources": "Chọn nguồn",
+      "fetchingSources": "Tải nguồn",
+      "extractingClaims": "Trích xuất",
+      "reflecting": "Đánh giá",
+      "synthesizing": "Tổng hợp",
+      "completed": "Hoàn tất",
+      "failed": "Thất bại",
+      "cancelled": "Đã hủy"
+    },
+    "progress": {
+      "title": "Tiến độ nghiên cứu"
+    },
+    "confidence": "tin cậy",
+    "sources": "nguồn",
+    "cancel": "Hủy",
+    "saveToWiki": "Lưu vào Wiki",
+    "savedToWiki": "Đã lưu vào Wiki",
+    "newResearch": "Tạo nghiên cứu mới",
+    "caveats": "Lưu ý",
+    "citations": "Nguồn trích dẫn",
+    "tab": {
+      "synthesis": "Kết quả tổng hợp",
+      "sources": "Nguồn",
+      "claims": "Bằng chứng",
+      "plan": "Kế hoạch"
+    },
+    "sources": {
+      "empty": "Không có nguồn nào."
+    },
+    "claims": {
+      "empty": "Không có bằng chứng nào."
+    },
+    "plan": {
+      "questions": "Câu hỏi nghiên cứu",
+      "queries": "Truy vấn đã thực hiện"
+    },
+    "failed": {
+      "title": "Nghiên cứu thất bại"
+    },
+    "cancelled": {
+      "title": "Nghiên cứu đã hủy"
     }
   }
 }

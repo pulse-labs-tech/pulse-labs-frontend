@@ -610,13 +610,13 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-auth-bg text-auth-text py-12 px-4 relative overflow-hidden animate-fade-in">
+    <div className="min-h-screen flex flex-col justify-between bg-auth-bg text-auth-text py-4 sm:py-8 md:py-12 px-4 relative overflow-hidden animate-fade-in">
       {/* Background gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-auth-accent/5 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-auth-accent-glow/5 rounded-full blur-[120px]" />
 
-      <main className="flex-grow flex items-center justify-center z-10 w-full">
-        <div className="w-full max-w-2xl bg-auth-surface border border-auth-border rounded-2xl p-6 md:p-10 shadow-auth shadow-black/40 flex flex-col gap-8 relative overflow-hidden backdrop-blur-md">
+      <main className="flex-grow flex items-start sm:items-center justify-center z-10 w-full">
+        <div className="w-full max-w-2xl bg-auth-surface border border-auth-border rounded-2xl p-4 sm:p-6 md:p-10 shadow-auth shadow-black/40 flex flex-col gap-6 md:gap-8 relative overflow-hidden backdrop-blur-md">
           {/* Top indicator glow */}
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-auth-accent" />
 
@@ -725,7 +725,7 @@ export function OnboardingWizard() {
               </div>
 
               {/* Feature Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-start hover:border-auth-text-3 transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <Brain className="h-5 w-5" />
@@ -764,7 +764,7 @@ export function OnboardingWizard() {
               </div>
 
               {/* Bottom Actions */}
-              <div className="flex justify-between items-center border-t border-auth-border-subtle pt-6">
+              <div className="flex justify-between items-center border-t border-auth-border-subtle pt-4 sm:pt-6">
                 <span className="text-xs text-auth-text-3 font-semibold">{t("onboarding.step1Of3")}</span>
                 <Button
                   variant="primary"
@@ -850,7 +850,7 @@ export function OnboardingWizard() {
                 </span>
 
                 {activeGroup !== "other" ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                     {roleGroups
                       .find((g) => g.id === activeGroup)
                       ?.roles.map((role) => {
@@ -932,7 +932,7 @@ export function OnboardingWizard() {
               )}
 
               {/* Bottom Actions */}
-              <div className="flex justify-between items-center border-t border-auth-border-subtle pt-6">
+              <div className="flex flex-wrap justify-between items-center gap-3 border-t border-auth-border-subtle pt-4 sm:pt-6">
                 <Button
                   variant="ghost"
                   size="md"
@@ -941,7 +941,7 @@ export function OnboardingWizard() {
                 >
                   {t("common.back")}
                 </Button>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 ml-auto">
                   <span className="text-xs text-auth-text-3 font-semibold">{t("onboarding.step2Of3")}</span>
                   <Button
                     variant="primary"
@@ -1062,7 +1062,7 @@ export function OnboardingWizard() {
               ) : (
                 <div className="flex flex-col gap-4">
                   {/* File Upload Zone (MVP hidden/disabled with "Coming Soon" badge) */}
-                  <div className="border border-dashed border-auth-border bg-auth-elevated/40 rounded-xl p-6 text-center flex flex-col gap-3 items-center relative overflow-hidden">
+                  <div className="border border-dashed border-auth-border bg-auth-elevated/40 rounded-xl p-4 sm:p-6 text-center flex flex-col gap-3 items-center relative overflow-hidden">
                     <div className="absolute top-2 right-2 bg-auth-accent-dim border border-auth-accent/20 text-auth-accent text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
                       <Lock className="h-3 w-3" />
                       {t("onboarding.seed.comingSoon")}
@@ -1135,7 +1135,7 @@ export function OnboardingWizard() {
                         value={seedText}
                         onChange={(e) => setSeedText(e.target.value)}
                         placeholder={t("onboarding.seed.placeholderText")}
-                        className="bg-auth-elevated border border-auth-border rounded-lg px-4 py-3 text-xs text-auth-text placeholder:text-auth-text-3 focus:border-auth-accent focus:ring-1 focus:ring-auth-accent min-h-[90px] resize-y"
+                        className="bg-auth-elevated border border-auth-border rounded-lg px-4 py-3 text-xs text-auth-text placeholder:text-auth-text-3 focus:border-auth-accent focus:ring-1 focus:ring-auth-accent min-h-[80px] sm:min-h-[90px] resize-y"
                       />
                       <div className="text-right text-[10px] text-auth-text-3 font-mono">
                         {seedText.length} {t("onboarding.seed.chars")}
@@ -1144,7 +1144,7 @@ export function OnboardingWizard() {
                   )}
 
                   {/* Bottom Actions */}
-                  <div className="flex justify-between items-center border-t border-auth-border-subtle pt-6">
+                  <div className="flex flex-wrap justify-between items-center gap-3 border-t border-auth-border-subtle pt-4 sm:pt-6">
                     <Button
                       variant="ghost"
                       size="md"
@@ -1153,7 +1153,7 @@ export function OnboardingWizard() {
                     >
                       {t("common.back")}
                     </Button>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 ml-auto flex-wrap">
                       <Button
                         variant="secondary"
                         size="md"

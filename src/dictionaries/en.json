@@ -3,6 +3,8 @@
     "dashboard": "Dashboard",
     "query": "Ask AI",
     "wiki": "Personal Wiki",
+    "research": "Research",
+    "settings": "Settings",
     "logout": "Log Out",
     "loading": "Loading...",
     "error": "Error",
@@ -25,6 +27,7 @@
     "product": "Product",
     "support": "Support",
     "allRightsReserved": "All rights reserved.",
+    "addDoc": "Ingest",
     "tagline": "Personalized AI Researcher — accumulating domain knowledge in your field. Ask anything, get sourced answers."
   },
   "landing": {
@@ -605,6 +608,143 @@
       "stagePrefix": "Stage:",
       "detailPrefix": "Details:",
       "successRedirecting": "✓ Compilation successful! Redirecting..."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account, plan, and usage quotas.",
+    "loading": "Loading settings...",
+    "account": {
+      "title": "Account",
+      "verified": "Verified",
+      "primaryRole": "Role KB:"
+    },
+    "plan": {
+      "title": "Current Plan",
+      "subtitle": "Plan info and quotas",
+      "upgradeCta": "Upgrade to Pro",
+      "viewUpgrade": "View upgrade status",
+      "freeDesc": "1 Role KB · 500 MB · 20 compiles/month · 30 questions/day",
+      "proDesc": "5 Role KBs · 10 GB · Unlimited compiles · Unlimited queries",
+      "upgradeIntentRecorded": "Upgrade interest recorded. Your active plan is still Free.",
+      "proCurrentNote": "You are on the Pro plan."
+    },
+    "compare": {
+      "title": "Plan Comparison"
+    },
+    "quota": {
+      "title": "Usage & Quotas",
+      "used": "used",
+      "unlimited": "Unlimited",
+      "noData": "Could not load quota data.",
+      "statusOk": "Healthy",
+      "statusWarning": "Near limit",
+      "statusExceeded": "Exceeded",
+      "statusUnlimited": "Unlimited",
+      "statusUnavailable": "Unavailable",
+      "unavailableMsg": "This usage section couldn't load.",
+      "resetsDaily": "Resets at 00:00 in your timezone",
+      "resetsMonthly": "Resets on the first day of next month"
+    },
+    "logout": {
+      "title": "Session",
+      "desc": "Log out of your account on this device. Your data will be preserved."
+    },
+    "planGate": {
+      "ROLE_LIMIT_REACHED": "Free plan supports 1 Role KB. Upgrade to Pro to add more.",
+      "STORAGE_LIMIT_REACHED": "You have used all storage on your current plan.",
+      "COMPILE_LIMIT_REACHED": "You have used all compile quota for this period.",
+      "QUERY_LIMIT_REACHED": "You have used all daily AI queries.",
+      "DOMAIN_LIMIT_REACHED": "You have used all domains on your current plan.",
+      "PLAN_REQUIRED": "This feature requires the Pro plan.",
+      "default": "This action is restricted by your current plan.",
+      "titleRoleLimit": "Role KB limit reached",
+      "titleStorageLimit": "Storage limit reached",
+      "titleCompileLimit": "Compile limit reached",
+      "titleQueryLimit": "Daily query limit reached",
+      "titleDomainLimit": "Domain limit reached",
+      "titlePlanRequired": "Pro plan required",
+      "titleDefault": "Free plan limit reached",
+      "upgradeCta": "Upgrade to Pro",
+      "viewSettings": "View quotas →",
+      "viewQuota": "View quota details",
+      "currentPlanFree": "Current plan: Free",
+      "currentPlanPro": "Current plan: Pro",
+      "currentUsage": "Current usage",
+      "resetsInfo": "Quota automatically resets each period",
+      "usage": "Usage:",
+      "resets": "Resets each period",
+      "notice": "Your plan will not change until confirmed."
+    },
+    "errors": {
+      "loadFailed": "Settings couldn't load. Please try again.",
+      "partialLoad": "Some sections couldn't load. Available information is still shown."
+    }
+  },
+  "research": {
+    "title": "AI Research",
+    "subtitle": "Automated deep research with verified web sources.",
+    "create": {
+      "title": "New Research Run",
+      "queryLabel": "Research topic",
+      "placeholder": "Enter the topic or question to research... (e.g., Best practices for deploying Next.js on Vercel with Edge Runtime)",
+      "asyncNote": "Research runs in the background — check progress anytime.",
+      "button": "Start Research"
+    },
+    "active": {
+      "title": "Running"
+    },
+    "history": {
+      "title": "Research History",
+      "empty": "No research runs yet",
+      "emptyDesc": "Create your first research run to start building a sourced research library.",
+      "loadMore": "Load more"
+    },
+    "status": {
+      "queued": "Queued",
+      "planning": "Planning",
+      "searching": "Searching",
+      "selectingSources": "Selecting sources",
+      "fetchingSources": "Fetching sources",
+      "extractingClaims": "Extracting claims",
+      "reflecting": "Reflecting",
+      "synthesizing": "Synthesizing",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "progress": {
+      "title": "Research Progress"
+    },
+    "confidence": "confidence",
+    "sources": "sources",
+    "cancel": "Cancel",
+    "saveToWiki": "Save to Wiki",
+    "savedToWiki": "Saved to Wiki",
+    "newResearch": "New Research",
+    "caveats": "Caveats",
+    "citations": "External Citations",
+    "tab": {
+      "synthesis": "Synthesis",
+      "sources": "Sources",
+      "claims": "Claims",
+      "plan": "Research Plan"
+    },
+    "sources": {
+      "empty": "No sources found."
+    },
+    "claims": {
+      "empty": "No claims found."
+    },
+    "plan": {
+      "questions": "Research Questions",
+      "queries": "Planned Queries"
+    },
+    "failed": {
+      "title": "Research Failed"
+    },
+    "cancelled": {
+      "title": "Research Cancelled"
     }
   }
 }
