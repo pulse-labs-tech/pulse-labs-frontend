@@ -30,6 +30,7 @@ import {
 import type {
   RoleGroup,
   RoleGroupOption,
+  RoleOption,
   SaveRoleInput,
   CompileJobDto,
   OnboardingStep,
@@ -230,16 +231,23 @@ export function OnboardingWizard() {
         }
 
         // Setup role options (dynamic catalogue)
-        // Normalize API response: handle cases where group uses `group` field instead of `id`
+        // API returns `group` field (not `id`) at group level — normalize to RoleGroupOption shape
         if (optionsRes.status === "1" && optionsRes.data?.groups) {
-          const normalized = optionsRes.data.groups.map((g) => {
-            const groupId = (g.id ?? (g as unknown as Record<string, string>)["group"] ?? "") as RoleGroup;
-            const normalizedRoles = (g.roles ?? []).map((r) => ({
-              id: r.id ?? (r as unknown as Record<string, string>)["roleOptionId"] ?? "",
-              label: r.label ?? "",
-              description: r.description ?? (r as unknown as Record<string, string>)["desc"] ?? "",
+          const normalized: RoleGroupOption[] = optionsRes.data.groups.map((g) => {
+            // API uses `group` field instead of `id` for the group identifier
+            const groupId = (g.id || g.group || "") as RoleGroup;
+            const normalizedRoles: RoleOption[] = (g.roles ?? []).map((r) => ({
+              id: r.id || r.roleOptionId || "",
+              label: r.label || "",
+              description: r.description || r.desc || "",
             }));
-            return { ...g, id: groupId, roles: normalizedRoles };
+            return {
+              id: groupId,
+              group: groupId,
+              label: g.label || groupId,
+              icon: g.icon || "",
+              roles: normalizedRoles,
+            };
           });
           setRoleGroups(normalized);
         }

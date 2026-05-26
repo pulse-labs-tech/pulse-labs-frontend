@@ -99,14 +99,32 @@ export interface RoleOption {
 }
 
 export interface RoleGroupOption {
+  /** Normalized group identifier — set after normalization from either `id` or `group` field */
   id: RoleGroup;
+  /** Raw field from API: some endpoints return `group` instead of `id` */
+  group?: string;
   label: string;
   icon: string;
   roles: RoleOption[];
 }
 
+/** Raw API response shape — group identifier may be in `group` field instead of `id` */
+export interface RawRoleGroupOption {
+  id?: string;
+  group?: string;
+  label?: string;
+  icon?: string;
+  roles?: {
+    id?: string;
+    roleOptionId?: string;
+    label?: string;
+    description?: string;
+    desc?: string;
+  }[];
+}
+
 export interface RoleOptionsResponse {
-  groups: RoleGroupOption[];
+  groups: RawRoleGroupOption[];
   allowCustomRole: boolean;
 }
 
