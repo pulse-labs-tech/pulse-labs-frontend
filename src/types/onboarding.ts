@@ -128,9 +128,10 @@ export interface RoleOptionsResponse {
   allowCustomRole: boolean;
 }
 
-/** PUT /api/v1/onboarding/roles */
+/** POST /api/v1/onboarding/roles */
 export interface SaveRoleInput {
-  roleId: string;
+  /** ID option from /role-options. null/empty if isCustom: true */
+  roleOptionId: string | null;
   roleName: string;
   roleGroup: RoleGroup;
   isCustom: boolean;
@@ -139,27 +140,17 @@ export interface SaveRoleInput {
 
 export interface SaveRolesRequest {
   roles: SaveRoleInput[];
-  idempotencyKey: string;
 }
 
-export interface SaveRolesResponseData {
-  status: OnboardingStatus;
-  currentStep: OnboardingStep;
-  roles: RoleKbDto[];
-  next: {
-    route: string;
-    reason: string;
-  };
-}
+/** API returns {} on success — no data payload */
+export type SaveRolesResponseData = Record<string, never>;
 
 /** POST /api/v1/onboarding/seed */
 export interface SeedRequest {
   roleKbId: string;
   sourceType: "text" | "url";
-  text?: string;
-  url?: string;
-  titleHint?: string | null;
-  idempotencyKey: string;
+  /** Content field: URL string when sourceType=url, plain text when sourceType=text */
+  content: string;
 }
 
 export interface SeedResponseData {
@@ -176,27 +167,15 @@ export interface CompileJobResponseData {
   compileJob: CompileJobDto;
 }
 
-/** POST /api/v1/onboarding/complete */
+/** POST /api/v1/onboarding/complete — no request body required */
 export interface CompleteOnboardingRequest {
-  seedSkipped: boolean;
+  /** Optional: for tracking purposes only, not required by API */
+  seedSkipped?: boolean;
   compileJobId?: string | null;
-  idempotencyKey: string;
+  idempotencyKey?: string;
 }
 
+/** API returns { nextRoute: "/dashboard" } */
 export interface CompleteOnboardingResponseData {
-  onboarding: {
-    status: OnboardingStatus;
-    currentStep: "done";
-    completedAt: string;
-  };
-  seed: {
-    skipped: boolean;
-    compileJobId: string | null;
-    compileStatus: CompileJobStatus | null;
-    outputKnowledgeItemId: string | null;
-  };
-  next: {
-    route: string;
-    reason: string;
-  };
+  nextRoute: string;
 }

@@ -92,16 +92,14 @@ export async function getRoleOptionsAction(): Promise<
 
 /**
  * Save selected roles (primary and/or secondary roles).
- * PUT /api/v1/onboarding/roles
+ * POST /api/v1/onboarding/roles
  */
 export async function saveRolesAction(
   roles: SaveRoleInput[],
-  idempotencyKey: string,
 ): Promise<AuthApiResponse<SaveRolesResponseData>> {
   try {
-    return await authClient.put<SaveRolesResponseData>("/v1/onboarding/roles", {
+    return await authClient.post<SaveRolesResponseData>("/v1/onboarding/roles", {
       roles,
-      idempotencyKey,
     });
   } catch (error) {
     console.error("saveRolesAction error:", error);
@@ -119,7 +117,7 @@ export async function saveRolesAction(
  * POST /api/v1/onboarding/seed
  */
 export async function submitSeedAction(
-  payload: Omit<SeedRequest, "idempotencyKey"> & { idempotencyKey: string },
+  payload: SeedRequest,
 ): Promise<AuthApiResponse<SeedResponseData>> {
   try {
     return await authClient.post<SeedResponseData>("/v1/onboarding/seed", payload);

@@ -32,6 +32,7 @@ import type {
   RoleGroupOption,
   RoleOption,
   SaveRoleInput,
+  SeedRequest,
   CompileJobDto,
   OnboardingStep,
   Plan,
@@ -146,10 +147,13 @@ export function OnboardingWizard() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [rateLimitCooldown, setRateLimitCooldown] = useState<number | null>(null);
 
-  // Idempotency keys
+  // Idempotency keys (kept for potential future use)
   const roleIdempotencyRef = useRef(generateIdempotencyKey());
   const seedIdempotencyRef = useRef(generateIdempotencyKey());
   const completeIdempotencyRef = useRef(generateIdempotencyKey());
+
+  // Store the primary roleKbId from saveRoles response for use in seed step
+  const primaryRoleKbIdRef = useRef<string>("");
 
   // Ref for timer
   const rateLimitTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -216,6 +220,9 @@ export function OnboardingWizard() {
                 isCustom: r.isCustom,
               })),
             );
+            // Restore primary roleKbId for seed step
+            const primaryRole = roles.find((r) => r.isPrimary) ?? roles[0];
+            if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
           }
 
           // Restore seed / compile job state
@@ -419,20 +426,31 @@ export function OnboardingWizard() {
     setErrorMsg(null);
 
     try {
-      // Map roles payload (exactly 1 must be primary - first is primary)
+      // Map roles payload — API expects roleOptionId (not roleId), roleName, roleGroup, isPrimary, isCustom
       const rolesInput: SaveRoleInput[] = selectedRoles.map((r, index) => ({
-        roleId: r.isCustom ? "" : r.id,
+        roleOptionId: r.isCustom ? null : r.id,
         roleName: r.label,
         roleGroup: r.group,
         isCustom: r.isCustom,
         isPrimary: index === 0,
       }));
 
-      const res = await saveRolesAction(rolesInput, roleIdempotencyRef.current);
+      const res = await saveRolesAction(rolesInput);
 
       if (res.status === "1") {
+        // After save, we need to fetch the state again to get roleKbId
+        // (API returns {} on success, roleKbId is in the state response)
+        // Fetch updated state to get the roleKbId created by the server
+        try {
+          const stateRes = await getOnboardingStateAction();
+          if (stateRes.status === "1" && stateRes.data?.roles?.length > 0) {
+            const primaryRole = stateRes.data.roles.find((r) => r.isPrimary) ?? stateRes.data.roles[0];
+            if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+          }
+        } catch {
+          // Non-fatal — seed step will handle if roleKbId is missing
+        }
         setCurrentStep("seed_kb");
-        // regenerate key for next potential write
         roleIdempotencyRef.current = generateIdempotencyKey();
       } else {
         handleErrorCode(res.error_code, res.msg);
@@ -468,23 +486,37 @@ export function OnboardingWizard() {
       }
     }
 
+    // roleKbId is required — must have been set after saveRoles
+    if (!primaryRoleKbIdRef.current) {
+      // Fetch state to try recover roleKbId
+      try {
+        const stateRes = await getOnboardingStateAction();
+        if (stateRes.status === "1" && stateRes.data?.roles?.length > 0) {
+          const primaryRole = stateRes.data.roles.find((r) => r.isPrimary) ?? stateRes.data.roles[0];
+          if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+        }
+      } catch {
+        // continue and let API error surface
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
-      const payload = {
-        roleKbId: "", // Will be selected server-side as the user's primary/default
+      // API expects: { roleKbId, sourceType, content } — `content` holds both URL and text
+      const payload: SeedRequest = {
+        roleKbId: primaryRoleKbIdRef.current,
         sourceType: seedType,
-        text: seedType === "text" ? seedText : undefined,
-        url: seedType === "url" ? seedUrl : undefined,
-        idempotencyKey: seedIdempotencyRef.current,
+        content: seedType === "text" ? seedText.trim() : seedUrl.trim(),
       };
 
       const res = await submitSeedAction(payload);
 
-      if (res.status === "1" && res.data) {
-        setCompileJob(res.data.compileJob);
-        // Reset key for future seeds
+      if (res.status === "1") {
+        // API returns 202 — seed job started in background
+        // Immediately call complete (per API contract)
         seedIdempotencyRef.current = generateIdempotencyKey();
+        await handleOnboardingComplete(false);
       } else {
         handleErrorCode(res.error_code, res.msg);
       }
@@ -496,28 +528,34 @@ export function OnboardingWizard() {
     }
   };
 
-  // Step 3 Completion (Skip or Done polling)
+  // Step 3 Completion (Skip or Done)
   const handleOnboardingComplete = async (skip: boolean) => {
     setIsSubmitting(true);
     setErrorMsg(null);
 
     try {
-      const payload = {
+      const res = await completeOnboardingAction({
         seedSkipped: skip,
         compileJobId: compileJob?.id || null,
         idempotencyKey: completeIdempotencyRef.current,
-      };
+      });
 
-      const res = await completeOnboardingAction(payload);
-
-      if (res.status === "1" && res.data) {
+      if (res.status === "1") {
         // Hydrate context user state
         if (user) {
           setUser({ ...user, onboardingStatus: "completed" });
         }
-        // Redirect
-        router.push(res.data.next?.route || "/dashboard");
+        // API returns { nextRoute: "/dashboard" }
+        const nextRoute = res.data?.nextRoute || "/dashboard";
+        const routePath = nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute;
+        router.push(`/${locale}${routePath}`);
       } else {
+        // 409 ONBOARDING_ALREADY_COMPLETED is non-fatal — treat as success
+        if (res.error_code === "ONBOARDING_ALREADY_COMPLETED") {
+          if (user) setUser({ ...user, onboardingStatus: "completed" });
+          router.push(`/${locale}/dashboard`);
+          return;
+        }
         handleErrorCode(res.error_code, res.msg);
       }
     } catch (err) {
