@@ -969,7 +969,7 @@ export function DashboardView() {
             <Clock className="h-3 w-3" />
             {locale === "vi" ? "Xem gần đây" : "Recently Viewed"}
           </div>
-          <div className="recent-strip-items flex flex-wrap gap-2">
+          <div className="recent-strip-items flex flex-nowrap gap-2">
             {(summary?.recentItems && summary.recentItems.length > 0
               ? summary.recentItems.slice(0, 6).map((item) => ({
                   id: item.id,

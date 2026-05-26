@@ -1201,6 +1201,8 @@ select:focus {
   .dashboard-page .recent-strip {
     flex-direction: column;
     align-items: flex-start;
+    max-height: none;
+    gap: 8px;
   }
 }
 
