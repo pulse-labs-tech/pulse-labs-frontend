@@ -89,14 +89,20 @@ export interface LoginResponseData {
 export interface RegisterResponseData {
   userId: string;
   email: string;
-  emailVerified: false;
+  emailVerified: boolean;
   plan: PlanType;
   selectedPlanIntent: PlanType;
-  verificationRequired: true;
-  resendAvailableInSeconds: number;
-  nextRoute: string;
+  verificationRequired: boolean;
+  resendAvailableInSeconds?: number;
+  nextRoute?: string;
   /** Only present in dev mode (DEBUG_RETURN_VERIFICATION_LINK=true) */
   verificationLink?: string;
+  /** Present when server auto-verifies + auto-logs-in on register */
+  accessToken?: string;
+  refreshToken?: string;
+  tokenType?: "Bearer";
+  expiresIn?: number;
+  user?: AuthUser;
 }
 
 /** GET /api/v1/auth/verify-email — success data */

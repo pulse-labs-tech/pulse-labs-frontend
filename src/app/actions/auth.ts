@@ -7,6 +7,13 @@
  * Uses React 19 useActionState pattern.
  *
  * @see /features/api-docs/API_Auth_Docs.md
+ *
+ * Register flow (updated):
+ *  1. POST /register
+ *  2. If register response has accessToken → store & redirect (server auto-login)
+ *  3. Else if verificationLink in response (dev mode) → verify → login → redirect
+ *  4. Else → POST /login directly (server auto-verified email per server logs)
+ *  5. If login returns EMAIL_NOT_VERIFIED → try resend → fallback to "check email" screen
  */
 
 import { redirect } from "next/navigation";
@@ -191,11 +198,14 @@ export async function loginAction(
 // ────────────────────────────────────────────────────────────────
 // 2. Register Action
 //
-// Flow:
-//   1. POST /register
-//   2. If verificationLink in response → extract token → auto verify → auto login
-//   3. Else → POST /resend-verification → extract token → auto verify → auto login
-//   4. If still no token → show "check your email" screen (fallback)
+// Updated flow (2026-05-26):
+//  Step 1: POST /register
+//  Step 2: If register response contains accessToken → store & redirect
+//          (server did auto-verify + auto-login in single step)
+//  Step 3: If verificationLink in response (dev mode) → verify → login → redirect
+//  Step 4: POST /login directly — server auto-verified email per server logs
+//          (EMAIL_VERIFIED event fires during register in production)
+//  Step 5: If EMAIL_NOT_VERIFIED → try resend (dev fallback) → show "check email" screen
 // ────────────────────────────────────────────────────────────────
 
 export interface RegisterActionState {
@@ -229,7 +239,7 @@ export async function registerAction(
   const { email, password } = validatedFields.data;
 
   try {
-    // ─── Step 1: Register ──────────────────────────────────────
+    // ─── Step 1: POST /register ─────────────────────────────────
     const registerResult = await apiRegister(validatedFields.data);
 
     if (registerResult.status === "0") {
@@ -241,65 +251,115 @@ export async function registerAction(
       };
     }
 
-    let verificationToken: string | null = null;
-    let resendAvailableInSeconds = registerResult.data.resendAvailableInSeconds;
+    const regData = registerResult.data;
 
-    // ─── Step 2: Try token from register response (dev mode) ───
-    if (registerResult.data.verificationLink) {
-      verificationToken = extractToken(registerResult.data.verificationLink);
-    }
-
-    // ─── Step 3: If no token yet → call resend-verification ────
-    // BE now returns verificationLink in resend-verification response
-    if (!verificationToken) {
-      const resendResult = await apiResendVerification(email);
-
-      if (resendResult.status === "1") {
-        resendAvailableInSeconds = resendResult.data.resendAvailableInSeconds;
-
-        if (resendResult.data.verificationLink) {
-          verificationToken = extractToken(resendResult.data.verificationLink);
-        }
+    // ─── Step 2: Register response contains tokens (server auto-login) ──
+    // Some server configs auto-verify + auto-login and return tokens directly
+    if (regData.accessToken && regData.refreshToken) {
+      await setAuthTokens(
+        regData.accessToken,
+        regData.refreshToken,
+        regData.expiresIn ?? 900,
+      );
+      if (regData.user) {
+        await setUserData(regData.user);
       }
-      // resend failure is non-fatal — fall through to email screen
+      const nextRoute = regData.nextRoute || "/onboarding";
+      redirect(nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute);
     }
 
-    // ─── Step 4: Auto verify + login if we have a token ────────
-    if (verificationToken) {
-      const result = await verifyAndLogin(verificationToken, email, password);
-
-      if ("error" in result) {
-        // Token invalid/expired — still fall through to email screen
-        // (don't block the user, just let them verify manually)
-        if (
-          result.error !== "TOKEN_INVALID" &&
-          result.error !== "TOKEN_EXPIRED"
-        ) {
-          return {
-            globalError: result.error,
-            serverMessage: result.serverMessage,
-          };
+    // ─── Step 3: Dev-mode verificationLink (DEBUG_RETURN_VERIFICATION_LINK) ──
+    if (regData.verificationLink) {
+      const token = extractToken(regData.verificationLink);
+      if (token) {
+        const result = await verifyAndLogin(token, email, password);
+        if (!("error" in result)) {
+          await setAuthTokens(
+            result.loginData.accessToken,
+            result.loginData.refreshToken,
+            result.loginData.expiresIn,
+          );
+          await setUserData(result.loginData.user);
+          redirect(result.nextRoute);
         }
-      } else {
-        // ─── Step 5: Store tokens & redirect ───────────────────
-        await setAuthTokens(
-          result.loginData.accessToken,
-          result.loginData.refreshToken,
-          result.loginData.expiresIn,
-        );
-        await setUserData(result.loginData.user);
-        redirect(result.nextRoute);
+        // If verifyAndLogin failed, fall through to direct login
       }
     }
 
-    // ─── Fallback: No token → show "check your email" screen ───
+    // ─── Step 4: Direct login ───────────────────────────────────
+    // Server logs confirm: EMAIL_VERIFIED fires during /register in production.
+    // So the account is verified immediately — login should succeed without
+    // going through the email verification flow.
+    const loginResult = await apiLogin({ email, password });
+
+    if (loginResult.status === "1") {
+      await setAuthTokens(
+        loginResult.data.accessToken,
+        loginResult.data.refreshToken,
+        loginResult.data.expiresIn,
+      );
+      await setUserData(loginResult.data.user);
+
+      const rawData = loginResult.data as unknown as Record<string, string | undefined>;
+      const nextRoute =
+        rawData.nextRoute ||
+        rawData["next-route"] ||
+        rawData.next_route ||
+        "/onboarding";
+      redirect(nextRoute);
+    }
+
+    // ─── Step 5: Handle EMAIL_NOT_VERIFIED ──────────────────────
+    // Server requires manual email verification (not auto-verify mode)
+    if (loginResult.error_code === "EMAIL_NOT_VERIFIED") {
+      // Try resend to get verificationLink (dev mode only)
+      try {
+        const resendResult = await apiResendVerification(email);
+        if (resendResult.status === "1" && resendResult.data.verificationLink) {
+          const token = extractToken(resendResult.data.verificationLink);
+          if (token) {
+            const result = await verifyAndLogin(token, email, password);
+            if (!("error" in result)) {
+              await setAuthTokens(
+                result.loginData.accessToken,
+                result.loginData.refreshToken,
+                result.loginData.expiresIn,
+              );
+              await setUserData(result.loginData.user);
+              redirect(result.nextRoute);
+            }
+          }
+        }
+      } catch {
+        // Resend failed — continue to "check email" screen
+      }
+
+      // True fallback: show "check your email" verification screen
+      return {
+        success: true,
+        email,
+        resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
+      };
+    }
+
+    // ─── Any other login error ───────────────────────────────────
+    if (loginResult.status === "0") {
+      const data = loginResult.data as unknown as { retryAfterSeconds?: number };
+      return {
+        globalError: mapErrorCode(loginResult.error_code),
+        serverMessage: loginResult.msg,
+        retryAfterSeconds: data?.retryAfterSeconds,
+      };
+    }
+
+    // ─── Unexpected fallback ─────────────────────────────────────
     return {
       success: true,
       email,
-      resendAvailableInSeconds,
+      resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
     };
   } catch (err) {
-    console.error("Register/auto-verify error:", err);
+    console.error("[registerAction] error:", err);
     return { globalError: "NETWORK_ERROR" };
   }
 }
@@ -407,6 +467,32 @@ export async function resendVerificationAction(
         } catch {
           // fall through
         }
+      }
+    }
+
+    // If no verificationLink: server auto-verified (per logs) → try direct login
+    if (password) {
+      try {
+        const loginResult = await apiLogin({ email, password });
+        if (loginResult.status === "1") {
+          await setAuthTokens(
+            loginResult.data.accessToken,
+            loginResult.data.refreshToken,
+            loginResult.data.expiresIn,
+          );
+          await setUserData(loginResult.data.user);
+
+          const rawData = loginResult.data as unknown as Record<string, string | undefined>;
+          const nextRoute =
+            rawData.nextRoute ||
+            rawData["next-route"] ||
+            rawData.next_route ||
+            "/onboarding";
+
+          return { success: true, autoVerifiedRedirect: nextRoute };
+        }
+      } catch {
+        // Login failed silently, fall through to countdown reset
       }
     }
 
