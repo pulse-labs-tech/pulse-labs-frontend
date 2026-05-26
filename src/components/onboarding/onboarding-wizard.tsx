@@ -676,14 +676,14 @@ export function OnboardingWizard() {
             </div>
 
             {/* Labels */}
-            <div className="flex justify-between text-[11px] text-auth-text-3 font-semibold uppercase tracking-wider">
-              <span className={currentStep === "welcome" ? "text-auth-accent" : "text-auth-accent"}>
+            <div className="grid grid-cols-3 text-[11px] text-auth-text-3 font-semibold uppercase tracking-wider mt-1">
+              <span className={`text-left ${currentStep === "welcome" ? "text-auth-accent" : "text-auth-accent"}`}>
                 {t("onboarding.welcome.stepName", "Welcome")}
               </span>
-              <span className={currentStep === "pick_role" ? "text-auth-accent" : ""}>
+              <span className={`text-center ${currentStep === "pick_role" ? "text-auth-accent" : ""}`}>
                 {t("onboarding.pickRole.stepName", "Chọn Vai Trò")}
               </span>
-              <span className={currentStep === "seed_kb" ? "text-auth-accent" : ""}>
+              <span className={`text-right ${currentStep === "seed_kb" ? "text-auth-accent" : ""}`}>
                 {t("onboarding.seed.stepName", "Nạp Kiến Thức")}
               </span>
             </div>
@@ -726,7 +726,7 @@ export function OnboardingWizard() {
 
               {/* Feature Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-start hover:border-auth-text-3 transition-colors hover-lift">
+                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <Brain className="h-5 w-5" />
                   </div>
@@ -738,7 +738,7 @@ export function OnboardingWizard() {
                   </p>
                 </div>
 
-                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-start hover:border-auth-text-3 transition-colors hover-lift">
+                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <Search className="h-5 w-5" />
                   </div>
@@ -750,7 +750,7 @@ export function OnboardingWizard() {
                   </p>
                 </div>
 
-                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-start hover:border-auth-text-3 transition-colors hover-lift">
+                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <Target className="h-5 w-5" />
                   </div>
@@ -859,19 +859,21 @@ export function OnboardingWizard() {
                           <button
                             key={role.id}
                             onClick={() => handlePickRole(role.id, role.label)}
-                            className={`flex flex-col items-start gap-1 p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
+                            className={`flex flex-col items-center text-center gap-1 p-3.5 rounded-xl border cursor-pointer transition-all relative ${
                               isSelected
                                 ? "bg-auth-accent-dim border-auth-accent"
                                 : "bg-auth-elevated border-auth-border hover:border-auth-text-3"
                             }`}
                           >
-                            <div className="flex justify-between items-start w-full">
-                              <span className="text-xs font-bold text-auth-text">
-                                {t("onboarding.groups." + activeGroup + ".roles." + role.id + ".label", role.label)}
+                            {isSelected && (
+                              <span className="absolute top-2 right-2">
+                                <Check className="h-3 w-3 text-auth-accent" />
                               </span>
-                              {isSelected && <Check className="h-3 w-3 text-auth-accent shrink-0" />}
-                            </div>
-                            <span className="text-[10px] text-auth-text-3 leading-normal mt-1">
+                            )}
+                            <span className="text-xs font-bold text-auth-text leading-snug">
+                              {t("onboarding.groups." + activeGroup + ".roles." + role.id + ".label", role.label)}
+                            </span>
+                            <span className="text-[10px] text-auth-text-3 leading-normal mt-0.5">
                               {t("onboarding.groups." + activeGroup + ".roles." + role.id + ".desc", role.description)}
                             </span>
                           </button>

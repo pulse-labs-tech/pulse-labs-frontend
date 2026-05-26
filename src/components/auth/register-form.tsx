@@ -11,21 +11,37 @@
  */
 
 import { useActionState, useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff, Mail } from "lucide-react";
 import { registerAction, resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
+import { useAuth } from "@/hooks/use-auth";
 
 export function RegisterForm() {
   const { t, locale } = useTranslation();
+  const { setUser } = useAuth();
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(
     registerAction,
     undefined,
   );
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+
+  // Handle successful auto-login after register: update AuthProvider THEN navigate.
+  // This prevents the "no user data" issue where root layout cache returns null initialUser.
+  useEffect(() => {
+    if (state?.redirectTo) {
+      if (state.sessionUser) {
+        setUser(state.sessionUser);
+      }
+      const path = state.redirectTo.startsWith("/") ? state.redirectTo : "/" + state.redirectTo;
+      router.push(`/${locale}${path}`);
+    }
+  }, [state?.redirectTo, state?.sessionUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -51,6 +67,18 @@ export function RegisterForm() {
     t("auth.register.strengthStrong"),
   ];
   const strengthLabel = strengthLabels[strengthScore];
+
+  // ─── Redirect in-progress (auto-login succeeded) ──
+  if (state?.redirectTo) {
+    return (
+      <div className="flex w-full flex-col items-center justify-center bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-7 w-7 animate-spin text-auth-accent" />
+          <p className="text-sm text-auth-text-2">Đang thiết lập tài khoản...</p>
+        </div>
+      </div>
+    );
+  }
 
   // ─── Success state → "Check your email" screen ──
   if (state?.success) {

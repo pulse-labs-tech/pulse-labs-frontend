@@ -134,6 +134,13 @@ export interface LoginActionState {
   serverMessage?: string;
   retryAfterSeconds?: number;
   message?: string;
+  /**
+   * Set on successful login — client should call setUser(sessionUser) then router.push(redirectTo).
+   * Using client-side navigation instead of server redirect ensures AuthProvider state is
+   * updated synchronously before the next page renders.
+   */
+  redirectTo?: string;
+  sessionUser?: import("@/types/auth").AuthUser;
 }
 
 export async function loginAction(
@@ -188,12 +195,17 @@ export async function loginAction(
       rawData["next-route"] ||
       rawData.next_route ||
       "/onboarding";
+
+    // Return user + route to client — client will call setUser() then router.push()
+    // This pattern ensures AuthProvider is updated BEFORE navigation so ProtectedRoute
+    // doesn't incorrectly redirect to /login (server redirect via redirect() skips layout re-render).
+    return {
+      redirectTo: nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute,
+      sessionUser: result.data.user,
+    };
   } catch {
     return { globalError: "NETWORK_ERROR" };
   }
-
-  // 6. Redirect to destination
-  redirect(nextRoute);
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -217,6 +229,12 @@ export interface RegisterActionState {
   success?: boolean;
   email?: string;
   resendAvailableInSeconds?: number;
+  /**
+   * Set on successful auto-login after register.
+   * Client should call setUser(sessionUser) then router.push(redirectTo).
+   */
+  redirectTo?: string;
+  sessionUser?: import("@/types/auth").AuthUser;
 }
 
 export async function registerAction(
@@ -266,7 +284,11 @@ export async function registerAction(
         await setUserData(regData.user);
       }
       const nextRoute = regData.nextRoute || "/onboarding";
-      redirect(nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute);
+      // Return to client for client-side navigation + AuthProvider update
+      return {
+        redirectTo: nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute,
+        sessionUser: regData.user ?? undefined,
+      };
     }
 
     // ─── Step 3: Dev-mode verificationLink (DEBUG_RETURN_VERIFICATION_LINK) ──
@@ -281,7 +303,10 @@ export async function registerAction(
             result.loginData.expiresIn,
           );
           await setUserData(result.loginData.user);
-          redirect(result.nextRoute);
+          return {
+            redirectTo: result.nextRoute.startsWith("/") ? result.nextRoute : "/" + result.nextRoute,
+            sessionUser: result.loginData.user,
+          };
         }
         // If verifyAndLogin failed, fall through to direct login
       }
@@ -307,7 +332,10 @@ export async function registerAction(
         rawData["next-route"] ||
         rawData.next_route ||
         "/onboarding";
-      redirect(nextRoute);
+      return {
+        redirectTo: nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute,
+        sessionUser: loginResult.data.user,
+      };
     }
 
     // ─── Step 5: Handle EMAIL_NOT_VERIFIED ──────────────────────
@@ -327,14 +355,16 @@ export async function registerAction(
                 result.loginData.expiresIn,
               );
               await setUserData(result.loginData.user);
-              redirect(result.nextRoute);
+              return {
+                redirectTo: result.nextRoute.startsWith("/") ? result.nextRoute : "/" + result.nextRoute,
+                sessionUser: result.loginData.user,
+              };
             }
           }
         }
       } catch (innerErr) {
-        // Re-throw redirect errors — must not be swallowed here
-        if (isRedirectError(innerErr)) throw innerErr;
-        // Resend failed — continue to "check email" screen
+        // Swallow non-redirect errors — continue to "check email" screen
+        void innerErr;
       }
 
       // True fallback: show "check your email" verification screen
@@ -362,7 +392,8 @@ export async function registerAction(
       resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
     };
   } catch (err) {
-    // Re-throw Next.js redirect errors — they must not be caught here
+    // isRedirectError no longer needed here (we don't call redirect() anymore),
+    // but kept as safety net in case any nested call does.
     if (isRedirectError(err)) throw err;
     console.error("[registerAction] error:", err);
     return { globalError: "NETWORK_ERROR" };
