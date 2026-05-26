@@ -63,11 +63,11 @@ export function ActivityChart() {
 
   // Chart configuration constants
   const width = 800;
-  const height = 170;
+  const height = 220;
   const paddingLeft = 40;
   const paddingRight = 20;
-  const paddingTop = 20;
-  const paddingBottom = 25;
+  const paddingTop = 25;
+  const paddingBottom = 30;
 
   const activeWidth = width - paddingLeft - paddingRight;
   const activeHeight = height - paddingTop - paddingBottom;
@@ -181,7 +181,7 @@ export function ActivityChart() {
   };
 
   const gridLines = [0, 1, 2, 3, 4];
-  const barWidth = Math.max(stepX - Math.max(stepX * 0.35, 3), 3);
+  const barWidth = Math.max(Math.min(stepX * 0.35, 14), 2);
 
   return (
     <div className="section-block">
@@ -205,7 +205,7 @@ export function ActivityChart() {
               <span
                 className={`w-2.5 h-2.5 rounded-sm block border transition-all ${
                   showCompile 
-                    ? "bg-[var(--color-auth-accent)] border-[var(--color-auth-accent)] shadow-[0_0_8px_var(--color-auth-accent-glow)]" 
+                    ? "bg-[#ff6b4a] border-[#ff6b4a] shadow-[0_0_8px_rgba(255,107,74,0.4)]" 
                     : "border-white/10 bg-transparent"
                 }`}
               />
@@ -221,7 +221,7 @@ export function ActivityChart() {
               <span
                 className={`w-2.5 h-2.5 rounded-sm block border transition-all ${
                   showQuery 
-                    ? "bg-[var(--color-auth-cyan)] border-[var(--color-auth-cyan)] shadow-[0_0_8px_rgba(120,200,250,0.2)]" 
+                    ? "bg-[#9055ff] border-[#9055ff] shadow-[0_0_8px_rgba(144,85,255,0.4)]" 
                     : "border-white/10 bg-transparent"
                 }`}
               />
@@ -286,7 +286,7 @@ export function ActivityChart() {
           </span>
         </div>
 
-        <div className="chart-area w-full relative" style={{ height: "170px" }}>
+        <div className="chart-area w-full relative" style={{ height: "220px" }}>
           <svg
             ref={svgRef}
             className="w-full h-full overflow-visible"
@@ -297,12 +297,20 @@ export function ActivityChart() {
             <defs>
               {/* Gradients */}
               <linearGradient id="compileGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-auth-accent)" stopOpacity={0.16} />
-                <stop offset="100%" stopColor="var(--color-auth-accent)" stopOpacity={0.01} />
+                <stop offset="0%" stopColor="#ff6b4a" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="#ff6b4a" stopOpacity={0.0} />
               </linearGradient>
               <linearGradient id="queryGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-auth-cyan)" stopOpacity={0.16} />
-                <stop offset="100%" stopColor="var(--color-auth-cyan)" stopOpacity={0.01} />
+                <stop offset="0%" stopColor="#9055ff" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="#9055ff" stopOpacity={0.0} />
+              </linearGradient>
+              <linearGradient id="barCompileGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#ff6b4a" stopOpacity={0.85} />
+                <stop offset="100%" stopColor="#ff6b4a" stopOpacity={0.25} />
+              </linearGradient>
+              <linearGradient id="barQueryGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#9055ff" stopOpacity={0.85} />
+                <stop offset="100%" stopColor="#9055ff" stopOpacity={0.25} />
               </linearGradient>
             </defs>
 
@@ -317,15 +325,15 @@ export function ActivityChart() {
                     y1={yVal}
                     x2={width - paddingRight}
                     y2={yVal}
-                    stroke="rgba(255, 255, 255, 0.03)"
+                    stroke={i === 0 ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.03)"}
                     strokeWidth={1}
                   />
                   <text
                     x={paddingLeft - 10}
                     y={yVal + 3.5}
-                    fill="#52525b"
+                    fill="#71717a"
                     fontSize={9}
-                    fontFamily="JetBrains Mono, monospace"
+                    fontFamily="var(--font-mono)"
                     textAnchor="end"
                     className="select-none"
                   >
@@ -353,10 +361,10 @@ export function ActivityChart() {
                       />
                       <text
                         x={xVal}
-                        y={height - 4}
-                        fill="#52525b"
+                        y={paddingTop + activeHeight + 15}
+                        fill="#71717a"
                         fontSize={9}
-                        fontFamily="Inter, sans-serif"
+                        fontFamily="var(--font-sans)"
                         textAnchor="middle"
                         className="select-none"
                       >
@@ -384,7 +392,7 @@ export function ActivityChart() {
                   <path
                     d={compilePath}
                     fill="none"
-                    stroke="var(--color-auth-accent)"
+                    stroke="#ff6b4a"
                     strokeWidth={2}
                     strokeLinecap="round"
                     className="transition-all duration-300"
@@ -394,44 +402,46 @@ export function ActivityChart() {
                   <path
                     d={queryPath}
                     fill="none"
-                    stroke="var(--color-auth-cyan)"
+                    stroke="#9055ff"
                     strokeWidth={2}
                     strokeLinecap="round"
                     className="transition-all duration-300"
                   />
                 )}
 
-                {/* Line point dots */}
+                {/* Line point dots (Only shown on hover for high-end look) */}
                 {compilePoints.map((pt, idx) => {
                   if (!showCompile) return null;
                   const isHovered = hoveredIdx === idx;
+                  if (!isHovered) return null;
                   return (
                     <circle
                       key={`pt-c-${idx}`}
                       cx={pt.x}
                       cy={pt.y}
-                      r={isHovered ? 4.5 : 2.5}
-                      fill="var(--color-auth-accent)"
-                      stroke="#141416"
-                      strokeWidth={isHovered ? 2 : 1}
+                      r={5}
+                      fill="#ff6b4a"
+                      stroke="#09090b"
+                      strokeWidth={2.5}
                       className="transition-all duration-75"
                     />
                   );
                 })}
 
-                {/* Query point dots */}
+                {/* Query point dots (Only shown on hover for high-end look) */}
                 {queryPoints.map((pt, idx) => {
                   if (!showQuery) return null;
                   const isHovered = hoveredIdx === idx;
+                  if (!isHovered) return null;
                   return (
                     <circle
                       key={`pt-q-${idx}`}
                       cx={pt.x}
                       cy={pt.y}
-                      r={isHovered ? 4.5 : 2.5}
-                      fill="var(--color-auth-cyan)"
-                      stroke="#141416"
-                      strokeWidth={isHovered ? 2 : 1}
+                      r={5}
+                      fill="#9055ff"
+                      stroke="#09090b"
+                      strokeWidth={2.5}
                       className="transition-all duration-75"
                     />
                   );
@@ -448,8 +458,14 @@ export function ActivityChart() {
                 const hCompile = (cVal / maxVal) * activeHeight;
                 const hQuery = (qVal / maxVal) * activeHeight;
 
-                const yCompile = paddingTop + activeHeight - hCompile;
-                const yQuery = yCompile - hQuery;
+                const hasBoth = cVal > 0 && qVal > 0;
+                const gap = hasBoth ? 2 : 0;
+
+                const hCompileAdjusted = Math.max(hCompile - gap / 2, 0);
+                const hQueryAdjusted = Math.max(hQuery - gap / 2, 0);
+
+                const yCompileAdjusted = paddingTop + activeHeight - hCompileAdjusted;
+                const yQueryAdjusted = yCompileAdjusted - hQueryAdjusted - gap;
 
                 const xPos = paddingLeft + idx * stepX - barWidth / 2;
                 const isDimmed = hoveredIdx !== null && hoveredIdx !== idx;
@@ -458,28 +474,34 @@ export function ActivityChart() {
                   <g 
                     key={`bar-group-${idx}`}
                     className="transition-opacity duration-200"
-                    style={{ opacity: isDimmed ? 0.35 : 1 }}
+                    style={{ opacity: isDimmed ? 0.25 : 1 }}
                   >
                     {/* Ingestion bar */}
                     {cVal > 0 && (
                       <rect
                         x={xPos}
-                        y={yCompile}
+                        y={yCompileAdjusted}
                         width={barWidth}
-                        height={hCompile}
-                        fill="var(--color-auth-accent)"
-                        rx={hQuery === 0 ? 1.5 : 0} // round top if no stacked queries on top
+                        height={hCompileAdjusted}
+                        fill="url(#barCompileGrad)"
+                        stroke="#ff6b4a"
+                        strokeWidth={1}
+                        strokeOpacity={0.3}
+                        rx={hasBoth ? 0 : 2} // round top if no query on top
                       />
                     )}
                     {/* Query bar stacked */}
                     {qVal > 0 && (
                       <rect
                         x={xPos}
-                        y={yQuery}
+                        y={yQueryAdjusted}
                         width={barWidth}
-                        height={hQuery}
-                        fill="var(--color-auth-cyan)"
-                        rx={1.5} // round top of stacked stack
+                        height={hQueryAdjusted}
+                        fill="url(#barQueryGrad)"
+                        stroke="#9055ff"
+                        strokeWidth={1}
+                        strokeOpacity={0.3}
+                        rx={2} // always round top of the query bar
                       />
                     )}
                   </g>
@@ -500,9 +522,7 @@ export function ActivityChart() {
               />
             )}
           </svg>
-        </div>
-
-        {/* HTML Tooltip overlay styled to match Dune Analytics */}
+        </div>        {/* HTML Tooltip overlay styled to match Dune Analytics */}
         {hoveredIdx !== null && tooltipPos && (
           <div
             className="absolute z-30 pointer-events-none rounded-xl p-3 shadow-2xl text-[11px] font-sans text-left transition-all duration-75"
@@ -510,7 +530,7 @@ export function ActivityChart() {
               left: `${tooltipPos.x + 16}px`,
               top: `${tooltipPos.y + 8}px`,
               transform: tooltipPos.x > 540 ? "translateX(-110%)" : "none",
-              background: "rgba(15, 15, 18, 0.82)",
+              background: "rgba(8, 8, 10, 0.88)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
               border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -525,17 +545,17 @@ export function ActivityChart() {
             {showCompile && (
               <div className="flex items-center justify-between gap-6 text-[#a1a1aa] mb-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-auth-accent)] shadow-[0_0_6px_var(--color-auth-accent)]" />
+                  <span className="w-2 h-2 rounded-full bg-[#ff6b4a] shadow-[0_0_6px_#ff6b4a]" />
                   <span>Compiled Sources:</span>
                 </div>
                 <strong className="text-white font-mono">{compile[hoveredIdx]}</strong>
               </div>
             )}
-
+ 
             {showQuery && (
               <div className="flex items-center justify-between gap-6 text-[#a1a1aa] mb-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-auth-cyan)] shadow-[0_0_6px_var(--color-auth-cyan)]" />
+                  <span className="w-2 h-2 rounded-full bg-[#9055ff] shadow-[0_0_6px_#9055ff]" />
                   <span>AI Queries:</span>
                 </div>
                 <strong className="text-white font-mono">{query[hoveredIdx]}</strong>
