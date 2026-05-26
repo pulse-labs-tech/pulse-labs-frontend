@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Select } from "../ui/select";
+import { Clock } from "lucide-react";
 
 // Mock datasets defined in design contract specification
 interface ChartDataset {
@@ -50,6 +51,9 @@ const CHART_DATA: Record<string, ChartDataset> = {
 
 export function ActivityChart() {
   const [period, setPeriod] = useState<string>("7d");
+  const [chartType, setChartType] = useState<"line" | "bar">("line");
+  const [showCompile, setShowCompile] = useState<boolean>(true);
+  const [showQuery, setShowQuery] = useState<boolean>(true);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -57,7 +61,7 @@ export function ActivityChart() {
   const dataset = CHART_DATA[period] || CHART_DATA["7d"];
   const { labels, compile, query } = dataset;
 
-  // Chart configuration constants matching globals.css
+  // Chart configuration constants
   const width = 800;
   const height = 170;
   const paddingLeft = 40;
@@ -68,34 +72,50 @@ export function ActivityChart() {
   const activeWidth = width - paddingLeft - paddingRight;
   const activeHeight = height - paddingTop - paddingBottom;
 
-  // Find max value in dataset to scale Y axis dynamically
-  const rawMax = Math.max(...compile, ...query, 1);
-  let maxVal = rawMax;
-  if (rawMax <= 5) maxVal = 5;
-  else if (rawMax <= 10) maxVal = 10;
-  else if (rawMax <= 20) maxVal = 20;
-  else if (rawMax <= 50) maxVal = 50;
-  else maxVal = Math.ceil(rawMax / 10) * 10;
-
   const n = labels.length;
-  const stepX = activeWidth / (n - 1);
+  const stepX = activeWidth / (n - 1 || 1);
 
-  // Compute exact point coordinates
+  // Compute values based on toggles
+  const visibleCompile = compile.map((val) => (showCompile ? val : 0));
+  const visibleQuery = query.map((val) => (showQuery ? val : 0));
+
+  // Find max value in dataset to scale Y axis dynamically
+  let maxVal = 1;
+  if (chartType === "bar") {
+    // Stacked height max
+    const maxStacked = Math.max(
+      ...compile.map((_, i) => visibleCompile[i] + visibleQuery[i]),
+      1
+    );
+    maxVal = maxStacked;
+  } else {
+    // Overlaid max
+    maxVal = Math.max(...visibleCompile, ...visibleQuery, 1);
+  }
+
+  // Round max values for clean grid lines
+  if (maxVal <= 5) maxVal = 5;
+  else if (maxVal <= 10) maxVal = 10;
+  else if (maxVal <= 20) maxVal = 20;
+  else if (maxVal <= 50) maxVal = 50;
+  else maxVal = Math.ceil(maxVal / 10) * 10;
+
+  // Compute exact point coordinates for Line mode
   const compilePoints = compile.map((val, idx) => ({
     x: paddingLeft + idx * stepX,
-    y: paddingTop + activeHeight - (val / maxVal) * activeHeight,
+    y: paddingTop + activeHeight - ((showCompile ? val : 0) / maxVal) * activeHeight,
   }));
 
   const queryPoints = query.map((val, idx) => ({
     x: paddingLeft + idx * stepX,
-    y: paddingTop + activeHeight - (val / maxVal) * activeHeight,
+    y: paddingTop + activeHeight - ((showQuery ? val : 0) / maxVal) * activeHeight,
   }));
 
-  // Bezier curve calculation using cubic spline segment generation (tension = 0.3)
+  // Bezier curve path generator
   const getBezierPath = (points: { x: number; y: number }[]) => {
     if (points.length === 0) return "";
     let path = `M ${points[0].x} ${points[0].y}`;
-    const tension = 0.3;
+    const tension = 0.25;
     for (let i = 0; i < points.length - 1; i++) {
       const p0 = points[i];
       const p1 = points[i + 1];
@@ -108,42 +128,50 @@ export function ActivityChart() {
     return path;
   };
 
-  const compilePath = getBezierPath(compilePoints);
-  const queryPath = getBezierPath(queryPoints);
+  const compilePath = showCompile ? getBezierPath(compilePoints) : "";
+  const queryPath = showQuery ? getBezierPath(queryPoints) : "";
 
-  const compileFillPath = compilePoints.length
+  const compileFillPath = showCompile && compilePoints.length
     ? `${compilePath} L ${compilePoints[compilePoints.length - 1].x} ${paddingTop + activeHeight} L ${compilePoints[0].x} ${paddingTop + activeHeight} Z`
     : "";
 
-  const queryFillPath = queryPoints.length
+  const queryFillPath = showQuery && queryPoints.length
     ? `${queryPath} L ${queryPoints[queryPoints.length - 1].x} ${paddingTop + activeHeight} L ${queryPoints[0].x} ${paddingTop + activeHeight} Z`
     : "";
 
-  // Mouse interactivity calculations
+  // Mouse move callback to calculate tooltip and cursor tracking
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
 
-    // Convert mouse x to internal SVG coordinate system (width: 800)
     const svgX = (x / rect.width) * width;
-
     let idx = Math.round((svgX - paddingLeft) / stepX);
     if (idx < 0) idx = 0;
     if (idx >= n) idx = n - 1;
 
     setHoveredIdx(idx);
 
-    // Calculate tooltip coordinates relative to SVG container bounding box
     const pointX = paddingLeft + idx * stepX;
-    const compileY = compilePoints[idx].y;
-    const queryY = queryPoints[idx].y;
-    const tooltipY = Math.min(compileY, queryY);
+    
+    // Position tooltip vertically near the highest active series
+    let activeY = paddingTop + activeHeight / 2;
+    if (chartType === "bar") {
+      const totalStacked = visibleCompile[idx] + visibleQuery[idx];
+      activeY = paddingTop + activeHeight - (totalStacked / maxVal) * activeHeight;
+    } else {
+      const cY = compilePoints[idx].y;
+      const qY = queryPoints[idx].y;
+      activeY = Math.min(
+        showCompile ? cY : Infinity,
+        showQuery ? qY : Infinity,
+        paddingTop + activeHeight
+      );
+    }
 
     setTooltipPos({
       x: (pointX / width) * rect.width,
-      y: (tooltipY / height) * rect.height,
+      y: (activeY / height) * rect.height,
     });
   };
 
@@ -152,17 +180,81 @@ export function ActivityChart() {
     setTooltipPos(null);
   };
 
-  // Generate grid values
   const gridLines = [0, 1, 2, 3, 4];
+  const barWidth = Math.max(stepX - Math.max(stepX * 0.35, 3), 3);
 
   return (
     <div className="section-block">
       {/* Label section */}
-      <div className="card-label">
+      <div className="card-label flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="card-label-title text-white flex items-center gap-2">
           Activity Over Time
         </div>
-        <div className="card-label-right">
+        
+        {/* Responsive controls */}
+        <div className="card-label-right flex items-center gap-3.5 flex-wrap">
+          {/* Legend series toggles */}
+          <div className="flex items-center gap-3.5 text-xs font-semibold select-none mr-2">
+            <button
+              type="button"
+              onClick={() => setShowCompile(!showCompile)}
+              className={`flex items-center gap-1.5 cursor-pointer transition-colors duration-200 ${
+                showCompile ? "text-[#fafafa]" : "text-auth-text-3 hover:text-auth-text-2"
+              }`}
+            >
+              <span
+                className={`w-2.5 h-2.5 rounded-sm block border transition-all ${
+                  showCompile 
+                    ? "bg-[var(--color-auth-accent)] border-[var(--color-auth-accent)] shadow-[0_0_8px_var(--color-auth-accent-glow)]" 
+                    : "border-white/10 bg-transparent"
+                }`}
+              />
+              <span>Ingests</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowQuery(!showQuery)}
+              className={`flex items-center gap-1.5 cursor-pointer transition-colors duration-200 ${
+                showQuery ? "text-[#fafafa]" : "text-auth-text-3 hover:text-auth-text-2"
+              }`}
+            >
+              <span
+                className={`w-2.5 h-2.5 rounded-sm block border transition-all ${
+                  showQuery 
+                    ? "bg-[var(--color-auth-cyan)] border-[var(--color-auth-cyan)] shadow-[0_0_8px_rgba(120,200,250,0.2)]" 
+                    : "border-white/10 bg-transparent"
+                }`}
+              />
+              <span>Queries</span>
+            </button>
+          </div>
+
+          {/* Chart Type Toggle: Line vs Bar */}
+          <div className="flex items-center rounded-lg bg-[#18181b] border border-[#27272a] p-0.5">
+            <button
+              type="button"
+              onClick={() => setChartType("line")}
+              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-colors cursor-pointer ${
+                chartType === "line" 
+                  ? "bg-white/5 text-white border border-white/[0.04] shadow-sm" 
+                  : "text-auth-text-3 hover:text-auth-text-2"
+              }`}
+            >
+              Line
+            </button>
+            <button
+              type="button"
+              onClick={() => setChartType("bar")}
+              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-colors cursor-pointer ${
+                chartType === "bar" 
+                  ? "bg-white/5 text-white border border-white/[0.04] shadow-sm" 
+                  : "text-auth-text-3 hover:text-auth-text-2"
+              }`}
+            >
+              Bar
+            </button>
+          </div>
+          
           <div className="flex items-center gap-2">
             <span className="tech-sort-label text-xs text-auth-text-3">Period</span>
             <Select
@@ -186,31 +278,35 @@ export function ActivityChart() {
 
       {/* SVG Chart Card */}
       <div className="chart-card fade-up relative" onMouseLeave={handleMouseLeave}>
-        <div className="text-center pb-2 pt-1 font-mono text-[10px] text-auth-text-3 tracking-widest uppercase">
-          Knowledge compilation &amp; query activity
+        <div className="text-center pb-2 pt-1 font-mono text-[9px] text-auth-text-3 tracking-widest uppercase flex items-center justify-center gap-1 select-none">
+          <span>Pulse Knowledge Analytics</span>
+          <span className="text-[#52525b]">•</span>
+          <span className="text-[var(--color-auth-accent)] flex items-center gap-0.5">
+            <Clock className="w-2.5 h-2.5 inline" /> updated 9m ago
+          </span>
         </div>
 
-        <div className="chart-area w-full" style={{ height: "170px" }}>
+        <div className="chart-area w-full relative" style={{ height: "170px" }}>
           <svg
             ref={svgRef}
-            className="w-full h-full"
+            className="w-full h-full overflow-visible"
             viewBox={`0 0 ${width} ${height}`}
             preserveAspectRatio="none"
             onMouseMove={handleMouseMove}
           >
             <defs>
-              {/* Gradients matching spec */}
+              {/* Gradients */}
               <linearGradient id="compileGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-auth-accent)" stopOpacity={0.25} />
+                <stop offset="0%" stopColor="var(--color-auth-accent)" stopOpacity={0.16} />
                 <stop offset="100%" stopColor="var(--color-auth-accent)" stopOpacity={0.01} />
               </linearGradient>
               <linearGradient id="queryGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-auth-text-3)" stopOpacity={0.15} />
-                <stop offset="100%" stopColor="var(--color-auth-text-3)" stopOpacity={0.01} />
+                <stop offset="0%" stopColor="var(--color-auth-cyan)" stopOpacity={0.16} />
+                <stop offset="100%" stopColor="var(--color-auth-cyan)" stopOpacity={0.01} />
               </linearGradient>
             </defs>
 
-            {/* Horizontal Grid Lines & Y Axis Labels */}
+            {/* Horizontal Grid Lines */}
             {gridLines.map((i) => {
               const yVal = paddingTop + activeHeight - (i / 4) * activeHeight;
               const textVal = Math.round((maxVal * i) / 4);
@@ -221,16 +317,17 @@ export function ActivityChart() {
                     y1={yVal}
                     x2={width - paddingRight}
                     y2={yVal}
-                    stroke="rgba(255, 255, 255, 0.04)"
+                    stroke="rgba(255, 255, 255, 0.03)"
                     strokeWidth={1}
                   />
                   <text
                     x={paddingLeft - 10}
-                    y={yVal + 4}
+                    y={yVal + 3.5}
                     fill="#52525b"
-                    fontSize={10}
+                    fontSize={9}
                     fontFamily="JetBrains Mono, monospace"
                     textAnchor="end"
+                    className="select-none"
                   >
                     {textVal}
                   </text>
@@ -238,10 +335,9 @@ export function ActivityChart() {
               );
             })}
 
-            {/* Vertical grid lines & X Axis Labels */}
+            {/* Vertical grid markers & labels */}
             {labels.map((lbl, idx) => {
               const xVal = paddingLeft + idx * stepX;
-              // Limit showing labels to avoid clutter
               const showLabel = n <= 10 || idx % Math.ceil(n / 8) === 0 || idx === n - 1;
               return (
                 <g key={`grid-x-${idx}`}>
@@ -252,16 +348,17 @@ export function ActivityChart() {
                         y1={paddingTop}
                         x2={xVal}
                         y2={paddingTop + activeHeight}
-                        stroke="rgba(255, 255, 255, 0.02)"
+                        stroke="rgba(255, 255, 255, 0.015)"
                         strokeWidth={1}
                       />
                       <text
                         x={xVal}
-                        y={height - 5}
+                        y={height - 4}
                         fill="#52525b"
                         fontSize={9}
                         fontFamily="Inter, sans-serif"
                         textAnchor="middle"
+                        className="select-none"
                       >
                         {lbl}
                       </text>
@@ -271,102 +368,186 @@ export function ActivityChart() {
               );
             })}
 
-            {/* Area Fills */}
-            {compileFillPath && (
-              <path d={compileFillPath} fill="url(#compileGrad)" />
-            )}
-            {queryFillPath && (
-              <path d={queryFillPath} fill="url(#queryGrad)" />
+            {/* Render lines if chartType is line */}
+            {chartType === "line" && (
+              <>
+                {/* Area Fills */}
+                {compileFillPath && (
+                  <path d={compileFillPath} fill="url(#compileGrad)" className="transition-all duration-300" />
+                )}
+                {queryFillPath && (
+                  <path d={queryFillPath} fill="url(#queryGrad)" className="transition-all duration-300" />
+                )}
+
+                {/* Strokes */}
+                {compilePath && (
+                  <path
+                    d={compilePath}
+                    fill="none"
+                    stroke="var(--color-auth-accent)"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+                {queryPath && (
+                  <path
+                    d={queryPath}
+                    fill="none"
+                    stroke="var(--color-auth-cyan)"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+
+                {/* Line point dots */}
+                {compilePoints.map((pt, idx) => {
+                  if (!showCompile) return null;
+                  const isHovered = hoveredIdx === idx;
+                  return (
+                    <circle
+                      key={`pt-c-${idx}`}
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={isHovered ? 4.5 : 2.5}
+                      fill="var(--color-auth-accent)"
+                      stroke="#141416"
+                      strokeWidth={isHovered ? 2 : 1}
+                      className="transition-all duration-75"
+                    />
+                  );
+                })}
+
+                {/* Query point dots */}
+                {queryPoints.map((pt, idx) => {
+                  if (!showQuery) return null;
+                  const isHovered = hoveredIdx === idx;
+                  return (
+                    <circle
+                      key={`pt-q-${idx}`}
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={isHovered ? 4.5 : 2.5}
+                      fill="var(--color-auth-cyan)"
+                      stroke="#141416"
+                      strokeWidth={isHovered ? 2 : 1}
+                      className="transition-all duration-75"
+                    />
+                  );
+                })}
+              </>
             )}
 
-            {/* Lines */}
-            {compilePath && (
-              <path
-                d={compilePath}
-                fill="none"
-                stroke="var(--color-auth-accent)"
-                strokeWidth={2}
-                strokeLinecap="round"
-              />
-            )}
-            {queryPath && (
-              <path
-                d={queryPath}
-                fill="none"
-                stroke="var(--color-auth-text-3)"
-                strokeWidth={2}
-                strokeLinecap="round"
-              />
-            )}
+            {/* Render stacked bars if chartType is bar */}
+            {chartType === "bar" &&
+              compile.map((_, idx) => {
+                const cVal = visibleCompile[idx];
+                const qVal = visibleQuery[idx];
+                
+                const hCompile = (cVal / maxVal) * activeHeight;
+                const hQuery = (qVal / maxVal) * activeHeight;
 
-            {/* Hover Vertical Line marker */}
+                const yCompile = paddingTop + activeHeight - hCompile;
+                const yQuery = yCompile - hQuery;
+
+                const xPos = paddingLeft + idx * stepX - barWidth / 2;
+                const isDimmed = hoveredIdx !== null && hoveredIdx !== idx;
+
+                return (
+                  <g 
+                    key={`bar-group-${idx}`}
+                    className="transition-opacity duration-200"
+                    style={{ opacity: isDimmed ? 0.35 : 1 }}
+                  >
+                    {/* Ingestion bar */}
+                    {cVal > 0 && (
+                      <rect
+                        x={xPos}
+                        y={yCompile}
+                        width={barWidth}
+                        height={hCompile}
+                        fill="var(--color-auth-accent)"
+                        rx={hQuery === 0 ? 1.5 : 0} // round top if no stacked queries on top
+                      />
+                    )}
+                    {/* Query bar stacked */}
+                    {qVal > 0 && (
+                      <rect
+                        x={xPos}
+                        y={yQuery}
+                        width={barWidth}
+                        height={hQuery}
+                        fill="var(--color-auth-cyan)"
+                        rx={1.5} // round top of stacked stack
+                      />
+                    )}
+                  </g>
+                );
+              })}
+
+            {/* Hover Crosshair vertical tracker */}
             {hoveredIdx !== null && (
               <line
                 x1={paddingLeft + hoveredIdx * stepX}
                 y1={paddingTop}
                 x2={paddingLeft + hoveredIdx * stepX}
                 y2={paddingTop + activeHeight}
-                stroke="rgba(255, 255, 255, 0.15)"
+                stroke="rgba(255, 255, 255, 0.08)"
                 strokeWidth={1}
-                strokeDasharray="3 3"
+                strokeDasharray="4 4"
+                className="pointer-events-none"
               />
             )}
-
-            {/* Interactive Data Point Dots */}
-            {compilePoints.map((pt, idx) => {
-              const isHovered = hoveredIdx === idx;
-              return (
-                <circle
-                  key={`pt-c-${idx}`}
-                  cx={pt.x}
-                  cy={pt.y}
-                  r={isHovered ? 5 : 3}
-                  fill="var(--color-auth-accent)"
-                  stroke="#141416"
-                  strokeWidth={isHovered ? 2 : 1}
-                  className="transition-all duration-75"
-                />
-              );
-            })}
-
-            {/* Interactive Query Dots */}
-            {queryPoints.map((pt, idx) => {
-              const isHovered = hoveredIdx === idx;
-              return (
-                <circle
-                  key={`pt-q-${idx}`}
-                  cx={pt.x}
-                  cy={pt.y}
-                  r={isHovered ? 5 : 3}
-                  fill="var(--color-auth-text-3)"
-                  stroke="#141416"
-                  strokeWidth={isHovered ? 2 : 1}
-                  className="transition-all duration-75"
-                />
-              );
-            })}
           </svg>
         </div>
 
-        {/* HTML Tooltip overlay styled to match Chart.js */}
+        {/* HTML Tooltip overlay styled to match Dune Analytics */}
         {hoveredIdx !== null && tooltipPos && (
           <div
-            className="absolute z-30 pointer-events-none bg-[#18181b] border border-[#27272a] rounded-lg p-2.5 shadow-xl text-[11px] font-sans text-left transition-all duration-75"
+            className="absolute z-30 pointer-events-none rounded-xl p-3 shadow-2xl text-[11px] font-sans text-left transition-all duration-75"
             style={{
-              left: `${tooltipPos.x + 15}px`,
-              top: `${tooltipPos.y + 10}px`,
-              transform: tooltipPos.x > 500 ? "translateX(-110%)" : "none",
+              left: `${tooltipPos.x + 16}px`,
+              top: `${tooltipPos.y + 8}px`,
+              transform: tooltipPos.x > 540 ? "translateX(-110%)" : "none",
+              background: "rgba(15, 15, 18, 0.82)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.7)",
             }}
           >
-            <div className="font-bold text-[#fafafa] mb-1">{labels[hoveredIdx]}</div>
-            <div className="flex items-center gap-1.5 text-[#a1a1aa] mb-0.5">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-auth-accent)]" />
-              <span>Compiled: <strong className="text-white">{compile[hoveredIdx]}</strong></span>
+            <div className="font-bold text-[#fafafa] mb-1.5 pb-1 border-b border-white/5 flex items-center justify-between gap-4">
+              <span>{labels[hoveredIdx]}</span>
+              <span className="text-[9px] text-[#52525b] font-normal font-mono">Index #{hoveredIdx + 1}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[#a1a1aa]">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-auth-text-3)]" />
-              <span>Queries: <strong className="text-white">{query[hoveredIdx]}</strong></span>
-            </div>
+            
+            {showCompile && (
+              <div className="flex items-center justify-between gap-6 text-[#a1a1aa] mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[var(--color-auth-accent)] shadow-[0_0_6px_var(--color-auth-accent)]" />
+                  <span>Compiled Sources:</span>
+                </div>
+                <strong className="text-white font-mono">{compile[hoveredIdx]}</strong>
+              </div>
+            )}
+
+            {showQuery && (
+              <div className="flex items-center justify-between gap-6 text-[#a1a1aa] mb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[var(--color-auth-cyan)] shadow-[0_0_6px_var(--color-auth-cyan)]" />
+                  <span>AI Queries:</span>
+                </div>
+                <strong className="text-white font-mono">{query[hoveredIdx]}</strong>
+              </div>
+            )}
+            
+            {(showCompile && showQuery) && (
+              <div className="flex items-center justify-between gap-6 text-[#71717a] pt-1 mt-1 border-t border-white/5 text-[10px]">
+                <span>Total Activity:</span>
+                <strong className="text-[#a1a1aa] font-mono">{compile[hoveredIdx] + query[hoveredIdx]}</strong>
+              </div>
+            )}
           </div>
         )}
       </div>
