@@ -30,30 +30,40 @@ const API_BASE =
 // Refresh Lock (prevents parallel refresh calls)
 // ────────────────────────────────────────────────────────────────
 
-let refreshPromise: Promise<string | null> | null = null;
+interface RefreshResult {
+  accessToken: string | null;
+  isSessionExpired: boolean;
+}
+
+let refreshPromise: Promise<RefreshResult> | null = null;
 
 /**
  * Attempt to refresh the access token.
  * Uses a lock to prevent multiple simultaneous refresh calls.
- * Returns the new access token, or null if refresh failed.
+ * Returns the new access token, and whether the session has expired.
  */
-async function tryRefresh(): Promise<string | null> {
+async function tryRefresh(): Promise<RefreshResult> {
   // If a refresh is already in progress, wait for it
   if (refreshPromise) {
     return refreshPromise;
   }
 
-  refreshPromise = (async () => {
+  refreshPromise = (async (): Promise<RefreshResult> => {
     try {
       const refreshToken = await getRefreshToken();
-      if (!refreshToken) return null;
+      if (!refreshToken) {
+        return { accessToken: null, isSessionExpired: true };
+      }
 
       const result = await apiRefreshToken(refreshToken);
 
       if (result.status === "0") {
-        // Refresh failed — clear all tokens
-        await clearAuthTokens();
-        return null;
+        const expired = isUnauthorized(result.error_code || "");
+        if (expired) {
+          // Definitely invalid session — clear all tokens
+          await clearAuthTokens();
+        }
+        return { accessToken: null, isSessionExpired: expired };
       }
 
       // Store NEW tokens (rotation — old ones are now invalid)
@@ -63,10 +73,10 @@ async function tryRefresh(): Promise<string | null> {
         result.data.expiresIn,
       );
 
-      return result.data.accessToken;
+      return { accessToken: result.data.accessToken, isSessionExpired: false };
     } catch {
-      await clearAuthTokens();
-      return null;
+      // Treat network errors or parsing errors as transient, do not clear tokens
+      return { accessToken: null, isSessionExpired: false };
     } finally {
       refreshPromise = null;
     }
@@ -90,10 +100,10 @@ interface AuthFetchOptions extends Omit<RequestInit, "headers"> {
  *
  * Flow:
  * 1. Read accessToken from cookie
- * 2. If no token → try refresh → if fail → redirect /login
+ * 2. If no token → try refresh → if fail (due to expired session) → redirect /login
  * 3. Make request with Bearer token
  * 4. If 401 → try refresh → retry request once
- * 5. If retry fails → redirect /login
+ * 5. If retry fails (due to expired session) → redirect /login
  */
 export async function authFetch<T>(
   path: string,
@@ -106,13 +116,17 @@ export async function authFetch<T>(
 
   // 2. If no access token, try refresh
   if (!accessToken) {
-    accessToken = (await tryRefresh()) ?? undefined;
+    const refreshRes = await tryRefresh();
+    accessToken = refreshRes.accessToken ?? undefined;
+
     if (!accessToken) {
-      if (!noRedirect) redirect("/login");
+      if (refreshRes.isSessionExpired && !noRedirect) {
+        redirect("/login");
+      }
       return {
         status: "0",
-        error_code: "UNAUTHORIZED",
-        msg: "No valid session",
+        error_code: refreshRes.isSessionExpired ? "UNAUTHORIZED" : "NETWORK_ERROR",
+        msg: refreshRes.isSessionExpired ? "No valid session" : "Không kết nối được máy chủ.",
         data: {} as T,
       };
     }
@@ -130,9 +144,13 @@ export async function authFetch<T>(
 
   // 4. If 401, try refresh and retry once
   if (response.status === "0" && isUnauthorized(response.error_code)) {
-    const newToken = await tryRefresh();
+    const refreshRes = await tryRefresh();
+    const newToken = refreshRes.accessToken;
+
     if (!newToken) {
-      if (!noRedirect) redirect("/login");
+      if (refreshRes.isSessionExpired && !noRedirect) {
+        redirect("/login");
+      }
       return response;
     }
 
