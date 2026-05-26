@@ -112,11 +112,12 @@
   --color-auth-text-2: oklch(0.70 0.01 260);
   --color-auth-text-3: oklch(0.48 0.01 260);
 
-  /* --- Auth Accent (vibrant mint-jade — premium green) --- */
-  --color-auth-accent: oklch(0.68 0.15 160);
-  --color-auth-accent-dim: oklch(0.68 0.15 160 / 0.10);
-  --color-auth-accent-dark: oklch(0.58 0.15 160);
-  --color-auth-accent-glow: oklch(0.68 0.15 160 / 0.20);
+  /* --- Auth Accent (refined jade — premium, not neon) --- */
+  --color-auth-accent: oklch(0.65 0.13 160);
+  --color-auth-accent-dim: oklch(0.65 0.13 160 / 0.09);
+  --color-auth-accent-dark: oklch(0.54 0.12 160);
+  --color-auth-accent-muted: oklch(0.65 0.13 160 / 0.60);
+  --color-auth-accent-glow: oklch(0.65 0.13 160 / 0.14);
 
   /* --- Auth Secondary Accents --- */
   --color-auth-purple: oklch(0.68 0.18 280);
@@ -203,10 +204,10 @@
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 oklch(0.68 0.15 160 / 0.35);
+    box-shadow: 0 0 0 0 oklch(0.65 0.13 160 / 0.25);
   }
   50% {
-    box-shadow: 0 0 20px 4px oklch(0.68 0.15 160 / 0.12);
+    box-shadow: 0 0 16px 4px oklch(0.65 0.13 160 / 0.09);
   }
 }
 
@@ -269,6 +270,7 @@
 *,
 *::before,
 *::after {
+  box-sizing: border-box;          /* Prevent border from overflowing container */
   border-color: var(--color-border);
 }
 
@@ -528,12 +530,12 @@ select:focus {
   will-change: transform, opacity;
 }
 
-/* Gradient text — Jade green → Teal */
+/* Gradient text — Jade green → Teal (muted, not neon) */
 .text-gradient {
   background: linear-gradient(
     135deg,
-    oklch(0.68 0.15 160),
-    oklch(0.68 0.14 175)
+    var(--color-auth-accent),
+    oklch(0.60 0.14 175)
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -549,10 +551,63 @@ select:focus {
   box-shadow: var(--shadow-lg);
 }
 
-/* Section spacing (fluid) */
-.section-padding {
-  padding-top: clamp(3rem, 8vw, 8rem);
-  padding-bottom: clamp(3rem, 8vw, 8rem);
+/* ============================================================
+   btn-primary-pulse — Unified CTA Button Style
+   Replaces scattered emerald/teal gradient buttons app-wide.
+   ============================================================ */
+
+.btn-primary-pulse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--color-auth-accent-dark) 0%,
+    oklch(0.50 0.12 175) 100%
+  );
+  box-shadow: 0 2px 12px var(--color-auth-accent-glow);
+  transition:
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-primary-pulse:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px var(--color-auth-accent-glow);
+}
+
+.btn-primary-pulse:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.btn-primary-pulse:disabled,
+.btn-primary-pulse[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* ============================================================
+   Global Tailwind emerald/teal override — less neon app-wide
+   Reduces chroma so all from-emerald-* to-teal-* are muted.
+   ============================================================ */
+
+@theme inline {
+  --color-emerald-400: oklch(0.66 0.13 152);
+  --color-emerald-500: oklch(0.58 0.12 155);
+  --color-teal-300:    oklch(0.77 0.10 178);
+  --color-teal-400:    oklch(0.66 0.11 178);
+  --color-teal-500:    oklch(0.56 0.10 178);
 }
 
 /* ============================================================
