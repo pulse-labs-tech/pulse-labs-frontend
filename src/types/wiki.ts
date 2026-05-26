@@ -178,7 +178,7 @@ export interface WikiListParams {
   domainId?: WikiDomainFilter;
   q?: string;
   sort?: WikiSort;
-  status?: WikiItemStatus;
+  status?: WikiItemStatus | WikiRetrievalStatus;
   limit?: number;
   cursor?: string;
   page?: number;

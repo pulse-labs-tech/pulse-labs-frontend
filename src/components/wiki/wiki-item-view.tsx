@@ -390,7 +390,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
         <div className="flex gap-3">
           <button
             onClick={fetchItem}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
+            className="btn-primary-pulse text-sm"
           >
             <RefreshCw className="h-4 w-4" /> {t("common.retry")}
           </button>
@@ -639,7 +639,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
         {/* Ask about this topic CTA */}
         <Link
           href={`/${locale}/query?roleKbId=${item.roleKbId}&q=${encodeURIComponent(item.title)}`}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-2xl shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
+          className="btn-primary-pulse w-full text-sm"
         >
           <MessageCircle className="h-4 w-4" />
           {t("wiki.detail.askTopic")}

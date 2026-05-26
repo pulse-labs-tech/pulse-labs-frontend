@@ -32,6 +32,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
 import { createQuerySessionAction, submitQueryMessageAction } from "@/app/actions/query";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
@@ -347,7 +348,7 @@ function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => stri
       </p>
       <Link
         href={`/${locale}/compile/new`}
-        className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full px-6 py-2.5 text-sm shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all"
+        className="btn-primary-pulse text-sm"
       >
         <Plus className="h-4 w-4" />
         {t("query.emptyKbButton")}
@@ -399,7 +400,7 @@ export function QueryView() {
 
   // Role KB state
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>("");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || "");
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
 
   // Refs
@@ -409,7 +410,6 @@ export function QueryView() {
   // ─── Bootstrap: load roles ───
   useEffect(() => {
     const initRoleKbId = searchParams.get("roleKbId") || "";
-    setSelectedRoleKbId(initRoleKbId);
 
     const loadRoles = async () => {
       setIsLoadingRoles(true);
@@ -728,17 +728,17 @@ export function QueryView() {
                     <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 block mb-1.5">
                       {t("query.changeKb", "Chuyển KB")}
                     </label>
-                    <select
+                    <Select
                       value={selectedRoleKbId}
-                      onChange={(e) => handleRoleChange(e.target.value)}
-                      className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text text-xs px-3 py-2 appearance-none cursor-pointer focus:border-auth-accent/50 transition-colors"
-                    >
-                      {userRoles.map((r) => (
-                        <option key={r.id} value={r.id} className="bg-auth-surface text-auth-text">
-                          {r.roleName}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={handleRoleChange}
+                      options={userRoles.map((r) => ({
+                        value: r.id,
+                        label: r.roleName,
+                        sublabel: r.roleGroup,
+                      }))}
+                      fullWidth
+                      className="bg-auth-elevated border border-auth-border rounded-xl py-2"
+                    />
                   </div>
                 )}
               </>
@@ -900,20 +900,21 @@ export function QueryView() {
                 {isLoadingRoles ? (
                   <span className="text-[10px] text-auth-text-3 animate-pulse">{t("common.loading", "Đang tải...")}</span>
                 ) : (
-                  <select
+                  <Select
                     value={selectedRoleKbId}
-                    onChange={(e) => handleRoleChange(e.target.value)}
-                    className="bg-auth-elevated border border-auth-border rounded-lg text-auth-text text-[11px] font-semibold px-2.5 py-1 appearance-none cursor-pointer focus:border-auth-accent/50 transition-colors max-w-[180px]"
-                  >
-                    {userRoles.length === 0 && (
-                      <option value="">{t("query.noKb", "Chưa có KB")}</option>
-                    )}
-                    {userRoles.map((r) => (
-                      <option key={r.id} value={r.id} className="bg-auth-surface">
-                        {r.roleName}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={handleRoleChange}
+                    options={
+                      userRoles.length === 0
+                        ? [{ value: "", label: t("query.noKb", "Chưa có KB") }]
+                        : userRoles.map((r) => ({
+                            value: r.id,
+                            label: r.roleName,
+                            sublabel: r.roleGroup,
+                          }))
+                    }
+                    align="right"
+                    className="bg-auth-elevated border border-auth-border rounded-lg px-2.5 py-1 text-[11px] max-w-[180px]"
+                  />
                 )}
               </div>
 
@@ -936,7 +937,7 @@ export function QueryView() {
                 <button
                   onClick={handleSubmit}
                   disabled={!canSend || quotaExceeded}
-                  className="shrink-0 h-12 w-12 flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                  className="shrink-0 h-12 w-12 flex items-center justify-center bg-gradient-to-r from-[var(--color-auth-accent-dark)] to-[oklch(0.50_0.12_175)] text-white rounded-full shadow-[0_2px_12px_var(--color-auth-accent-glow)] hover:shadow-[0_6px_22px_var(--color-auth-accent-glow)] hover:-translate-y-[1px] active:scale-[0.97] transition-all disabled:opacity-40 disabled:pointer-events-none"
                   title={t("query.button", "Gửi")}
                 >
                   {isAnswering ? (

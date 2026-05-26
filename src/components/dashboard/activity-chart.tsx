@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { Select } from "../ui/select";
 
 // Mock datasets defined in design contract specification
 interface ChartDataset {
@@ -164,19 +165,21 @@ export function ActivityChart() {
         <div className="card-label-right">
           <div className="flex items-center gap-2">
             <span className="tech-sort-label text-xs text-auth-text-3">Period</span>
-            <select
+            <Select
               value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-              className="tech-sort-select bg-[#18181b] border border-[#27272a] text-xs text-auth-text font-semibold rounded-lg px-2.5 py-1 cursor-pointer focus:border-auth-accent transition-all appearance-none"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="1Q">Q1 (3 months)</option>
-              <option value="3Q">Q3 (9 months)</option>
-              <option value="1Y">1 Year</option>
-              <option value="5Y">5 Years</option>
-              <option value="all">All time</option>
-            </select>
+              onChange={setPeriod}
+              options={[
+                { value: "7d", label: "Last 7 days" },
+                { value: "30d", label: "Last 30 days" },
+                { value: "1Q", label: "Q1 (3 months)" },
+                { value: "3Q", label: "Q3 (9 months)" },
+                { value: "1Y", label: "1 Year" },
+                { value: "5Y", label: "5 Years" },
+                { value: "all", label: "All time" },
+              ]}
+              align="right"
+              className="bg-[#18181b] border border-[#27272a] text-auth-text rounded-lg px-2.5 py-1"
+            />
           </div>
         </div>
       </div>

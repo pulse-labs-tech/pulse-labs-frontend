@@ -46,7 +46,7 @@ export default function NotFound() {
 
         {/* Action buttons */}
         <div className="mt-10 flex flex-col gap-3 sm:flex-row animate-[fadeUp_0.5s_ease-out_0.5s_both]">
-          <Link href="/" className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] px-7 py-3 text-sm font-bold text-white shadow-[0_0_20px_oklch(0.72_0.11_145_/_0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_0_40px_oklch(0.72_0.11_145_/_0.5)] active:scale-95">
+          <Link href="/" className="btn-primary-pulse text-sm group">
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
             Về trang chủ
           </Link>

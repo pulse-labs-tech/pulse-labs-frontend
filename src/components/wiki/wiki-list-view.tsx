@@ -32,6 +32,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemsAction } from "@/app/actions/wiki";
 import type { WikiItemCard, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
@@ -360,7 +361,7 @@ export function WikiListView() {
           limit: LIMIT,
           q: effectiveSearch || undefined,
           domainId: (effectiveDomain && effectiveDomain !== "all") ? effectiveDomain : undefined,
-          status: effectiveStatus ? (effectiveStatus as any) : undefined,
+          status: effectiveStatus ? (effectiveStatus as WikiRetrievalStatus) : undefined,
           tag: effectiveTag || undefined,
           sort: getSortParam(sortBy),
         });
@@ -635,18 +636,16 @@ export function WikiListView() {
               <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">
                 <SlidersHorizontal className="h-3 w-3 inline mr-1" />{t("wiki.sortBy.label", "Sort by")}
               </label>
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as "compiledAt" | "title" | "updatedAt")}
-                  className="appearance-none bg-auth-elevated border border-auth-border rounded-xl pl-3 pr-7 py-2 text-xs text-auth-text focus:outline-none focus:border-auth-accent/60 transition-colors cursor-pointer"
-                >
-                  <option value="compiledAt">{t("wiki.sortBy.newest", "Newest")}</option>
-                  <option value="updatedAt">{t("wiki.sortBy.updated", "Recently Updated")}</option>
-                  <option value="title">{t("wiki.sortBy.title", "Alphabetical")}</option>
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-auth-text-3" />
-              </div>
+              <Select
+                value={sortBy}
+                onChange={(val) => setSortBy(val as "compiledAt" | "title" | "updatedAt")}
+                options={[
+                  { value: "compiledAt", label: t("wiki.sortBy.newest", "Newest") },
+                  { value: "updatedAt", label: t("wiki.sortBy.updated", "Recently Updated") },
+                  { value: "title", label: t("wiki.sortBy.title", "Alphabetical") },
+                ]}
+                className="bg-auth-elevated border-auth-border rounded-xl"
+              />
             </div>
           </div>
 
@@ -679,21 +678,15 @@ export function WikiListView() {
             {domains.length > 0 && (
               <>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">{t("dashboard.selectDomain", "Domain")}:</span>
-                <div className="relative">
-                  <select
-                    value={domainFilter}
-                    onChange={(e) => handleDomainFilter(e.target.value)}
-                    className="appearance-none bg-auth-elevated border border-auth-border rounded-full pl-3 pr-7 py-1 text-xs text-auth-text focus:outline-none focus:border-auth-accent/60 transition-colors cursor-pointer"
-                  >
-                    <option value="">{locale === "vi" ? "Tất cả domain" : "All domains"}</option>
-                    {domains.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-auth-text-3" />
-                </div>
+                <Select
+                  value={domainFilter}
+                  onChange={handleDomainFilter}
+                  options={[
+                    { value: "", label: locale === "vi" ? "Tất cả domain" : "All domains" },
+                    ...domains.map((d) => ({ value: d.id, label: d.name })),
+                  ]}
+                  className="bg-auth-elevated border-auth-border rounded-full py-1 px-3"
+                />
               </>
             )}
 
@@ -701,21 +694,15 @@ export function WikiListView() {
             {allTags.length > 0 && (
               <>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">Tag:</span>
-                <div className="relative">
-                  <select
-                    value={tagFilter}
-                    onChange={(e) => handleTagFilter(e.target.value)}
-                    className="appearance-none bg-auth-elevated border border-auth-border rounded-full pl-3 pr-7 py-1 text-xs text-auth-text focus:outline-none focus:border-auth-accent/60 transition-colors cursor-pointer"
-                  >
-                    <option value="">{locale === "vi" ? "Tất cả tags" : "All tags"}</option>
-                    {allTags.map((t) => (
-                      <option key={t} value={t}>
-                        #{t}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-auth-text-3" />
-                </div>
+                <Select
+                  value={tagFilter}
+                  onChange={handleTagFilter}
+                  options={[
+                    { value: "", label: locale === "vi" ? "Tất cả tags" : "All tags" },
+                    ...allTags.map((t) => ({ value: t, label: `#${t}` })),
+                  ]}
+                  className="bg-auth-elevated border-auth-border rounded-full py-1 px-3"
+                />
               </>
             )}
 
@@ -769,7 +756,7 @@ export function WikiListView() {
               </div>
               <Link
                 href={roleKbId ? `/${locale}/compile/new?roleKbId=${roleKbId}` : `/${locale}/compile/new`}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:scale-[0.98] transition-all text-sm"
+                className="btn-primary-pulse text-sm"
               >
                 <Upload className="h-4 w-4" /> {t("wiki.uploadCta", "Ingest your first document")}
               </Link>

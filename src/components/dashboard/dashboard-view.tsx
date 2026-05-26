@@ -1080,7 +1080,7 @@ export function DashboardView() {
                           key={item.value}
                           type="button"
                           onClick={() => {
-                            setSortBy(item.value as any);
+                            setSortBy(item.value as "name" | "domain" | "pct" | "updated");
                             setSortDropdownOpen(false);
                           }}
                           className={`w-full text-left px-3 py-2 text-xs font-semibold flex items-center justify-between transition-colors duration-200 hover:bg-white/5 ${sortBy === item.value ? "text-auth-accent bg-auth-accent-dim/30" : "text-auth-text-2"}`}
