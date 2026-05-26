@@ -18,6 +18,7 @@ import {
   Loader2,
   CheckCircle2,
   ArrowRight,
+  ArrowLeft,
   Shield,
   ChevronRight,
   Crown,
@@ -183,7 +184,16 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
   // ─── Global error (no data) ─────────────────────────────────────
   if (globalError && !overview) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-auth-bg px-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-auth-bg px-4 gap-4">
+        {/* Minimal logo header so user knows where they are */}
+        <Link
+          href={`/${locale}/dashboard`}
+          className="flex items-center gap-2 mb-2 opacity-70 hover:opacity-100 transition-opacity select-none"
+        >
+          <ArrowLeft className="h-4 w-4 text-auth-text-2" />
+          <span className="text-sm text-auth-text-2">{t("common.dashboard", "Dashboard")}</span>
+        </Link>
+
         <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center shadow-auth relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-auth-error" />
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
@@ -203,7 +213,14 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
             >
               {t("common.retry", "Thử lại")}
             </Button>
-            <Button variant="ghost" size="lg" fullWidth onClick={handleLogout}>
+            <Link href={`/${locale}/dashboard`} className="block">
+              <Button variant="ghost" size="lg" fullWidth leftIcon={<ArrowLeft className="h-4 w-4" />}>
+                {t("common.backToDashboard", "Về Dashboard")}
+              </Button>
+            </Link>
+            <Button variant="ghost" size="lg" fullWidth onClick={handleLogout}
+              className="text-auth-text-3 hover:text-red-400 text-xs"
+            >
               {t("common.logout", "Đăng xuất")}
             </Button>
           </div>

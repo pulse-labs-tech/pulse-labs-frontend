@@ -60,6 +60,7 @@ import type {
 import type { RoleKbDto } from "@/types/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
+import { PulseLogo } from "@/components/shared/pulse-logo";
 import { Search } from "lucide-react";
 
 interface TechItem {
@@ -640,8 +641,9 @@ export function DashboardView() {
         <div className="container-focused flex h-14 items-center justify-between gap-4 relative">
           {/* ── Left: Logo ── */}
           <div className="flex-shrink-0">
-            <Link href={`/${locale}`} className="flex items-center gap-1 select-none group">
-              <span className="text-[15px] font-extrabold tracking-tight text-white leading-none">
+            <Link href={`/${locale}`} className="flex items-center gap-2 group select-none">
+              <PulseLogo size={28} className="transition-all duration-300 group-hover:drop-shadow-[0_0_10px_var(--color-auth-accent-glow)]" />
+              <span className="text-[15px] font-extrabold tracking-tight text-white leading-none hidden sm:block">
                 Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
