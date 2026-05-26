@@ -636,126 +636,143 @@ export function DashboardView() {
       <div className="pointer-events-none absolute -right-[100px] top-[10%] h-[400px] w-[400px] blur-[100px]" style={{ background: "radial-gradient(circle, var(--color-auth-accent-dim) 0%, transparent 70%)" }} aria-hidden="true" />
 
       {/* ────────────────── Header / Navigation ────────────────── */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#09090b]/75 backdrop-blur-2xl">
-        <div className="container-focused flex h-16 items-center justify-between relative">
-          <div className="flex justify-start z-10">
-            <Link href={`/${locale}`} className="flex items-center gap-2">
-              <span className="text-base font-bold tracking-tight text-white">
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#09090b]/80 backdrop-blur-2xl">
+        <div className="container-focused flex h-14 items-center justify-between gap-4 relative">
+          {/* ── Left: Logo ── */}
+          <div className="flex-shrink-0">
+            <Link href={`/${locale}`} className="flex items-center gap-2 group">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-400 shadow-[0_0_12px_oklch(0.72_0.11_145_/_0.25)] group-hover:shadow-[0_0_18px_oklch(0.72_0.11_145_/_0.4)] transition-shadow duration-300">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-3.5 w-3.5 text-white">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
+              <span className="text-sm font-bold tracking-tight text-white hidden sm:block">
                 Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
           </div>
 
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 md:flex">
-            <nav className="flex items-center gap-1.5">
+          {/* ── Center: Nav pill group (desktop) ── */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex">
+            <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1">
               <Link
                 href={`/${locale}/dashboard`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/25 transition-all"
               >
+                <LayoutDashboard className="h-3 w-3" />
                 {t("dashboard.title", "Dashboard")}
               </Link>
               <Link
                 href={stats.totalItems > 0 ? `/${locale}/query` : "#"}
-                onClick={(e) => {
-                  if (stats.totalItems === 0) e.preventDefault();
-                }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                onClick={(e) => { if (stats.totalItems === 0) e.preventDefault(); }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
                   stats.totalItems > 0
-                    ? "text-[#a1a1aa] hover:text-white"
+                    ? "text-[#a1a1aa] hover:text-white hover:bg-white/[0.05]"
                     : "text-[#52525b] cursor-not-allowed"
                 }`}
               >
+                <MessageSquare className="h-3 w-3" />
                 {t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
               </Link>
               <Link
                 href={`/${locale}/research`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
               >
+                <Compass className="h-3 w-3" />
                 {t("common.research", "Nghiên cứu")}
               </Link>
               <Link
                 href={`/${locale}/wiki`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
               >
-                {t("compile.labels.sidebarWiki", "Wiki Cá nhân")}
+                <BookOpen className="h-3 w-3" />
+                {t("compile.labels.sidebarWiki", "Wiki")}
               </Link>
               <Link
                 href={`/${locale}/settings`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#a1a1aa] hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
               >
+                <Database className="h-3 w-3" />
                 {t("common.settings", "Cài đặt")}
               </Link>
             </nav>
           </div>
 
-          <div className="flex items-center gap-4 justify-end z-10">
-            {/* Search Trigger Button (Desktop - wide pill) */}
+          {/* ── Right: Actions ── */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Search pill (desktop) */}
             <button
               onClick={() => {
                 if (typeof window !== "undefined") {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
+              className="hidden lg:flex items-center gap-2 h-8 px-3 rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-200 cursor-pointer text-[11px] select-none"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
-              <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
-              <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
-                Ctrl K
-              </kbd>
+              <Search className="h-3.5 w-3.5" />
+              <span>{locale === "vi" ? "Tìm kiếm" : "Search"}</span>
+              <kbd className="ml-1 px-1.5 py-0.5 text-[9px] font-mono bg-white/[0.04] border border-white/[0.08] rounded text-auth-text-3/70">⌘K</kbd>
             </button>
 
-            {/* Search Trigger Button (Tablet - compact icon) */}
+            {/* Search icon only (tablet) */}
             <button
               onClick={() => {
                 if (typeof window !== "undefined") {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
-              title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
+              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] text-auth-text-3 hover:text-white transition-all cursor-pointer"
             >
-              <Search className="h-4 w-4 text-auth-text-3/70" />
+              <Search className="h-3.5 w-3.5" />
             </button>
 
-            {/* Mobile Search Trigger Icon */}
+            {/* Mobile search */}
             <button
               onClick={() => {
                 if (typeof window !== "undefined") {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
-              title={locale === "vi" ? "Tìm kiếm" : "Search"}
+              className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-auth-text-2 hover:text-white transition-all cursor-pointer"
             >
-              <Search className="h-4 w-4" />
+              <Search className="h-3.5 w-3.5" />
             </button>
 
+            {/* Locale switcher */}
             <LocaleSwitcher id="dashboard-header" />
 
-            {/* User Greeting & Plan */}
-            <div className="hidden text-right md:block">
-              <div className="text-xs font-bold text-white">
-                {userCtx.displayName || userCtx.email}
-              </div>
-              <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-border bg-auth-elevated px-2 py-0.2 text-[10px] font-semibold text-auth-text-2">
-                {planName}
-              </span>
-            </div>
+            {/* Divider */}
+            <div className="hidden md:block h-5 w-px bg-white/10" />
 
-            {/* Logout button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              isLoading={isPending}
-              aria-label={t("dashboard.btnLogout", "Đăng xuất")}
-              title={t("dashboard.btnLogout", "Đăng xuất")}
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
+            {/* User avatar + name + logout */}
+            <div className="flex items-center gap-2">
+              {/* Avatar initials */}
+              <div className="hidden md:flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
+                {(userCtx.displayName || userCtx.email || "U").charAt(0).toUpperCase()}
+              </div>
+
+              {/* Name + plan (desktop only) */}
+              <div className="hidden lg:flex flex-col items-start leading-none gap-0.5">
+                <span className="text-[11px] font-semibold text-white truncate max-w-[80px]">
+                  {userCtx.displayName?.split(" ").slice(-1)[0] || userCtx.email?.split("@")[0]}
+                </span>
+                <span className="text-[9px] font-semibold text-auth-accent/80 uppercase tracking-wide">{planName}</span>
+              </div>
+
+              {/* Logout */}
+              <button
+                onClick={handleLogout}
+                disabled={isPending}
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-auth-text-3 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/[0.06] transition-all duration-200 cursor-pointer disabled:opacity-50"
+                title={t("dashboard.btnLogout", "Đăng xuất")}
+                aria-label={t("dashboard.btnLogout", "Đăng xuất")}
+              >
+                {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
+              </button>
+            </div>
           </div>
+
         </div>
       </header>
 
