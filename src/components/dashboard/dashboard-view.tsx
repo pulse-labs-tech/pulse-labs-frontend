@@ -640,13 +640,8 @@ export function DashboardView() {
         <div className="container-focused flex h-14 items-center justify-between gap-4 relative">
           {/* ── Left: Logo ── */}
           <div className="flex-shrink-0">
-            <Link href={`/${locale}`} className="flex items-center gap-2 group">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-400 shadow-[0_0_12px_oklch(0.72_0.11_145_/_0.25)] group-hover:shadow-[0_0_18px_oklch(0.72_0.11_145_/_0.4)] transition-shadow duration-300">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-3.5 w-3.5 text-white">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                </svg>
-              </div>
-              <span className="text-sm font-bold tracking-tight text-white hidden sm:block">
+            <Link href={`/${locale}`} className="flex items-center gap-1 select-none group">
+              <span className="text-[15px] font-extrabold tracking-tight text-white leading-none">
                 Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
               </span>
             </Link>
@@ -658,9 +653,10 @@ export function DashboardView() {
               <Link
                 href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/25 transition-all"
+                title="Dashboard"
               >
-                <LayoutDashboard className="h-3 w-3" />
-                {t("dashboard.title", "Dashboard")}
+                <LayoutDashboard className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="hidden lg:inline">{t("dashboard.title", "Dashboard")}</span>
               </Link>
               <Link
                 href={stats.totalItems > 0 ? `/${locale}/query` : "#"}
@@ -670,44 +666,48 @@ export function DashboardView() {
                     ? "text-[#a1a1aa] hover:text-white hover:bg-white/[0.05]"
                     : "text-[#52525b] cursor-not-allowed"
                 }`}
+                title={t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
               >
-                <MessageSquare className="h-3 w-3" />
-                {t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
+                <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="hidden lg:inline">{t("compile.labels.sidebarQuery", "Hỏi đáp AI")}</span>
               </Link>
               <Link
                 href={`/${locale}/research`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
+                title={t("common.research", "Nghiên cứu AI")}
               >
-                <Compass className="h-3 w-3" />
-                {t("common.research", "Nghiên cứu")}
+                <Compass className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="hidden lg:inline">{t("common.research", "Nghiên cứu")}</span>
               </Link>
               <Link
                 href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
+                title={t("compile.labels.sidebarWiki", "Wiki")}
               >
-                <BookOpen className="h-3 w-3" />
-                {t("compile.labels.sidebarWiki", "Wiki")}
+                <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="hidden lg:inline">{t("compile.labels.sidebarWiki", "Wiki")}</span>
               </Link>
               <Link
                 href={`/${locale}/settings`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
+                title={t("common.settings", "Cài đặt")}
               >
-                <Database className="h-3 w-3" />
-                {t("common.settings", "Cài đặt")}
+                <Database className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="hidden lg:inline">{t("common.settings", "Cài đặt")}</span>
               </Link>
             </nav>
           </div>
 
           {/* ── Right: Actions ── */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Search pill (desktop) */}
+            {/* Search pill — xl+ only (enough room at 1280px+) */}
             <button
               onClick={() => {
                 if (typeof window !== "undefined") {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden lg:flex items-center gap-2 h-8 px-3 rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-200 cursor-pointer text-[11px] select-none"
+              className="hidden xl:flex items-center gap-2 h-8 px-3 rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-200 cursor-pointer text-[11px] select-none"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <Search className="h-3.5 w-3.5" />

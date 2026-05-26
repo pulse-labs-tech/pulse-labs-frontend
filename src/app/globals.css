@@ -462,15 +462,16 @@ select:focus {
   width: 100%;
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(1rem, 3vw, 4rem);
-  padding-right: clamp(1rem, 3vw, 4rem);
-  max-width: 1200px;
+  padding-left: clamp(1rem, 2.5vw, 3rem);
+  padding-right: clamp(1rem, 2.5vw, 3rem);
+  max-width: 1400px;
 }
 
 @media (min-width: 1920px) {
   .container-focused {
-    padding-left: clamp(2rem, 3vw, 6rem);
-    padding-right: clamp(2rem, 3vw, 6rem);
+    max-width: 1680px;
+    padding-left: clamp(2rem, 2.5vw, 5rem);
+    padding-right: clamp(2rem, 2.5vw, 5rem);
   }
 }
 
