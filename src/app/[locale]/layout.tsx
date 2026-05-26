@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { LocaleProvider } from "@/contexts/locale-context";
 import { getDictionary } from "@/dictionaries";
 import { NavigationProgress } from "@/components/ui/navigation-progress";
+import { GlobalSearchPalette } from "@/components/layout";
 import "../globals.css";
 
 /* ============================================================
@@ -154,6 +155,8 @@ export default async function RootLayout({
           <LocaleProvider locale={locale} dictionary={dictionary}>
             {/* Navigation progress bar — shown on every route transition */}
             <NavigationProgress />
+            {/* Global search palette command menu */}
+            <GlobalSearchPalette />
             {/* Content — pages handle their own layout structure */}
             <div className="flex-1">
               {children}

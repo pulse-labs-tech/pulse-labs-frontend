@@ -38,6 +38,7 @@ import { createQuerySessionAction, submitQueryMessageAction } from "@/app/action
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
+import { Search } from "lucide-react";
 import type { QueryCitation } from "@/types/query";
 import type { RoleKbDto } from "@/types/onboarding";
 
@@ -222,7 +223,7 @@ function UserMessage({ msg, locale }: { msg: QueryMessage; locale: string }) {
     <div className="flex justify-end">
       <div className="max-w-[75%]">
         <div className="bg-auth-elevated border border-auth-border rounded-2xl rounded-tr-sm px-4 py-3">
-          <p className="text-sm text-auth-text whitespace-pre-wrap leading-relaxed">
+          <p className="text-sm text-auth-text whitespace-pre-wrap leading-relaxed break-words">
             {msg.content}
           </p>
         </div>
@@ -255,7 +256,7 @@ function AssistantMessage({ msg, locale, t }: { msg: QueryMessage; locale: strin
 
         {/* Answer text */}
         <div className="prose prose-sm prose-invert max-w-none">
-          <p className="text-sm text-auth-text-2 leading-relaxed whitespace-pre-wrap m-0">
+          <p className="text-sm text-auth-text-2 leading-relaxed whitespace-pre-wrap m-0 break-words">
             {msg.content}
           </p>
         </div>
@@ -445,7 +446,7 @@ export function QueryView() {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    const maxH = 5 * 24 + 24; // ~5 rows
+    const maxH = 200; // Allow expansion up to 200px (approx 8 rows) for spacious inputting
     el.style.height = Math.min(el.scrollHeight, maxH) + "px";
   }, []);
 
@@ -665,6 +666,36 @@ export function QueryView() {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
+            {/* Search Trigger Button */}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("open-global-search"));
+                }
+              }}
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
+              title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
+            >
+              <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
+              <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
+              <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
+                Ctrl K
+              </kbd>
+            </button>
+
+            {/* Mobile Search Trigger Icon */}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("open-global-search"));
+                }
+              }}
+              className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
+              title={locale === "vi" ? "Tìm kiếm" : "Search"}
+            >
+              <Search className="h-4 w-4" />
+            </button>
+
             <LocaleSwitcher id="query-header" />
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
@@ -931,9 +962,14 @@ export function QueryView() {
                     placeholder={t("query.placeholderTextarea", "Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)")}
                     disabled={isAnswering || quotaExceeded}
                     rows={1}
-                    className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm px-4 py-3 resize-none focus:outline-none focus:border-auth-accent/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed leading-relaxed"
-                    style={{ minHeight: "48px", maxHeight: "144px" }}
+                    className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm pl-4 pr-12 py-3 resize-none focus:outline-none focus:border-auth-accent/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed leading-relaxed"
+                    style={{ minHeight: "48px", maxHeight: "200px" }}
                   />
+                  {inputValue.length > 0 && (
+                    <div className="absolute right-3.5 bottom-2 text-[10px] font-mono text-auth-text-3 select-none pointer-events-none bg-auth-elevated/90 px-1 rounded backdrop-blur-sm">
+                      {inputValue.length}
+                    </div>
+                  )}
                 </div>
 
                 <button

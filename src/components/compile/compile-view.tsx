@@ -42,6 +42,7 @@ import { logoutAction } from "@/app/actions/auth";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
+import { Search } from "lucide-react";
 import { createSourceAction, getCompileJobAction } from "@/app/actions/compile";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { CompileJob } from "@/types/compile";
@@ -567,6 +568,36 @@ export function CompileView() {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
+            {/* Search Trigger Button */}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("open-global-search"));
+                }
+              }}
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
+              title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
+            >
+              <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
+              <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
+              <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
+                Ctrl K
+              </kbd>
+            </button>
+
+            {/* Mobile Search Trigger Icon */}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("open-global-search"));
+                }
+              }}
+              className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
+              title={locale === "vi" ? "Tìm kiếm" : "Search"}
+            >
+              <Search className="h-4 w-4" />
+            </button>
+
             <LocaleSwitcher id="compile-header" />
             {authUser && (
               <div className="hidden text-right md:block">
@@ -861,7 +892,7 @@ export function CompileView() {
               <button
                 type="button"
                 onClick={() => { setStep(1); setSubmitError(null); setTextError(null); setUrlError(null); }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-sm transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
               >
                 <ArrowLeft className="h-4 w-4" />
                 {t("compile.labels.btnBack", "Quay lại")}
