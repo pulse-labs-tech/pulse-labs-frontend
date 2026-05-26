@@ -26,7 +26,6 @@ import {
   ChevronDown,
   LogOut,
   Loader2,
-  AlertCircle,
   X,
   SlidersHorizontal,
   Tag,
@@ -35,7 +34,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemsAction } from "@/app/actions/wiki";
-import type { WikiItemCard, WikiDomain, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
+import type { WikiItemCard, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
 import { useTranslation } from "@/contexts/locale-context";
 
 // ────────────────────────────────────────────────────────────────
@@ -63,49 +62,49 @@ function getSourceTypeIcon(type: WikiSourceType) {
   }
 }
 
-function getSourceTypeLabel(type: WikiSourceType, t: any): string {
+function getSourceTypeLabel(type: WikiSourceType, tFn: (key: string, fallback: string) => string): string {
   switch (type) {
-    case "text": return t("wiki.sourceTypes.text", "Raw Text");
-    case "url": return t("wiki.sourceTypes.url", "URL Link");
+    case "text": return tFn("wiki.sourceTypes.text", "Raw Text");
+    case "url": return tFn("wiki.sourceTypes.url", "URL Link");
     case "file_pdf": return "PDF";
     case "file_txt": return "TXT";
     case "file_md": return "Markdown";
     case "query_output": return "AI Output";
-    case "manual_note": return t("wiki.sourceTypes.manual_note", "Manual Note");
-    default: return t("wiki.sourceTypes.default", "Document");
+    case "manual_note": return tFn("wiki.sourceTypes.manual_note", "Manual Note");
+    default: return tFn("wiki.sourceTypes.default", "Document");
   }
 }
 
-function getStatusBadge(status: WikiRetrievalStatus, t: any) {
+function getStatusBadge(status: WikiRetrievalStatus, tFn: (key: string, fallback: string) => string) {
   switch (status) {
     case "indexed":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-          <CheckCircle2 className="h-2.5 w-2.5" /> {t("wiki.statuses.ready", "Indexed")}
+          <CheckCircle2 className="h-2.5 w-2.5" /> {tFn("wiki.statuses.ready", "Indexed")}
         </span>
       );
     case "pending":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
-          <Clock className="h-2.5 w-2.5" /> {t("wiki.statuses.pending", "Processing")}
+          <Clock className="h-2.5 w-2.5" /> {tFn("wiki.statuses.pending", "Processing")}
         </span>
       );
     case "degraded":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-          <AlertTriangle className="h-2.5 w-2.5" /> {t("wiki.statuses.lowQuality", "Low Quality")}
+          <AlertTriangle className="h-2.5 w-2.5" /> {tFn("wiki.statuses.lowQuality", "Low Quality")}
         </span>
       );
     case "failed":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-          <XCircle className="h-2.5 w-2.5" /> {t("wiki.statuses.failed", "Index Error")}
+          <XCircle className="h-2.5 w-2.5" /> {tFn("wiki.statuses.failed", "Index Error")}
         </span>
       );
     default:
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-auth-elevated border border-auth-border text-auth-text-3">
-          {t("wiki.statuses.unknown", "Unknown")}
+          {tFn("wiki.statuses.unknown", "Unknown")}
         </span>
       );
   }
@@ -408,7 +407,8 @@ export function WikiListView() {
 
   // Refetch when sort changes
   useEffect(() => {
-    if (!isLoading) fetchItems({ page: 1 });
+    const timer = setTimeout(() => { fetchItems({ page: 1 }); }, 0);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy]);
 

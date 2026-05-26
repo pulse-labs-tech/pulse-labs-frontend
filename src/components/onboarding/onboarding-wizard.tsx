@@ -230,8 +230,18 @@ export function OnboardingWizard() {
         }
 
         // Setup role options (dynamic catalogue)
+        // Normalize API response: handle cases where group uses `group` field instead of `id`
         if (optionsRes.status === "1" && optionsRes.data?.groups) {
-          setRoleGroups(optionsRes.data.groups);
+          const normalized = optionsRes.data.groups.map((g) => {
+            const groupId = (g.id ?? (g as unknown as Record<string, string>)["group"] ?? "") as RoleGroup;
+            const normalizedRoles = (g.roles ?? []).map((r) => ({
+              id: r.id ?? (r as unknown as Record<string, string>)["roleOptionId"] ?? "",
+              label: r.label ?? "",
+              description: r.description ?? (r as unknown as Record<string, string>)["desc"] ?? "",
+            }));
+            return { ...g, id: groupId, roles: normalizedRoles };
+          });
+          setRoleGroups(normalized);
         }
       } catch (err) {
         console.error("Bootstrap error:", err);

@@ -97,12 +97,15 @@ function readUserCookie(): AuthUser | null {
   if (typeof document === "undefined") return null;
 
   try {
-    const cookies = document.cookie.split("; ");
-    const userCookie = cookies.find((c) => c.startsWith("pulse_user="));
-    if (!userCookie) return null;
+    // Use regex to reliably extract cookie value, handles "=" in base64/JSON values
+    const match = document.cookie.match(/(?:^|;\s*)pulse_user=([^;]*)/);
+    if (!match || !match[1]) return null;
 
-    const value = decodeURIComponent(userCookie.split("=").slice(1).join("="));
-    return JSON.parse(value) as AuthUser;
+    const value = decodeURIComponent(match[1]);
+    const parsed = JSON.parse(value);
+    // Validate it has at least an email field before trusting it
+    if (!parsed || typeof parsed !== "object" || !parsed.email) return null;
+    return parsed as AuthUser;
   } catch {
     return null;
   }

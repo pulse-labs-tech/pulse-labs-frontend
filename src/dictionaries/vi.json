@@ -281,18 +281,28 @@
         "label": "Kỹ thuật / Công nghệ",
         "roles": {
           "frontend": { "label": "Lập trình viên Frontend", "desc": "React, Vue, CSS, UI, Hiệu năng" },
+          "frontend_developer": { "label": "Lập trình viên Frontend", "desc": "React, Vue, CSS, UI, Hiệu năng" },
           "backend": { "label": "Lập trình viên Backend", "desc": "API, Database, Kiến trúc, Bảo mật" },
+          "backend_developer": { "label": "Lập trình viên Backend", "desc": "API, Database, Kiến trúc, Bảo mật" },
           "mobile": { "label": "Lập trình viên Di động", "desc": "iOS, Android, Flutter, React Native" },
+          "mobile_developer": { "label": "Lập trình viên Di động", "desc": "iOS, Android, Flutter, React Native" },
           "devops": { "label": "Kỹ sư DevOps / Platform", "desc": "CI/CD, K8s, Cloud, SRE" },
+          "devops_engineer": { "label": "Kỹ sư DevOps / Platform", "desc": "CI/CD, K8s, Cloud, SRE" },
           "security": { "label": "Kỹ sư Bảo mật", "desc": "Bảo mật ứng dụng, Hạ tầng, Tuân thủ" },
-          "qa": { "label": "Kỹ sư QA / Kiểm thử", "desc": "Kiểm thử tự động, Chiến lược kiểm thử" }
+          "security_engineer": { "label": "Kỹ sư Bảo mật", "desc": "Bảo mật ứng dụng, Hạ tầng, Tuân thủ" },
+          "qa": { "label": "Kỹ sư QA / Kiểm thử", "desc": "Kiểm thử tự động, Chiến lược kiểm thử" },
+          "qa_engineer": { "label": "Kỹ sư QA / Kiểm thử", "desc": "Kiểm thử tự động, Chiến lược kiểm thử" }
         }
       },
       "business": {
         "label": "Kinh doanh / Quản lý",
         "roles": {
           "ba": { "label": "Chuyên viên Phân tích nghiệp vụ", "desc": "Yêu cầu, BPMN, User Stories" },
+          "business_analyst": { "label": "Chuyên viên Phân tích nghiệp vụ", "desc": "Yêu cầu, Phân tích dữ liệu, Cải tiến quy trình" },
           "pm": { "label": "Quản trị viên Sản phẩm", "desc": "Roadmap, OKR, Chiến lược đưa ra thị trường" },
+          "product_manager": { "label": "Quản trị viên Sản phẩm", "desc": "Roadmap, Stakeholders, Agile, OKRs" },
+          "project_manager": { "label": "Quản lý Dự án", "desc": "Lập kế hoạch, Rủi ro, Giao hàng, Stakeholders" },
+          "scrum_master": { "label": "Scrum Master", "desc": "Agile, Scrum, Điều phối, Huấn luyện nhóm" },
           "marketing": { "label": "Chuyên viên Marketing", "desc": "Tăng trưởng, Content, Chiến dịch" },
           "sales": { "label": "Chuyên viên Bán hàng", "desc": "Pipeline, Xử lý phản hồi, CRM" },
           "finance": { "label": "Tài chính / Kế toán", "desc": "Ngân sách, Báo cáo, Kiểm toán" },
@@ -303,8 +313,11 @@
         "label": "Thiết kế & Giao diện",
         "roles": {
           "ux": { "label": "Nhà thiết kế UX", "desc": "Nghiên cứu người dùng, Wireframe, Usability" },
+          "ux_designer": { "label": "Nhà thiết kế UX", "desc": "Nghiên cứu người dùng, Wireframe, Usability" },
           "ui": { "label": "Nhà thiết kế UI", "desc": "Design system, Figma, Visual" },
-          "prod_design": { "label": "Nhà thiết kế Sản phẩm", "desc": "Thiết kế sản phẩm toàn diện" }
+          "ui_designer": { "label": "Nhà thiết kế UI", "desc": "Design system, Figma, Visual" },
+          "prod_design": { "label": "Nhà thiết kế Sản phẩm", "desc": "Thiết kế sản phẩm toàn diện" },
+          "product_designer": { "label": "Nhà thiết kế Sản phẩm", "desc": "Thiết kế sản phẩm toàn diện" }
         }
       },
       "data": {
@@ -312,7 +325,9 @@
         "roles": {
           "data_analyst": { "label": "Chuyên viên Phân tích dữ liệu", "desc": "SQL, BI, Dashboard, Insight" },
           "data_eng": { "label": "Kỹ sư Dữ liệu", "desc": "Pipeline, ETL, Kho dữ liệu" },
-          "ai_ml": { "label": "Kỹ sư AI / Machine Learning", "desc": "LLM, RAG, Huấn luyện mô hình, MLOps" }
+          "data_engineer": { "label": "Kỹ sư Dữ liệu", "desc": "Pipeline, ETL, Kho dữ liệu" },
+          "ai_ml": { "label": "Kỹ sư AI / Machine Learning", "desc": "LLM, RAG, Huấn luyện mô hình, MLOps" },
+          "ai_ml_engineer": { "label": "Kỹ sư AI / Machine Learning", "desc": "LLM, RAG, Huấn luyện mô hình, MLOps" }
         }
       },
       "other": {

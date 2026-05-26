@@ -16,11 +16,13 @@ export function LocaleProvider({
 }: {
   children: ReactNode;
   locale: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dictionary: any;
 }) {
   const t = (path: string, defaultValue?: string): string => {
     const keys = path.split(".");
-    let current = dictionary;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let current: any = dictionary;
     for (const key of keys) {
       if (current && typeof current === "object" && key in current) {
         current = current[key];

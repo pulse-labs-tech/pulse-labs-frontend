@@ -135,11 +135,15 @@ export default async function proxy(request: NextRequest) {
   const hasRefreshToken = !!cookieStore.get(REFRESH_TOKEN_COOKIE)?.value;
   const hasUser = !!cookieStore.get(USER_DATA_COOKIE)?.value;
   
-  // A valid session requires both user metadata and tokens to be present
-  const hasSession = (hasAccessToken || hasRefreshToken) && hasUser;
+  // A valid session requires refresh token (long-lived) and user metadata.
+  // We check refreshToken as source of truth because accessToken expires in 15min
+  // and gets cleared independently — we don't want that to cause an orphan detection.
+  const hasSession = hasRefreshToken && hasUser;
 
-  // Clean up mismatched cookie states (orphaned tokens/user) to prevent redirect loops
-  const isOrphaned = (hasAccessToken || hasRefreshToken) !== hasUser;
+  // Orphaned state: tokens exist but no user metadata (or user exists but no tokens at all)
+  // Only treat as orphaned if refreshToken state and user state are mismatched.
+  // This avoids false-positives when only the short-lived accessToken has expired.
+  const isOrphaned = hasRefreshToken !== hasUser;
 
   if (isOrphaned) {
     const loginUrl = request.nextUrl.clone();
@@ -151,9 +155,11 @@ export default async function proxy(request: NextRequest) {
     }
     
     const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete(ACCESS_TOKEN_COOKIE);
-    response.cookies.delete(REFRESH_TOKEN_COOKIE);
-    response.cookies.delete(USER_DATA_COOKIE);
+    // Must include path, secure, sameSite to correctly clear cookies on all browsers (esp. Chrome)
+    const clearOpts = { path: "/", secure: process.env.NODE_ENV === "production", sameSite: "lax" as const };
+    response.cookies.set(ACCESS_TOKEN_COOKIE, "", { ...clearOpts, maxAge: 0 });
+    response.cookies.set(REFRESH_TOKEN_COOKIE, "", { ...clearOpts, maxAge: 0 });
+    response.cookies.set(USER_DATA_COOKIE, "", { ...clearOpts, maxAge: 0 });
     return response;
   }
 

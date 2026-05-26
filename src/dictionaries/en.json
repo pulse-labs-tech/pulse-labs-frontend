@@ -281,18 +281,34 @@
         "label": "Engineering & Technology",
         "roles": {
           "frontend": { "label": "Frontend Developer", "desc": "React, Vue, CSS, UI, Performance" },
+          "frontend_developer": { "label": "Frontend Developer", "desc": "React, Vue, CSS, UI, Performance" },
+          "frontend_engineer": { "label": "Frontend Engineer", "desc": "React, Vue, CSS, UI, Performance" },
           "backend": { "label": "Backend Developer", "desc": "APIs, Database, Architecture, Security" },
+          "backend_developer": { "label": "Backend Developer", "desc": "APIs, Database, Architecture, Security" },
+          "backend_engineer": { "label": "Backend Engineer", "desc": "API, Database, Architecture, Security" },
+          "fullstack_engineer": { "label": "Fullstack Engineer", "desc": "Full-stack development, APIs, UI, DevOps" },
           "mobile": { "label": "Mobile Developer", "desc": "iOS, Android, Flutter, React Native" },
+          "mobile_developer": { "label": "Mobile Developer", "desc": "iOS, Android, Flutter, React Native" },
+          "mobile_engineer": { "label": "Mobile Engineer", "desc": "iOS, Android, Flutter, React Native" },
           "devops": { "label": "DevOps / Platform Engineer", "desc": "CI/CD, K8s, Cloud, SRE" },
+          "devops_engineer": { "label": "DevOps Engineer", "desc": "CI/CD, Kubernetes, Cloud, SRE" },
           "security": { "label": "Security Engineer", "desc": "Application Security, Infrastructure, Compliance" },
-          "qa": { "label": "QA / Testing Engineer", "desc": "Automated Testing, Test Strategy" }
+          "security_engineer": { "label": "Security Engineer", "desc": "Application Security, Infrastructure, Compliance" },
+          "qa": { "label": "QA / Testing Engineer", "desc": "Automated Testing, Test Strategy" },
+          "qa_engineer": { "label": "QA / Testing Engineer", "desc": "Automated Testing, Test Strategy" },
+          "data_engineer": { "label": "Data Engineer", "desc": "ETL, Data Pipelines, Warehousing, Spark" },
+          "ml_engineer": { "label": "ML Engineer", "desc": "Machine Learning, Model Training, MLOps" }
         }
       },
       "business": {
         "label": "Business & Management",
         "roles": {
           "ba": { "label": "Business Analyst", "desc": "Requirements, BPMN, User Stories" },
+          "business_analyst": { "label": "Business Analyst", "desc": "Requirements, Data Analysis, Process Improvement" },
           "pm": { "label": "Product Manager", "desc": "Roadmap, OKRs, Go-To-Market Strategy" },
+          "product_manager": { "label": "Product Manager", "desc": "Roadmap, Stakeholders, Agile, OKRs" },
+          "project_manager": { "label": "Project Manager", "desc": "Planning, Risk, Delivery, Stakeholders" },
+          "scrum_master": { "label": "Scrum Master", "desc": "Agile, Scrum, Facilitation, Team Coaching" },
           "marketing": { "label": "Marketing Specialist", "desc": "Growth, Content, Campaigns" },
           "sales": { "label": "Sales Specialist", "desc": "Pipeline, Objection Handling, CRM" },
           "finance": { "label": "Finance / Accountant", "desc": "Budgeting, Reports, Auditing" },
@@ -303,16 +319,24 @@
         "label": "Design & User Interface",
         "roles": {
           "ux": { "label": "UX Designer", "desc": "User Research, Wireframes, Usability" },
+          "ux_designer": { "label": "UX Designer", "desc": "User Research, Wireframing, Prototyping, Usability" },
           "ui": { "label": "UI Designer", "desc": "Design System, Figma, Visuals" },
-          "prod_design": { "label": "Product Designer", "desc": "Comprehensive product design" }
+          "ui_designer": { "label": "UI Designer", "desc": "Visual Design, Typography, Color, Design Systems" },
+          "prod_design": { "label": "Product Designer", "desc": "Comprehensive product design" },
+          "product_designer": { "label": "Product Designer", "desc": "End-to-end Design, UX, UI, Strategy" }
         }
       },
       "data": {
         "label": "Data & AI",
         "roles": {
-          "data_analyst": { "label": "Data Analyst", "desc": "SQL, BI, Dashboards, Insights" },
+          "data_analyst": { "label": "Data Analyst", "desc": "SQL, Reporting, Dashboards, Insights" },
           "data_eng": { "label": "Data Engineer", "desc": "Pipelines, ETL, Data Warehouse" },
-          "ai_ml": { "label": "AI / Machine Learning Engineer", "desc": "LLMs, RAG, Model Training, MLOps" }
+          "data_engineer": { "label": "Data Engineer", "desc": "ETL, Data Pipelines, Warehousing, Spark" },
+          "data_scientist": { "label": "Data Scientist", "desc": "Statistics, ML, Python, Data Visualization" },
+          "bi_analyst": { "label": "BI Analyst", "desc": "BI Tools, Dashboards, KPIs, Business Intelligence" },
+          "ai_ml": { "label": "AI / Machine Learning Engineer", "desc": "LLMs, RAG, Model Training, MLOps" },
+          "ai_ml_engineer": { "label": "AI / ML Engineer", "desc": "LLMs, RAG, Model Training, MLOps" },
+          "ml_engineer": { "label": "ML Engineer", "desc": "Machine Learning, Model Training, MLOps" }
         }
       },
       "other": {
