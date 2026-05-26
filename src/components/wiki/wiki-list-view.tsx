@@ -514,14 +514,14 @@ export function WikiListView() {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
-            {/* Search Trigger Button */}
+            {/* Search Trigger Button (Desktop - wide pill) */}
             <button
               onClick={() => {
                 if (typeof window !== "undefined") {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
+              className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
@@ -529,6 +529,19 @@ export function WikiListView() {
               <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
                 Ctrl K
               </kbd>
+            </button>
+
+            {/* Search Trigger Button (Tablet - compact icon) */}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("open-global-search"));
+                }
+              }}
+              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
+              title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
+            >
+              <Search className="h-4 w-4 text-auth-text-3/70" />
             </button>
 
             {/* Mobile Search Trigger Icon */}
