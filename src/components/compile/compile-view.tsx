@@ -41,6 +41,7 @@ import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
+import { LocaleSwitcher } from "../layout/locale-switcher";
 import { createSourceAction, getCompileJobAction } from "@/app/actions/compile";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { CompileJob } from "@/types/compile";
@@ -566,6 +567,7 @@ export function CompileView() {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
+            <LocaleSwitcher id="compile-header" />
             {authUser && (
               <div className="hidden text-right md:block">
                 <div className="text-xs font-bold text-auth-text">

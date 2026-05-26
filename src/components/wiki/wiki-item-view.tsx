@@ -40,6 +40,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemAction } from "@/app/actions/wiki";
 import { useTranslation } from "@/contexts/locale-context";
+import { LocaleSwitcher } from "../layout/locale-switcher";
 import type { WikiItemDetail, WikiRetrievalStatus, WikiSourceType } from "@/types/wiki";
 
 // ────────────────────────────────────────────────────────────────
@@ -316,6 +317,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
+            <LocaleSwitcher id="wiki-item-header" />
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
                 {authUser?.displayName || authUser?.email || t("auth.brand.prop3Title")}

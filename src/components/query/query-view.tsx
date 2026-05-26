@@ -37,6 +37,7 @@ import { logoutAction } from "@/app/actions/auth";
 import { createQuerySessionAction, submitQueryMessageAction } from "@/app/actions/query";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
+import { LocaleSwitcher } from "../layout/locale-switcher";
 import type { QueryCitation } from "@/types/query";
 import type { RoleKbDto } from "@/types/onboarding";
 
@@ -664,6 +665,7 @@ export function QueryView() {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
+            <LocaleSwitcher id="query-header" />
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
                 {authUser?.displayName || authUser?.email}

@@ -59,6 +59,7 @@ import type {
 } from "@/types/dashboard";
 import type { RoleKbDto } from "@/types/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
+import { LocaleSwitcher } from "../layout/locale-switcher";
 
 interface TechItem {
   icon: string;
@@ -675,6 +676,8 @@ export function DashboardView() {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
+            <LocaleSwitcher id="dashboard-header" />
+
             {/* User Greeting & Plan */}
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-white">

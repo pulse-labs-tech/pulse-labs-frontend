@@ -37,6 +37,7 @@ import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemsAction } from "@/app/actions/wiki";
 import type { WikiItemCard, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
 import { useTranslation } from "@/contexts/locale-context";
+import { LocaleSwitcher } from "../layout/locale-switcher";
 
 // ────────────────────────────────────────────────────────────────
 // Helpers
@@ -513,6 +514,7 @@ export function WikiListView() {
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
+            <LocaleSwitcher id="wiki-list-header" />
             <div className="hidden text-right md:block">
               <div className="text-xs font-bold text-auth-text">
                 {authUser?.displayName || authUser?.email || (locale === "vi" ? "Người dùng" : "User")}
