@@ -72,20 +72,34 @@ function getOnboardingStatus(
   const raw = cookieStore.get(USER_DATA_COOKIE)?.value;
   if (!raw) return null;
 
-  try {
-    // 1. Try to parse directly (if Next.js already decoded it)
+  const tryParse = (str: string): "completed" | "pending" | null => {
     try {
-      const parsed = JSON.parse(raw) as { onboardingStatus?: string };
+      const parsed = JSON.parse(str) as { onboardingStatus?: string };
       return parsed.onboardingStatus === "completed" ? "completed" : "pending";
     } catch {
-      // 2. Try decoding if it was URL-encoded (common in middleware/proxy environment)
-      const decoded = decodeURIComponent(raw);
-      const parsed = JSON.parse(decoded) as { onboardingStatus?: string };
-      return parsed.onboardingStatus === "completed" ? "completed" : "pending";
+      return null;
     }
+  };
+
+  // Attempt 1: raw is plain JSON
+  const direct = tryParse(raw);
+  if (direct) return direct;
+
+  // Attempt 2: URL-decode once
+  try {
+    const decoded = decodeURIComponent(raw);
+    const once = tryParse(decoded);
+    if (once) return once;
+
+    // Attempt 3: URL-decode twice (double-encoded edge case)
+    const decodedTwice = decodeURIComponent(decoded);
+    const twice = tryParse(decodedTwice);
+    if (twice) return twice;
   } catch {
-    return null;
+    // ignore decode errors
   }
+
+  return null;
 }
 
 /** Check if pathname matches an onboarding route. */

@@ -100,7 +100,10 @@ export async function setUserData(user: AuthUser): Promise<void> {
     onboardingStatus: user.onboardingStatus,
   };
 
-  cookieStore.set(COOKIE_KEYS.USER_DATA, JSON.stringify(safeData), {
+  // URL-encode so the JSON is safe in cookie header (special chars: ", {, }, etc.)
+  const encoded = encodeURIComponent(JSON.stringify(safeData));
+
+  cookieStore.set(COOKIE_KEYS.USER_DATA, encoded, {
     ...BASE_OPTIONS,
     httpOnly: false, // Client-readable
     maxAge: 30 * 24 * 60 * 60,
@@ -130,7 +133,18 @@ export async function getUserData(): Promise<AuthUser | null> {
   if (!raw) return null;
 
   try {
-    return JSON.parse(raw) as AuthUser;
+    // Try direct parse first (in case value wasn't encoded)
+    try {
+      const parsed = JSON.parse(raw) as AuthUser;
+      if (parsed && typeof parsed === "object" && parsed.email) return parsed;
+    } catch {
+      // fall through to decode
+    }
+    // Decode URL-encoded value then parse
+    const decoded = decodeURIComponent(raw);
+    const parsed = JSON.parse(decoded) as AuthUser;
+    if (!parsed || typeof parsed !== "object" || !parsed.email) return null;
+    return parsed;
   } catch {
     return null;
   }

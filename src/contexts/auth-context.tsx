@@ -97,15 +97,45 @@ function readUserCookie(): AuthUser | null {
   if (typeof document === "undefined") return null;
 
   try {
-    // Use regex to reliably extract cookie value, handles "=" in base64/JSON values
+    // Cookies can be stored with or without URL-encoding.
+    // Next.js cookies().set() may double-encode; document.cookie gives raw value.
     const match = document.cookie.match(/(?:^|;\s*)pulse_user=([^;]*)/);
     if (!match || !match[1]) return null;
 
-    const value = decodeURIComponent(match[1]);
-    const parsed = JSON.parse(value);
-    // Validate it has at least an email field before trusting it
-    if (!parsed || typeof parsed !== "object" || !parsed.email) return null;
-    return parsed as AuthUser;
+    const raw = match[1];
+
+    // Helper: try to parse a string as AuthUser JSON
+    const tryParse = (str: string): AuthUser | null => {
+      try {
+        const parsed = JSON.parse(str);
+        if (parsed && typeof parsed === "object" && parsed.email) {
+          return parsed as AuthUser;
+        }
+      } catch {
+        // ignore
+      }
+      return null;
+    };
+
+    // Attempt 1: raw value is already valid JSON
+    const direct = tryParse(raw);
+    if (direct) return direct;
+
+    // Attempt 2: URL-decode once then parse
+    try {
+      const decoded = decodeURIComponent(raw);
+      const once = tryParse(decoded);
+      if (once) return once;
+
+      // Attempt 3: URL-decode twice (double-encoded edge case)
+      const decodedTwice = decodeURIComponent(decoded);
+      const twice = tryParse(decodedTwice);
+      if (twice) return twice;
+    } catch {
+      // ignore decode errors
+    }
+
+    return null;
   } catch {
     return null;
   }
