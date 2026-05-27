@@ -7,6 +7,5 @@ interface LineIconProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export function LineIcon({ name, className = "", variant = "line", ...props }: LineIconProps) {
-  const prefix = variant === "solid" ? "lnis lnis-" : "lni lni-";
-  return <i className={`${prefix}${name} ${className}`} {...props} />;
+  return <i className={`lni lni-${name} ${className}`} {...props} />;
 }

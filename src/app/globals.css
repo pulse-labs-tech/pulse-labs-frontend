@@ -1,6 +1,6 @@
-@import url("https://cdn.lineicons.com/5.1/line/lineicons.css");
-@import url("https://cdn.lineicons.com/5.1/solid/lineicons-solid.css");
+@import "lineicons/dist/lineicons.css";
 @import "tailwindcss";
+
 
 
 

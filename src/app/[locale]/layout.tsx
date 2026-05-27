@@ -132,8 +132,6 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link href="https://cdn.lineicons.com/5.1/line/lineicons.css" rel="stylesheet" />
-        <link href="https://cdn.lineicons.com/5.1/solid/lineicons-solid.css" rel="stylesheet" />
         {/* JSON-LD Structured Data — Organization */}
         <script
           type="application/ld+json"
