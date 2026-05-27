@@ -149,7 +149,7 @@ function SourceTypeCard({
     >
       {/* Top accent on selected */}
       {selected && (
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
+        <div className="premium-accent-border premium-accent-border-default" />
       )}
 
       {/* Pro badge */}
@@ -692,8 +692,8 @@ export function CompileView() {
 
         {/* ────────── STEP 1 — Chọn loại nguồn ────────── */}
         {step === 1 && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 group">
+            <div className="premium-accent-border premium-accent-border-default" />
 
             <div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
@@ -745,8 +745,8 @@ export function CompileView() {
 
         {/* ────────── STEP 2 — Nhập nội dung ────────── */}
         {step === 2 && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 group">
+            <div className="premium-accent-border premium-accent-border-default" />
 
             <div className="flex items-center justify-between">
               <div>
@@ -938,10 +938,16 @@ export function CompileView() {
           <div className="flex flex-col gap-4">
             {/* Processing card */}
             {currentJob && (
-              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
+              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 group">
                 <div
-                  className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r to-transparent
-                    ${currentJob.status === "failed" ? "from-red-500" : currentJob.status === "wiki_ready" ? "from-emerald-400" : "from-auth-accent"}
+                  className={`premium-accent-border
+                    ${
+                      currentJob.status === "failed"
+                        ? "premium-accent-border-red"
+                        : currentJob.status === "wiki_ready"
+                          ? "premium-accent-border-default"
+                          : "premium-accent-border-cyan animate-pulse"
+                    }
                   `}
                 />
 
@@ -1006,8 +1012,8 @@ export function CompileView() {
 
             {/* ── SUCCESS state ── */}
             {currentJob?.status === "wiki_ready" && (
-              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-5">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400 to-transparent" />
+              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 group">
+                <div className="premium-accent-border premium-accent-border-default" />
 
                 <div className="flex flex-col items-center gap-4 py-4 text-center">
                   <div className="h-16 w-16 rounded-full bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-center">
@@ -1053,8 +1059,8 @@ export function CompileView() {
 
             {/* ── FAILED state ── */}
             {currentJob?.status === "failed" && (
-              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-5">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-transparent" />
+              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 group">
+                <div className="premium-accent-border premium-accent-border-red" />
 
                 <div className="flex flex-col items-center gap-4 py-4 text-center">
                   <div className="h-16 w-16 rounded-full bg-red-950/40 border border-red-500/20 flex items-center justify-center">

@@ -195,8 +195,8 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           <span className="text-sm text-auth-text-2">{t("common.dashboard", "Dashboard")}</span>
         </Link>
 
-        <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center shadow-auth relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-auth-error" />
+        <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center shadow-auth relative group">
+          <div className="premium-accent-border premium-accent-border-red" />
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="h-6 w-6" />
           </div>
@@ -295,10 +295,10 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Account summary */}
           <section
-            className="flex flex-col gap-4 rounded-2xl border border-auth-border bg-auth-surface p-5 relative overflow-hidden"
+            className="flex flex-col gap-4 rounded-2xl border border-auth-border bg-auth-surface p-5 relative group"
             aria-labelledby="settings-account-heading"
           >
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent/30 to-transparent" />
+            <div className="premium-accent-border premium-accent-border-default" />
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
                 <User className="h-3.5 w-3.5 text-auth-accent" />
@@ -354,7 +354,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           {/* Current plan card */}
           <section
             id="settings-section-plan"
-            className="flex flex-col gap-4 rounded-2xl border bg-auth-surface p-5 relative overflow-hidden"
+            className="flex flex-col gap-4 rounded-2xl border bg-auth-surface p-5 relative group"
             style={{
               borderColor: isPro ? "rgba(245, 158, 11, 0.3)" : undefined,
               borderImage: isPro ? undefined : undefined,
@@ -362,9 +362,9 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
             aria-labelledby="settings-plan-heading"
           >
             {isPro ? (
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500 to-yellow-400" />
+              <div className="premium-accent-border premium-accent-border-amber" />
             ) : (
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent/30 to-transparent" />
+              <div className="premium-accent-border premium-accent-border-default" />
             )}
 
             <div className="flex items-center justify-between">
@@ -448,10 +448,10 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         {!isPro && proPlan && (
           <section
             id="settings-section-upgrade"
-            className="rounded-2xl border border-white/[0.06] bg-auth-surface/40 p-6 relative"
+            className="rounded-2xl border border-white/[0.06] bg-auth-surface/40 p-6 relative group"
             aria-labelledby="settings-compare-heading"
           >
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent/30 to-transparent rounded-t-2xl" />
+            <div className="premium-accent-border premium-accent-border-default" />
             <div className="flex items-center gap-2 mb-6">
               <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
                 <Sparkles className="h-3.5 w-3.5 text-auth-accent" />

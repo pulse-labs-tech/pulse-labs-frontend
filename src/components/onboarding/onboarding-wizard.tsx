@@ -616,9 +616,9 @@ export function OnboardingWizard() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-auth-accent-glow/5 rounded-full blur-[120px]" />
 
       <main className="flex-grow flex items-start sm:items-center justify-center z-10 w-full">
-        <div className="w-full max-w-2xl bg-auth-surface border border-auth-border rounded-2xl p-4 sm:p-6 md:p-10 shadow-auth shadow-black/40 flex flex-col gap-6 md:gap-8 relative overflow-hidden backdrop-blur-md">
+        <div className="w-full max-w-2xl bg-auth-surface border border-auth-border rounded-2xl p-4 sm:p-6 md:p-10 shadow-auth shadow-black/40 flex flex-col gap-6 md:gap-8 relative group backdrop-blur-md">
           {/* Top indicator glow */}
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-auth-accent" />
+          <div className="premium-accent-border premium-accent-border-default" />
 
           {/* ────────────────── Progress bar (Top) ────────────────── */}
           <div className="flex flex-col gap-2">

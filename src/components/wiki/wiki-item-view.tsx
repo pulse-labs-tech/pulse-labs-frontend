@@ -509,9 +509,8 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           </div>
         </div>
 
-        {/* Summary card */}
-        <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+        <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative group">
+          <div className="premium-accent-border premium-accent-border-default" />
           <div className="flex items-center gap-2 mb-4">
             <div className="h-7 w-7 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
               <AlignLeft className="h-3.5 w-3.5" />
@@ -550,8 +549,8 @@ export function WikiItemView({ id }: WikiItemViewProps) {
 
         {/* Citations / Chunks */}
         {item.citations && item.citations.length > 0 && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500/30 to-transparent" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative group">
+            <div className="premium-accent-border premium-accent-border-cyan" />
             <div className="flex items-center gap-2 mb-4">
               <div className="h-7 w-7 rounded-lg bg-blue-950/40 text-blue-400 flex items-center justify-center shrink-0">
                 <FileText className="h-3.5 w-3.5" />
@@ -609,8 +608,8 @@ export function WikiItemView({ id }: WikiItemViewProps) {
 
         {/* Domain card */}
         {item.domain && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 relative group">
+            <div className="premium-accent-border premium-accent-border-default" />
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-3">Domain</p>
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">

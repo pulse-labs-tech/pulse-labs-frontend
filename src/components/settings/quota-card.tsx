@@ -137,7 +137,7 @@ export function QuotaCard({ quota, onRetry, isRetrying }: QuotaCardProps) {
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl border bg-auth-surface p-4 relative overflow-hidden transition-all duration-300 ${
+      className={`flex flex-col gap-3 rounded-xl border bg-auth-surface p-4 relative transition-all duration-300 group ${
         quota.status === "exceeded"
           ? "border-red-500/30 bg-red-950/10"
           : quota.status === "warning"
@@ -147,10 +147,10 @@ export function QuotaCard({ quota, onRetry, isRetrying }: QuotaCardProps) {
     >
       {/* Top accent line for exceeded/warning */}
       {quota.status === "exceeded" && (
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-red-500" />
+        <div className="premium-accent-border premium-accent-border-red" />
       )}
       {quota.status === "warning" && (
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-400" />
+        <div className="premium-accent-border premium-accent-border-amber" />
       )}
 
       {/* Header */}

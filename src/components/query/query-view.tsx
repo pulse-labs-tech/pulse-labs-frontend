@@ -739,9 +739,8 @@ export function QueryView() {
       <div className="flex flex-1 overflow-hidden container-focused py-6 gap-6 relative z-10">
         {/* ──────── Left Sidebar ──────── */}
         <aside className="hidden lg:flex w-[280px] shrink-0 flex-col gap-4">
-          {/* Context Card */}
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 relative">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 relative group">
+            <div className="premium-accent-border premium-accent-border-default" />
 
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-3">
               {t("query.sidebarKb", "Knowledge Base đang dùng")}
@@ -806,9 +805,8 @@ export function QueryView() {
             )}
           </div>
 
-          {/* Quick actions */}
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 flex flex-col gap-2.5 relative group">
+            <div className="premium-accent-border premium-accent-border-default" />
 
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1">
               {t("query.actions", "Thao tác")}
@@ -853,8 +851,8 @@ export function QueryView() {
         </aside>
 
         {/* ──────── Main Chat Area ──────── */}
-        <div className="flex-1 flex flex-col min-h-0 bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl overflow-hidden relative">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+        <div className="flex-1 flex flex-col min-h-0 bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl overflow-hidden relative group">
+          <div className="premium-accent-border premium-accent-border-default" />
 
           {/* Chat header */}
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] shrink-0">

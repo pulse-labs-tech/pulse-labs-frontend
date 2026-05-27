@@ -579,8 +579,8 @@ export function DashboardView() {
   if (globalErrorMsg && !summary) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text px-4">
-        <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center shadow-auth relative overflow-hidden backdrop-blur-md">
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-auth-error" />
+        <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center shadow-auth relative group backdrop-blur-md">
+          <div className="premium-accent-border premium-accent-border-red" />
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="h-6 w-6" />
           </div>
@@ -807,9 +807,8 @@ export function DashboardView() {
           </div>
         )}
 
-        {/* Welcome & Role context Switcher row */}
-        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-500/40 to-transparent rounded-t-2xl" />
+        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative group">
+          <div className="premium-accent-border premium-accent-border-default" />
           <div>
             <h1 className="text-fluid-lg font-extrabold tracking-tight">
               {t("dashboard.welcome.hello", "Xin chào, {name} 👋").replace("{name}", userCtx.displayName || (locale === "vi" ? "Bạn" : "User"))}
@@ -875,8 +874,8 @@ export function DashboardView() {
 
         {/* Active Ingesting Jobs Section */}
         {activeJobs.length > 0 && (
-          <section className="bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-5">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 to-transparent" />
+          <section className="bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 group">
+            <div className="premium-accent-border premium-accent-border-cyan" />
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">
@@ -946,8 +945,8 @@ export function DashboardView() {
 
         {/* Quota Panel (Account Limits) */}
         {quota && (
-          <section className="bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-4">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 to-transparent" />
+          <section className="bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-4 group">
+            <div className="premium-accent-border premium-accent-border-purple" />
             <div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">
                 {locale === "vi" ? "Giới hạn tài khoản" : "Account Resource Limits"}
@@ -1331,7 +1330,7 @@ export function DashboardView() {
       {/* Footer */}
       <footer className="border-t border-white/[0.06] bg-[#09090b] py-6 text-center text-xs text-[#52525b] z-10">
         <div className="container-focused">
-          <p>{locale === "vi" ? "© 2026 Pulse Knowledge. Tất cả quyền được bảo lưu." : "© 2026 Pulse Knowledge. All rights reserved."}</p>
+          <p>© 2026 Pulse Knowledge. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -223,10 +223,10 @@ export function GlobalSearchPalette() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="w-full max-w-xl bg-auth-surface/95 border border-white/[0.08] rounded-2xl shadow-[0_24px_50px_rgba(0,0,0,0.8)] relative overflow-hidden backdrop-blur-xl flex flex-col z-10"
+            className="w-full max-w-xl bg-auth-surface/95 border border-white/[0.08] rounded-2xl shadow-[0_24px_50px_rgba(0,0,0,0.8)] relative backdrop-blur-xl flex flex-col z-10 group"
           >
             {/* Top indicator glow */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-400 to-purple-500" />
+            <div className="premium-accent-border premium-accent-border-flow" />
 
             {/* Input row */}
             <div className="relative flex items-center">

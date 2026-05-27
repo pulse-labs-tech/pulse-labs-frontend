@@ -218,8 +218,8 @@ export function ResearchView() {
         </div>
 
         {/* ─── Create new research ─── */}
-        <section className="rounded-2xl border border-auth-border bg-auth-surface p-5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent/40 to-transparent" />
+        <section className="rounded-2xl border border-auth-border bg-auth-surface p-5 relative group">
+          <div className="premium-accent-border premium-accent-border-default" />
 
           <div className="flex items-center gap-2 mb-4">
             <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">

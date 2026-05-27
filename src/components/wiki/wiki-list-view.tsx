@@ -649,8 +649,8 @@ export function WikiListView() {
         </div>
 
         {/* Search & Filters bar */}
-        <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-4 flex flex-col gap-4 relative">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
+        <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-4 flex flex-col gap-4 relative group">
+          <div className="premium-accent-border premium-accent-border-default" />
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Search input */}
