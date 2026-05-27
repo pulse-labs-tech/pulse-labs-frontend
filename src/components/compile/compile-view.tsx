@@ -692,8 +692,8 @@ export function CompileView() {
 
         {/* ────────── STEP 1 — Chọn loại nguồn ────────── */}
         {step === 1 && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
 
             <div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
@@ -745,8 +745,8 @@ export function CompileView() {
 
         {/* ────────── STEP 2 — Nhập nội dung ────────── */}
         {step === 2 && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
 
             <div className="flex items-center justify-between">
               <div>

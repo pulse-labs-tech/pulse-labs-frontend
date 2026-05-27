@@ -808,8 +808,8 @@ export function DashboardView() {
         )}
 
         {/* Welcome & Role context Switcher row */}
-        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-500/40 to-transparent" />
+        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-500/40 to-transparent rounded-t-2xl" />
           <div>
             <h1 className="text-fluid-lg font-extrabold tracking-tight">
               {t("dashboard.welcome.hello", "Xin chào, {name} 👋").replace("{name}", userCtx.displayName || (locale === "vi" ? "Bạn" : "User"))}

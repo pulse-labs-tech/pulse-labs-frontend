@@ -1739,3 +1739,161 @@ select:focus {
     transform: translateY(0);
   }
 }
+
+/* ============================================================
+   PRICING SYSTEM & PLAN CARDS
+   ============================================================ */
+
+.plan-cards-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .plan-cards-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.plan-card-premium {
+  background: var(--color-auth-surface);
+  border: 1px solid var(--color-auth-border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-card-premium:hover {
+  border-color: var(--color-auth-text-3);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-auth-card);
+}
+
+.plan-card-premium.active-tier {
+  border-color: var(--color-auth-accent);
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.plan-card-premium.pro-tier {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.02);
+}
+
+.plan-card-premium.pro-tier::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-auth-purple), var(--color-auth-accent));
+}
+
+.plan-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-auth-text);
+}
+
+.plan-card-price {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-auth-text);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.plan-card-price span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-auth-text-2);
+}
+
+.plan-card-desc {
+  font-size: 12px;
+  color: var(--color-auth-text-2);
+  line-height: 1.5;
+}
+
+.plan-card-divider {
+  height: 1px;
+  background: var(--color-auth-border-subtle);
+  width: 100%;
+}
+
+.plan-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: auto;
+}
+
+.plan-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.plan-feature-item.included {
+  color: var(--color-auth-text-2);
+}
+
+.plan-feature-item.included svg {
+  color: var(--color-auth-accent);
+}
+
+.plan-feature-item.excluded {
+  color: var(--color-auth-text-3);
+}
+
+.plan-feature-item.excluded svg {
+  color: var(--color-auth-text-3);
+}
+
+/* Billing cycle toggle button */
+.billing-toggle-wrapper {
+  display: inline-flex;
+  background: var(--color-auth-elevated);
+  border: 1px solid var(--color-auth-border);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  gap: 4px;
+}
+
+.billing-toggle-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-auth-text-2);
+  transition: all var(--dur) var(--ease);
+}
+
+.billing-toggle-btn.active {
+  background: var(--color-auth-surface);
+  color: var(--color-auth-text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.save-badge-accent {
+  background: var(--color-auth-accent-dim);
+  color: var(--color-auth-accent);
+  border-radius: var(--radius-full);
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+

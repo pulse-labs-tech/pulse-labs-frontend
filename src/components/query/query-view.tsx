@@ -740,8 +740,8 @@ export function QueryView() {
         {/* ──────── Left Sidebar ──────── */}
         <aside className="hidden lg:flex w-[280px] shrink-0 flex-col gap-4">
           {/* Context Card */}
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent" />
+          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-5 relative">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent to-transparent rounded-t-2xl" />
 
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-3">
               {t("query.sidebarKb", "Knowledge Base đang dùng")}

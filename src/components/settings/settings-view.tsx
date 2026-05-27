@@ -448,43 +448,144 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         {!isPro && proPlan && (
           <section
             id="settings-section-upgrade"
-            className="rounded-2xl border border-auth-border bg-auth-surface p-5 relative overflow-hidden"
+            className="rounded-2xl border border-white/[0.06] bg-auth-surface/40 p-6 relative"
             aria-labelledby="settings-compare-heading"
           >
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent/20 to-transparent" />
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-auth-elevated flex items-center justify-center">
-                <Sparkles className="h-3.5 w-3.5 text-auth-text-2" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-auth-accent/30 to-transparent rounded-t-2xl" />
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
+                <Sparkles className="h-3.5 w-3.5 text-auth-accent" />
               </div>
-              <h2 id="settings-compare-heading" className="text-sm font-bold text-white">
+              <h2 id="settings-compare-heading" className="text-sm font-bold text-white uppercase tracking-wider">
                 {t("settings.compare.title", "So sánh gói dịch vụ")}
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {/* Free */}
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-auth-text-3 uppercase tracking-wider">Free</p>
-                <ul className="space-y-1.5 text-xs text-auth-text-2">
-                  <li>• 1 Role KB</li>
-                  <li>• 500 MB dung lượng</li>
-                  <li>• 20 compiles / tháng</li>
-                  <li>• 30 câu hỏi AI / ngày</li>
-                  <li>• 3 domain</li>
-                </ul>
-              </div>
-              {/* Pro */}
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
-                  <Crown className="h-3 w-3" /> Pro
+            <div className="plan-cards-container">
+              {/* Free Plan Card */}
+              <div className="plan-card-premium active-tier">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="plan-card-title">Free Plan</h3>
+                    <p className="text-[10px] text-auth-accent font-semibold uppercase tracking-wider mt-0.5">
+                      {locale === "vi" ? "Gói hiện tại" : "Current Plan"}
+                    </p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/5 border border-white/10 text-auth-text-3">
+                    FREE
+                  </span>
+                </div>
+                <div className="plan-card-price">
+                  $0<span>/tháng</span>
+                </div>
+                <p className="plan-card-desc text-xs text-auth-text-2">
+                  {locale === "vi"
+                    ? "Công cụ cơ bản để bắt đầu xây dựng cơ sở tri thức của bạn"
+                    : "Essential tools to start building your knowledge base"}
                 </p>
-                <ul className="space-y-1.5 text-xs text-amber-200/80">
-                  <li>• 5 Role KB</li>
-                  <li>• 10 GB dung lượng</li>
-                  <li>• Unlimited compiles</li>
-                  <li>• Unlimited câu hỏi AI</li>
-                  <li>• Unlimited domain</li>
-                </ul>
+                <div className="plan-card-divider" />
+                <div className="plan-feature-list">
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>1 Role KB</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>500 MB storage</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>20 compiles / tháng</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>30 queries / ngày</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>3 domains max</span>
+                  </div>
+                  <div className="plan-feature-item excluded">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>Multi-role profiles</span>
+                  </div>
+                  <div className="plan-feature-item excluded">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>Auto-Heal features</span>
+                  </div>
+                </div>
+                <button
+                  disabled
+                  className="w-full py-2 bg-white/5 text-auth-text-3 font-semibold rounded-lg text-xs cursor-not-allowed border border-white/[0.04]"
+                >
+                  {locale === "vi" ? "Gói hiện tại" : "Current Plan"}
+                </button>
+              </div>
+
+              {/* Pro Plan Card */}
+              <div className="plan-card-premium pro-tier">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="plan-card-title text-auth-purple">Pro Plan</h3>
+                    <p className="text-[10px] text-amber-400 font-semibold uppercase tracking-wider mt-0.5">
+                      {locale === "vi" ? "Khuyên dùng" : "Recommended"}
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                    PRO
+                  </span>
+                </div>
+                <div className="plan-card-price">
+                  $19<span>/tháng</span>
+                </div>
+                <p className="plan-card-desc text-xs text-auth-text-2">
+                  {locale === "vi"
+                    ? "~450.000 VNĐ/tháng · Dành cho cá nhân và nhóm chuyên nghiệp"
+                    : "For professionals and growing teams needing custom workflows"}
+                </p>
+                <div className="plan-card-divider" />
+                <div className="plan-feature-list">
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span><strong>5</strong> Role KBs</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span><strong>10 GB</strong> storage</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>Unlimited compiles</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>Unlimited queries</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>Unlimited domains</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>Multi-role profiles</span>
+                  </div>
+                  <div className="plan-feature-item included">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>Auto-Heal enabled</span>
+                  </div>
+                </div>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  fullWidth
+                  onClick={handleUpgrade}
+                  isLoading={isUpgrading}
+                  leftIcon={<Zap className="h-3.5 w-3.5" />}
+                >
+                  {hasUpgradeIntent
+                    ? (locale === "vi" ? "Đã ghi nhận yêu cầu" : "Recorded interest")
+                    : (locale === "vi" ? "Nâng cấp lên Pro" : "Upgrade to Pro")}
+                </Button>
               </div>
             </div>
           </section>
