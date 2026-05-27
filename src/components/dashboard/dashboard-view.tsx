@@ -1179,7 +1179,7 @@ export function DashboardView() {
           </div>
 
           {/* Right Column (40%): Role Panels (Toolkit, Workflow, Skills) */}
-          <div className="content-right" style={{ height: "730px" }}>
+          <div className="content-right">
             
             {/* BA Toolkit Panel */}
             <div className="section-block">

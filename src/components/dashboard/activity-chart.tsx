@@ -286,7 +286,7 @@ export function ActivityChart() {
           </span>
         </div>
 
-        <div className="chart-area w-full relative" style={{ height: "220px" }}>
+        <div className="chart-area w-full relative">
           <svg
             ref={svgRef}
             className="w-full h-full overflow-visible"
