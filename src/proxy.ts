@@ -102,13 +102,18 @@ function getOnboardingStatus(
   return null;
 }
 
-/** Check if pathname is an onboarding or welcome route (treated as onboarding flow). */
+/** Check if pathname is the /onboarding wizard route. */
 function isOnboardingRoute(pathname: string): boolean {
-  return (
-    pathname === "/onboarding" ||
-    pathname.startsWith("/onboarding/") ||
-    pathname === "/welcome"
-  );
+  return pathname === "/onboarding" || pathname.startsWith("/onboarding/");
+}
+
+/**
+ * Check if pathname is the post-register welcome page.
+ * /welcome is a special transitional page between register and onboarding.
+ * It should NEVER be redirected away automatically (even for onboarded users).
+ */
+function isWelcomeRoute(pathname: string): boolean {
+  return pathname === "/welcome";
 }
 
 /** Extract locale and subpath from pathname */
@@ -208,10 +213,18 @@ export default async function proxy(request: NextRequest) {
     const isOnboarded = onboardingStatus === "completed";
 
     // ── Auth route + session → redirect based on onboarding ──
+    // /welcome is the post-register transition page, not a standard auth route
     if (isAuthRoute) {
       return NextResponse.redirect(
         new URL(`/${pathLocale}${isOnboarded ? "/dashboard" : "/onboarding"}`, request.url),
       );
+    }
+
+    // ── /welcome: always accessible when authenticated — let through ──
+    // Post-register welcome page must never be auto-redirected away.
+    // The page itself handles the next step (→ /onboarding or → /dashboard).
+    if (isWelcomeRoute(subpath)) {
+      return NextResponse.next();
     }
 
     // ── Onboarding route + already onboarded → redirect to dashboard ──
@@ -222,7 +235,7 @@ export default async function proxy(request: NextRequest) {
     }
 
     // ── Protected route + not onboarded → redirect to onboarding ──
-    if (!isPublic && !isOnboardingRoute(subpath) && !isOnboarded) {
+    if (!isPublic && !isOnboardingRoute(subpath) && !isWelcomeRoute(subpath) && !isOnboarded) {
       return NextResponse.redirect(
         new URL(`/${pathLocale}/onboarding`, request.url),
       );

@@ -284,8 +284,6 @@ export async function registerAction(
 
     // ─── Step 2: Register response contains tokens (server auto-login) ──
     // Some server configs auto-verify + auto-login and return tokens directly.
-    // Even in this case, we still show the verify screen briefly with auto-bypass
-    // so the user sees the UX flow (verify → welcome → onboarding).
     if (regData.accessToken && regData.refreshToken) {
       await setAuthTokens(
         regData.accessToken,
@@ -295,32 +293,50 @@ export async function registerAction(
       if (regData.user) {
         await setUserData(regData.user);
       }
-      const nextRoute = regData.nextRoute || "/onboarding";
-      // Return to client for client-side navigation + AuthProvider update
-      return {
-        redirectTo: nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute,
-        sessionUser: regData.user ?? undefined,
-      };
+      const rawRoute = (regData as unknown as Record<string, string | undefined>).nextRoute || "/onboarding";
+      const nextRoute = rawRoute.startsWith("/") ? rawRoute : "/" + rawRoute;
+      // If user needs onboarding → show /welcome first; otherwise go directly
+      const dest = nextRoute.includes("/onboarding") ? "/welcome" : nextRoute;
+      return { redirectTo: dest, sessionUser: regData.user ?? undefined };
     }
 
-    // ─── Step 3: verificationRequired = true → Show Verify Email screen ──
-    // Per API docs: register response always has verificationRequired: true when
-    // BE needs email confirmation. FE must show the verify screen.
-    // If verificationLink is present (dev mode DEBUG_RETURN_VERIFICATION_LINK),
-    // pass it to FE so the VerifyEmailScreen can auto-bypass after a brief delay.
+    // ─── Step 3: verificationLink present (dev DEBUG mode) → server-side auto-bypass ──
+    // Extract token → verify → login → redirect.
+    // Done server-side to avoid extra client roundtrip and proxy redirect issues.
+    if (regData.verificationLink) {
+      const token = extractToken(regData.verificationLink);
+      if (token) {
+        const result = await verifyAndLogin(token, email, password);
+        if (!("error" in result)) {
+          await setAuthTokens(
+            result.loginData.accessToken,
+            result.loginData.refreshToken,
+            result.loginData.expiresIn,
+          );
+          await setUserData(result.loginData.user);
+          // If user needs onboarding → /welcome; already onboarded → /dashboard
+          const dest = result.nextRoute.includes("/onboarding") ? "/welcome" : result.nextRoute;
+          return {
+            redirectTo: dest.startsWith("/") ? dest : "/" + dest,
+            sessionUser: result.loginData.user,
+          };
+        }
+        // verifyAndLogin failed (e.g. token already used) → fall through
+      }
+    }
+
+    // ─── Step 4: verificationRequired = true (no link) → Show Verify Email screen ──
+    // Production: BE requires manual email verification. User must check email.
     if (regData.verificationRequired) {
       return {
         verifyPending: true,
         email,
         resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
-        // Pass verificationLink if present (dev mode) — FE uses it for auto-bypass
-        verificationLink: regData.verificationLink ?? undefined,
       };
     }
 
-    // ─── Step 4: No verificationRequired flag — try direct login ─
-    // Some server configs auto-verify email during register (EMAIL_VERIFIED event
-    // fires in production). Attempt login directly.
+    // ─── Step 5: No verificationRequired flag — try direct login ─────────────
+    // Some server configs auto-verify email during register (EMAIL_VERIFIED fires in production).
     const loginResult = await apiLogin({ email, password });
 
     if (loginResult.status === "1") {
@@ -331,17 +347,20 @@ export async function registerAction(
       );
       await setUserData(loginResult.data.user);
 
-      // After register → direct login success: redirect to /welcome (not /onboarding directly)
-      // /welcome shows the Welcome screen, then user clicks "Start Setup" to go to /onboarding
-      // This ensures the Welcome screen is always shown after a new registration.
+      // Always trust BE's nextRoute for post-login destination.
+      // If /onboarding (new user) → show /welcome first.
+      // If /dashboard (existing user, completed) → go directly.
+      const rawData = loginResult.data as unknown as Record<string, string | undefined>;
+      const nextRoute =
+        rawData.nextRoute || rawData["next-route"] || rawData.next_route || "/onboarding";
+      const dest = nextRoute.includes("/onboarding") ? "/welcome" : nextRoute;
       return {
-        redirectTo: "/welcome",
+        redirectTo: dest.startsWith("/") ? dest : "/" + dest,
         sessionUser: loginResult.data.user,
       };
     }
 
-    // ─── Step 5: Handle EMAIL_NOT_VERIFIED from direct login ────
-    // Direct login returned EMAIL_NOT_VERIFIED — must show verify screen.
+    // ─── Step 6: Handle EMAIL_NOT_VERIFIED from direct login ────────────────
     if (loginResult.error_code === "EMAIL_NOT_VERIFIED") {
       // Try to get verificationLink via resend (dev mode only)
       let devVerificationLink: string | undefined;
@@ -351,20 +370,39 @@ export async function registerAction(
           devVerificationLink = resendResult.data.verificationLink;
         }
       } catch (innerErr) {
-        // Swallow errors — fall through to show verify screen without auto-bypass
         void innerErr;
       }
 
-      // Show verify screen (with or without auto-bypass link)
+      // If dev mode returned a new link → server-side auto-bypass
+      if (devVerificationLink) {
+        const token = extractToken(devVerificationLink);
+        if (token) {
+          const result = await verifyAndLogin(token, email, password);
+          if (!("error" in result)) {
+            await setAuthTokens(
+              result.loginData.accessToken,
+              result.loginData.refreshToken,
+              result.loginData.expiresIn,
+            );
+            await setUserData(result.loginData.user);
+            const dest = result.nextRoute.includes("/onboarding") ? "/welcome" : result.nextRoute;
+            return {
+              redirectTo: dest.startsWith("/") ? dest : "/" + dest,
+              sessionUser: result.loginData.user,
+            };
+          }
+        }
+      }
+
+      // No link available → show verify screen (user must check email manually)
       return {
         verifyPending: true,
         email,
         resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
-        verificationLink: devVerificationLink,
       };
     }
 
-    // ─── Any other login error ───────────────────────────────────
+    // ─── Any other login error ───────────────────────────────────────────────
     if (loginResult.status === "0") {
       const data = loginResult.data as unknown as { retryAfterSeconds?: number };
       return {
@@ -374,15 +412,13 @@ export async function registerAction(
       };
     }
 
-    // ─── Unexpected fallback ─────────────────────────────────────
+    // ─── Unexpected fallback ─────────────────────────────────────────────────
     return {
       verifyPending: true,
       email,
       resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
     };
   } catch (err) {
-    // isRedirectError no longer needed here (we don't call redirect() anymore),
-    // but kept as safety net in case any nested call does.
     if (isRedirectError(err)) throw err;
     console.error("[registerAction] error:", err);
     return { globalError: "NETWORK_ERROR" };
