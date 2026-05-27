@@ -286,14 +286,16 @@ src/hooks/                → Custom hooks (use-auth.ts)
 
 ---
 
-## 13. Icon Rules (LineIcons)
+## 13. Icon Rules (Ant Design Icons)
 
-All icons in the codebase MUST use **LineIcons**.
+All icons in the codebase MUST use **Ant Design Icons** (from the `@ant-design/icons` library).
 
 - **Implementation**:
-  - Use the unified `<LineIcon />` component wrapper from `@/components/shared/line-icon` (Option A).
+  - Use the unified `<LineIcon />` component wrapper from `@/components/shared/line-icon` (which internally maps and imports Ant Design Icons Outlined variants dynamically).
   - Use lowercase kebab-case naming for the `name` prop (e.g., `search`, `chevron-right`, `brain-alt`, `comment-text`).
   - Example: `<LineIcon name="search" className="h-4 w-4" />`
 - **Agent Guidelines**:
-  - **Do NOT use `lucide-react`** in any new code or page modifications.
-  - Refer to the mappings in [implementation_plan.md](file:///C:/Users/Admin/.gemini/antigravity/brain/24c45dd5-dc88-456d-a023-0ab428502dba/implementation_plan.md) to translate legacy icons.
+  - **Do NOT use `lucide-react` or `lineicons`** in any new code or page modifications.
+  - The `<LineIcon />` wrapper translates kebab-case names directly to Ant Outlined icon components (e.g. `arrow-right` -> `ArrowRightOutlined`).
+  - Refer to the alias mapping inside the wrapper for custom lookups (e.g. `brain-alt` -> `BulbOutlined`, `layers` -> `BlockOutlined`).
+
