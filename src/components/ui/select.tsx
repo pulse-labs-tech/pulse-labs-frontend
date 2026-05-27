@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 
 export interface SelectOption {
   value: string;
@@ -81,7 +81,7 @@ export function Select({
         <span className="truncate pr-2">
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <ChevronDown
+        <LineIcon name="chevron-down"
           className={`h-4 w-4 text-[#52525b] transition-transform duration-300 shrink-0 ${
             isOpen ? "rotate-180 text-auth-accent" : "rotate-0"
           }`}
@@ -135,7 +135,7 @@ export function Select({
                     )}
                   </div>
                   {isSelected && (
-                    <Check className="h-3.5 w-3.5 text-auth-accent shrink-0" />
+                    <LineIcon name="checkmark" className="h-3.5 w-3.5 text-auth-accent shrink-0" />
                   )}
                 </button>
               );

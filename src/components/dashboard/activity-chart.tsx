@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Select } from "../ui/select";
-import { Clock } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 
 // Mock datasets defined in design contract specification
 interface ChartDataset {
@@ -282,7 +282,7 @@ export function ActivityChart() {
           <span>Pulse Knowledge Analytics</span>
           <span className="text-[#52525b]">•</span>
           <span className="text-[var(--color-auth-accent)] flex items-center gap-0.5">
-            <Clock className="w-2.5 h-2.5 inline" /> updated 9m ago
+            <LineIcon name="alarm" className="w-2.5 h-2.5 inline" /> updated 9m ago
           </span>
         </div>
 

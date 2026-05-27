@@ -7,16 +7,7 @@
  * @see /features/api-docs/API_Auth_Docs.md — Error Code Catalog
  */
 
-import {
-  AlertCircle,
-  ShieldAlert,
-  WifiOff,
-  Clock,
-  ServerCrash,
-  MailWarning,
-  Link2Off,
-  CheckCircle2,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import type { ReactNode } from "react";
 import type { AuthErrorCode } from "@/types/auth";
 import { useTranslation } from "@/contexts/locale-context";
@@ -34,45 +25,45 @@ interface AuthErrorConfig {
 const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
   // ── Auth Errors ──
   INVALID_CREDENTIALS: {
-    icon: <AlertCircle className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   EMAIL_NOT_VERIFIED: {
-    icon: <MailWarning className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
   },
   ACCOUNT_LOCKED: {
-    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
     actionKey: "contactSupport",
     actionHref: "/contact",
   },
   RATE_LIMITED: {
-    icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="alarm" className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
   },
 
   // ── Validation ──
   VALIDATION_ERROR: {
-    icon: <AlertCircle className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
 
   // ── Token / Verify Email ──
   TOKEN_MISSING: {
-    icon: <Link2Off className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="link" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   TOKEN_INVALID: {
-    icon: <Link2Off className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="link" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   TOKEN_EXPIRED: {
-    icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="alarm" className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
   },
   EMAIL_ALREADY_VERIFIED: {
-    icon: <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="checkmark-circle" className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
     actionKey: "login",
     actionHref: "/login",
@@ -80,7 +71,7 @@ const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
 
   // ── Session / Access Token ──
   UNAUTHORIZED: {
-    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
     actionKey: "login",
     actionHref: "/login",
@@ -88,25 +79,25 @@ const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
 
   // ── Refresh Token ──
   MISSING_REFRESH_TOKEN: {
-    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
     actionKey: "login",
     actionHref: "/login",
   },
   INVALID_REFRESH_TOKEN: {
-    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
     actionKey: "login",
     actionHref: "/login",
   },
   REFRESH_TOKEN_EXPIRED: {
-    icon: <Clock className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="alarm" className="h-3.5 w-3.5 shrink-0" />,
     variant: "warning",
     actionKey: "login",
     actionHref: "/login",
   },
   REFRESH_TOKEN_REUSED: {
-    icon: <ShieldAlert className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
     actionKey: "loginAgain",
     actionHref: "/login",
@@ -114,11 +105,11 @@ const errorConfigs: Record<AuthErrorCode, AuthErrorConfig> = {
 
   // ── Client-side Errors ──
   SERVER_ERROR: {
-    icon: <ServerCrash className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
   NETWORK_ERROR: {
-    icon: <WifiOff className="h-3.5 w-3.5 shrink-0" />,
+    icon: <LineIcon name="signal" className="h-3.5 w-3.5 shrink-0" />,
     variant: "error",
   },
 };

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Search } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 
 /**
  * Custom 404 Not Found page.
@@ -47,7 +47,7 @@ export default function NotFound() {
         {/* Action buttons */}
         <div className="mt-10 flex flex-col gap-3 sm:flex-row animate-[fadeUp_0.5s_ease-out_0.5s_both]">
           <Link href="/" className="btn-primary-pulse text-sm group">
-            <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
+            <LineIcon name="arrow-left" className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
             Về trang chủ
           </Link>
           <a href="mailto:support@pulseknowledge.com" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-3 text-sm font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95">
@@ -59,7 +59,7 @@ export default function NotFound() {
         <div className="mt-12 w-full max-w-sm animate-[fadeUp_0.5s_ease-out_0.6s_both]">
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 backdrop-blur-sm">
             <div className="flex items-center gap-3 text-xs text-auth-text-3">
-              <Search className="h-3.5 w-3.5 shrink-0" />
+              <LineIcon name="search" className="h-3.5 w-3.5 shrink-0" />
               <span>Thử tìm kiếm nội dung bạn cần từ trang chủ</span>
             </div>
           </div>

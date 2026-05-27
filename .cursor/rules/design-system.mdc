@@ -13,7 +13,7 @@ alwaysApply: true
 ## 1. App Context
 
 **App:** Pulse Knowledge — Personal AI Knowledge Base manager  
-**Stack:** Next.js 16 (App Router), TypeScript, TailwindCSS v4, Lucide React icons  
+**Stack:** Next.js 16 (App Router), TypeScript, TailwindCSS v4, LineIcons (CSS CDN integration)  
 **Theme:** Dark-only. No light mode. Full-app dark background.  
 **Language:** Vietnamese UI (all user-facing text must be in Vietnamese).
 
@@ -283,3 +283,17 @@ src/hooks/                → Custom hooks (use-auth.ts)
 | Purple (data) | `text-auth-purple` | `oklch(0.68 0.18 280)` |
 | Cyan (live) | `text-auth-cyan` | `oklch(0.78 0.14 195)` |
 | Orange (limit) | `text-auth-orange` | `oklch(0.72 0.16 55)` |
+
+---
+
+## 13. Icon Rules (LineIcons)
+
+All icons in the codebase MUST use **LineIcons**.
+
+- **Implementation**:
+  - Use the unified `<LineIcon />` component wrapper from `@/components/shared/line-icon` (Option A).
+  - Use lowercase kebab-case naming for the `name` prop (e.g., `search`, `chevron-right`, `brain-alt`, `comment-text`).
+  - Example: `<LineIcon name="search" className="h-4 w-4" />`
+- **Agent Guidelines**:
+  - **Do NOT use `lucide-react`** in any new code or page modifications.
+  - Refer to the mappings in [implementation_plan.md](file:///C:/Users/Admin/.gemini/antigravity/brain/24c45dd5-dc88-456d-a023-0ab428502dba/implementation_plan.md) to translate legacy icons.

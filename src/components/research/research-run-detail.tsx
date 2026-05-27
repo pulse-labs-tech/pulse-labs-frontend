@@ -3,25 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  Microscope,
-  ChevronRight,
-  AlertCircle,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  BookmarkPlus,
-  X as XIcon,
-  Globe,
-  FileSearch,
-  Brain,
-  Lightbulb,
-  BarChart3,
-  Shield,
-  Quote,
-  ExternalLink,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
+import Loading from "@/app/[locale]/loading";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/contexts/locale-context";
 import {
@@ -53,21 +37,21 @@ function getConfidenceBadge(level: ConfidenceLevel, score: number) {
     case "high":
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-auth-accent-dim border border-auth-accent/20 text-auth-accent">
-          <CheckCircle2 className="h-3 w-3" />
+          <LineIcon name="checkmark-circle" className="h-3 w-3" />
           Tin cậy cao — {pct}%
         </span>
       );
     case "medium":
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-          <Shield className="h-3 w-3" />
+          <LineIcon name="shield" className="h-3 w-3" />
           Tin cậy vừa — {pct}%
         </span>
       );
     case "low":
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-950/40 border border-red-500/20 text-red-400">
-          <AlertCircle className="h-3 w-3" />
+          <LineIcon name="warning" className="h-3 w-3" />
           Tin cậy thấp — {pct}%
         </span>
       );
@@ -75,17 +59,17 @@ function getConfidenceBadge(level: ConfidenceLevel, score: number) {
 }
 
 const STAGE_ICONS: Record<string, React.ReactNode> = {
-  queued: <Clock className="h-4 w-4" />,
-  planning: <Brain className="h-4 w-4" />,
-  searching: <Globe className="h-4 w-4" />,
-  selecting_sources: <FileSearch className="h-4 w-4" />,
-  fetching_sources: <FileSearch className="h-4 w-4" />,
-  extracting_claims: <Quote className="h-4 w-4" />,
-  reflecting: <Lightbulb className="h-4 w-4" />,
-  synthesizing: <Brain className="h-4 w-4" />,
-  completed: <CheckCircle2 className="h-4 w-4" />,
-  failed: <XCircle className="h-4 w-4" />,
-  cancelled: <XCircle className="h-4 w-4" />,
+  queued: <LineIcon name="alarm" className="h-4 w-4" />,
+  planning: <LineIcon name="brain-alt" className="h-4 w-4" />,
+  searching: <LineIcon name="world" className="h-4 w-4" />,
+  selecting_sources: <LineIcon name="search" className="h-4 w-4" />,
+  fetching_sources: <LineIcon name="search" className="h-4 w-4" />,
+  extracting_claims: <LineIcon name="quotation" className="h-4 w-4" />,
+  reflecting: <LineIcon name="bulb" className="h-4 w-4" />,
+  synthesizing: <LineIcon name="brain-alt" className="h-4 w-4" />,
+  completed: <LineIcon name="checkmark-circle" className="h-4 w-4" />,
+  failed: <LineIcon name="xmark-circle" className="h-4 w-4" />,
+  cancelled: <LineIcon name="xmark-circle" className="h-4 w-4" />,
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -242,18 +226,14 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
 
   // ─── Loading ────────────────────────────────────────────────────
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-auth-bg">
-        <DotMatrixLoader variant="orbit" size="lg" />
-      </div>
-    );
+    return <Loading />;
   }
 
   if (loadError || !detail) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-auth-bg px-4">
         <div className="w-full max-w-md text-center space-y-4">
-          <AlertCircle className="h-12 w-12 text-auth-text-3 mx-auto" />
+          <LineIcon name="warning" className="h-12 w-12 text-auth-text-3 mx-auto" />
           <p className="text-white font-semibold">{loadError || "Không tải được nghiên cứu."}</p>
           <div className="flex gap-3 justify-center">
             <Button variant="ghost" size="sm" onClick={() => fetchDetail()}>
@@ -289,7 +269,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
           <Link href={`/${locale}/research`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
             ← {t("research.title", "Nghiên cứu AI")}
           </Link>
-          <ChevronRight className="h-3.5 w-3.5 text-auth-text-3" />
+          <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3" />
           <span className="text-sm font-semibold text-white truncate max-w-[200px]">
             {run.query}
           </span>
@@ -307,9 +287,9 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                 isFailed ? "bg-red-950/40" : "bg-auth-elevated"
               }`}>
                 {isActive && <DotMatrixLoader variant="pulse" size="xs" />}
-                {isCompleted && <CheckCircle2 className="h-3.5 w-3.5 text-auth-accent" />}
-                {isFailed && <XCircle className="h-3.5 w-3.5 text-red-400" />}
-                {isCancelled && <XCircle className="h-3.5 w-3.5 text-auth-text-3" />}
+                {isCompleted && <LineIcon name="checkmark-circle" className="h-3.5 w-3.5 text-auth-accent" />}
+                {isFailed && <LineIcon name="xmark-circle" className="h-3.5 w-3.5 text-red-400" />}
+                {isCancelled && <LineIcon name="xmark-circle" className="h-3.5 w-3.5 text-auth-text-3" />}
               </div>
               <span className={`text-xs font-semibold ${
                 isActive ? "text-auth-accent" :
@@ -330,7 +310,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                 size="sm"
                 onClick={handleCancel}
                 isLoading={isCancelling}
-                leftIcon={<XIcon className="h-3.5 w-3.5" />}
+                leftIcon={<LineIcon name="xmark" className="h-3.5 w-3.5" />}
                 className="text-auth-text-2 hover:text-red-300"
               >
                 {t("research.cancel", "Hủy")}
@@ -342,14 +322,14 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                 size="sm"
                 onClick={handleSaveToWiki}
                 isLoading={isSaving}
-                leftIcon={<BookmarkPlus className="h-3.5 w-3.5" />}
+                leftIcon={<LineIcon name="bookmark" className="h-3.5 w-3.5" />}
               >
                 {t("research.saveToWiki", "Lưu vào Wiki")}
               </Button>
             )}
             {(savedResearch || savedWikiUrl) && (
               <Link href={savedWikiUrl ?? `/${locale}/wiki`}>
-                <Button variant="ghost" size="sm" leftIcon={<CheckCircle2 className="h-3.5 w-3.5 text-auth-accent" />}>
+                <Button variant="ghost" size="sm" leftIcon={<LineIcon name="checkmark-circle" className="h-3.5 w-3.5 text-auth-accent" />}>
                   {t("research.savedToWiki", "Đã lưu vào Wiki")}
                 </Button>
               </Link>
@@ -359,12 +339,12 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
 
         {cancelError && (
           <div className="flex items-center gap-2 text-xs text-red-300 bg-red-950/20 border border-red-500/20 rounded-lg px-3 py-2">
-            <AlertCircle className="h-3.5 w-3.5" /> {cancelError}
+            <LineIcon name="warning" className="h-3.5 w-3.5" /> {cancelError}
           </div>
         )}
         {saveError && (
           <div className="flex items-center gap-2 text-xs text-red-300 bg-red-950/20 border border-red-500/20 rounded-lg px-3 py-2">
-            <AlertCircle className="h-3.5 w-3.5" /> {saveError}
+            <LineIcon name="warning" className="h-3.5 w-3.5" /> {saveError}
           </div>
         )}
 
@@ -388,7 +368,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                       isCurrent ? "bg-auth-accent-dim border-2 border-auth-accent text-auth-accent" :
                       "bg-auth-elevated text-auth-text-3"
                     }`}>
-                      {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : (
+                      {isDone ? <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" /> : (
                         <span className="h-3.5 w-3.5 flex items-center justify-center">
                           {STAGE_ICONS[stage]}
                         </span>
@@ -456,7 +436,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                 {/* Caveats */}
                 {synthesis.caveats.length > 0 && (
                   <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/10 px-4 py-3">
-                    <AlertCircle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+                    <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
                     <div className="space-y-1">
                       <p className="text-xs font-semibold text-amber-300">{t("research.caveats", "Lưu ý")}</p>
                       {synthesis.caveats.map((c, i) => (
@@ -483,14 +463,14 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                     <div className="space-y-2">
                       {synthesis.externalCitations.map((cite) => (
                         <div key={cite.sourceId} className="flex items-start gap-3 rounded-lg border border-auth-border bg-auth-elevated px-3 py-2.5">
-                          <Globe className="h-3.5 w-3.5 shrink-0 text-auth-text-3 mt-0.5" />
+                          <LineIcon name="world" className="h-3.5 w-3.5 shrink-0 text-auth-text-3 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-white truncate">{cite.title}</p>
                             {cite.excerpt && <p className="text-[10px] text-auth-text-2 mt-0.5 line-clamp-2">{cite.excerpt}</p>}
                           </div>
                           {cite.url && (
                             <a href={cite.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-auth-text-3 hover:text-auth-accent transition-colors">
-                              <ExternalLink className="h-3.5 w-3.5" />
+                              <LineIcon name="popup" className="h-3.5 w-3.5" />
                             </a>
                           )}
                         </div>
@@ -511,7 +491,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                 ) : sources.map((src) => (
                   <div key={src.id} className="flex items-start gap-3 rounded-xl border border-auth-border bg-auth-surface p-4">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${src.fetchedOk ? "bg-auth-accent-dim" : "bg-auth-elevated"}`}>
-                      <Globe className={`h-3.5 w-3.5 ${src.fetchedOk ? "text-auth-accent" : "text-auth-text-3"}`} />
+                      <LineIcon name="world" className={`h-3.5 w-3.5 ${src.fetchedOk ? "text-auth-accent" : "text-auth-text-3"}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-white">{src.title}</p>
@@ -528,7 +508,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                     </div>
                     {src.url && (
                       <a href={src.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-auth-text-3 hover:text-auth-accent transition-colors">
-                        <ExternalLink className="h-4 w-4" />
+                        <LineIcon name="popup" className="h-4 w-4" />
                       </a>
                     )}
                   </div>
@@ -606,7 +586,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
         {/* ─── Failed/Cancelled state ─── */}
         {(isFailed || isCancelled) && (
           <div className="rounded-2xl border border-auth-border bg-auth-surface p-6 text-center space-y-3">
-            <XCircle className={`h-10 w-10 mx-auto ${isFailed ? "text-red-400" : "text-auth-text-3"}`} />
+            <LineIcon name="xmark-circle" className={`h-10 w-10 mx-auto ${isFailed ? "text-red-400" : "text-auth-text-3"}`} />
             <p className="text-sm font-semibold text-white">
               {isFailed ? t("research.failed.title", "Nghiên cứu thất bại") : t("research.cancelled.title", "Nghiên cứu đã hủy")}
             </p>

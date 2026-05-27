@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, BookOpen, FileText, Link2, FileCode, Cpu, CornerDownLeft } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
@@ -183,19 +183,19 @@ export function GlobalSearchPalette() {
     const size = "h-4 w-4 shrink-0";
     switch (type) {
       case "text":
-        return <FileText className={`${size} text-emerald-400`} />;
+        return <LineIcon name="files" className={`${size} text-emerald-400`} />;
       case "url":
-        return <Link2 className={`${size} text-blue-400`} />;
+        return <LineIcon name="link" className={`${size} text-blue-400`} />;
       case "file_pdf":
-        return <FileText className={`${size} text-red-400`} />;
+        return <LineIcon name="files" className={`${size} text-red-400`} />;
       case "file_txt":
-        return <FileText className={`${size} text-slate-400`} />;
+        return <LineIcon name="files" className={`${size} text-slate-400`} />;
       case "file_md":
-        return <FileCode className={`${size} text-purple-400`} />;
+        return <LineIcon name="code" className={`${size} text-purple-400`} />;
       case "query_output":
-        return <Cpu className={`${size} text-cyan-400`} />;
+        return <LineIcon name="cpu" className={`${size} text-cyan-400`} />;
       default:
-        return <BookOpen className={`${size} text-emerald-500`} />;
+        return <LineIcon name="book" className={`${size} text-emerald-500`} />;
     }
   };
 
@@ -228,7 +228,7 @@ export function GlobalSearchPalette() {
 
             {/* Input row */}
             <div className="relative flex items-center">
-              <Search className="absolute left-4 h-4 w-4 text-auth-text-3 pointer-events-none" />
+              <LineIcon name="search" className="absolute left-4 h-4 w-4 text-auth-text-3 pointer-events-none" />
               <input
                 ref={inputRef}
                 type="text"
@@ -285,7 +285,7 @@ export function GlobalSearchPalette() {
               {query.trim() === "" ? (
                 <div className="py-6 px-4 text-center text-xs text-auth-text-3 flex flex-col items-center gap-2 select-none">
                   <div className="h-8 w-8 rounded-lg bg-white/[0.02] border border-white/[0.05] flex items-center justify-center">
-                    <Search className="h-4 w-4 text-auth-text-3/60" />
+                    <LineIcon name="search" className="h-4 w-4 text-auth-text-3/60" />
                   </div>
                   <p className="font-semibold text-auth-text-2/80">
                     {locale === "vi" ? "Tìm kiếm tri thức trong Wiki" : "Search knowledge in Wiki"}
@@ -340,7 +340,7 @@ export function GlobalSearchPalette() {
 
                         <div className="flex items-center gap-2 shrink-0">
                           {isSelected ? (
-                            <CornerDownLeft className="h-3 w-3 text-auth-accent animate-pulse" />
+                            <LineIcon name="enter" className="h-3 w-3 text-auth-accent animate-pulse" />
                           ) : (
                             <span className="text-[9px] font-mono text-auth-text-3 opacity-0 group-hover:opacity-100 transition-opacity">
                               Open

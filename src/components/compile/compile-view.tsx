@@ -15,34 +15,13 @@
 import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  MessageSquare,
-  BookOpen,
-  Upload,
-  FileText,
-  Link2,
-  Lock,
-  LogOut,
-
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  AlertTriangle,
-  RefreshCw,
-  ChevronRight,
-  ArrowRight,
-  ArrowLeft,
-  ExternalLink,
-  Sparkles,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
-import { Search } from "lucide-react";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { createSourceAction, getCompileJobAction } from "@/app/actions/compile";
 import type { RoleKbDto } from "@/types/onboarding";
@@ -175,7 +154,7 @@ function SourceTypeCard({
       {/* Selected check */}
       {selected && (
         <div className="absolute bottom-3 right-3 h-5 w-5 rounded-full bg-auth-accent flex items-center justify-center">
-          <CheckCircle2 className="h-3 w-3 text-black" />
+          <LineIcon name="checkmark-circle" className="h-3 w-3 text-black" />
         </div>
       )}
     </button>
@@ -537,28 +516,28 @@ export function CompileView() {
                 href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" />
+                <LineIcon name="grid-alt" className="h-3.5 w-3.5" />
                 {t("common.dashboard", "Dashboard")}
               </Link>
               <Link
                 href={`/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <MessageSquare className="h-3.5 w-3.5" />
+                <LineIcon name="comment" className="h-3.5 w-3.5" />
                 {t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
               </Link>
               <Link
                 href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <BookOpen className="h-3.5 w-3.5" />
+                <LineIcon name="book" className="h-3.5 w-3.5" />
                 {t("compile.labels.sidebarWiki", "Wiki Cá nhân")}
               </Link>
               <Link
                 href={`/${locale}/compile/new${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                <Upload className="h-3.5 w-3.5" />
+                <LineIcon name="upload" className="h-3.5 w-3.5" />
                 {t("compile.labels.sidebarCompile", "Nạp tài liệu")}
               </Link>
             </nav>
@@ -575,7 +554,7 @@ export function CompileView() {
               className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
               <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
               <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
                 Ctrl K
@@ -592,7 +571,7 @@ export function CompileView() {
               className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-4 w-4 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
             </button>
 
             {/* Mobile Search Trigger Icon */}
@@ -605,7 +584,7 @@ export function CompileView() {
               className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm" : "Search"}
             >
-              <Search className="h-4 w-4" />
+              <LineIcon name="search" className="h-4 w-4" />
             </button>
 
             <LocaleSwitcher id="compile-header" />
@@ -628,7 +607,7 @@ export function CompileView() {
               {isPending ? (
                 <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
-                <LogOut className="h-4 w-4" />
+                <LineIcon name="exit" className="h-4 w-4" />
               )}
             </button>
           </div>
@@ -643,7 +622,7 @@ export function CompileView() {
             <Link href={`/${locale}/dashboard`} className="hover:text-auth-text transition-colors">
               {t("common.dashboard", "Dashboard")}
             </Link>
-            <ChevronRight className="h-3 w-3" />
+            <LineIcon name="chevron-right" className="h-3 w-3" />
             <span className="text-auth-text">{t("compile.labels.headerTitle", "Nạp nguồn tài liệu")}</span>
           </div>
           <h1 className="text-fluid-xl font-extrabold tracking-tight mt-1">
@@ -668,7 +647,7 @@ export function CompileView() {
                       ${isDone ? "bg-auth-accent border-auth-accent text-black" : isActive ? "border-auth-accent bg-auth-accent-dim text-auth-accent" : "border-white/10 bg-white/5 text-auth-text-3"}
                     `}
                   >
-                    {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : n}
+                    {isDone ? <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" /> : n}
                   </div>
                   <span
                     className={`text-[10px] font-bold uppercase tracking-wider hidden sm:inline
@@ -701,21 +680,21 @@ export function CompileView() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <SourceTypeCard
-                icon={<FileText className="h-5 w-5" />}
+                icon={<LineIcon name="files" className="h-5 w-5" />}
                 title={t("compile.labels.sourceText", "Văn bản thuần")}
                 description={t("compile.labels.sourceTextDesc", "Dán văn bản, ghi chú, bài viết hoặc tài liệu của bạn vào đây.")}
                 selected={selectedSourceType === "text"}
                 onClick={() => setSelectedSourceType("text")}
               />
               <SourceTypeCard
-                icon={<Link2 className="h-5 w-5" />}
+                icon={<LineIcon name="link" className="h-5 w-5" />}
                 title={t("compile.labels.sourceUrl", "URL / Website")}
                 description={t("compile.labels.sourceUrlDesc", "Crawl nội dung từ một trang web, bài blog hoặc tài liệu online.")}
                 selected={selectedSourceType === "url"}
                 onClick={() => setSelectedSourceType("url")}
               />
               <SourceTypeCard
-                icon={<Lock className="h-5 w-5" />}
+                icon={<LineIcon name="lock" className="h-5 w-5" />}
                 title={t("compile.labels.sourceFile", "Tải tệp lên")}
                 description={t("compile.labels.sourceFileDesc", "PDF, TXT, Markdown — tính năng dành riêng cho gói Pro.")}
                 selected={false}
@@ -732,7 +711,7 @@ export function CompileView() {
                 className="btn-primary-pulse text-sm"
               >
                 {t("compile.labels.btnContinue", "Tiếp tục")}
-                <ArrowRight className="h-4 w-4" />
+                <LineIcon name="arrow-right" className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -756,12 +735,12 @@ export function CompileView() {
               <div className="flex items-center gap-2 text-xs text-auth-text-3">
                 {selectedSourceType === "text" ? (
                   <>
-                    <FileText className="h-3.5 w-3.5 text-emerald-400" />
+                    <LineIcon name="files" className="h-3.5 w-3.5 text-emerald-400" />
                     <span className="text-emerald-400 font-semibold">{t("compile.labels.badgeText", "Văn bản")}</span>
                   </>
                 ) : (
                   <>
-                    <Link2 className="h-3.5 w-3.5 text-blue-400" />
+                    <LineIcon name="link" className="h-3.5 w-3.5 text-blue-400" />
                     <span className="text-blue-400 font-semibold">{t("compile.labels.badgeUrl", "URL")}</span>
                   </>
                 )}
@@ -792,13 +771,13 @@ export function CompileView() {
                 />
               ) : userRoles.length === 1 ? (
                 <div className="bg-auth-elevated border border-auth-border rounded-xl px-3 py-2.5 text-xs font-semibold text-auth-accent flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                  <LineIcon name="star" className="h-3.5 w-3.5 shrink-0" />
                   <span>{userRoles[0].roleName}</span>
                   <span className="text-[10px] text-auth-text-3 font-normal">({userRoles[0].roleGroup})</span>
                 </div>
               ) : (
                 <div className="h-10 bg-red-950/20 border border-red-500/20 rounded-xl flex items-center px-3 gap-2">
-                  <AlertCircle className="h-3.5 w-3.5 text-red-400" />
+                  <LineIcon name="warning" className="h-3.5 w-3.5 text-red-400" />
                   <span className="text-xs text-red-400">{t("compile.errors.noKb", "Không tìm thấy Knowledge Base. Hoàn tất onboarding trước.")}</span>
                 </div>
               )}
@@ -831,7 +810,7 @@ export function CompileView() {
                 />
                 {textError && (
                   <p className="text-xs text-red-400 flex items-center gap-1.5 mt-0.5">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />
                     {textError}
                   </p>
                 )}
@@ -842,7 +821,7 @@ export function CompileView() {
                   {t("compile.labels.labelUrl", "Địa chỉ URL")} <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
-                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3" />
+                  <LineIcon name="link" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3" />
                   <input
                     type="url"
                     value={url}
@@ -856,13 +835,13 @@ export function CompileView() {
                 </div>
                 {urlError && (
                   <p className="text-xs text-red-400 flex items-center gap-1.5 mt-0.5">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0" />
                     {urlError}
                   </p>
                 )}
                 {url && isURLValid(url) && (
                   <div className="flex items-center gap-2 text-xs text-auth-text-2 bg-auth-elevated/50 border border-auth-border/50 rounded-lg px-3 py-2">
-                    <ExternalLink className="h-3.5 w-3.5 text-blue-400 shrink-0" />
+                    <LineIcon name="popup" className="h-3.5 w-3.5 text-blue-400 shrink-0" />
                     <span className="truncate">{url}</span>
                   </div>
                 )}
@@ -890,7 +869,7 @@ export function CompileView() {
             {/* Submit error */}
             {submitError && (
               <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
-                <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                <LineIcon name="warning" className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-red-400">{submitError}</p>
               </div>
             )}
@@ -902,7 +881,7 @@ export function CompileView() {
                 onClick={() => { setStep(1); setSubmitError(null); setTextError(null); setUrlError(null); }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <LineIcon name="arrow-left" className="h-4 w-4" />
                 {t("compile.labels.btnBack", "Quay lại")}
               </button>
               <button
@@ -918,7 +897,7 @@ export function CompileView() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4" />
+                    <LineIcon name="star" className="h-4 w-4" />
                     {t("compile.labels.btnCompile", "Bắt đầu Ingest")}
                   </>
                 )}
@@ -956,17 +935,17 @@ export function CompileView() {
                   {/* Status badge */}
                   {currentJob.status === "wiki_ready" ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" />
                       {t("common.success", "Hoàn thành")}
                     </span>
                   ) : currentJob.status === "failed" ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-950/40 border border-red-500/20 text-red-400">
-                      <XCircle className="h-3.5 w-3.5" />
+                      <LineIcon name="xmark-circle" className="h-3.5 w-3.5" />
                       {t("common.error", "Lỗi xử lý")}
                     </span>
                   ) : currentJob.status === "cancelled" ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-                      <AlertCircle className="h-3.5 w-3.5" />
+                      <LineIcon name="warning" className="h-3.5 w-3.5" />
                       {t("common.cancel", "Đã hủy")}
                     </span>
                   ) : (
@@ -983,7 +962,7 @@ export function CompileView() {
                 {/* Poll timeout error */}
                 {pollError && (
                   <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
-                    <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                    <LineIcon name="warning" className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-400">{pollError}</p>
                   </div>
                 )}
@@ -991,7 +970,7 @@ export function CompileView() {
                 {/* Error details */}
                 {currentJob.status === "failed" && currentJob.error && (
                   <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
-                    <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                    <LineIcon name="warning" className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                     <div className="flex flex-col gap-1">
                       <p className="text-xs font-semibold text-red-400">{t("compile.labels.detailPrefix", "Chi tiết lỗi")}</p>
                       <p className="text-xs text-red-400/80">{currentJob.error}</p>
@@ -1007,7 +986,7 @@ export function CompileView() {
 
                 <div className="flex flex-col items-center gap-4 py-4 text-center">
                   <div className="h-16 w-16 rounded-full bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-center">
-                    <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                    <LineIcon name="checkmark-circle" className="h-8 w-8 text-emerald-400" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-auth-text">{t("compile.success", "Tài liệu đã được biên soạn thành công!")}</h3>
@@ -1023,9 +1002,9 @@ export function CompileView() {
                       href={`/${locale}/wiki/items/${currentJob.outputKnowledgeItemId}`}
                       className="btn-primary-pulse flex-1 text-sm"
                     >
-                      <BookOpen className="h-4 w-4" />
+                      <LineIcon name="book" className="h-4 w-4" />
                       {t("compile.labels.btnViewWiki", "Xem Wiki item")}
-                      <ExternalLink className="h-3.5 w-3.5" />
+                      <LineIcon name="popup" className="h-3.5 w-3.5" />
                     </Link>
                   )}
                   <button
@@ -1033,14 +1012,14 @@ export function CompileView() {
                     onClick={handleStartNew}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
-                    <Upload className="h-4 w-4" />
+                    <LineIcon name="upload" className="h-4 w-4" />
                     {t("compile.labels.btnNewDoc", "Nạp tài liệu mới")}
                   </button>
                   <Link
                     href={`/${locale}/dashboard`}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
-                    <LayoutDashboard className="h-4 w-4" />
+                    <LineIcon name="grid-alt" className="h-4 w-4" />
                     {t("common.dashboard", "Dashboard")}
                   </Link>
                 </div>
@@ -1053,7 +1032,7 @@ export function CompileView() {
 
                 <div className="flex flex-col items-center gap-4 py-4 text-center">
                   <div className="h-16 w-16 rounded-full bg-red-950/40 border border-red-500/20 flex items-center justify-center">
-                    <XCircle className="h-8 w-8 text-red-400" />
+                    <LineIcon name="xmark-circle" className="h-8 w-8 text-red-400" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-auth-text">{t("compile.errors.compileFailed", "Xử lý thất bại")}</h3>
@@ -1072,7 +1051,7 @@ export function CompileView() {
                       onClick={handleRetry}
                       className="btn-primary-pulse flex-1 text-sm"
                     >
-                      <RefreshCw className="h-4 w-4" />
+                      <LineIcon name="sync" className="h-4 w-4" />
                       {t("common.retry", "Thử lại")}
                     </button>
                   )}
@@ -1081,14 +1060,14 @@ export function CompileView() {
                     onClick={handleStartNew}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
-                    <Upload className="h-4 w-4" />
+                    <LineIcon name="upload" className="h-4 w-4" />
                     {t("compile.labels.btnNewDoc", "Nạp tài liệu mới")}
                   </button>
                   <Link
                     href={`/${locale}/dashboard`}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
-                    <LayoutDashboard className="h-4 w-4" />
+                    <LineIcon name="grid-alt" className="h-4 w-4" />
                     {t("common.dashboard", "Dashboard")}
                   </Link>
                 </div>

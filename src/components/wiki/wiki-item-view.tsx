@@ -3,45 +3,13 @@
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  Brain,
-  MessageSquare,
-  BookOpen,
-  FileText,
-  Link2,
-  Upload,
-  FileCode,
-  PenLine,
-  Cpu,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  ChevronRight,
-  LogOut,
-  AlertCircle,
-  ArrowLeft,
-  ExternalLink,
-  Tag,
-  Globe,
-  Hash,
-  Layers,
-  FileSymlink,
-  Calendar,
-  RefreshCw,
-  MessageCircle,
-  AlignLeft,
-  Lightbulb,
-  Dot,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemAction } from "@/app/actions/wiki";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
-import { Search } from "lucide-react";
 import type { WikiItemDetail, WikiRetrievalStatus, WikiSourceType } from "@/types/wiki";
 
 // ────────────────────────────────────────────────────────────────
@@ -51,21 +19,21 @@ import type { WikiItemDetail, WikiRetrievalStatus, WikiSourceType } from "@/type
 function getSourceTypeIcon(type: WikiSourceType, size = "h-4 w-4") {
   switch (type) {
     case "text":
-      return <FileText className={`${size} text-emerald-400`} />;
+      return <LineIcon name="files" className={`${size} text-emerald-400`} />;
     case "url":
-      return <Link2 className={`${size} text-blue-400`} />;
+      return <LineIcon name="link" className={`${size} text-blue-400`} />;
     case "file_pdf":
-      return <FileText className={`${size} text-red-400`} />;
+      return <LineIcon name="files" className={`${size} text-red-400`} />;
     case "file_txt":
-      return <FileText className={`${size} text-slate-400`} />;
+      return <LineIcon name="files" className={`${size} text-slate-400`} />;
     case "file_md":
-      return <FileCode className={`${size} text-purple-400`} />;
+      return <LineIcon name="code" className={`${size} text-purple-400`} />;
     case "query_output":
-      return <Cpu className={`${size} text-cyan-400`} />;
+      return <LineIcon name="cpu" className={`${size} text-cyan-400`} />;
     case "manual_note":
-      return <PenLine className={`${size} text-amber-400`} />;
+      return <LineIcon name="pencil" className={`${size} text-amber-400`} />;
     default:
-      return <Upload className={`${size} text-auth-text-3`} />;
+      return <LineIcon name="upload" className={`${size} text-auth-text-3`} />;
   }
 }
 
@@ -88,25 +56,25 @@ function getStatusBadge(status: WikiRetrievalStatus, t: (path: string) => string
     case "indexed":
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-          <CheckCircle2 className="h-3.5 w-3.5" /> {t("wiki.statuses.ready")}
+          <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" /> {t("wiki.statuses.ready")}
         </span>
       );
     case "pending":
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
-          <Clock className="h-3.5 w-3.5" /> {t("wiki.statuses.pending")}
+          <LineIcon name="alarm" className="h-3.5 w-3.5" /> {t("wiki.statuses.pending")}
         </span>
       );
     case "degraded":
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-          <AlertTriangle className="h-3.5 w-3.5" /> {t("wiki.statuses.lowQuality")}
+          <LineIcon name="warning" className="h-3.5 w-3.5" /> {t("wiki.statuses.lowQuality")}
         </span>
       );
     case "failed":
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-          <XCircle className="h-3.5 w-3.5" /> {t("wiki.statuses.failed")}
+          <LineIcon name="xmark-circle" className="h-3.5 w-3.5" /> {t("wiki.statuses.failed")}
         </span>
       );
     default:
@@ -154,7 +122,7 @@ function WikiItemSkeleton() {
           {[80, 50, 120, 50, 180].map((w, i) => (
             <span key={i} className="flex items-center gap-2">
               <div className={`h-3 w-${w / 4} bg-white/[0.06] rounded animate-pulse`} style={{ width: w }} />
-              {i < 4 && <ChevronRight className="h-3 w-3 text-auth-text-3/40" />}
+              {i < 4 && <LineIcon name="chevron-right" className="h-3 w-3 text-auth-text-3/40" />}
             </span>
           ))}
         </div>
@@ -300,19 +268,19 @@ export function WikiItemView({ id }: WikiItemViewProps) {
                 href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" /> {t("common.dashboard")}
+                <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> {t("common.dashboard")}
               </Link>
               <Link
                 href={`/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <MessageSquare className="h-3.5 w-3.5" /> {t("common.query")}
+                <LineIcon name="comment" className="h-3.5 w-3.5" /> {t("common.query")}
               </Link>
               <Link
                 href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                <BookOpen className="h-3.5 w-3.5" /> {t("common.wiki")}
+                <LineIcon name="book" className="h-3.5 w-3.5" /> {t("common.wiki")}
               </Link>
             </nav>
           </div>
@@ -328,7 +296,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
               className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
               <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
               <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
                 Ctrl K
@@ -345,7 +313,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
               className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-4 w-4 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
             </button>
 
             {/* Mobile Search Trigger Icon */}
@@ -358,7 +326,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
               className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm" : "Search"}
             >
-              <Search className="h-4 w-4" />
+              <LineIcon name="search" className="h-4 w-4" />
             </button>
 
             <LocaleSwitcher id="wiki-item-header" />
@@ -379,7 +347,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
               {isPending ? (
                 <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
-                <LogOut className="h-4 w-4" />
+                <LineIcon name="exit" className="h-4 w-4" />
               )}
             </button>
           </div>
@@ -403,7 +371,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
     return renderLayout(
       <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
         <div className="h-20 w-20 rounded-2xl bg-red-950/20 border border-red-500/20 flex items-center justify-center text-red-400">
-          <AlertCircle className="h-10 w-10" />
+          <LineIcon name="warning" className="h-10 w-10" />
         </div>
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-red-400 mb-2">404 — {t("common.error")}</p>
@@ -416,7 +384,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           href={`/${locale}/wiki`}
           className="inline-flex items-center gap-2 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm font-semibold transition-all"
         >
-          <ArrowLeft className="h-4 w-4" /> {t("wiki.detail.backToLibrary")}
+          <LineIcon name="arrow-left" className="h-4 w-4" /> {t("wiki.detail.backToLibrary")}
         </Link>
       </div>
     );
@@ -427,7 +395,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
     return renderLayout(
       <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
         <div className="h-20 w-20 rounded-2xl bg-amber-950/20 border border-amber-500/20 flex items-center justify-center text-amber-400">
-          <AlertCircle className="h-10 w-10" />
+          <LineIcon name="warning" className="h-10 w-10" />
         </div>
         <div>
           <h2 className="text-xl font-extrabold text-auth-text">{t("wiki.detail.loadError")}</h2>
@@ -438,13 +406,13 @@ export function WikiItemView({ id }: WikiItemViewProps) {
             onClick={fetchItem}
             className="btn-primary-pulse text-sm"
           >
-            <RefreshCw className="h-4 w-4" /> {t("common.retry")}
+            <LineIcon name="sync" className="h-4 w-4" /> {t("common.retry")}
           </button>
           <Link
             href={`/${locale}/wiki`}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm font-semibold transition-all"
           >
-            <ArrowLeft className="h-4 w-4" /> {t("common.back")}
+            <LineIcon name="arrow-left" className="h-4 w-4" /> {t("common.back")}
           </Link>
         </div>
       </div>
@@ -462,11 +430,11 @@ export function WikiItemView({ id }: WikiItemViewProps) {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-1.5 text-xs text-auth-text-3 flex-wrap" aria-label="Breadcrumb">
           <Link href={`/${locale}/dashboard`} className="hover:text-auth-text transition-colors">{t("common.dashboard")}</Link>
-          <ChevronRight className="h-3 w-3 shrink-0" />
+          <LineIcon name="chevron-right" className="h-3 w-3 shrink-0" />
           <Link href={`/${locale}/wiki`} className="hover:text-auth-text transition-colors">{t("common.wiki")}</Link>
           {item.domain?.name && (
             <>
-              <ChevronRight className="h-3 w-3 shrink-0" />
+              <LineIcon name="chevron-right" className="h-3 w-3 shrink-0" />
               <Link
                 href={`/${locale}/wiki?domainId=${item.domain.id}`}
                 className="hover:text-auth-text transition-colors"
@@ -475,7 +443,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
               </Link>
             </>
           )}
-          <ChevronRight className="h-3 w-3 shrink-0" />
+          <LineIcon name="chevron-right" className="h-3 w-3 shrink-0" />
           <span className="text-auth-text-2 truncate max-w-[200px]" title={item.title}>
             {item.title}
           </span>
@@ -487,7 +455,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
             href={`/${locale}/wiki`}
             className="self-start inline-flex items-center gap-1.5 text-[10px] font-semibold text-auth-text-3 hover:text-auth-accent transition-colors uppercase tracking-wider"
           >
-            <ArrowLeft className="h-3 w-3" /> {t("wiki.detail.backToLibrary")}
+            <LineIcon name="arrow-left" className="h-3 w-3" /> {t("wiki.detail.backToLibrary")}
           </Link>
 
           <h1 className="text-fluid-xl font-extrabold tracking-tight leading-tight">
@@ -502,7 +470,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
             </span>
             {item.domain?.name && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20">
-                <Globe className="h-3.5 w-3.5" />
+                <LineIcon name="world" className="h-3.5 w-3.5" />
                 {item.domain.name}
               </span>
             )}
@@ -512,7 +480,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
         <div className="backdrop-blur-md rounded-2xl p-6 relative premium-hover-card">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-7 w-7 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
-              <AlignLeft className="h-3.5 w-3.5" />
+              <LineIcon name="align-left" className="h-3.5 w-3.5" />
             </div>
             <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">{t("wiki.detail.noSummary").replace("Không có tóm tắt cho mục này.", locale === "en" ? "Summary" : "Tóm tắt")}</h2>
           </div>
@@ -526,7 +494,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-7 w-7 rounded-lg bg-purple-950/40 text-purple-400 flex items-center justify-center shrink-0">
-                <Brain className="h-3.5 w-3.5" />
+                <LineIcon name="brain-alt" className="h-3.5 w-3.5" />
               </div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">{t("wiki.detail.concepts")}</h2>
             </div>
@@ -534,7 +502,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
               {item.concepts.map((concept) => (
                 <div key={concept.id} className="border-b border-white/[0.04] pb-3 last:border-0 last:pb-0">
                   <h3 className="text-xs font-bold text-purple-300 flex items-center gap-1">
-                    <Hash className="h-3 w-3" />
+                    <LineIcon name="hash" className="h-3 w-3" />
                     {concept.term}
                   </h3>
                   <p className="text-xs text-auth-text-2 mt-1 leading-relaxed">
@@ -551,7 +519,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           <div className="backdrop-blur-md rounded-2xl p-6 relative premium-hover-card-cyan">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-7 w-7 rounded-lg bg-blue-950/40 text-blue-400 flex items-center justify-center shrink-0">
-                <FileText className="h-3.5 w-3.5" />
+                <LineIcon name="files" className="h-3.5 w-3.5" />
               </div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">{t("wiki.detail.chunks")}</h2>
             </div>
@@ -578,7 +546,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
         {/* Source attribution */}
         {(item.source?.url || item.source?.titleHint) && (
           <div className="flex items-center gap-3 bg-auth-elevated/60 border border-auth-border rounded-xl px-4 py-3">
-            <FileSymlink className="h-4 w-4 text-auth-text-3 shrink-0" />
+            <LineIcon name="arrow-right" className="h-4 w-4 text-auth-text-3 shrink-0" />
             <span className="text-xs text-auth-text-3">
               <span className="font-semibold">{t("wiki.detail.source")}</span>{" "}
               <span className="font-medium text-auth-text-2">{getSourceTypeLabel(item.source.sourceType, t)}</span>
@@ -591,7 +559,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
                   className="inline-flex items-center gap-1 text-auth-accent hover:underline transition-colors"
                 >
                   {item.source.titleHint || item.source.url}
-                  <ExternalLink className="h-3 w-3" />
+                  <LineIcon name="popup" className="h-3 w-3" />
                 </a>
               ) : (
                 <span>{item.source.titleHint}</span>
@@ -610,7 +578,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
             <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-3">Domain</p>
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
-                <Globe className="h-4 w-4" />
+                <LineIcon name="world" className="h-4 w-4" />
               </div>
               <div>
                 <p className="text-sm font-bold text-auth-text">{item.domain.name}</p>
@@ -626,22 +594,22 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           <div className="flex flex-col gap-3">
             {[
               {
-                icon: <AlignLeft className="h-3.5 w-3.5" />,
+                icon: <LineIcon name="align-left" className="h-3.5 w-3.5" />,
                 label: t("wiki.detail.statWords"),
                 value: formatNumber(item.source?.wordCount, locale),
               },
               {
-                icon: <Layers className="h-3.5 w-3.5" />,
+                icon: <LineIcon name="layers" className="h-3.5 w-3.5" />,
                 label: t("wiki.detail.statChunks"),
                 value: formatNumber(item.citations?.length, locale),
               },
               {
-                icon: <Calendar className="h-3.5 w-3.5" />,
+                icon: <LineIcon name="calendar" className="h-3.5 w-3.5" />,
                 label: t("wiki.detail.statCompiled"),
                 value: formatDateVN(item.compiledAt, locale),
               },
               {
-                icon: <RefreshCw className="h-3.5 w-3.5" />,
+                icon: <LineIcon name="sync" className="h-3.5 w-3.5" />,
                 label: t("wiki.detail.statUpdated"),
                 value: formatDateVN(item.updatedAt, locale),
               },
@@ -670,7 +638,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
                   href={`/${locale}/wiki?tag=${encodeURIComponent(tag)}`}
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold bg-white/5 border border-white/10 text-auth-text-3 hover:text-auth-accent hover:border-auth-accent/20 hover:bg-auth-accent-dim transition-all"
                 >
-                  <Tag className="h-2.5 w-2.5" />
+                  <LineIcon name="tag" className="h-2.5 w-2.5" />
                   {tag}
                 </Link>
               ))}
@@ -683,7 +651,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           href={`/${locale}/query?roleKbId=${item.roleKbId}&q=${encodeURIComponent(item.title)}`}
           className="btn-primary-pulse w-full text-sm"
         >
-          <MessageCircle className="h-4 w-4" />
+          <LineIcon name="comment-alt" className="h-4 w-4" />
           {t("wiki.detail.askTopic")}
         </Link>
 
@@ -707,7 +675,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
                     </p>
                     {related.domain?.name && (
                       <p className="text-[10px] text-auth-text-3 mt-0.5 flex items-center gap-1">
-                        <Dot className="h-2 w-2" />
+                        <LineIcon name="dot" className="h-2 w-2" />
                         {related.domain.name}
                       </p>
                     )}

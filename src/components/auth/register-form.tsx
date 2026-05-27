@@ -19,7 +19,7 @@
 import { useActionState, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Mail } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { registerAction, resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
@@ -245,7 +245,7 @@ export function RegisterForm() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-auth-text-3 transition-colors hover:text-auth-text-2"
                 aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <LineIcon name="eye" className="h-4 w-4" /> : <LineIcon name="eye" className="h-4 w-4" />}
               </button>
             </div>
             {state?.errors?.password && (
@@ -387,7 +387,7 @@ function VerifyEmailScreen({
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
         {/* Icon */}
         <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--color-auth-accent)]/20 bg-[var(--color-auth-accent-dim)]">
-          <Mail className="h-6 w-6 text-[var(--color-auth-accent)]" />
+          <LineIcon name="envelope" className="h-6 w-6 text-[var(--color-auth-accent)]" />
         </div>
 
         <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">

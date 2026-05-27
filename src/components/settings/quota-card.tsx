@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, XCircle, Infinity, RefreshCw } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import type { QuotaCardData, QuotaStatus } from "@/types/settings";
 import { useTranslation } from "@/contexts/locale-context";
@@ -47,28 +47,28 @@ function getStatusBadge(status: QuotaStatus, t: (key: string, fallback: string) 
     case "ok":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-auth-accent-dim border border-auth-accent/20 text-auth-accent">
-          <CheckCircle2 className="h-3 w-3" />
+          <LineIcon name="checkmark-circle" className="h-3 w-3" />
           {t("settings.quota.statusOk", "Bình thường")}
         </span>
       );
     case "warning":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-          <AlertTriangle className="h-3 w-3" />
+          <LineIcon name="warning" className="h-3 w-3" />
           {t("settings.quota.statusWarning", "Sắp đầy")}
         </span>
       );
     case "exceeded":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-          <XCircle className="h-3 w-3" />
+          <LineIcon name="xmark-circle" className="h-3 w-3" />
           {t("settings.quota.statusExceeded", "Đã đầy")}
         </span>
       );
     case "unlimited":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-auth-accent-dim border border-auth-accent/20 text-auth-accent">
-          <Infinity className="h-3 w-3" />
+          <LineIcon name="infinite" className="h-3 w-3" />
           {t("settings.quota.statusUnlimited", "Không giới hạn")}
         </span>
       );
@@ -123,7 +123,7 @@ export function QuotaCard({ quota, onRetry, isRetrying }: QuotaCardProps) {
             {isRetrying ? (
               <DotMatrixLoader variant="breathe" size="xs" />
             ) : (
-              <RefreshCw className="h-3.5 w-3.5" />
+              <LineIcon name="sync" className="h-3.5 w-3.5" />
             )}
             {t("common.retry", "Thử lại")}
           </button>
@@ -157,7 +157,7 @@ export function QuotaCard({ quota, onRetry, isRetrying }: QuotaCardProps) {
       {/* Usage numbers */}
       {quota.status === "unlimited" ? (
         <div className="flex items-center gap-1.5">
-          <Infinity className="h-5 w-5 text-auth-accent" />
+          <LineIcon name="infinite" className="h-5 w-5 text-auth-accent" />
           <span className="text-xl font-bold text-white">
             {t("settings.quota.unlimited", "Không giới hạn")}
           </span>

@@ -5,7 +5,7 @@
  * Displays logo, headline, value propositions with ambient glow effects.
  */
 
-import { Brain, Search, Target } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { getDictionary } from "@/dictionaries";
 
@@ -14,17 +14,17 @@ export async function BrandPanel({ locale = "vi" }: { locale?: string }) {
 
   const valueProps = [
     {
-      icon: Brain,
+      icon: "brain-alt",
       title: dict.auth.brand.prop1Title,
       description: dict.auth.brand.prop1Desc,
     },
     {
-      icon: Search,
+      icon: "search",
       title: dict.auth.brand.prop2Title,
       description: dict.auth.brand.prop2Desc,
     },
     {
-      icon: Target,
+      icon: "target",
       title: dict.auth.brand.prop3Title,
       description: dict.auth.brand.prop3Desc,
     },
@@ -74,13 +74,12 @@ export async function BrandPanel({ locale = "vi" }: { locale?: string }) {
       {/* Value propositions */}
       <div className="relative flex flex-col gap-3.5">
         {valueProps.map((item) => {
-          const Icon = item.icon;
           return (
             <div key={item.title} className="flex items-center gap-3.5 py-1">
               <div
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-auth-accent-dim)] border border-[var(--color-auth-accent)]/20 text-[var(--color-auth-accent)] 3xl:h-9 3xl:w-9"
               >
-                <Icon className="h-4 w-4 3xl:h-[18px] 3xl:w-[18px]" />
+                <LineIcon name={item.icon} className="h-4 w-4 3xl:h-[18px] 3xl:w-[18px]" />
               </div>
               <div>
                 <strong className="block text-[13px] font-semibold text-auth-text 3xl:text-sm">

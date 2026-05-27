@@ -9,9 +9,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "fetch-svg": "node scripts/fetch-svg.js"
   },
   "dependencies": {
+    "@lineiconshq/free-icons": "^1.0.6",
+    "@lineiconshq/react-lineicons": "^1.0.5",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "hls.js": "^1.6.16",

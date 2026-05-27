@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 
 interface ScrollToTopProps {
   className?: string;
@@ -56,7 +56,7 @@ export function ScrollToTop({ className = "", threshold = 300 }: ScrollToTopProp
         aria-label="Scroll to top"
         title="Cuộn lên đầu trang"
       >
-        <ArrowUp />
+        <LineIcon name="arrow-up" />
       </button>
     </div>
   );

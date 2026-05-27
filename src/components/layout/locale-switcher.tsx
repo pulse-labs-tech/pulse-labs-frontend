@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { motion } from "framer-motion";
-import { Globe } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 
 interface LocaleSwitcherProps {
   id?: string;
@@ -46,7 +46,7 @@ export function LocaleSwitcher({ id = "default" }: LocaleSwitcherProps) {
         transition={{ duration: 0.6, ease: "easeInOut" }}
         className="pl-2 pr-1 text-auth-text-3 flex items-center justify-center cursor-pointer"
       >
-        <Globe className="h-3.5 w-3.5 text-auth-text-3/70 hover:text-emerald-400 transition-colors duration-300" />
+        <LineIcon name="world" className="h-3.5 w-3.5 text-auth-text-3/70 hover:text-emerald-400 transition-colors duration-300" />
       </motion.div>
       
       <div className="relative flex items-center bg-black/25 p-0.5 rounded-full border border-white/[0.03]">

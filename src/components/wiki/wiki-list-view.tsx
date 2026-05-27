@@ -3,33 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  Brain,
-  MessageSquare,
-  BookOpen,
-  Search,
-  Grid3X3,
-  List,
-  FileText,
-  Link2,
-  Upload,
-  FileCode,
-  PenLine,
-  Cpu,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  LogOut,
-  X,
-  SlidersHorizontal,
-  Tag,
-  Globe,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
@@ -46,21 +20,21 @@ import { LocaleSwitcher } from "../layout/locale-switcher";
 function getSourceTypeIcon(type: WikiSourceType) {
   switch (type) {
     case "text":
-      return <FileText className="h-3.5 w-3.5 text-emerald-400" />;
+      return <LineIcon name="files" className="h-3.5 w-3.5 text-emerald-400" />;
     case "url":
-      return <Link2 className="h-3.5 w-3.5 text-blue-400" />;
+      return <LineIcon name="link" className="h-3.5 w-3.5 text-blue-400" />;
     case "file_pdf":
-      return <FileText className="h-3.5 w-3.5 text-red-400" />;
+      return <LineIcon name="files" className="h-3.5 w-3.5 text-red-400" />;
     case "file_txt":
-      return <FileText className="h-3.5 w-3.5 text-slate-400" />;
+      return <LineIcon name="files" className="h-3.5 w-3.5 text-slate-400" />;
     case "file_md":
-      return <FileCode className="h-3.5 w-3.5 text-purple-400" />;
+      return <LineIcon name="code" className="h-3.5 w-3.5 text-purple-400" />;
     case "query_output":
-      return <Cpu className="h-3.5 w-3.5 text-cyan-400" />;
+      return <LineIcon name="cpu" className="h-3.5 w-3.5 text-cyan-400" />;
     case "manual_note":
-      return <PenLine className="h-3.5 w-3.5 text-amber-400" />;
+      return <LineIcon name="pencil" className="h-3.5 w-3.5 text-amber-400" />;
     default:
-      return <Upload className="h-3.5 w-3.5 text-auth-text-3" />;
+      return <LineIcon name="upload" className="h-3.5 w-3.5 text-auth-text-3" />;
   }
 }
 
@@ -82,25 +56,25 @@ function getStatusBadge(status: WikiRetrievalStatus, tFn: (key: string, fallback
     case "indexed":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-          <CheckCircle2 className="h-2.5 w-2.5" /> {tFn("wiki.statuses.ready", "Indexed")}
+          <LineIcon name="checkmark-circle" className="h-2.5 w-2.5" /> {tFn("wiki.statuses.ready", "Indexed")}
         </span>
       );
     case "pending":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
-          <Clock className="h-2.5 w-2.5" /> {tFn("wiki.statuses.pending", "Processing")}
+          <LineIcon name="alarm" className="h-2.5 w-2.5" /> {tFn("wiki.statuses.pending", "Processing")}
         </span>
       );
     case "degraded":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-          <AlertTriangle className="h-2.5 w-2.5" /> {tFn("wiki.statuses.lowQuality", "Low Quality")}
+          <LineIcon name="warning" className="h-2.5 w-2.5" /> {tFn("wiki.statuses.lowQuality", "Low Quality")}
         </span>
       );
     case "failed":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-          <XCircle className="h-2.5 w-2.5" /> {tFn("wiki.statuses.failed", "Index Error")}
+          <LineIcon name="xmark-circle" className="h-2.5 w-2.5" /> {tFn("wiki.statuses.failed", "Index Error")}
         </span>
       );
     default:
@@ -165,7 +139,7 @@ function WikiCard({ item }: { item: WikiItemCard }) {
         <div className="flex items-center gap-1.5 flex-wrap">
           {item.domain?.name && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20">
-              <Globe className="h-2.5 w-2.5" />
+              <LineIcon name="world" className="h-2.5 w-2.5" />
               {item.domain.name}
             </span>
           )}
@@ -193,7 +167,7 @@ function WikiCard({ item }: { item: WikiItemCard }) {
               key={tag}
               className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-white/5 border border-white/10 text-auth-text-3"
             >
-              <Tag className="h-2 w-2" />
+              <LineIcon name="tag" className="h-2 w-2" />
               {tag}
             </span>
           ))}
@@ -239,7 +213,7 @@ function WikiRow({ item }: { item: WikiItemCard }) {
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {item.domain?.name && (
             <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-auth-accent">
-              <Globe className="h-2.5 w-2.5" />
+              <LineIcon name="world" className="h-2.5 w-2.5" />
               {item.domain.name}
             </span>
           )}
@@ -248,7 +222,7 @@ function WikiRow({ item }: { item: WikiItemCard }) {
               key={tag}
               className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-white/5 border border-white/10 text-auth-text-3"
             >
-              <Tag className="h-2 w-2" />
+              <LineIcon name="tag" className="h-2 w-2" />
               {tag}
             </span>
           ))}
@@ -496,19 +470,19 @@ export function WikiListView() {
                 href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" /> {t("common.dashboard", "Dashboard")}
+                <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> {t("common.dashboard", "Dashboard")}
               </Link>
               <Link
                 href={roleKbId ? `/${locale}/query?roleKbId=${roleKbId}` : `/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <MessageSquare className="h-3.5 w-3.5" /> {t("common.query", "Ask AI")}
+                <LineIcon name="comment" className="h-3.5 w-3.5" /> {t("common.query", "Ask AI")}
               </Link>
               <Link
                 href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                <BookOpen className="h-3.5 w-3.5" /> {t("common.wiki", "Personal Wiki")}
+                <LineIcon name="book" className="h-3.5 w-3.5" /> {t("common.wiki", "Personal Wiki")}
               </Link>
             </nav>
           </div>
@@ -524,7 +498,7 @@ export function WikiListView() {
               className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
               <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
               <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
                 Ctrl K
@@ -541,7 +515,7 @@ export function WikiListView() {
               className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-4 w-4 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
             </button>
 
             {/* Mobile Search Trigger Icon */}
@@ -554,7 +528,7 @@ export function WikiListView() {
               className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm" : "Search"}
             >
-              <Search className="h-4 w-4" />
+              <LineIcon name="search" className="h-4 w-4" />
             </button>
 
             <LocaleSwitcher id="wiki-list-header" />
@@ -575,7 +549,7 @@ export function WikiListView() {
               {isPending ? (
                 <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
-                <LogOut className="h-4 w-4" />
+                <LineIcon name="exit" className="h-4 w-4" />
               )}
             </button>
           </div>
@@ -588,7 +562,7 @@ export function WikiListView() {
         {/* API warning banner */}
         {apiWarning && (
           <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400" />
             <span className="flex-1">{apiWarning}</span>
             <button
               onClick={() => { setApiWarning(null); fetchItems(); }}
@@ -597,7 +571,7 @@ export function WikiListView() {
               {t("common.retry", "Retry")}
             </button>
             <button onClick={() => setApiWarning(null)} className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors">
-              <X className="h-4 w-4" />
+              <LineIcon name="xmark" className="h-4 w-4" />
             </button>
           </div>
         )}
@@ -606,7 +580,7 @@ export function WikiListView() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
-              <BookOpen className="h-5 w-5" />
+              <LineIcon name="book" className="h-5 w-5" />
             </div>
             <div>
               <h1 className="text-fluid-xl font-extrabold tracking-tight">{t("wiki.title", "Wiki Library")}</h1>
@@ -632,7 +606,7 @@ export function WikiListView() {
               }`}
               title={locale === "vi" ? "Xem lưới" : "Grid view"}
             >
-              <Grid3X3 className="h-3.5 w-3.5" />
+              <LineIcon name="grid-alt" className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
@@ -643,7 +617,7 @@ export function WikiListView() {
               }`}
               title={locale === "vi" ? "Xem danh sách" : "List view"}
             >
-              <List className="h-3.5 w-3.5" />
+              <LineIcon name="list" className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
@@ -654,7 +628,7 @@ export function WikiListView() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Search input */}
             <div className="relative w-full max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3 pointer-events-none" />
+              <LineIcon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3 pointer-events-none" />
               <input
                 type="text"
                 value={search}
@@ -667,7 +641,7 @@ export function WikiListView() {
                   onClick={() => handleSearchChange("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-auth-text-3 hover:text-auth-text transition-colors"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <LineIcon name="xmark" className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
@@ -678,7 +652,7 @@ export function WikiListView() {
             {/* Sort */}
             <div className="flex items-center gap-2">
               <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">
-                <SlidersHorizontal className="h-3 w-3 inline mr-1" />{t("wiki.sortBy.label", "Sort by")}
+                <LineIcon name="control-panel" className="h-3 w-3 inline mr-1" />{t("wiki.sortBy.label", "Sort by")}
               </label>
               <Select
                 value={sortBy}
@@ -756,7 +730,7 @@ export function WikiListView() {
                 onClick={clearAllFilters}
                 className="inline-flex items-center gap-1 ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-red-950/30 border border-red-500/20 text-red-400 hover:bg-red-950/50 transition-colors"
               >
-                <X className="h-3 w-3" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
+                <LineIcon name="xmark" className="h-3 w-3" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
               </button>
             )}
           </div>
@@ -771,7 +745,7 @@ export function WikiListView() {
             /* No search results */
             <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
               <div className="h-16 w-16 rounded-2xl bg-auth-surface/40 border border-white/[0.06] flex items-center justify-center text-auth-text-3">
-                <Search className="h-8 w-8" />
+                <LineIcon name="search" className="h-8 w-8" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-auth-text">{t("wiki.noResults", "No results found")}</h3>
@@ -783,14 +757,14 @@ export function WikiListView() {
                 onClick={clearAllFilters}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm font-semibold transition-all"
               >
-                <X className="h-4 w-4" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
+                <LineIcon name="xmark" className="h-4 w-4" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
               </button>
             </div>
           ) : (
             /* Completely empty */
             <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
               <div className="h-20 w-20 rounded-2xl bg-auth-surface/40 border border-white/[0.06] flex items-center justify-center text-auth-text-3">
-                <Brain className="h-10 w-10" />
+                <LineIcon name="brain-alt" className="h-10 w-10" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-auth-text">{t("wiki.empty", "No knowledge items yet")}</h3>
@@ -802,7 +776,7 @@ export function WikiListView() {
                 href={roleKbId ? `/${locale}/compile/new?roleKbId=${roleKbId}` : `/${locale}/compile/new`}
                 className="btn-primary-pulse text-sm"
               >
-                <Upload className="h-4 w-4" /> {t("wiki.uploadCta", "Ingest your first document")}
+                <LineIcon name="upload" className="h-4 w-4" /> {t("wiki.uploadCta", "Ingest your first document")}
               </Link>
             </div>
           )
@@ -836,7 +810,7 @@ export function WikiListView() {
                 disabled={page <= 1}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <ChevronLeft className="h-3.5 w-3.5" /> {locale === "vi" ? "Trước" : "Back"}
+                <LineIcon name="chevron-left" className="h-3.5 w-3.5" /> {locale === "vi" ? "Trước" : "Back"}
               </button>
 
               {/* Page number pills */}
@@ -873,7 +847,7 @@ export function WikiListView() {
                 disabled={page >= totalPages}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {t("common.next", "Next")} <ChevronRight className="h-3.5 w-3.5" />
+                {t("common.next", "Next")} <LineIcon name="chevron-right" className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>

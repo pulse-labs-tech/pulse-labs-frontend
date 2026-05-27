@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, RotateCcw } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { Button } from "@/components/ui";
 
 /**
@@ -26,7 +26,7 @@ export default function Error({
       <div className="relative flex max-w-md flex-col items-center text-center">
         {/* Error icon — glowing red badge */}
         <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/20 bg-red-950/30">
-          <AlertTriangle className="h-7 w-7 text-red-400" />
+          <LineIcon name="warning" className="h-7 w-7 text-red-400" />
         </div>
 
         <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
@@ -47,7 +47,7 @@ export default function Error({
           variant="primary"
           size="lg"
           className="group mt-10"
-          leftIcon={<RotateCcw className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-180" />}
+          leftIcon={<LineIcon name="reload" className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-180" />}
         >
           Thử lại
         </Button>

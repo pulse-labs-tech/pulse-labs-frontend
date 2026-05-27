@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Check, Gem, ShieldAlert } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
@@ -64,7 +64,7 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
                   className="h-8 w-8 text-auth-text-3 hover:text-auth-text"
                   aria-label="Close modal"
                 >
-                  <X className="h-4 w-4" />
+                  <LineIcon name="xmark" className="h-4 w-4" />
                 </Button>
               </div>
 
@@ -84,23 +84,23 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
 
                   <div className="flex flex-col gap-3 mt-6 flex-grow">
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-2">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.freeFeature1")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-2">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.freeFeature2")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-2">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.freeFeature3")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-3 line-through">
-                      <X className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
+                      <LineIcon name="xmark" className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.freeFeature4")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text-3 line-through">
-                      <X className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
+                      <LineIcon name="xmark" className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.freeFeature5")}</span>
                     </div>
                   </div>
@@ -123,23 +123,23 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
 
                   <div className="flex flex-col gap-3 mt-6 flex-grow">
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.proFeature1")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.proFeature2")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.proFeature3")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.proFeature4")}</span>
                     </div>
                     <div className="flex items-start gap-2.5 text-xs text-auth-text">
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                       <span>{t("onboarding.proModal.proFeature5")}</span>
                     </div>
                   </div>
@@ -148,7 +148,7 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
 
               {/* Notice */}
               <div className="flex items-start gap-2 bg-auth-orange-dim border border-auth-orange/20 rounded-lg p-3 text-xs text-auth-text-2 mb-6">
-                <ShieldAlert className="h-4 w-4 text-auth-orange shrink-0 mt-0.5" />
+                <LineIcon name="warning" className="h-4 w-4 text-auth-orange shrink-0 mt-0.5" />
                 <span>
                   <strong>{t("onboarding.proModal.notice")}</strong> {t("onboarding.proModal.noticeText")}
                 </span>

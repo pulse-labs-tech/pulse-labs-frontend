@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { Volume2, VolumeX } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 
 export function ShowcaseVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -154,9 +154,9 @@ export function ShowcaseVideo() {
           title={isMuted ? "Mở tiếng" : "Tắt tiếng"}
         >
           {isMuted ? (
-            <VolumeX className="h-4.5 w-4.5 text-white/80" />
+            <LineIcon name="volume-mute" className="h-4.5 w-4.5 text-white/80" />
           ) : (
-            <Volume2 className="h-4.5 w-4.5 text-emerald-400" />
+            <LineIcon name="volume-high" className="h-4.5 w-4.5 text-emerald-400" />
           )}
         </button>
       )}

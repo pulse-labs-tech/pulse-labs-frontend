@@ -8,22 +8,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  Settings,
-  User,
-  Zap,
-  LogOut,
-  RefreshCw,
-  AlertCircle,
-
-  CheckCircle2,
-  ArrowRight,
-  ArrowLeft,
-  Shield,
-  ChevronRight,
-  Crown,
-  Sparkles,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { Button } from "@/components/ui/button";
 import { QuotaCard } from "./quota-card";
 import { useAuth } from "@/hooks/use-auth";
@@ -41,6 +26,7 @@ import type {
 } from "@/types/settings";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
+import Loading from "@/app/[locale]/loading";
 
 interface SettingsViewProps {
   initialSection?: "plan" | "upgrade" | "quota";
@@ -170,16 +156,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
 
   // ─── Loading ────────────────────────────────────────────────────
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-auth-bg">
-        <div className="flex flex-col items-center gap-4">
-          <DotMatrixLoader variant="orbit" size="lg" />
-          <p className="text-sm text-auth-text-2">
-            {t("settings.loading", "Đang tải cài đặt...")}
-          </p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   // ─── Global error (no data) ─────────────────────────────────────
@@ -191,13 +168,13 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           href={`/${locale}/dashboard`}
           className="flex items-center gap-2 mb-2 opacity-70 hover:opacity-100 transition-opacity select-none"
         >
-          <ArrowLeft className="h-4 w-4 text-auth-text-2" />
+          <LineIcon name="arrow-left" className="h-4 w-4 text-auth-text-2" />
           <span className="text-sm text-auth-text-2">{t("common.dashboard", "Dashboard")}</span>
         </Link>
 
         <div className="w-full max-w-md rounded-2xl p-6 text-center shadow-auth relative premium-hover-card-red">
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-6 w-6" />
+            <LineIcon name="warning" className="h-6 w-6" />
           </div>
           <h2 className="text-lg font-bold text-white">
             {t("settings.errors.loadFailed", "Không tải được Settings")}
@@ -209,12 +186,12 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
               size="lg"
               fullWidth
               onClick={loadOverview}
-              leftIcon={<RefreshCw className="h-4 w-4" />}
+              leftIcon={<LineIcon name="sync" className="h-4 w-4" />}
             >
               {t("common.retry", "Thử lại")}
             </Button>
             <Link href={`/${locale}/dashboard`} className="block">
-              <Button variant="ghost" size="lg" fullWidth leftIcon={<ArrowLeft className="h-4 w-4" />}>
+              <Button variant="ghost" size="lg" fullWidth leftIcon={<LineIcon name="arrow-left" className="h-4 w-4" />}>
                 {t("common.backToDashboard", "Về Dashboard")}
               </Button>
             </Link>
@@ -255,9 +232,9 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
             <Link href={`/${locale}/dashboard`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
               ← {t("common.dashboard", "Dashboard")}
             </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-auth-text-3" />
+            <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3" />
             <span className="text-sm font-semibold text-white flex items-center gap-1.5">
-              <Settings className="h-3.5 w-3.5 text-auth-accent" />
+              <LineIcon name="gear" className="h-3.5 w-3.5 text-auth-accent" />
               {t("settings.title", "Cài đặt")}
             </span>
           </div>
@@ -279,7 +256,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         {/* Non-critical warning if overview has section errors */}
         {overview?.sectionErrors && overview.sectionErrors.length > 0 && (
           <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300">
-            <AlertCircle className="h-4 w-4 shrink-0" />
+            <LineIcon name="warning" className="h-4 w-4 shrink-0" />
             <span>{t("settings.errors.partialLoad", "Một số phần Settings chưa tải được. Thông tin còn lại vẫn hiển thị đầy đủ.")}</span>
             <button
               onClick={loadOverview}
@@ -299,7 +276,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           >
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
-                <User className="h-3.5 w-3.5 text-auth-accent" />
+                <LineIcon name="user" className="h-3.5 w-3.5 text-auth-accent" />
               </div>
               <h2 id="settings-account-heading" className="text-sm font-bold text-white">
                 {t("settings.account.title", "Tài khoản")}
@@ -321,7 +298,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
               <div className="flex items-center gap-2">
                 {isPro ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border border-amber-500/30 text-amber-300">
-                    <Crown className="h-3 w-3" />
+                    <LineIcon name="crown" className="h-3 w-3" />
                     Pro Plan
                   </span>
                 ) : (
@@ -333,7 +310,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                 {/* Email verified indicator */}
                 {userCtx.isEmailVerified && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-auth-accent-dim border border-auth-accent/20 text-auth-accent">
-                    <CheckCircle2 className="h-3 w-3" />
+                    <LineIcon name="checkmark-circle" className="h-3 w-3" />
                     {t("settings.account.verified", "Đã xác thực")}
                   </span>
                 )}
@@ -364,7 +341,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isPro ? "bg-amber-500/20" : "bg-auth-accent-dim"}`}>
-                  {isPro ? <Crown className="h-3.5 w-3.5 text-amber-400" /> : <Shield className="h-3.5 w-3.5 text-auth-accent" />}
+                  {isPro ? <LineIcon name="crown" className="h-3.5 w-3.5 text-amber-400" /> : <LineIcon name="shield" className="h-3.5 w-3.5 text-auth-accent" />}
                 </div>
                 <h2 id="settings-plan-heading" className="text-sm font-bold text-white">
                   {t("settings.plan.title", "Gói dịch vụ hiện tại")}
@@ -387,7 +364,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
               </p>
               {!isPro && hasUpgradeIntent && (
                 <p className="text-xs text-amber-300 mt-1 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3 w-3" />
+                  <LineIcon name="checkmark-circle" className="h-3 w-3" />
                   {t("settings.plan.upgradeIntentRecorded", "Đã ghi nhận yêu cầu nâng cấp. Gói hiện tại vẫn là Free.")}
                 </p>
               )}
@@ -411,7 +388,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                 )}
                 {hasUpgradeIntent ? (
                   <Link href={`/${locale}/settings/plan/upgrade`}>
-                    <Button variant="ghost" size="sm" fullWidth rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
+                    <Button variant="ghost" size="sm" fullWidth rightIcon={<LineIcon name="arrow-right" className="h-3.5 w-3.5" />}>
                       {t("settings.plan.viewUpgrade", "Xem trạng thái nâng cấp")}
                     </Button>
                   </Link>
@@ -422,7 +399,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                     fullWidth
                     onClick={handleUpgrade}
                     isLoading={isUpgrading}
-                    leftIcon={<Zap className="h-3.5 w-3.5" />}
+                    leftIcon={<LineIcon name="bolt" className="h-3.5 w-3.5" />}
                   >
                     {t("settings.plan.upgradeCta", "Nâng cấp lên Pro")}
                   </Button>
@@ -447,7 +424,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           >
             <div className="flex items-center gap-2 mb-6">
               <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
-                <Sparkles className="h-3.5 w-3.5 text-auth-accent" />
+                <LineIcon name="star" className="h-3.5 w-3.5 text-auth-accent" />
               </div>
               <h2 id="settings-compare-heading" className="text-sm font-bold text-white uppercase tracking-wider">
                 {t("settings.compare.title", "So sánh gói dịch vụ")}
@@ -479,31 +456,31 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                 <div className="plan-card-divider" />
                 <div className="plan-feature-list">
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>1 Role KB</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>500 MB storage</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>20 compiles / tháng</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>30 queries / ngày</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>3 domains max</span>
                   </div>
                   <div className="plan-feature-item excluded">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <LineIcon name="warning" className="h-4 w-4 shrink-0" />
                     <span>Multi-role profiles</span>
                   </div>
                   <div className="plan-feature-item excluded">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <LineIcon name="warning" className="h-4 w-4 shrink-0" />
                     <span>Auto-Heal features</span>
                   </div>
                 </div>
@@ -539,31 +516,31 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                 <div className="plan-card-divider" />
                 <div className="plan-feature-list">
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span><strong>5</strong> Role KBs</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span><strong>10 GB</strong> storage</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>Unlimited compiles</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>Unlimited queries</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>Unlimited domains</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>Multi-role profiles</span>
                   </div>
                   <div className="plan-feature-item included">
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                     <span>Auto-Heal enabled</span>
                   </div>
                 </div>
@@ -573,7 +550,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                   fullWidth
                   onClick={handleUpgrade}
                   isLoading={isUpgrading}
-                  leftIcon={<Zap className="h-3.5 w-3.5" />}
+                  leftIcon={<LineIcon name="bolt" className="h-3.5 w-3.5" />}
                 >
                   {hasUpgradeIntent
                     ? (locale === "vi" ? "Đã ghi nhận yêu cầu" : "Recorded interest")
@@ -598,7 +575,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
               disabled={isLoading || isRefreshingQuota}
               className="flex items-center gap-1.5 text-xs text-auth-text-2 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshingQuota ? "animate-spin" : ""}`} />
+              <LineIcon name="sync" className={`h-3.5 w-3.5 ${isRefreshingQuota ? "animate-spin" : ""}`} />
               {t("common.retry", "Làm mới")}
             </button>
           </div>
@@ -639,7 +616,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
             size="md"
             onClick={handleLogout}
             isLoading={isLoggingOut || isPending}
-            leftIcon={<LogOut className="h-4 w-4" />}
+            leftIcon={<LineIcon name="exit" className="h-4 w-4" />}
             className="text-red-400 hover:text-red-300 border-red-500/20 hover:border-red-400/30 hover:bg-red-950/20"
           >
             {t("common.logout", "Đăng xuất")}

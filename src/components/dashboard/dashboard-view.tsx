@@ -4,44 +4,7 @@ import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, ScrollToTop } from "@/components/ui";
-import {
-  LayoutDashboard,
-  Brain,
-  MessageSquare,
-  BookOpen,
-  Upload,
-  Link2,
-  FileText,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  ArrowRight,
-  ChevronRight,
-  RefreshCw,
-  LogOut,
-  Compass,
-  Lock,
-  Zap,
-  Activity,
-  Database,
-  Globe,
-
-  AlertCircle,
-  Plus,
-  Landmark,
-  Bot,
-  Server,
-  Clipboard,
-  Shield,
-  Cpu,
-  Code,
-  Box,
-  Star,
-  Pin,
-  Flame,
-  HelpCircle,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { ActivityChart } from "./activity-chart";
 import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
@@ -61,8 +24,8 @@ import type { RoleKbDto } from "@/types/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { PulseLogo } from "@/components/shared/pulse-logo";
-import { Search } from "lucide-react";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
+import Loading from "@/app/[locale]/loading";
 
 interface TechItem {
   icon: string;
@@ -147,43 +110,43 @@ const getDomainIcon = (name: string): string => {
 const getIconComponent = (iconName: string) => {
   switch (iconName?.toLowerCase()) {
     case "landmark":
-      return <Landmark className="h-3.5 w-3.5" />;
+      return <LineIcon name="home" className="h-3.5 w-3.5" />;
     case "bot":
-      return <Bot className="h-3.5 w-3.5" />;
+      return <LineIcon name="android" className="h-3.5 w-3.5" />;
     case "server":
-      return <Server className="h-3.5 w-3.5" />;
+      return <LineIcon name="database" className="h-3.5 w-3.5" />;
     case "clipboard":
-      return <Clipboard className="h-3.5 w-3.5" />;
+      return <LineIcon name="clipboard" className="h-3.5 w-3.5" />;
     case "shield":
-      return <Shield className="h-3.5 w-3.5" />;
+      return <LineIcon name="shield" className="h-3.5 w-3.5" />;
     case "cpu":
-      return <Cpu className="h-3.5 w-3.5" />;
+      return <LineIcon name="cpu" className="h-3.5 w-3.5" />;
     case "code":
-      return <Code className="h-3.5 w-3.5" />;
+      return <LineIcon name="code" className="h-3.5 w-3.5" />;
     case "box":
-      return <Box className="h-3.5 w-3.5" />;
+      return <LineIcon name="package" className="h-3.5 w-3.5" />;
     case "star":
-      return <Star className="h-3.5 w-3.5" />;
+      return <LineIcon name="star" className="h-3.5 w-3.5" />;
     case "pin":
-      return <Pin className="h-3.5 w-3.5" />;
+      return <LineIcon name="pin" className="h-3.5 w-3.5" />;
     case "flame":
-      return <Flame className="h-3.5 w-3.5" />;
+      return <LineIcon name="fire" className="h-3.5 w-3.5" />;
     case "database":
-      return <Database className="h-3.5 w-3.5" />;
+      return <LineIcon name="database" className="h-3.5 w-3.5" />;
     case "zap":
-      return <Zap className="h-3.5 w-3.5" />;
+      return <LineIcon name="bolt" className="h-3.5 w-3.5" />;
     case "globe":
-      return <Globe className="h-3.5 w-3.5" />;
+      return <LineIcon name="world" className="h-3.5 w-3.5" />;
     case "link":
-      return <Link2 className="h-3.5 w-3.5" />;
+      return <LineIcon name="link" className="h-3.5 w-3.5" />;
     case "activity":
-      return <Activity className="h-3.5 w-3.5" />;
+      return <LineIcon name="pulse" className="h-3.5 w-3.5" />;
     case "helpcircle":
-      return <HelpCircle className="h-3.5 w-3.5" />;
+      return <LineIcon name="questionmark-circle" className="h-3.5 w-3.5" />;
     case "plus":
-      return <Plus className="h-3.5 w-3.5" />;
+      return <LineIcon name="plus" className="h-3.5 w-3.5" />;
     default:
-      return <FileText className="h-3.5 w-3.5" />;
+      return <LineIcon name="files" className="h-3.5 w-3.5" />;
   }
 };
 
@@ -462,11 +425,11 @@ export function DashboardView() {
   const getSourceTypeIcon = (type: string) => {
     switch (type) {
       case "text":
-        return <FileText className="h-4 w-4 text-brand-400" />;
+        return <LineIcon name="files" className="h-4 w-4 text-brand-400" />;
       case "url":
-        return <Link2 className="h-4 w-4 text-blue-400" />;
+        return <LineIcon name="link" className="h-4 w-4 text-blue-400" />;
       default:
-        return <Upload className="h-4 w-4 text-purple-400" />;
+        return <LineIcon name="upload" className="h-4 w-4 text-purple-400" />;
     }
   };
 
@@ -481,19 +444,19 @@ export function DashboardView() {
       case "pending":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
-            <Clock className="h-3 w-3" /> {t("dashboard.status.indexing", "Đang chỉ mục")}
+            <LineIcon name="alarm" className="h-3 w-3" /> {t("dashboard.status.indexing", "Đang chỉ mục")}
           </span>
         );
       case "degraded":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
-            <AlertTriangle className="h-3 w-3" /> {t("dashboard.status.lowQuality", "Chất lượng thấp")}
+            <LineIcon name="warning" className="h-3 w-3" /> {t("dashboard.status.lowQuality", "Chất lượng thấp")}
           </span>
         );
       case "failed":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-950/40 border border-red-500/20 text-red-400">
-            <XCircle className="h-3 w-3" /> {t("dashboard.status.error", "Lỗi")}
+            <LineIcon name="xmark-circle" className="h-3 w-3" /> {t("dashboard.status.error", "Lỗi")}
           </span>
         );
       default:
@@ -565,14 +528,7 @@ export function DashboardView() {
 
   // 1. Loading State
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text">
-        <div className="flex flex-col items-center gap-4">
-          <DotMatrixLoader variant="grid" size="xl" />
-          <p className="text-sm text-auth-text-2">{t("dashboard.loading", "Đang tải trung tâm điều khiển...")}</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   // 2. Global Error State (Retryable)
@@ -581,7 +537,7 @@ export function DashboardView() {
       <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text px-4">
         <div className="w-full max-w-md rounded-2xl p-6 text-center shadow-auth relative backdrop-blur-md premium-hover-card-red">
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-6 w-6" />
+            <LineIcon name="warning" className="h-6 w-6" />
           </div>
           <h2 className="text-lg font-bold text-auth-text">{t("dashboard.errors.connectionFailed", "Không thể kết nối dữ liệu")}</h2>
           <p className="text-sm text-auth-text-2 mt-2 leading-relaxed">{globalErrorMsg}</p>
@@ -591,7 +547,7 @@ export function DashboardView() {
               size="lg"
               fullWidth
               onClick={() => fetchDashboardData(selectedRoleKbId || undefined, true)}
-              leftIcon={<RefreshCw className="h-4 w-4" />}
+              leftIcon={<LineIcon name="sync" className="h-4 w-4" />}
             >
               {t("dashboard.btnRetry", "Thử lại")}
             </Button>
@@ -657,7 +613,7 @@ export function DashboardView() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/25 transition-all"
                 title="Dashboard"
               >
-                <LayoutDashboard className="h-3.5 w-3.5 flex-shrink-0" />
+                <LineIcon name="grid-alt" className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="hidden lg:inline">{t("dashboard.title", "Dashboard")}</span>
               </Link>
               <Link
@@ -670,7 +626,7 @@ export function DashboardView() {
                 }`}
                 title={t("compile.labels.sidebarQuery", "Hỏi đáp AI")}
               >
-                <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
+                <LineIcon name="comment" className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="hidden lg:inline">{t("compile.labels.sidebarQuery", "Hỏi đáp AI")}</span>
               </Link>
               <Link
@@ -678,7 +634,7 @@ export function DashboardView() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("common.research", "Nghiên cứu AI")}
               >
-                <Compass className="h-3.5 w-3.5 flex-shrink-0" />
+                <LineIcon name="compass" className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="hidden lg:inline">{t("common.research", "Nghiên cứu")}</span>
               </Link>
               <Link
@@ -686,7 +642,7 @@ export function DashboardView() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("compile.labels.sidebarWiki", "Wiki")}
               >
-                <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
+                <LineIcon name="book" className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="hidden lg:inline">{t("compile.labels.sidebarWiki", "Wiki")}</span>
               </Link>
               <Link
@@ -694,7 +650,7 @@ export function DashboardView() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("common.settings", "Cài đặt")}
               >
-                <Database className="h-3.5 w-3.5 flex-shrink-0" />
+                <LineIcon name="database" className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="hidden lg:inline">{t("common.settings", "Cài đặt")}</span>
               </Link>
             </nav>
@@ -712,7 +668,7 @@ export function DashboardView() {
               className="hidden xl:flex items-center gap-2 h-8 px-3 rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-200 cursor-pointer text-[11px] select-none"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-3.5 w-3.5" />
+              <LineIcon name="search" className="h-3.5 w-3.5" />
               <span>{locale === "vi" ? "Tìm kiếm" : "Search"}</span>
               <kbd className="ml-1 px-1.5 py-0.5 text-[9px] font-mono bg-white/[0.04] border border-white/[0.08] rounded text-auth-text-3/70">⌘K</kbd>
             </button>
@@ -726,7 +682,7 @@ export function DashboardView() {
               }}
               className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] text-auth-text-3 hover:text-white transition-all cursor-pointer"
             >
-              <Search className="h-3.5 w-3.5" />
+              <LineIcon name="search" className="h-3.5 w-3.5" />
             </button>
 
             {/* Mobile search */}
@@ -738,7 +694,7 @@ export function DashboardView() {
               }}
               className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-auth-text-2 hover:text-white transition-all cursor-pointer"
             >
-              <Search className="h-3.5 w-3.5" />
+              <LineIcon name="search" className="h-3.5 w-3.5" />
             </button>
 
             {/* Locale switcher */}
@@ -770,7 +726,7 @@ export function DashboardView() {
                 title={t("dashboard.btnLogout", "Đăng xuất")}
                 aria-label={t("dashboard.btnLogout", "Đăng xuất")}
               >
-                {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LogOut className="h-3.5 w-3.5" />}
+                {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LineIcon name="exit" className="h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
@@ -792,7 +748,7 @@ export function DashboardView() {
         {/* Non-blocking API warning banner */}
         {apiWarning && (
           <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300 animate-fade-in">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400" />
             <span className="flex-1">{apiWarning}</span>
             <button
               onClick={() => { setApiWarning(null); fetchDashboardData(selectedRoleKbId || undefined, true); }}
@@ -801,7 +757,7 @@ export function DashboardView() {
               {t("dashboard.btnRetry", "Thử lại")}
             </button>
             <button onClick={() => setApiWarning(null)} className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors cursor-pointer">
-              <XCircle className="h-4 w-4" />
+              <LineIcon name="xmark-circle" className="h-4 w-4" />
             </button>
           </div>
         )}
@@ -834,7 +790,7 @@ export function DashboardView() {
                   <span>
                     {userRoles.find((r) => r.id === selectedRoleKbId)?.roleName || t("dashboard.selectDomain", "Chọn Chuyên Ngành")}
                   </span>
-                  <ChevronRight className={`h-4 w-4 text-[#52525b] transition-transform duration-300 ${kbDropdownOpen ? "-rotate-90" : "rotate-90"}`} />
+                  <LineIcon name="chevron-right" className={`h-4 w-4 text-[#52525b] transition-transform duration-300 ${kbDropdownOpen ? "-rotate-90" : "rotate-90"}`} />
                 </button>
                 
                 {kbDropdownOpen && (
@@ -1040,7 +996,7 @@ export function DashboardView() {
         {/* Recently Viewed Strip */}
         <div className="recent-strip">
           <div className="recent-strip-label flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+            <LineIcon name="alarm" className="h-3 w-3" />
             {locale === "vi" ? "Xem gần đây" : "Recently Viewed"}
           </div>
           <div className="recent-strip-items flex flex-nowrap gap-2">
@@ -1074,7 +1030,7 @@ export function DashboardView() {
                   <div className="card-label-title">{locale === "vi" ? "Kiến thức Lĩnh vực" : "Domain Knowledge"}</div>
                   <Link className="view-more" href={`/${locale}/wiki`}>
                     {(locale === "vi" ? "Xem tất cả {count} chuyên ngành" : "View all {count} domains").replace("{count}", String(summary?.domainSnapshot?.length || 0))}{" "}
-                    <ArrowRight className="h-3 w-3" />
+                    <LineIcon name="arrow-right" className="h-3 w-3" />
                   </Link>
                 </div>
               </div>
@@ -1119,7 +1075,7 @@ export function DashboardView() {
                   <div className="card-label-title">{locale === "vi" ? "Kiến thức Công nghệ" : "Tech Stack Knowledge"}</div>
                   <Link className="view-more" href={`/${locale}/wiki`}>
                     {locale === "vi" ? "Xem tất cả 12 công nghệ" : "View all 12 technologies"}{" "}
-                    <ArrowRight className="h-3 w-3" />
+                    <LineIcon name="arrow-right" className="h-3 w-3" />
                   </Link>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }} className="relative">
@@ -1231,7 +1187,7 @@ export function DashboardView() {
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div className="card-label-title">{locale === "vi" ? "Bộ Công Cụ" : "Toolkit"}</div>
                   <Link className="view-more" href={`/${locale}/wiki`}>
-                    {t("dashboard.viewAll", "Xem thêm")} <ArrowRight className="h-3 w-3" />
+                    {t("dashboard.viewAll", "Xem thêm")} <LineIcon name="arrow-right" className="h-3 w-3" />
                   </Link>
                 </div>
               </div>
@@ -1244,7 +1200,7 @@ export function DashboardView() {
                       className="group/item flex items-center justify-between py-2 border-b border-[#27272a]/40 text-xs text-auth-text-2 hover:text-white transition-colors"
                     >
                       <span>{item.label}</span>
-                      <ChevronRight className="h-3.5 w-3.5 text-auth-text-3 opacity-0 transform -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
+                      <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3 opacity-0 transform -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
                     </Link>
                   ))}
                 </div>
@@ -1257,7 +1213,7 @@ export function DashboardView() {
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div className="card-label-title">{locale === "vi" ? "Quy Trình Công Việc" : "Workflow"}</div>
                   <Link className="view-more" href={`/${locale}/wiki`}>
-                    {t("dashboard.viewAll", "Xem thêm")} <ArrowRight className="h-3 w-3" />
+                    {t("dashboard.viewAll", "Xem thêm")} <LineIcon name="arrow-right" className="h-3 w-3" />
                   </Link>
                 </div>
               </div>
@@ -1274,7 +1230,7 @@ export function DashboardView() {
                     )}`}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-auth-accent text-white hover:bg-auth-accent-dark transition-all active:scale-[0.98] shadow-[0_0_15px_var(--color-auth-accent-glow)]"
                   >
-                    <Plus className="h-3.5 w-3.5" /> {locale === "vi" ? "Vẽ quy trình AI" : "Generate AI Workflow"}
+                    <LineIcon name="plus" className="h-3.5 w-3.5" /> {locale === "vi" ? "Vẽ quy trình AI" : "Generate AI Workflow"}
                   </Link>
                 </div>
               </div>
@@ -1286,7 +1242,7 @@ export function DashboardView() {
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div className="card-label-title">{locale === "vi" ? "Kỹ Năng Chuyên Môn" : "Skills"}</div>
                   <Link className="view-more" href={`/${locale}/wiki`}>
-                    {t("dashboard.viewAll", "Xem thêm")} <ArrowRight className="h-3.5 w-3.5" />
+                    {t("dashboard.viewAll", "Xem thêm")} <LineIcon name="arrow-right" className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               </div>
@@ -1299,7 +1255,7 @@ export function DashboardView() {
                       className="group/item flex items-center justify-between py-2 border-b border-[#27272a]/40 text-xs text-auth-text-2 hover:text-white transition-colors"
                     >
                       <span>{item.label}</span>
-                      <ChevronRight className="h-3.5 w-3.5 text-auth-text-3 opacity-0 transform -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
+                      <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3 opacity-0 transform -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
                     </Link>
                   ))}
                 </div>
@@ -1319,7 +1275,7 @@ export function DashboardView() {
         className="fab-compile group"
         title={t("compile.labels.sidebarCompile", "Compile new knowledge")}
       >
-        <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+        <LineIcon name="plus" className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
         <span>{t("dashboard.stage.compiling", "Compile")}</span>
       </Link>
 

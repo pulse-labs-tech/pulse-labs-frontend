@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { X, Zap, Lock, AlertTriangle, ArrowRight, Clock } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/contexts/locale-context";
@@ -108,7 +108,7 @@ export function PlanGateModal({
         className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-950/20 px-4 py-3 animate-fade-in"
         role="alert"
       >
-        <Lock className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+        <LineIcon name="lock" className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-red-300">{title}</p>
           <p className="text-xs text-red-400/80 mt-0.5">{message}</p>
@@ -118,7 +118,7 @@ export function PlanGateModal({
             href={upgradePath}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-auth-accent text-white text-xs font-semibold hover:bg-auth-accent-dark transition-colors"
           >
-            <Zap className="h-3 w-3" />
+            <LineIcon name="bolt" className="h-3 w-3" />
             {t("settings.planGate.upgradeCta", "Nâng cấp")}
           </Link>
           <button
@@ -126,7 +126,7 @@ export function PlanGateModal({
             className="text-red-400/60 hover:text-red-300 transition-colors cursor-pointer"
             aria-label={t("common.cancel", "Đóng")}
           >
-            <X className="h-4 w-4" />
+            <LineIcon name="xmark" className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -141,7 +141,7 @@ export function PlanGateModal({
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-red-950/40 border border-red-500/20 flex items-center justify-center shrink-0">
-            <Lock className="h-4 w-4 text-red-400" />
+            <LineIcon name="lock" className="h-4 w-4 text-red-400" />
           </div>
           <div>
             <p className="text-sm font-semibold text-white">{title}</p>
@@ -165,7 +165,7 @@ export function PlanGateModal({
             href={upgradePath}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-auth-accent text-white text-xs font-semibold hover:bg-auth-accent-dark transition-colors"
           >
-            <Zap className="h-3.5 w-3.5" />
+            <LineIcon name="bolt" className="h-3.5 w-3.5" />
             {t("settings.planGate.upgradeCta", "Nâng cấp Pro")}
           </Link>
           <Link
@@ -197,7 +197,7 @@ export function PlanGateModal({
         <div className="flex items-start justify-between p-6 pb-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-950/40 border border-red-500/20 flex items-center justify-center">
-              <Lock className="h-5 w-5 text-red-400" />
+              <LineIcon name="lock" className="h-5 w-5 text-red-400" />
             </div>
             <div>
               <h2
@@ -218,7 +218,7 @@ export function PlanGateModal({
             className="h-8 w-8 rounded-lg flex items-center justify-center text-auth-text-3 hover:text-white hover:bg-auth-elevated transition-colors cursor-pointer"
             aria-label={t("common.cancel", "Đóng")}
           >
-            <X className="h-4 w-4" />
+            <LineIcon name="xmark" className="h-4 w-4" />
           </button>
         </div>
 
@@ -226,7 +226,7 @@ export function PlanGateModal({
         <div className="p-6 space-y-4">
           {/* Gate message */}
           <div className="flex items-start gap-2.5 rounded-lg bg-red-950/20 border border-red-500/20 p-3.5">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
             <p className="text-sm text-red-200 leading-relaxed">{message}</p>
           </div>
 
@@ -241,7 +241,7 @@ export function PlanGateModal({
               </div>
               {hasResetTime && (
                 <div className="flex items-center gap-1.5 text-xs text-auth-text-3">
-                  <Clock className="h-3.5 w-3.5" />
+                  <LineIcon name="alarm" className="h-3.5 w-3.5" />
                   <span>{t("settings.planGate.resetsInfo", "Hạn mức tự động làm mới theo chu kỳ")}</span>
                 </div>
               )}
@@ -255,8 +255,8 @@ export function PlanGateModal({
                 variant="primary"
                 size="lg"
                 fullWidth
-                leftIcon={<Zap className="h-4 w-4" />}
-                rightIcon={<ArrowRight className="h-4 w-4" />}
+                leftIcon={<LineIcon name="bolt" className="h-4 w-4" />}
+                rightIcon={<LineIcon name="arrow-right" className="h-4 w-4" />}
               >
                 {t("settings.planGate.upgradeCta", "Nâng cấp lên Pro")}
               </Button>

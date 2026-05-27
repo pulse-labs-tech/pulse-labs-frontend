@@ -13,7 +13,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
-import { Brain, Search, Target, ChevronRight, Sparkles, Zap, BookOpen, Loader2 } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { Button } from "@/components/ui";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 
@@ -55,7 +55,7 @@ function WelcomeScreen() {
 
   const features = [
     {
-      icon: Brain,
+      icon: "brain-alt",
       title: t("onboarding.welcome.feat1Title"),
       desc: t("onboarding.welcome.feat1Desc"),
       gradient: "from-violet-500/20 to-violet-500/5",
@@ -63,7 +63,7 @@ function WelcomeScreen() {
       borderColor: "border-violet-500/20",
     },
     {
-      icon: Search,
+      icon: "search",
       title: t("onboarding.welcome.feat2Title"),
       desc: t("onboarding.welcome.feat2Desc"),
       gradient: "from-[var(--color-brand-600)]/20 to-[var(--color-brand-600)]/5",
@@ -71,7 +71,7 @@ function WelcomeScreen() {
       borderColor: "border-[var(--color-brand-500)]/20",
     },
     {
-      icon: Target,
+      icon: "target",
       title: t("onboarding.welcome.feat3Title"),
       desc: t("onboarding.welcome.feat3Desc"),
       gradient: "from-amber-500/20 to-amber-500/5",
@@ -109,7 +109,7 @@ function WelcomeScreen() {
           }`}
         >
           <div className="flex items-center gap-2 rounded-full border border-[var(--color-brand-500)]/30 bg-[var(--color-brand-600)]/10 px-4 py-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-[var(--color-brand-400)]" />
+            <LineIcon name="star" className="h-3.5 w-3.5 text-[var(--color-brand-400)]" />
             <span className="text-xs font-semibold text-[var(--color-brand-300)]">
               Tài khoản đã được kích hoạt thành công
             </span>
@@ -172,7 +172,6 @@ function WelcomeScreen() {
           }`}
         >
           {features.map((feature, i) => {
-            const Icon = feature.icon;
             return (
               <div
                 key={i}
@@ -181,7 +180,7 @@ function WelcomeScreen() {
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-xl border ${feature.borderColor} bg-auth-elevated/80`}
                 >
-                  <Icon className={`h-5 w-5 ${feature.iconColor}`} />
+                  <LineIcon name={feature.icon} className={`h-5 w-5 ${feature.iconColor}`} />
                 </div>
                 <div>
                   <h3 className="text-[11px] font-bold text-auth-text uppercase tracking-wider">
@@ -203,12 +202,12 @@ function WelcomeScreen() {
           }`}
         >
           {[
-            { icon: Zap, label: "AI hỏi đáp theo domain" },
-            { icon: BookOpen, label: "Auto-research khi thiếu KB" },
-            { icon: Brain, label: "Expert Advisor cá nhân" },
+            { icon: "bolt", label: "AI hỏi đáp theo domain" },
+            { icon: "book", label: "Auto-research khi thiếu KB" },
+            { icon: "brain-alt", label: "Expert Advisor cá nhân" },
           ].map(({ icon: Icon, label }, i) => (
             <div key={i} className="flex items-center gap-1.5">
-              <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--color-brand-400)]" />
+              <LineIcon name={Icon} className="h-3.5 w-3.5 shrink-0 text-[var(--color-brand-400)]" />
               <span className="text-[11px] text-auth-text-3">{label}</span>
             </div>
           ))}
@@ -225,7 +224,7 @@ function WelcomeScreen() {
             size="lg"
             isLoading={isRedirecting}
             onClick={handleContinue}
-            rightIcon={!isRedirecting ? <ChevronRight className="h-5 w-5" /> : undefined}
+            rightIcon={!isRedirecting ? <LineIcon name="chevron-right" className="h-5 w-5" /> : undefined}
             className="min-w-[240px] text-[15px] font-bold"
           >
             {t("onboarding.welcome.btn")}

@@ -2,18 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Brain,
-  Search,
-  Target,
-  Check,
-  X,
-  UploadCloud,
-  ChevronRight,
-  ArrowLeft,
-  Gem,
-  Lock,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui";
@@ -630,7 +619,7 @@ export function OnboardingWizard() {
                       : "border-auth-accent text-auth-accent bg-auth-accent-dim shadow-auth shadow-auth-accent-glow"
                   }`}
                 >
-                  {currentStep !== "welcome" ? <Check className="h-3 w-3 stroke-[3]" /> : 1}
+                  {currentStep !== "welcome" ? <LineIcon name="checkmark" className="h-3 w-3 stroke-[3]" /> : 1}
                 </div>
                 <div
                   className={`flex-grow h-[2px] mx-2 ${
@@ -650,7 +639,7 @@ export function OnboardingWizard() {
                         : "border-auth-border text-auth-text-3 bg-auth-elevated"
                   }`}
                 >
-                  {currentStep === "seed_kb" ? <Check className="h-3 w-3 stroke-[3]" /> : 2}
+                  {currentStep === "seed_kb" ? <LineIcon name="checkmark" className="h-3 w-3 stroke-[3]" /> : 2}
                 </div>
                 <div
                   className={`flex-grow h-[2px] mx-2 ${
@@ -690,7 +679,7 @@ export function OnboardingWizard() {
           {/* ────────────────── Error Alert Region ────────────────── */}
           {errorMsg && (
             <div className="bg-auth-error-dim border border-auth-error/30 text-auth-error rounded-xl p-4 text-sm flex items-start gap-3 animate-fade-in">
-              <X
+              <LineIcon name="xmark"
                 className="h-5 w-5 shrink-0 cursor-pointer hover:opacity-80"
                 onClick={() => setErrorMsg(null)}
               />
@@ -726,7 +715,7 @@ export function OnboardingWizard() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
-                    <Brain className="h-5 w-5" />
+                    <LineIcon name="brain-alt" className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
                     {t("onboarding.welcome.feat1Title")}
@@ -738,7 +727,7 @@ export function OnboardingWizard() {
 
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
-                    <Search className="h-5 w-5" />
+                    <LineIcon name="search" className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
                     {t("onboarding.welcome.feat2Title")}
@@ -750,7 +739,7 @@ export function OnboardingWizard() {
 
                 <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
-                    <Target className="h-5 w-5" />
+                    <LineIcon name="target" className="h-5 w-5" />
                   </div>
                   <h3 className="text-xs font-bold text-auth-text uppercase tracking-wider">
                     {t("onboarding.welcome.feat3Title")}
@@ -768,7 +757,7 @@ export function OnboardingWizard() {
                   variant="primary"
                   size="md"
                   onClick={() => setCurrentStep("pick_role")}
-                  rightIcon={<ChevronRight className="h-4 w-4" />}
+                  rightIcon={<LineIcon name="chevron-right" className="h-4 w-4" />}
                 >
                   {t("onboarding.welcome.btn")}
                 </Button>
@@ -811,7 +800,7 @@ export function OnboardingWizard() {
                           onClick={() => handleRemoveRole(role.id)}
                           className="hover:bg-auth-accent-dark/20 rounded p-0.5"
                         >
-                          <X className="h-3 w-3" />
+                          <LineIcon name="xmark" className="h-3 w-3" />
                         </button>
                       </span>
                     ))}
@@ -865,7 +854,7 @@ export function OnboardingWizard() {
                           >
                             {isSelected && (
                               <span className="absolute top-2 right-2">
-                                <Check className="h-3 w-3 text-auth-accent" />
+                                <LineIcon name="checkmark" className="h-3 w-3 text-auth-accent" />
                               </span>
                             )}
                             <span className="text-xs font-bold text-auth-text leading-snug">
@@ -912,7 +901,7 @@ export function OnboardingWizard() {
               {showProNudge && plan === "free" && (
                 <div className="flex justify-between items-center bg-auth-elevated border border-auth-accent/30 rounded-xl p-3.5 text-xs text-auth-text-2 animate-fade-up">
                   <div className="flex items-center gap-2">
-                    <Gem className="h-4.5 w-4.5 text-auth-accent animate-pulse" />
+                    <LineIcon name="crown" className="h-4.5 w-4.5 text-auth-accent animate-pulse" />
                     <span>
                       {t("onboarding.pickRole.proNudgePrefix")}
                       <strong>{t("onboarding.pickRole.proNudgeHighlight")}</strong>
@@ -937,7 +926,7 @@ export function OnboardingWizard() {
                   variant="ghost"
                   size="md"
                   onClick={() => setCurrentStep("welcome")}
-                  leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
+                  leftIcon={<LineIcon name="arrow-left" className="h-3.5 w-3.5" />}
                 >
                   {t("common.back")}
                 </Button>
@@ -949,7 +938,7 @@ export function OnboardingWizard() {
                     onClick={handleSaveRoles}
                     isLoading={isSubmitting}
                     disabled={selectedRoles.length === 0 || isSubmitting || rateLimitCooldown !== null}
-                    rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
+                    rightIcon={!isSubmitting ? <LineIcon name="chevron-right" className="h-4 w-4" /> : undefined}
                   >
                     {t("common.next")}
                   </Button>
@@ -1001,9 +990,9 @@ export function OnboardingWizard() {
                     compileJob.status !== "cancelled" ? (
                       <DotMatrixLoader variant="pulse" size="sm" />
                     ) : compileJob.status === "wiki_ready" ? (
-                      <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
+                      <LineIcon name="checkmark" className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                     ) : (
-                      <X className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
+                      <LineIcon name="xmark" className="h-4 w-4 text-auth-error shrink-0 mt-0.5" />
                     )}
                     <div className="flex-grow">
                       <p className="text-xs font-semibold text-auth-text">
@@ -1051,7 +1040,7 @@ export function OnboardingWizard() {
                       size="md"
                       onClick={() => handleOnboardingComplete(false)}
                       isLoading={isSubmitting}
-                      rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
+                      rightIcon={!isSubmitting ? <LineIcon name="chevron-right" className="h-4 w-4" /> : undefined}
                     >
                       {compileJob.status === "wiki_ready"
                         ? t("onboarding.seed.goToDashboard")
@@ -1064,11 +1053,11 @@ export function OnboardingWizard() {
                   {/* File Upload Zone (MVP hidden/disabled with "Coming Soon" badge) */}
                   <div className="border border-dashed border-auth-border bg-auth-elevated/40 rounded-xl p-4 sm:p-6 text-center flex flex-col gap-3 items-center relative overflow-hidden">
                     <div className="absolute top-2 right-2 bg-auth-accent-dim border border-auth-accent/20 text-auth-accent text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
-                      <Lock className="h-3 w-3" />
+                      <LineIcon name="lock" className="h-3 w-3" />
                       {t("onboarding.seed.comingSoon")}
                     </div>
                     <div className="w-11 h-11 rounded-lg bg-auth-elevated border border-auth-border flex items-center justify-center text-auth-text-3">
-                      <UploadCloud className="h-5 w-5" />
+                      <LineIcon name="cloud-upload" className="h-5 w-5" />
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-auth-text-3">
@@ -1149,7 +1138,7 @@ export function OnboardingWizard() {
                       variant="ghost"
                       size="md"
                       onClick={() => setCurrentStep("pick_role")}
-                      leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
+                      leftIcon={<LineIcon name="arrow-left" className="h-3.5 w-3.5" />}
                     >
                       {t("common.back")}
                     </Button>
@@ -1173,7 +1162,7 @@ export function OnboardingWizard() {
                           rateLimitCooldown !== null ||
                           (seedType === "text" ? seedText.length < 50 : !seedUrl)
                         }
-                        rightIcon={!isSubmitting ? <ChevronRight className="h-4 w-4" /> : undefined}
+                        rightIcon={!isSubmitting ? <LineIcon name="chevron-right" className="h-4 w-4" /> : undefined}
                       >
                         {t("onboarding.seed.submit")}
                       </Button>

@@ -10,27 +10,7 @@ import {
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  MessageSquare,
-  Send,
-  Trash2,
-  Plus,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  LayoutDashboard,
-  LogOut,
-
-  AlertTriangle,
-  AlertCircle,
-  Zap,
-  Database,
-  ExternalLink,
-  Sparkles,
-  RefreshCw,
-  TrendingUp,
-  CheckCircle2,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
@@ -38,7 +18,6 @@ import { createQuerySessionAction, submitQueryMessageAction } from "@/app/action
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
-import { Search } from "lucide-react";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import type { QueryCitation } from "@/types/query";
 import type { RoleKbDto } from "@/types/onboarding";
@@ -96,17 +75,17 @@ function ConfidenceBadge({ level, t }: { level: "high" | "medium" | "low"; t: (p
     high: {
       label: t("query.confidenceHigh"),
       cls: "bg-emerald-950/40 border border-emerald-500/20 text-emerald-400",
-      Icon: CheckCircle2,
+      Icon: "checkmark-circle",
     },
     medium: {
       label: t("query.confidenceMedium"),
       cls: "bg-amber-950/40 border border-amber-500/20 text-amber-400",
-      Icon: TrendingUp,
+      Icon: "grow",
     },
     low: {
       label: t("query.confidenceLow"),
       cls: "bg-red-950/40 border border-red-500/20 text-red-400",
-      Icon: AlertTriangle,
+      Icon: "warning",
     },
   };
   const { label, cls, Icon } = map[level];
@@ -114,7 +93,7 @@ function ConfidenceBadge({ level, t }: { level: "high" | "medium" | "low"; t: (p
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${cls}`}
     >
-      <Icon className="h-2.5 w-2.5" />
+      <LineIcon name={Icon} className="h-2.5 w-2.5" />
       {label}
     </span>
   );
@@ -138,7 +117,7 @@ function CitationCard({ citation, index, t }: { citation: QueryCitation; index: 
         <span className="text-[9px] font-bold uppercase tracking-wider text-auth-text-3 bg-auth-bg/60 border border-white/[0.06] px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
           {citation.domain?.name || "Unknown"}
         </span>
-        <ExternalLink className="h-3 w-3 text-auth-text-3 group-hover:text-emerald-400 transition-colors shrink-0" />
+        <LineIcon name="popup" className="h-3 w-3 text-auth-text-3 group-hover:text-emerald-400 transition-colors shrink-0" />
       </div>
 
       {/* Title */}
@@ -177,12 +156,12 @@ function CitationsPanel({ citations, t }: { citations: QueryCitation[]; t: (path
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
       >
-        <BookOpen className="h-3 w-3" />
+        <LineIcon name="book" className="h-3 w-3" />
         {t("query.citationsCount", "{count} sources").replace("{count}", citations.length.toString())}
         {open ? (
-          <ChevronUp className="h-3 w-3" />
+          <LineIcon name="chevron-up" className="h-3 w-3" />
         ) : (
-          <ChevronDown className="h-3 w-3" />
+          <LineIcon name="chevron-down" className="h-3 w-3" />
         )}
       </button>
 
@@ -201,7 +180,7 @@ function CitationsPanel({ citations, t }: { citations: QueryCitation[]; t: (path
 function KbGapWarning({ suggestion, locale, t }: { suggestion: string | null; locale: string; t: (path: string) => string }) {
   return (
     <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
-      <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+      <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
       <div>
         <p className="text-xs font-bold text-amber-300">{t("query.gapTitle")}</p>
         {suggestion && (
@@ -211,7 +190,7 @@ function KbGapWarning({ suggestion, locale, t }: { suggestion: string | null; lo
           href={`/${locale}/compile/new`}
           className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
         >
-          <Plus className="h-3 w-3" /> {t("query.gapButton")}
+          <LineIcon name="plus" className="h-3 w-3" /> {t("query.gapButton")}
         </Link>
       </div>
     </div>
@@ -242,7 +221,7 @@ function AssistantMessage({ msg, locale, t }: { msg: QueryMessage; locale: strin
         {/* Header row */}
         <div className="flex items-center gap-2 mb-2">
           <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
-            <Sparkles className="h-3 w-3 text-white" />
+            <LineIcon name="star" className="h-3 w-3 text-white" />
           </div>
           <span className="text-[11px] font-bold text-auth-text-3 uppercase tracking-wider">
             Pulse AI
@@ -301,7 +280,7 @@ function EmptyState({
       {/* Icon */}
       <div className="relative mb-6">
         <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.1)]">
-          <MessageSquare className="h-10 w-10 text-emerald-400" />
+          <LineIcon name="comment" className="h-10 w-10 text-emerald-400" />
         </div>
         <div
           className="absolute inset-0 rounded-2xl blur-xl opacity-30"
@@ -341,7 +320,7 @@ function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => stri
   return (
     <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
       <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center mb-6">
-        <Database className="h-10 w-10 text-amber-400" />
+        <LineIcon name="database" className="h-10 w-10 text-amber-400" />
       </div>
       <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2">
         {t("query.emptyKbTitle")}
@@ -353,7 +332,7 @@ function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => stri
         href={`/${locale}/compile/new`}
         className="btn-primary-pulse text-sm"
       >
-        <Plus className="h-4 w-4" />
+        <LineIcon name="plus" className="h-4 w-4" />
         {t("query.emptyKbButton")}
       </Link>
     </div>
@@ -364,7 +343,7 @@ function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => stri
 function QuotaExceededBanner({ locale, t }: { locale: string; t: (path: string) => string }) {
   return (
     <div className="mx-4 mb-4 rounded-xl border border-red-500/20 bg-red-950/20 p-4 flex items-start gap-3">
-      <AlertCircle className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
+      <LineIcon name="warning" className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
       <div className="flex-1">
         <p className="text-sm font-bold text-red-300">{t("query.limitTitle")}</p>
         <p className="text-xs text-red-200/70 mt-1">
@@ -374,7 +353,7 @@ function QuotaExceededBanner({ locale, t }: { locale: string; t: (path: string) 
           href={`/${locale}/settings/billing`}
           className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors"
         >
-          <Zap className="h-3.5 w-3.5" /> {t("query.limitButton")}
+          <LineIcon name="bolt" className="h-3.5 w-3.5" /> {t("query.limitButton")}
         </Link>
       </div>
     </div>
@@ -649,19 +628,19 @@ export function QueryView() {
                 href={`/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+                <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> Dashboard
               </Link>
               <Link
                 href={`/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                <MessageSquare className="h-3.5 w-3.5" /> Hỏi đáp AI
+                <LineIcon name="comment" className="h-3.5 w-3.5" /> Hỏi đáp AI
               </Link>
               <Link
                 href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <BookOpen className="h-3.5 w-3.5" /> Wiki Cá nhân
+                <LineIcon name="book" className="h-3.5 w-3.5" /> Wiki Cá nhân
               </Link>
             </nav>
           </div>
@@ -677,7 +656,7 @@ export function QueryView() {
               className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-3.5 w-3.5 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
               <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
               <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
                 Ctrl K
@@ -694,7 +673,7 @@ export function QueryView() {
               className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
-              <Search className="h-4 w-4 text-auth-text-3/70" />
+              <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
             </button>
 
             {/* Mobile Search Trigger Icon */}
@@ -707,7 +686,7 @@ export function QueryView() {
               className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm" : "Search"}
             >
-              <Search className="h-4 w-4" />
+              <LineIcon name="search" className="h-4 w-4" />
             </button>
 
             <LocaleSwitcher id="query-header" />
@@ -728,7 +707,7 @@ export function QueryView() {
               {isPending ? (
                 <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
-                <LogOut className="h-4 w-4" />
+                <LineIcon name="exit" className="h-4 w-4" />
               )}
             </button>
           </div>
@@ -755,7 +734,7 @@ export function QueryView() {
                 {/* Role name */}
                 <div className="flex items-start gap-2 mb-3">
                   <div className="h-8 w-8 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
-                    <MessageSquare className="h-4 w-4" />
+                    <LineIcon name="comment" className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-auth-text truncate">
@@ -814,7 +793,7 @@ export function QueryView() {
               href={`/${locale}/compile/new`}
               className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-white transition-all"
             >
-              <Plus className="h-4 w-4 text-auth-accent" />
+              <LineIcon name="plus" className="h-4 w-4 text-auth-accent" />
               {t("query.gapButton", "Nạp thêm tài liệu")}
             </Link>
 
@@ -823,7 +802,7 @@ export function QueryView() {
               disabled={messages.length === 0}
               className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-red-950/30 hover:border-red-500/20 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-red-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Trash2 className="h-4 w-4" />
+              <LineIcon name="trash" className="h-4 w-4" />
               {t("query.deleteSession", "Xóa cuộc hội thoại")}
             </button>
           </div>
@@ -855,7 +834,7 @@ export function QueryView() {
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-[0_0_10px_rgba(52,211,153,0.2)]">
-                <Sparkles className="h-3.5 w-3.5 text-white" />
+                <LineIcon name="star" className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-bold text-auth-text">{t("query.headerTitle", "Hỏi đáp AI")}</p>
@@ -871,7 +850,7 @@ export function QueryView() {
               disabled={messages.length === 0}
               className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs text-auth-text-2 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <LineIcon name="trash" className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{t("query.btnDelete", "Xóa hội thoại")}</span>
             </button>
           </div>
@@ -904,7 +883,7 @@ export function QueryView() {
                   <div className="flex justify-start">
                     <div className="flex items-center gap-2">
                       <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
-                        <Sparkles className="h-3 w-3 text-white" />
+                        <LineIcon name="star" className="h-3 w-3 text-white" />
                       </div>
                       <TypingIndicator t={t} />
                     </div>
@@ -914,14 +893,14 @@ export function QueryView() {
                 {/* Inline error (non-KB-empty, non-quota) */}
                 {inlineError && inlineError !== "KB_INSUFFICIENT" && (
                   <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
-                    <AlertCircle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+                    <LineIcon name="warning" className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs text-red-300">{inlineError}</p>
                       <button
                         onClick={handleRetry}
                         className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-red-400 hover:text-red-300 transition-colors"
                       >
-                        <RefreshCw className="h-3 w-3" /> {t("common.retry")}
+                        <LineIcon name="sync" className="h-3 w-3" /> {t("common.retry")}
                       </button>
                     </div>
                   </div>
@@ -990,7 +969,7 @@ export function QueryView() {
                   {isAnswering ? (
                     <DotMatrixLoader variant="wave" size="md" />
                   ) : (
-                    <Send className="h-5 w-5" />
+                    <LineIcon name="send" className="h-5 w-5" />
                   )}
                 </button>
               </div>

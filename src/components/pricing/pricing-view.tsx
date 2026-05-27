@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, Crown, Zap, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Check } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { Button } from "@/components/ui/button";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
@@ -89,7 +89,7 @@ export function PricingView() {
         <div className="text-center max-w-2xl">
           <ScrollReveal direction="up" delay={0.1}>
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] font-semibold text-auth-text-2 backdrop-blur-md uppercase tracking-wider">
-              <Crown className="h-3 w-3 text-amber-400" />
+              <LineIcon name="crown" className="h-3 w-3 text-amber-400" />
               {locale === "vi" ? "Gói dịch vụ linh hoạt" : "Flexible Service Tiers"}
             </div>
           </ScrollReveal>
@@ -169,31 +169,31 @@ export function PricingView() {
 
               <div className="plan-feature-list">
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>1 Role KB</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>500 MB storage</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>20 compiles / tháng</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>30 queries / ngày</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>3 domains max</span>
                 </div>
                 <div className="plan-feature-item excluded">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <LineIcon name="warning" className="h-4 w-4 shrink-0" />
                   <span>Multi-role profiles</span>
                 </div>
                 <div className="plan-feature-item excluded">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <LineIcon name="warning" className="h-4 w-4 shrink-0" />
                   <span>Auto-Heal feature</span>
                 </div>
               </div>
@@ -237,31 +237,31 @@ export function PricingView() {
 
               <div className="plan-feature-list">
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span><strong>5</strong> Role KBs</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span><strong>10 GB</strong> storage</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>Unlimited compiles</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>Unlimited queries</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>Unlimited domains</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>Multi-role profiles</span>
                 </div>
                 <div className="plan-feature-item included">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                   <span>Auto-Heal enabled</span>
                 </div>
               </div>
@@ -275,12 +275,12 @@ export function PricingView() {
                   disabled
                   className="w-full py-3 bg-auth-accent/20 text-auth-accent font-semibold rounded-xl text-xs cursor-not-allowed border border-auth-accent/30 flex items-center justify-center gap-1.5"
                 >
-                  <Check className="h-3.5 w-3.5" />
+                  <LineIcon name="checkmark" className="h-3.5 w-3.5" />
                   {locale === "vi" ? "Đang hoạt động" : "Active"}
                 </button>
               ) : hasRecordedIntent ? (
                 <Link href={`/${locale}/settings/plan`} className="w-full">
-                  <Button variant="ghost" size="lg" fullWidth rightIcon={<ArrowRight className="h-4 w-4" />}>
+                  <Button variant="ghost" size="lg" fullWidth rightIcon={<LineIcon name="arrow-right" className="h-4 w-4" />}>
                     {locale === "vi" ? "Xem trạng thái đăng ký" : "View intent status"}
                   </Button>
                 </Link>
@@ -291,7 +291,7 @@ export function PricingView() {
                   fullWidth
                   onClick={handleUpgradeAction}
                   isLoading={isUpgrading}
-                  leftIcon={<Zap className="h-4 w-4" />}
+                  leftIcon={<LineIcon name="bolt" className="h-4 w-4" />}
                 >
                   {locale === "vi" ? "Nâng cấp lên Pro" : "Upgrade to Pro"}
                 </Button>
@@ -304,7 +304,7 @@ export function PricingView() {
         {/* Security / SSL stamp */}
         <ScrollReveal direction="up" delay={0.7} className="mt-4">
           <div className="flex items-center gap-2 text-xs text-auth-text-3 font-semibold select-none">
-            <ShieldCheck className="h-4 w-4 text-auth-text-3" />
+            <LineIcon name="shield" className="h-4 w-4 text-auth-text-3" />
             <span>
               {locale === "vi"
                 ? "Hệ thống bảo mật 256-bit SSL · Hỗ trợ thanh toán an toàn"

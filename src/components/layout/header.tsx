@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
@@ -54,7 +54,7 @@ export function Header() {
             aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? <LineIcon name="xmark" className="h-5 w-5" /> : <LineIcon name="menu" className="h-5 w-5" />}
           </Button>
         </div>
       </nav>

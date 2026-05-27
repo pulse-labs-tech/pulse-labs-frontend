@@ -21,7 +21,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
+import Loading from "@/app/[locale]/loading";
 import { useAuth } from "@/hooks/use-auth";
 import type { AuthUser } from "@/types/auth";
 
@@ -36,14 +36,7 @@ interface ProtectedRouteProps {
 
 /** Default full-screen loading spinner */
 function DefaultSpinner() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-auth-bg">
-      <div className="flex flex-col items-center gap-4">
-        <DotMatrixLoader variant="orbit" size="lg" />
-        <p className="text-sm text-auth-text-2">Đang tải...</p>
-      </div>
-    </div>
-  );
+  return <Loading />;
 }
 
 export function ProtectedRoute({

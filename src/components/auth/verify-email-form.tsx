@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { verifyEmailAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
@@ -123,7 +123,7 @@ export function VerifyEmailForm() {
           {status === "success" && (
             <div className="flex flex-col items-center gap-4 w-full">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-brand-500/20 bg-brand-950/30">
-                <CheckCircle2 className="h-6 w-6 text-brand-400" />
+                <LineIcon name="checkmark-circle" className="h-6 w-6 text-brand-400" />
               </div>
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
                 {t("auth.verify.successTitle")}
@@ -143,7 +143,7 @@ export function VerifyEmailForm() {
           {status === "error" && (
             <div className="flex flex-col items-center gap-4 w-full">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-auth-error/20 bg-auth-error-dim">
-                <AlertCircle className="h-6 w-6 text-auth-error" />
+                <LineIcon name="warning" className="h-6 w-6 text-auth-error" />
               </div>
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
                 {t("auth.verify.failedTitle")}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Brain, MessageSquareText, Layers, BookOpen, Search, Target, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { generatePageMetadata, generateWebPageJsonLd } from "@/lib/seo";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -46,12 +46,12 @@ export default async function HomePage({
   const dict = await getDictionary(locale);
 
   const features = [
-    { icon: Brain, color: "green" as const, title: dict.landing.feature1Title, description: dict.landing.feature1Desc, tag: "Role KB" },
-    { icon: MessageSquareText, color: "purple" as const, title: dict.landing.feature2Title, description: dict.landing.feature2Desc, tag: "Query AI" },
-    { icon: Layers, color: "amber" as const, title: dict.landing.feature3Title, description: dict.landing.feature3Desc, tag: "Pipeline" },
-    { icon: BookOpen, color: "green" as const, title: dict.landing.feature4Title, description: dict.landing.feature4Desc, tag: "Wiki" },
-    { icon: Search, color: "purple" as const, title: dict.landing.feature5Title, description: dict.landing.feature5Desc, tag: "Research" },
-    { icon: Target, color: "amber" as const, title: dict.landing.feature6Title, description: dict.landing.feature6Desc, tag: "Advisor" },
+    { icon: "brain-alt", color: "green" as const, title: dict.landing.feature1Title, description: dict.landing.feature1Desc, tag: "Role KB" },
+    { icon: "comment-text", color: "purple" as const, title: dict.landing.feature2Title, description: dict.landing.feature2Desc, tag: "Query AI" },
+    { icon: "layers", color: "amber" as const, title: dict.landing.feature3Title, description: dict.landing.feature3Desc, tag: "Pipeline" },
+    { icon: "book", color: "green" as const, title: dict.landing.feature4Title, description: dict.landing.feature4Desc, tag: "Wiki" },
+    { icon: "search", color: "purple" as const, title: dict.landing.feature5Title, description: dict.landing.feature5Desc, tag: "Research" },
+    { icon: "target", color: "amber" as const, title: dict.landing.feature6Title, description: dict.landing.feature6Desc, tag: "Advisor" },
   ];
 
   const steps = [
@@ -106,11 +106,11 @@ export default async function HomePage({
                 <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                   <Link href={`/${locale}/register`} className="group inline-flex items-center gap-2 rounded-full bg-auth-accent px-8 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_var(--color-auth-accent-glow)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:bg-auth-accent-dark hover:shadow-[0_0_40px_var(--color-auth-accent-glow)] active:scale-95 3xl:text-base">
                     {dict.landing.ctaStart}
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                    <LineIcon name="arrow-right" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </Link>
                   <a href="#how-it-works" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 py-3.5 text-sm font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95 3xl:text-base">
                     {dict.landing.ctaHow}
-                    <ChevronRight className="h-4 w-4" />
+                    <LineIcon name="chevron-right" className="h-4 w-4" />
                   </a>
                 </div>
               </ScrollReveal>
@@ -141,11 +141,11 @@ export default async function HomePage({
                 </div>
               </ScrollReveal>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:gap-5">
-                {features.map((f, i) => { const Icon = f.icon; return (
+                {features.map((f, i) => { return (
                   <ScrollReveal key={f.tag} delay={i * 0.1} direction="up">
                     <div className="group h-full relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] 3xl:p-8">
                        <div className="mb-5 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-auth-elevated text-auth-text-3 border border-auth-border transition-all duration-300 group-hover:bg-auth-accent-dim group-hover:text-auth-accent group-hover:border-auth-accent/20 group-hover:scale-105 3xl:h-11 3xl:w-11"><Icon className="h-[18px] w-[18px] 3xl:h-5 3xl:w-5" /></div>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-auth-elevated text-auth-text-3 border border-auth-border transition-all duration-300 group-hover:bg-auth-accent-dim group-hover:text-auth-accent group-hover:border-auth-accent/20 group-hover:scale-105 3xl:h-11 3xl:w-11"><LineIcon name={f.icon} className="h-[18px] w-[18px] 3xl:h-5 3xl:w-5" /></div>
                         <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-medium text-auth-text-3">{f.tag}</span>
                       </div>
                       <h3 className="mb-2 text-[15px] font-bold tracking-tight 3xl:text-base">{f.title}</h3>
@@ -199,7 +199,7 @@ export default async function HomePage({
                   </p>
                   <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                     <Link href={`/${locale}/register`} className="group inline-flex items-center gap-2 rounded-full bg-auth-accent px-10 py-4 text-base font-bold text-white shadow-[0_0_30px_var(--color-auth-accent-glow)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:bg-auth-accent-dark hover:shadow-[0_0_60px_var(--color-auth-accent-glow)] active:scale-95">
-                      {dict.landing.ctaStart} <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      {dict.landing.ctaStart} <LineIcon name="arrow-right" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                     </Link>
                     <a href="mailto:support@pulseknowledge.com" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-10 py-4 text-base font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95">
                       {dict.landing.ctaContact}

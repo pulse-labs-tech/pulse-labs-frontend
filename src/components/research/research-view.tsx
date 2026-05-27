@@ -3,20 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  Microscope,
-  Plus,
-  ChevronRight,
-  AlertCircle,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Zap,
-  RefreshCw,
-  BarChart3,
-  FileText,
-  Search,
-} from "lucide-react";
+import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -43,13 +30,13 @@ function getStatusIcon(status: ResearchStatus) {
   }
   switch (status) {
     case "completed":
-      return <CheckCircle2 className="h-3.5 w-3.5 text-auth-accent" />;
+      return <LineIcon name="checkmark-circle" className="h-3.5 w-3.5 text-auth-accent" />;
     case "failed":
-      return <XCircle className="h-3.5 w-3.5 text-red-400" />;
+      return <LineIcon name="xmark-circle" className="h-3.5 w-3.5 text-red-400" />;
     case "cancelled":
-      return <XCircle className="h-3.5 w-3.5 text-auth-text-3" />;
+      return <LineIcon name="xmark-circle" className="h-3.5 w-3.5 text-auth-text-3" />;
     default:
-      return <Clock className="h-3.5 w-3.5 text-auth-text-3" />;
+      return <LineIcon name="alarm" className="h-3.5 w-3.5 text-auth-text-3" />;
   }
 }
 
@@ -198,9 +185,9 @@ export function ResearchView() {
           <Link href={`/${locale}/dashboard`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
             ← {t("common.dashboard", "Dashboard")}
           </Link>
-          <ChevronRight className="h-3.5 w-3.5 text-auth-text-3" />
+          <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3" />
           <span className="text-sm font-semibold text-white flex items-center gap-1.5">
-            <Microscope className="h-3.5 w-3.5 text-auth-accent" />
+            <LineIcon name="search" className="h-3.5 w-3.5 text-auth-accent" />
             {t("research.title", "Nghiên cứu AI")}
           </span>
         </div>
@@ -221,7 +208,7 @@ export function ResearchView() {
 
           <div className="flex items-center gap-2 mb-4">
             <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
-              <Plus className="h-3.5 w-3.5 text-auth-accent" />
+              <LineIcon name="plus" className="h-3.5 w-3.5 text-auth-accent" />
             </div>
             <h2 className="text-sm font-bold text-white">
               {t("research.create.title", "Tạo nghiên cứu mới")}
@@ -254,7 +241,7 @@ export function ResearchView() {
 
             {createError && (
               <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-950/20 px-3 py-2.5 text-xs text-red-300">
-                <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>{createError}</span>
               </div>
             )}
@@ -269,7 +256,7 @@ export function ResearchView() {
                 size="sm"
                 isLoading={isCreating}
                 disabled={query.trim().length < 2 || query.length > 8000}
-                leftIcon={<Search className="h-3.5 w-3.5" />}
+                leftIcon={<LineIcon name="search" className="h-3.5 w-3.5" />}
               >
                 {t("research.create.button", "Bắt đầu nghiên cứu")}
               </Button>
@@ -302,7 +289,7 @@ export function ResearchView() {
               disabled={isLoadingRuns}
               className="flex items-center gap-1.5 text-xs text-auth-text-2 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isLoadingRuns ? "animate-spin" : ""}`} />
+              <LineIcon name="sync" className={`h-3.5 w-3.5 ${isLoadingRuns ? "animate-spin" : ""}`} />
             </button>
           </div>
 
@@ -312,7 +299,7 @@ export function ResearchView() {
             </div>
           ) : listError ? (
             <div className="text-center py-8 space-y-3">
-              <AlertCircle className="h-8 w-8 text-auth-text-3 mx-auto" />
+              <LineIcon name="warning" className="h-8 w-8 text-auth-text-3 mx-auto" />
               <p className="text-sm text-auth-text-2">{listError}</p>
               <Button variant="ghost" size="sm" onClick={() => loadRuns()}>
                 {t("common.retry", "Thử lại")}
@@ -320,7 +307,7 @@ export function ResearchView() {
             </div>
           ) : historyRuns.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-auth-border rounded-2xl space-y-3">
-              <Microscope className="h-10 w-10 text-auth-text-3 mx-auto opacity-50" />
+              <LineIcon name="search" className="h-10 w-10 text-auth-text-3 mx-auto opacity-50" />
               <p className="text-sm font-semibold text-auth-text-2">
                 {t("research.history.empty", "Chưa có nghiên cứu nào")}
               </p>
@@ -402,7 +389,7 @@ function ResearchRunCard({
           )}
           {isCompleted && (
             <span className="flex items-center gap-1 text-xs text-auth-text-3">
-              <FileText className="h-3 w-3" />
+              <LineIcon name="files" className="h-3 w-3" />
               {run.sourceCount} {t("research.sources", "nguồn")}
             </span>
           )}
@@ -412,7 +399,7 @@ function ResearchRunCard({
         </div>
       </div>
 
-      <ChevronRight className="h-4 w-4 text-auth-text-3 shrink-0 group-hover:text-white transition-colors mt-1" />
+      <LineIcon name="chevron-right" className="h-4 w-4 text-auth-text-3 shrink-0 group-hover:text-white transition-colors mt-1" />
     </Link>
   );
 }
