@@ -26,6 +26,19 @@ import { LocaleSwitcher } from "../layout/locale-switcher";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import Loading from "@/app/[locale]/loading";
+import {
+  Database,
+  Globe,
+  MessageSquare,
+  Zap,
+  Activity,
+  RefreshCw,
+  XCircle,
+  Search,
+  LayoutDashboard,
+  BookOpen,
+  Compass,
+} from "lucide-react";
 
 interface TechItem {
   icon: string;
@@ -889,10 +902,188 @@ export function DashboardView() {
           </section>
         )}
 
-        {/* Activity Chart Section */}
+        {/* Activity Chart + Stats Panel */}
         <section className="hero-section">
-          <ActivityChart />
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 items-start">
+
+            {/* ── Left: Activity Chart (60%) ── */}
+            <div className="xl:col-span-3">
+              <ActivityChart />
+            </div>
+
+            {/* ── Right: Token Terminal Stats Panel (40%) ── */}
+            <div className="xl:col-span-2 flex flex-col gap-3">
+              {/* Header */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[#52525b]">
+                  {locale === "vi" ? "Thống Kê Tổng Quan" : "Key Metrics"}
+                </span>
+                <span className="text-[10px] text-[#3f3f46] font-mono">live</span>
+              </div>
+
+              {/* Stat cards grid */}
+              <div className="grid grid-cols-2 gap-2.5">
+
+                {/* 1. Knowledge Items */}
+                <div className="stat-terminal-card group">
+                  <div className="stat-terminal-label">
+                    <Database className="h-3 w-3" />
+                    {locale === "vi" ? "Tài liệu KB" : "KB Items"}
+                  </div>
+                  <div className="stat-terminal-value">{stats.totalItems.toLocaleString()}</div>
+                  <div className="stat-terminal-sub">
+                    {stats.indexedItems} {locale === "vi" ? "đã index" : "indexed"}
+                    {stats.pendingRetrievalItems > 0 && (
+                      <span className="text-amber-400/70"> · {stats.pendingRetrievalItems} pending</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Active Domains */}
+                <div className="stat-terminal-card group">
+                  <div className="stat-terminal-label">
+                    <Globe className="h-3 w-3" />
+                    {locale === "vi" ? "Domain" : "Domains"}
+                  </div>
+                  <div className="stat-terminal-value">{stats.activeDomains}</div>
+                  <div className="stat-terminal-sub">
+                    {locale === "vi" ? "chuyên ngành đang dùng" : "active domains"}
+                  </div>
+                </div>
+
+                {/* 3. AI Queries (today) */}
+                <div className="stat-terminal-card group">
+                  <div className="stat-terminal-label">
+                    <MessageSquare className="h-3 w-3" />
+                    {locale === "vi" ? "Query AI hôm nay" : "AI Queries"}
+                  </div>
+                  <div className="stat-terminal-value">
+                    {stats.queriesUsedToday}
+                    {stats.queriesLimitToday > 0 && (
+                      <span className="stat-terminal-limit">/{stats.queriesLimitToday}</span>
+                    )}
+                  </div>
+                  {stats.queriesLimitToday > 0 && (
+                    <div className="stat-terminal-bar-track">
+                      <div
+                        className="stat-terminal-bar-fill"
+                        style={{
+                          width: `${Math.min((stats.queriesUsedToday / stats.queriesLimitToday) * 100, 100)}%`,
+                          background: stats.queriesUsedToday >= stats.queriesLimitToday
+                            ? "var(--color-auth-error)"
+                            : stats.queriesUsedToday >= stats.queriesLimitToday * 0.8
+                            ? "#f59e0b"
+                            : "var(--color-auth-accent)",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Compiles (this month) */}
+                <div className="stat-terminal-card group">
+                  <div className="stat-terminal-label">
+                    <Zap className="h-3 w-3" />
+                    {locale === "vi" ? "Ingests tháng này" : "Ingests / mo"}
+                  </div>
+                  <div className="stat-terminal-value">
+                    {stats.compilesUsedThisMonth}
+                    {stats.compilesLimitThisMonth > 0 && (
+                      <span className="stat-terminal-limit">/{stats.compilesLimitThisMonth}</span>
+                    )}
+                  </div>
+                  {stats.compilesLimitThisMonth > 0 && (
+                    <div className="stat-terminal-bar-track">
+                      <div
+                        className="stat-terminal-bar-fill"
+                        style={{
+                          width: `${Math.min((stats.compilesUsedThisMonth / stats.compilesLimitThisMonth) * 100, 100)}%`,
+                          background: stats.compilesUsedThisMonth >= stats.compilesLimitThisMonth
+                            ? "var(--color-auth-error)"
+                            : stats.compilesUsedThisMonth >= stats.compilesLimitThisMonth * 0.8
+                            ? "#f59e0b"
+                            : "#ff6b4a",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Storage — full width */}
+                <div className="stat-terminal-card group col-span-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="stat-terminal-label mb-1.5">
+                        <Activity className="h-3 w-3" />
+                        {locale === "vi" ? "Dung lượng lưu trữ" : "Storage"}
+                      </div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="stat-terminal-value">
+                          {stats.storageUsedBytes >= 1073741824
+                            ? `${(stats.storageUsedBytes / 1073741824).toFixed(1)} GB`
+                            : `${(stats.storageUsedBytes / 1048576).toFixed(1)} MB`}
+                        </span>
+                        {stats.storageLimitBytes > 0 && (
+                          <span className="stat-terminal-limit">
+                            / {stats.storageLimitBytes >= 1073741824
+                              ? `${(stats.storageLimitBytes / 1073741824).toFixed(0)} GB`
+                              : `${(stats.storageLimitBytes / 1048576).toFixed(0)} MB`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {stats.storageLimitBytes > 0 && (
+                      <span className="text-[11px] font-bold tabular-nums text-[#71717a] mt-1">
+                        {Math.round((stats.storageUsedBytes / stats.storageLimitBytes) * 100)}%
+                      </span>
+                    )}
+                  </div>
+                  {stats.storageLimitBytes > 0 && (
+                    <div className="stat-terminal-bar-track mt-2">
+                      <div
+                        className="stat-terminal-bar-fill"
+                        style={{
+                          width: `${Math.min((stats.storageUsedBytes / stats.storageLimitBytes) * 100, 100)}%`,
+                          background: (stats.storageUsedBytes / stats.storageLimitBytes) >= 0.9
+                            ? "var(--color-auth-error)"
+                            : (stats.storageUsedBytes / stats.storageLimitBytes) >= 0.7
+                            ? "#f59e0b"
+                            : "var(--color-auth-purple)",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 6. Active/Failed Jobs */}
+                {(stats.processingJobs > 0 || stats.failedJobs > 0) && (
+                  <div className="stat-terminal-card group col-span-2">
+                    <div className="stat-terminal-label">
+                      <RefreshCw className="h-3 w-3" />
+                      {locale === "vi" ? "Jobs đang chạy" : "Active Jobs"}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      {stats.processingJobs > 0 && (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-auth-accent">
+                          <span className="h-1.5 w-1.5 rounded-full bg-auth-accent animate-pulse" />
+                          {stats.processingJobs} processing
+                        </span>
+                      )}
+                      {stats.failedJobs > 0 && (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-red-400">
+                          <XCircle className="h-3 w-3" />
+                          {stats.failedJobs} failed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </div>
         </section>
+
 
         {/* Quota Panel (Account Limits) */}
         {quota && (
