@@ -2049,3 +2049,30 @@ select:focus {
   background-size: 200% auto !important;
 }
 
+/* ============================================================
+   ANT DESIGN ICONS — Perfect Alignment & Sizing Overrides
+   ============================================================ */
+
+.anticon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  line-height: 0 !important;
+  text-align: center !important;
+}
+
+.anticon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
+/* If parent has height or width utility classes, force the SVG to fill the container */
+.anticon[class*="h-"] svg,
+.anticon[class*="w-"] svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
