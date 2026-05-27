@@ -56,7 +56,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 border-t border-white/[0.04] pt-6">
-          <p className="text-center text-[11px] text-auth-text-3/60">© {new Date().getFullYear()} Pulse Knowledge. {t("common.allRightsReserved")}</p>
+          <p className="text-center text-[11px] text-auth-text-3/60">© {new Date().getFullYear()} Pulse Knowledge. All rights reserved.</p>
         </div>
       </div>
     </footer>
