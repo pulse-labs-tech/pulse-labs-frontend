@@ -15,7 +15,7 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { loginAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
@@ -88,7 +88,7 @@ export function LoginForm() {
         {/* Loading overlay while redirecting after successful login */}
         {state?.redirectTo ? (
           <div className="flex items-center justify-center gap-3 py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-auth-accent" />
+            <DotMatrixLoader variant="wave" size="md" />
             <span className="text-sm text-auth-text-2">Đang đăng nhập...</span>
           </div>
         ) : (

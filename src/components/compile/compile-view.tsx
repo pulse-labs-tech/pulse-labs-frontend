@@ -24,7 +24,7 @@ import {
   Link2,
   Lock,
   LogOut,
-  Loader2,
+
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -43,6 +43,7 @@ import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { Search } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { createSourceAction, getCompileJobAction } from "@/app/actions/compile";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { CompileJob } from "@/types/compile";
@@ -629,7 +630,7 @@ export function CompileView() {
               title={t("common.logout", "Đăng xuất")}
             >
               {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+                <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}
@@ -780,7 +781,7 @@ export function CompileView() {
               </label>
               {rolesLoading ? (
                 <div className="h-10 bg-auth-elevated border border-auth-border rounded-xl flex items-center px-3 gap-2">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-auth-accent" />
+                  <DotMatrixLoader variant="pulse" size="xs" />
                   <span className="text-xs text-auth-text-3">{t("compile.labels.kbLoading", "Đang tải...")}</span>
                 </div>
               ) : userRoles.length > 1 ? (
@@ -918,7 +919,7 @@ export function CompileView() {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <DotMatrixLoader variant="pulse" size="sm" />
                     {t("common.sending", "Đang gửi...")}
                   </>
                 ) : (
@@ -973,7 +974,7 @@ export function CompileView() {
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-blue-950/40 border border-blue-500/20 text-blue-400 animate-pulse">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <DotMatrixLoader variant="pulse" size="xs" />
                       {t("compile.labels.statusProcessing", "Đang xử lý")}
                     </span>
                   )}
@@ -1102,7 +1103,7 @@ export function CompileView() {
             {/* ── Still processing — waiting state ── */}
             {currentJob && !currentJob.isTerminal && !pollError && (
               <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3">
-                <Loader2 className="h-4 w-4 text-blue-400 animate-spin shrink-0" />
+                <DotMatrixLoader variant="pulse" size="sm" />
                 <p className="text-xs text-blue-400">
                   {t("compile.labels.step3Desc", "Hệ thống đang biên soạn. Trang sẽ tự cập nhật — bạn không cần làm gì thêm.")}
                 </p>

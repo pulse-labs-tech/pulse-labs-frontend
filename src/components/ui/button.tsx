@@ -21,7 +21,7 @@
  */
 
 import * as React from "react";
-import { Loader2 } from "lucide-react";
+import { DotMatrixLoader } from "./dot-matrix-loader";
 
 // ─── Variant + Size Maps ───────────────────────────────────────────────────
 
@@ -163,7 +163,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading ? (
           <>
-            <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden="true" />
+            <DotMatrixLoader variant="pulse" size="xs" />
             {children && size !== "icon" && (
               <span className="opacity-70">{children}</span>
             )}

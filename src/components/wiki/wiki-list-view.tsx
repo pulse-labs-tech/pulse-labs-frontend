@@ -25,12 +25,12 @@ import {
   ChevronRight,
   ChevronDown,
   LogOut,
-  Loader2,
   X,
   SlidersHorizontal,
   Tag,
   Globe,
 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
@@ -573,7 +573,7 @@ export function WikiListView() {
               title={t("common.logout", "Log Out")}
             >
               {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+                <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}

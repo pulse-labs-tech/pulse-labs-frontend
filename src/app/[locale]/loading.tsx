@@ -1,9 +1,9 @@
 /**
  * Global loading UI — shown during Next.js route transitions.
  *
- * Design: Full-screen dark splash with the animated Pulse logo,
- * spinning orbital rings, an ECG waveform draw animation,
- * shimmer wordmark, and a travelling progress bar.
+ * Design: Full-screen dark splash with dot-matrix grid animation,
+ * Pulse logo, shimmer wordmark, and a dot-matrix progress indicator.
+ * Inspired by dotmatrix.zzzzshawn.cloud + pixelpoint.io aesthetic.
  */
 export default function Loading() {
   return (
@@ -30,23 +30,75 @@ export default function Loading() {
         }}
       />
 
+      {/* ── Dot grid background ── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, oklch(1 0 0 / 0.03) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+
       {/* ── Centre content ── */}
       <div className="relative flex flex-col items-center gap-8">
 
-        {/* Logo icon with orbital ring + glow pulse */}
+        {/* Logo icon with dot-matrix orbital animation */}
         <div className="relative flex items-center justify-center">
-          {/* Outer spinning orbital ring */}
-          <div
+          {/* Dot-matrix orbit ring (outer) */}
+          <svg
             aria-hidden="true"
-            className="absolute h-28 w-28 rounded-full border border-[var(--color-brand-400)]/20"
-            style={{ animation: "loading-orbit 3s linear infinite" }}
-          />
-          {/* Dashed inner ring counter-rotation */}
-          <div
+            className="absolute"
+            width="120"
+            height="120"
+            viewBox="0 0 120 120"
+            style={{ animation: "loading-orbit 6s linear infinite" }}
+          >
+            {Array.from({ length: 12 }).map((_, i) => {
+              const angle = (i / 12) * Math.PI * 2;
+              const cx = 60 + Math.cos(angle) * 52;
+              const cy = 60 + Math.sin(angle) * 52;
+              const opacity = 0.15 + (i / 12) * 0.6;
+              return (
+                <circle
+                  key={`o-${i}`}
+                  cx={cx}
+                  cy={cy}
+                  r={2}
+                  fill="var(--color-brand-400)"
+                  opacity={opacity}
+                />
+              );
+            })}
+          </svg>
+
+          {/* Dot-matrix orbit ring (inner, counter-rotate) */}
+          <svg
             aria-hidden="true"
-            className="absolute h-20 w-20 rounded-full border border-dashed border-[var(--color-accent-400)]/15"
-            style={{ animation: "loading-orbit-rev 4s linear infinite" }}
-          />
+            className="absolute"
+            width="88"
+            height="88"
+            viewBox="0 0 88 88"
+            style={{ animation: "loading-orbit-rev 4.5s linear infinite" }}
+          >
+            {Array.from({ length: 8 }).map((_, i) => {
+              const angle = (i / 8) * Math.PI * 2;
+              const cx = 44 + Math.cos(angle) * 36;
+              const cy = 44 + Math.sin(angle) * 36;
+              const opacity = 0.1 + (i / 8) * 0.5;
+              return (
+                <circle
+                  key={`i-${i}`}
+                  cx={cx}
+                  cy={cy}
+                  r={1.5}
+                  fill="var(--color-accent-400)"
+                  opacity={opacity}
+                />
+              );
+            })}
+          </svg>
 
           {/* Pulsing glow disc */}
           <div
@@ -55,7 +107,7 @@ export default function Loading() {
             style={{ animation: "loading-glow-pulse 2s ease-in-out infinite" }}
           />
 
-          {/* Icon container */}
+          {/* Icon container — Pulse Logo */}
           <div
             className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl"
             style={{
@@ -157,25 +209,25 @@ export default function Loading() {
           </p>
         </div>
 
-        {/* Progress bar */}
+        {/* Dot-matrix progress indicator (replaces solid progress bar) */}
         <div
-          className="w-48 overflow-hidden rounded-full"
-          style={{
-            height: "2px",
-            background: "oklch(0.25 0.008 260)",
-            animation: "loading-text-appear 0.5s ease-out 0.5s both",
-          }}
+          className="flex items-center gap-1.5"
+          style={{ animation: "loading-text-appear 0.5s ease-out 0.5s both" }}
           aria-hidden="true"
         >
-          <div
-            className="h-full rounded-full"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent 0%, var(--color-brand-400) 40%, var(--color-accent-400) 60%, transparent 100%)",
-              animation: "progress-travel 1.8s ease-in-out infinite",
-              width: "60%",
-            }}
-          />
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-full"
+              style={{
+                width: "4px",
+                height: "4px",
+                backgroundColor: "var(--color-brand-400)",
+                opacity: 0.15,
+                animation: `dotm-progress-dot 1.8s ease-in-out ${i * 0.15}s infinite`,
+              }}
+            />
+          ))}
         </div>
       </div>
 
@@ -208,9 +260,9 @@ export default function Loading() {
           0%   { background-position: 0% center; }
           100% { background-position: 200% center; }
         }
-        @keyframes progress-travel {
-          0%   { transform: translateX(-100%); }
-          100% { transform: translateX(280%); }
+        @keyframes dotm-progress-dot {
+          0%, 100% { opacity: 0.15; transform: scale(1); }
+          50%      { opacity: 0.9; transform: scale(1.5); }
         }
       `}</style>
     </div>

@@ -9,12 +9,12 @@ import {
   Check,
   X,
   UploadCloud,
-  Loader2,
   ChevronRight,
   ArrowLeft,
   Gem,
   Lock,
 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui";
 import { ProModal } from "./pro-modal";
@@ -602,7 +602,7 @@ export function OnboardingWizard() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
+          <DotMatrixLoader variant="orbit" size="lg" />
           <p className="text-sm text-auth-text-2">{t("onboarding.seed.progressLoading", "Đang tải trạng thái thiết lập...")}</p>
         </div>
       </div>
@@ -1001,7 +1001,7 @@ export function OnboardingWizard() {
                     {compileJob.status !== "wiki_ready" &&
                     compileJob.status !== "failed" &&
                     compileJob.status !== "cancelled" ? (
-                      <Loader2 className="h-4 w-4 text-auth-accent animate-spin shrink-0 mt-0.5" />
+                      <DotMatrixLoader variant="pulse" size="sm" />
                     ) : compileJob.status === "wiki_ready" ? (
                       <Check className="h-4 w-4 text-auth-accent shrink-0 mt-0.5" />
                     ) : (

@@ -26,7 +26,7 @@ import {
   Activity,
   Database,
   Globe,
-  Loader2,
+
   AlertCircle,
   Plus,
   Landmark,
@@ -62,6 +62,7 @@ import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { Search } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 
 interface TechItem {
   icon: string;
@@ -567,7 +568,7 @@ export function DashboardView() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-auth-accent" />
+          <DotMatrixLoader variant="grid" size="xl" />
           <p className="text-sm text-auth-text-2">{t("dashboard.loading", "Đang tải trung tâm điều khiển...")}</p>
         </div>
       </div>
@@ -770,7 +771,7 @@ export function DashboardView() {
                 title={t("dashboard.btnLogout", "Đăng xuất")}
                 aria-label={t("dashboard.btnLogout", "Đăng xuất")}
               >
-                {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
+                {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LogOut className="h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
@@ -783,7 +784,7 @@ export function DashboardView() {
         {isChangingRole && (
           <div className="absolute inset-0 bg-[#09090b]/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="h-8 w-8 animate-spin text-brand-400" />
+              <DotMatrixLoader variant="orbit" size="lg" />
               <p className="text-sm text-[#a1a1aa]">{t("dashboard.errors.syncingRoles", "Đang đồng bộ vai trò chuyên môn...")}</p>
             </div>
           </div>
@@ -886,7 +887,7 @@ export function DashboardView() {
                 </p>
               </div>
               <span className="flex items-center gap-1.5 text-xs text-brand-400 font-semibold animate-pulse">
-                <Loader2 className="h-3 w-3 animate-spin" /> {t("query.loading", "Đang tải...")}
+                <DotMatrixLoader variant="breathe" size="xs" /> {t("query.loading", "Đang tải...")}
               </span>
             </div>
 

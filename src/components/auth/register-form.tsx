@@ -19,7 +19,8 @@
 import { useActionState, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Eye, EyeOff, Mail } from "lucide-react";
+import { Eye, EyeOff, Mail } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { registerAction, resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
@@ -75,7 +76,7 @@ export function RegisterForm() {
     return (
       <div className="flex w-full flex-col items-center justify-center bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-7 w-7 animate-spin text-auth-accent" />
+          <DotMatrixLoader variant="orbit" size="lg" />
           <p className="text-sm text-auth-text-2">Đang thiết lập tài khoản...</p>
         </div>
       </div>

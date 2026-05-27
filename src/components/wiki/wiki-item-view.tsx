@@ -20,7 +20,6 @@ import {
   Clock,
   ChevronRight,
   LogOut,
-  Loader2,
   AlertCircle,
   ArrowLeft,
   ExternalLink,
@@ -36,6 +35,7 @@ import {
   Lightbulb,
   Dot,
 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemAction } from "@/app/actions/wiki";
@@ -377,7 +377,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
               title={t("common.logout")}
             >
               {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+                <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}

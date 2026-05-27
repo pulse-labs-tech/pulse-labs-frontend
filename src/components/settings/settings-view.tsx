@@ -15,7 +15,7 @@ import {
   LogOut,
   RefreshCw,
   AlertCircle,
-  Loader2,
+
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
@@ -40,6 +40,7 @@ import type {
   SettingsErrorCode,
 } from "@/types/settings";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 
 interface SettingsViewProps {
   initialSection?: "plan" | "upgrade" | "quota";
@@ -172,7 +173,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-auth-bg">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
+          <DotMatrixLoader variant="orbit" size="lg" />
           <p className="text-sm text-auth-text-2">
             {t("settings.loading", "Đang tải cài đặt...")}
           </p>

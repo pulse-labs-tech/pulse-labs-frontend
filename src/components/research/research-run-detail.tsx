@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   Microscope,
   ChevronRight,
-  Loader2,
   AlertCircle,
   CheckCircle2,
   XCircle,
@@ -22,6 +21,7 @@ import {
   Quote,
   ExternalLink,
 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/contexts/locale-context";
 import {
@@ -244,7 +244,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-auth-bg">
-        <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
+        <DotMatrixLoader variant="orbit" size="lg" />
       </div>
     );
   }
@@ -306,7 +306,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                 isCompleted ? "bg-auth-accent-dim" :
                 isFailed ? "bg-red-950/40" : "bg-auth-elevated"
               }`}>
-                {isActive && <Loader2 className="h-3.5 w-3.5 animate-spin text-auth-accent" />}
+                {isActive && <DotMatrixLoader variant="pulse" size="xs" />}
                 {isCompleted && <CheckCircle2 className="h-3.5 w-3.5 text-auth-accent" />}
                 {isFailed && <XCircle className="h-3.5 w-3.5 text-red-400" />}
                 {isCancelled && <XCircle className="h-3.5 w-3.5 text-auth-text-3" />}
@@ -372,7 +372,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
         {isActive && (
           <section className="rounded-2xl border border-auth-accent/20 bg-auth-accent-dim/10 p-5">
             <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+              <DotMatrixLoader variant="pulse" size="sm" />
               {t("research.progress.title", "Tiến độ nghiên cứu")}
             </h2>
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-1">

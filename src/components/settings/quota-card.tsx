@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, XCircle, Infinity, RefreshCw, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, XCircle, Infinity, RefreshCw } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import type { QuotaCardData, QuotaStatus } from "@/types/settings";
 import { useTranslation } from "@/contexts/locale-context";
 
@@ -120,7 +121,7 @@ export function QuotaCard({ quota, onRetry, isRetrying }: QuotaCardProps) {
             className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-auth-accent hover:text-auth-accent-light transition-colors disabled:opacity-50 cursor-pointer"
           >
             {isRetrying ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <DotMatrixLoader variant="breathe" size="xs" />
             ) : (
               <RefreshCw className="h-3.5 w-3.5" />
             )}

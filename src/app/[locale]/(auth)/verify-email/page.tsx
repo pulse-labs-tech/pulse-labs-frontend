@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { BrandPanel } from "@/components/auth/brand-panel";
 import { VerifyEmailForm } from "@/components/auth/verify-email-form";
 import { generatePageMetadata, generateWebPageJsonLd } from "@/lib/seo";
@@ -46,7 +46,7 @@ function VerifyEmailFallback() {
         <div className="flex flex-col items-center text-center">
           <div className="flex flex-col items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-auth-accent/20 bg-auth-accent-dim">
-              <Loader2 className="h-6 w-6 animate-spin text-auth-accent" />
+              <DotMatrixLoader variant="ripple" size="md" />
             </div>
             <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
               Pulse Knowledge

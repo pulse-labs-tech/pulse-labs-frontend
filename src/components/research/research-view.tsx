@@ -7,7 +7,6 @@ import {
   Microscope,
   Plus,
   ChevronRight,
-  Loader2,
   AlertCircle,
   Clock,
   CheckCircle2,
@@ -18,6 +17,7 @@ import {
   FileText,
   Search,
 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
@@ -39,7 +39,7 @@ const ACTIVE_STATUSES: ResearchStatus[] = [
 
 function getStatusIcon(status: ResearchStatus) {
   if (ACTIVE_STATUSES.includes(status)) {
-    return <Loader2 className="h-3.5 w-3.5 animate-spin text-auth-accent" />;
+    return <DotMatrixLoader variant="pulse" size="xs" />;
   }
   switch (status) {
     case "completed":
@@ -310,7 +310,7 @@ export function ResearchView() {
 
           {isLoadingRuns ? (
             <div className="flex items-center justify-center py-12 text-auth-text-3">
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <DotMatrixLoader variant="ripple" size="md" />
             </div>
           ) : listError ? (
             <div className="text-center py-8 space-y-3">

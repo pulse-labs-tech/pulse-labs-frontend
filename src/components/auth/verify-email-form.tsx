@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { verifyEmailAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import type { AuthErrorCode } from "@/types/auth";
@@ -108,7 +109,7 @@ export function VerifyEmailForm() {
           {status === "loading" && (
             <div className="flex flex-col items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-auth-accent/20 bg-auth-accent-dim">
-                <Loader2 className="h-6 w-6 animate-spin text-auth-accent" />
+                <DotMatrixLoader variant="ripple" size="md" />
               </div>
               <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
                 {t("auth.verify.verifyingTitle")}

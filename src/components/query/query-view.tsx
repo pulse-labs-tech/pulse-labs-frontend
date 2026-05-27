@@ -20,7 +20,7 @@ import {
   ChevronUp,
   LayoutDashboard,
   LogOut,
-  Loader2,
+
   AlertTriangle,
   AlertCircle,
   Zap,
@@ -39,6 +39,7 @@ import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { Search } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import type { QueryCitation } from "@/types/query";
 import type { RoleKbDto } from "@/types/onboarding";
 
@@ -725,7 +726,7 @@ export function QueryView() {
               title={t("common.logout", "Đăng xuất")}
             >
               {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+                <DotMatrixLoader variant="pulse" size="sm" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}
@@ -748,7 +749,7 @@ export function QueryView() {
 
             {isLoadingRoles ? (
               <div className="flex items-center gap-2 text-xs text-auth-text-3">
-                <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+                <DotMatrixLoader variant="pulse" size="sm" />
                 {t("common.loading", "Đang tải...")}
               </div>
             ) : selectedRole ? (
@@ -992,7 +993,7 @@ export function QueryView() {
                   title={t("query.button", "Gửi")}
                 >
                   {isAnswering ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <DotMatrixLoader variant="wave" size="md" />
                   ) : (
                     <Send className="h-5 w-5" />
                   )}

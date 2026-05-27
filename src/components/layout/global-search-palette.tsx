@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, Loader2, BookOpen, FileText, Link2, FileCode, Cpu, CornerDownLeft } from "lucide-react";
+import { Search, BookOpen, FileText, Link2, FileCode, Cpu, CornerDownLeft } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { getWikiItemsAction } from "@/app/actions/wiki";
@@ -241,7 +242,7 @@ export function GlobalSearchPalette() {
               
               <div className="absolute right-4 flex items-center gap-1.5 select-none">
                 {loading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-auth-accent" />
+                  <DotMatrixLoader variant="wave" size="xs" />
                 ) : (
                   <span className="text-[9px] font-mono bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-auth-text-3">
                     ESC

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { BrandPanel } from "@/components/auth/brand-panel";
 import { LoginForm } from "@/components/auth/login-form";
 import { generatePageMetadata, generateWebPageJsonLd } from "@/lib/seo";
@@ -52,7 +52,7 @@ function LoginFallback() {
           </p>
         </div>
         <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-auth-accent" />
+          <DotMatrixLoader variant="orbit" size="lg" />
         </div>
       </div>
     </div>
