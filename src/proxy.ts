@@ -102,9 +102,13 @@ function getOnboardingStatus(
   return null;
 }
 
-/** Check if pathname matches an onboarding route. */
+/** Check if pathname is an onboarding or welcome route (treated as onboarding flow). */
 function isOnboardingRoute(pathname: string): boolean {
-  return pathname === "/onboarding" || pathname.startsWith("/onboarding/");
+  return (
+    pathname === "/onboarding" ||
+    pathname.startsWith("/onboarding/") ||
+    pathname === "/welcome"
+  );
 }
 
 /** Extract locale and subpath from pathname */

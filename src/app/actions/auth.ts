@@ -226,9 +226,19 @@ export interface RegisterActionState {
   globalError?: AuthErrorCode;
   serverMessage?: string;
   retryAfterSeconds?: number;
+  /**
+   * success = true → show "check your email" verify screen (manual verification needed).
+   * verifyPending = true → also show verify screen, but with auto-bypass capability.
+   */
   success?: boolean;
+  verifyPending?: boolean;
   email?: string;
   resendAvailableInSeconds?: number;
+  /**
+   * verificationLink: only present in dev mode (DEBUG_RETURN_VERIFICATION_LINK=true).
+   * FE uses this to auto-bypass verification without user having to check email.
+   */
+  verificationLink?: string;
   /**
    * Set on successful auto-login after register.
    * Client should call setUser(sessionUser) then router.push(redirectTo).
@@ -273,7 +283,9 @@ export async function registerAction(
     const regData = registerResult.data;
 
     // ─── Step 2: Register response contains tokens (server auto-login) ──
-    // Some server configs auto-verify + auto-login and return tokens directly
+    // Some server configs auto-verify + auto-login and return tokens directly.
+    // Even in this case, we still show the verify screen briefly with auto-bypass
+    // so the user sees the UX flow (verify → welcome → onboarding).
     if (regData.accessToken && regData.refreshToken) {
       await setAuthTokens(
         regData.accessToken,
@@ -291,31 +303,24 @@ export async function registerAction(
       };
     }
 
-    // ─── Step 3: Dev-mode verificationLink (DEBUG_RETURN_VERIFICATION_LINK) ──
-    if (regData.verificationLink) {
-      const token = extractToken(regData.verificationLink);
-      if (token) {
-        const result = await verifyAndLogin(token, email, password);
-        if (!("error" in result)) {
-          await setAuthTokens(
-            result.loginData.accessToken,
-            result.loginData.refreshToken,
-            result.loginData.expiresIn,
-          );
-          await setUserData(result.loginData.user);
-          return {
-            redirectTo: result.nextRoute.startsWith("/") ? result.nextRoute : "/" + result.nextRoute,
-            sessionUser: result.loginData.user,
-          };
-        }
-        // If verifyAndLogin failed, fall through to direct login
-      }
+    // ─── Step 3: verificationRequired = true → Show Verify Email screen ──
+    // Per API docs: register response always has verificationRequired: true when
+    // BE needs email confirmation. FE must show the verify screen.
+    // If verificationLink is present (dev mode DEBUG_RETURN_VERIFICATION_LINK),
+    // pass it to FE so the VerifyEmailScreen can auto-bypass after a brief delay.
+    if (regData.verificationRequired) {
+      return {
+        verifyPending: true,
+        email,
+        resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
+        // Pass verificationLink if present (dev mode) — FE uses it for auto-bypass
+        verificationLink: regData.verificationLink ?? undefined,
+      };
     }
 
-    // ─── Step 4: Direct login ───────────────────────────────────
-    // Server logs confirm: EMAIL_VERIFIED fires during /register in production.
-    // So the account is verified immediately — login should succeed without
-    // going through the email verification flow.
+    // ─── Step 4: No verificationRequired flag — try direct login ─
+    // Some server configs auto-verify email during register (EMAIL_VERIFIED event
+    // fires in production). Attempt login directly.
     const loginResult = await apiLogin({ email, password });
 
     if (loginResult.status === "1") {
@@ -326,52 +331,36 @@ export async function registerAction(
       );
       await setUserData(loginResult.data.user);
 
-      const rawData = loginResult.data as unknown as Record<string, string | undefined>;
-      const nextRoute =
-        rawData.nextRoute ||
-        rawData["next-route"] ||
-        rawData.next_route ||
-        "/onboarding";
+      // After register → direct login success: redirect to /welcome (not /onboarding directly)
+      // /welcome shows the Welcome screen, then user clicks "Start Setup" to go to /onboarding
+      // This ensures the Welcome screen is always shown after a new registration.
       return {
-        redirectTo: nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute,
+        redirectTo: "/welcome",
         sessionUser: loginResult.data.user,
       };
     }
 
-    // ─── Step 5: Handle EMAIL_NOT_VERIFIED ──────────────────────
-    // Server requires manual email verification (not auto-verify mode)
+    // ─── Step 5: Handle EMAIL_NOT_VERIFIED from direct login ────
+    // Direct login returned EMAIL_NOT_VERIFIED — must show verify screen.
     if (loginResult.error_code === "EMAIL_NOT_VERIFIED") {
-      // Try resend to get verificationLink (dev mode only)
+      // Try to get verificationLink via resend (dev mode only)
+      let devVerificationLink: string | undefined;
       try {
         const resendResult = await apiResendVerification(email);
         if (resendResult.status === "1" && resendResult.data.verificationLink) {
-          const token = extractToken(resendResult.data.verificationLink);
-          if (token) {
-            const result = await verifyAndLogin(token, email, password);
-            if (!("error" in result)) {
-              await setAuthTokens(
-                result.loginData.accessToken,
-                result.loginData.refreshToken,
-                result.loginData.expiresIn,
-              );
-              await setUserData(result.loginData.user);
-              return {
-                redirectTo: result.nextRoute.startsWith("/") ? result.nextRoute : "/" + result.nextRoute,
-                sessionUser: result.loginData.user,
-              };
-            }
-          }
+          devVerificationLink = resendResult.data.verificationLink;
         }
       } catch (innerErr) {
-        // Swallow non-redirect errors — continue to "check email" screen
+        // Swallow errors — fall through to show verify screen without auto-bypass
         void innerErr;
       }
 
-      // True fallback: show "check your email" verification screen
+      // Show verify screen (with or without auto-bypass link)
       return {
-        success: true,
+        verifyPending: true,
         email,
         resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
+        verificationLink: devVerificationLink,
       };
     }
 
@@ -387,7 +376,7 @@ export async function registerAction(
 
     // ─── Unexpected fallback ─────────────────────────────────────
     return {
-      success: true,
+      verifyPending: true,
       email,
       resendAvailableInSeconds: regData.resendAvailableInSeconds ?? 60,
     };
@@ -482,9 +471,12 @@ export async function resendVerificationAction(
             );
             await setUserData(verifyLoginResult.loginData.user);
 
+            // Redirect to /welcome so user sees the welcome screen
+            // before proceeding to onboarding. This is the happy-path
+            // for the register → verify → welcome → onboarding flow.
             return {
               success: true,
-              autoVerifiedRedirect: verifyLoginResult.nextRoute,
+              autoVerifiedRedirect: "/welcome",
             };
           }
         } catch {
@@ -525,7 +517,7 @@ export async function resendVerificationAction(
             rawData.next_route ||
             "/onboarding";
 
-          return { success: true, autoVerifiedRedirect: nextRoute };
+          return { success: true, autoVerifiedRedirect: "/welcome" };
         }
       } catch {
         // Login failed silently, fall through to countdown reset

@@ -4,16 +4,22 @@
  * Register Form — Client Component with full state management.
  *
  * Uses React 19 useActionState for form submission.
- * Handles: idle, editing, submitting, field errors, global errors, success state.
+ * Handles: idle, editing, submitting, field errors, global errors,
+ *          verifyPending (show verify screen + auto-bypass), success (manual verify).
  *
- * Fields: firstName, lastName, email, password, acceptedTerms, selectedPlanIntent
- * On success → shows "check your email" verification screen.
+ * Register flow:
+ *  1. Submit form → registerAction
+ *  2a. verifyPending = true  → show VerifyEmailScreen
+ *      - If verificationLink present (dev mode) → auto-bypass after brief delay
+ *      - If not → user must check email; resend available after countdown
+ *  2b. redirectTo set        → tokens stored server-side, navigate to /onboarding
+ *      → OnboardingWizard shows Welcome screen (step 1)
  */
 
-import { useActionState, useState, useCallback, useEffect } from "react";
+import { useActionState, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Eye, EyeOff, Mail } from "lucide-react";
+import { Loader2, Eye, EyeOff, Mail, Check, Sparkles, Brain, Search, Target, ChevronRight } from "lucide-react";
 import { registerAction, resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
@@ -80,13 +86,14 @@ export function RegisterForm() {
     );
   }
 
-  // ─── Success state → "Check your email" screen ──
-  if (state?.success) {
+  // ─── Verify Email screen (both verifyPending and legacy success state) ──
+  if (state?.verifyPending || state?.success) {
     return (
       <VerifyEmailScreen
         email={state.email || ""}
         password={password}
         initialCountdown={state.resendAvailableInSeconds || 60}
+        verificationLink={state.verificationLink}
       />
     );
   }
@@ -403,25 +410,76 @@ export function RegisterForm() {
 
 
 // ────────────────────────────────────────────────────────────────
-// Verify Email Screen — Countdown timer + Resend
+// Verify Email Screen
+// ────────────────────────────────────────────────────────────────
+// Shown after register when BE signals verificationRequired: true.
+// If verificationLink is present (dev mode), auto-bypass after a
+// brief countdown so user sees the screen before being redirected.
 // ────────────────────────────────────────────────────────────────
 
 function VerifyEmailScreen({
   email,
   password,
   initialCountdown,
+  verificationLink,
 }: {
   email: string;
   password?: string;
   initialCountdown: number;
+  verificationLink?: string;
 }) {
   const { t, locale } = useTranslation();
+  const { setUser } = useAuth();
+  const router = useRouter();
+
   const [countdown, setCountdown] = useState(initialCountdown);
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
 
-  // Countdown timer
+  // Auto-bypass state: when verificationLink present, show progress then redirect
+  const [autoBypassState, setAutoBypassState] = useState<
+    "idle" | "verifying" | "done" | "error"
+  >(verificationLink ? "verifying" : "idle");
+  const [autoBypassCountdown, setAutoBypassCountdown] = useState(3);
+  const autoBypassStarted = useRef(false);
+
+  // ── Auto-bypass when verificationLink is present (dev mode) ──
+  // Show a brief "Đang xác minh..." state → then auto-login → redirect /onboarding
   useEffect(() => {
+    if (!verificationLink || autoBypassStarted.current) return;
+    autoBypassStarted.current = true;
+
+    // Show "verifying" for 2s, then auto-login using resend action
+    const verifyTimer = setTimeout(async () => {
+      try {
+        const result = await resendVerificationAction(email, password);
+
+        if (result.success && result.autoVerifiedRedirect) {
+          // Store user from auth context if returned
+          setAutoBypassState("done");
+
+          // Brief "done" display then redirect
+          setTimeout(() => {
+            const path = result.autoVerifiedRedirect!.startsWith("/")
+              ? result.autoVerifiedRedirect!
+              : "/" + result.autoVerifiedRedirect!;
+            window.location.href = `/${locale}${path}`;
+          }, 1000);
+        } else {
+          // Auto-bypass failed — fall back to manual verify UI
+          setAutoBypassState("idle");
+        }
+      } catch {
+        setAutoBypassState("idle");
+      }
+    }, 2000);
+
+    return () => clearTimeout(verifyTimer);
+  }, [verificationLink]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resend countdown timer (only when in manual mode)
+  useEffect(() => {
+    if (autoBypassState !== "idle") return;
     if (countdown <= 0) return;
 
     const timer = setInterval(() => {
@@ -435,9 +493,9 @@ function VerifyEmailScreen({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [countdown]);
+  }, [countdown, autoBypassState]);
 
-  // Handle resend — also handles auto-verify when BE returns verificationLink
+  // Handle manual resend — also handles auto-verify when BE returns verificationLink
   const handleResend = useCallback(async () => {
     if (countdown > 0 || isResending) return;
 
@@ -451,7 +509,10 @@ function VerifyEmailScreen({
         // Auto-verified — redirect immediately
         if (result.autoVerifiedRedirect) {
           setResendMessage(t("auth.register.verifiedRedirecting"));
-          window.location.href = result.autoVerifiedRedirect;
+          const path = result.autoVerifiedRedirect.startsWith("/")
+            ? result.autoVerifiedRedirect
+            : "/" + result.autoVerifiedRedirect;
+          window.location.href = `/${locale}${path}`;
           return;
         }
 
@@ -465,8 +526,74 @@ function VerifyEmailScreen({
     } finally {
       setIsResending(false);
     }
-  }, [countdown, isResending, email, password, t]);
+  }, [countdown, isResending, email, password, t, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Auto-bypass loading state ──
+  if (autoBypassState === "verifying") {
+    return (
+      <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
+        <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
+          {/* Animated verify icon */}
+          <div className="mb-6 relative flex h-16 w-16 items-center justify-center">
+            <div className="absolute inset-0 rounded-2xl border border-[var(--color-auth-accent)]/30 bg-[var(--color-auth-accent-dim)] animate-pulse" />
+            <Mail className="relative h-7 w-7 text-[var(--color-auth-accent)]" />
+          </div>
+
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
+            Đang xác minh email...
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-auth-text-2 3xl:text-sm">
+            Hệ thống đang tự động xác minh{" "}
+            <span className="font-semibold text-auth-text">{email}</span>.
+            Vui lòng đợi trong giây lát.
+          </p>
+
+          {/* Progress bar */}
+          <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-auth-border">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] transition-all duration-[2000ms] ease-in-out"
+              style={{ width: "85%" }}
+            />
+          </div>
+
+          <div className="mt-4 flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+            <span className="text-xs text-auth-text-3">Đang kích hoạt tài khoản...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Auto-bypass done state ──
+  if (autoBypassState === "done") {
+    return (
+      <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
+        <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
+          {/* Success icon */}
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10">
+            <Check className="h-7 w-7 text-emerald-400" strokeWidth={2.5} />
+          </div>
+
+          <h2 className="text-[22px] font-bold tracking-[-0.03em] text-auth-text 3xl:text-2xl">
+            Xác minh thành công! 🎉
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-auth-text-2 3xl:text-sm">
+            Email{" "}
+            <span className="font-semibold text-auth-text">{email}</span>{" "}
+            đã được xác minh. Đang chuyển hướng...
+          </p>
+
+          <div className="mt-4 flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin text-auth-accent" />
+            <span className="text-xs text-auth-text-3">Thiết lập tài khoản...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Manual verify screen (idle state — user must check email) ──
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
@@ -486,8 +613,27 @@ function VerifyEmailScreen({
           . {t("auth.register.checkInbox")}
         </p>
 
+        {/* Steps hint */}
+        <div className="mt-5 rounded-xl border border-auth-border bg-auth-elevated p-4 flex flex-col gap-2.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-auth-text-3">
+            Các bước tiếp theo
+          </p>
+          {[
+            "Kiểm tra hộp thư của bạn (kể cả Spam/Junk)",
+            "Click vào link xác minh trong email",
+            "Bạn sẽ được chuyển đến trang Đăng nhập",
+          ].map((step, i) => (
+            <div key={i} className="flex items-start gap-2.5">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-auth-accent-dim)] text-[10px] font-bold text-auth-accent">
+                {i + 1}
+              </span>
+              <span className="text-xs text-auth-text-2 leading-relaxed">{step}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Countdown + resend */}
-        <div className="mt-3">
+        <div className="mt-5">
           {countdown > 0 ? (
             <p className="text-xs text-auth-text-3">
               {t("auth.register.canResend").replace("{seconds}", countdown.toString())}
@@ -515,14 +661,27 @@ function VerifyEmailScreen({
           )}
         </div>
 
-        <div className="mt-8">
+        <div className="mt-6">
           <Link
             href={`/${locale}/login`}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.72_0.11_145_/_0.20)] transition-colors duration-200 hover:shadow-[0_0_28px_oklch(0.72_0.11_145_/_0.45)] hover:-translate-y-[1px] active:scale-[0.97] 3xl:text-sm"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_0_15px_oklch(0.72_0.11_145_/_0.20)] transition-all duration-200 hover:shadow-[0_0_28px_oklch(0.72_0.11_145_/_0.45)] hover:-translate-y-[1px] active:scale-[0.97] 3xl:text-sm"
           >
             {t("auth.register.goToLogin")}
           </Link>
         </div>
+
+        {/* Bottom hint */}
+        <p className="mt-4 text-center text-[11px] text-auth-text-3">
+          Không nhận được email?{" "}
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={countdown > 0 || isResending}
+            className="text-auth-text-2 underline underline-offset-2 hover:text-auth-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Gửi lại
+          </button>
+        </p>
       </div>
     </div>
   );
