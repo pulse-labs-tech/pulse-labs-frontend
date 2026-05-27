@@ -1963,7 +1963,7 @@ select:focus {
   -webkit-mask-composite: xor !important;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
   mask-composite: exclude !important;
-  opacity: 0;
+  opacity: 0 !important;
   transition: opacity 0.3s ease-in-out;
   pointer-events: none !important;
   z-index: 1 !important;
