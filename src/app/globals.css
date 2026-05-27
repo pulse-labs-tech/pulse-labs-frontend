@@ -1913,133 +1913,135 @@ select:focus {
   }
 }
 
-/* Base style for premium hover cards (border gradient on hover) */
+/* Base style for premium hover cards (border gradient on hover using pseudo-element mask) */
 .premium-hover-card,
 .premium-hover-card-cyan,
 .premium-hover-card-purple,
 .premium-hover-card-amber,
 .premium-hover-card-red,
 .premium-hover-card-flow {
-  position: relative;
-  border: 1px solid transparent !important;
-  background: 
-    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)) border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease !important;
+  position: relative !important;
+  background-color: oklch(0.16 0.008 260 / 0.40);
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease !important;
 }
 
-/* Default / Jade Hover */
-.premium-hover-card:hover {
-  background: 
-    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
-    linear-gradient(
-      90deg,
-      var(--color-auth-accent) 0%,
-      var(--color-brand-400) 25%,
-      var(--color-accent-300) 50%,
-      var(--color-brand-400) 75%,
-      var(--color-auth-accent) 100%
-    ) border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-size: 100% 100%, 200% auto;
-  animation: border-shimmer 3s linear infinite;
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.08);
+/* Ensure solid background for modals or specific cards using this class */
+.bg-auth-surface.premium-hover-card,
+.bg-auth-surface.premium-hover-card-flow,
+.bg-auth-surface.premium-hover-card-cyan,
+.bg-auth-surface.premium-hover-card-purple,
+.bg-auth-surface.premium-hover-card-amber,
+.bg-auth-surface.premium-hover-card-red {
+  background-color: var(--color-auth-surface) !important;
 }
 
-/* Cyan Hover */
-.premium-hover-card-cyan:hover {
-  background: 
-    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
-    linear-gradient(
-      90deg,
-      var(--color-auth-cyan) 0%,
-      var(--color-accent-300) 25%,
-      var(--color-brand-400) 50%,
-      var(--color-accent-300) 75%,
-      var(--color-auth-cyan) 100%
-    ) border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-size: 100% 100%, 200% auto;
-  animation: border-shimmer 3s linear infinite;
-  box-shadow: 0 8px 30px rgba(34, 211, 238, 0.08);
+.premium-hover-card::before,
+.premium-hover-card-cyan::before,
+.premium-hover-card-purple::before,
+.premium-hover-card-amber::before,
+.premium-hover-card-red::before,
+.premium-hover-card-flow::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -1px !important;
+  border-radius: inherit !important;
+  padding: 1px !important;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
+  -webkit-mask-composite: xor !important;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
+  mask-composite: exclude !important;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none !important;
+  z-index: 1 !important;
 }
 
-/* Purple Hover */
-.premium-hover-card-purple:hover {
-  background: 
-    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
-    linear-gradient(
-      90deg,
-      var(--color-auth-purple) 0%,
-      oklch(0.65 0.15 320) 25%,
-      oklch(0.72 0.18 290) 50%,
-      oklch(0.65 0.15 320) 75%,
-      var(--color-auth-purple) 100%
-    ) border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-size: 100% 100%, 200% auto;
-  animation: border-shimmer 3s linear infinite;
-  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.08);
+/* Hover trigger to show the pseudo border */
+.premium-hover-card:hover::before,
+.premium-hover-card-cyan:hover::before,
+.premium-hover-card-purple:hover::before,
+.premium-hover-card-amber:hover::before,
+.premium-hover-card-red:hover::before,
+.premium-hover-card-flow:hover::before {
+  opacity: 1 !important;
+  animation: border-shimmer 3s linear infinite !important;
 }
 
-/* Amber Hover */
-.premium-hover-card-amber:hover {
-  background: 
-    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
-    linear-gradient(
-      90deg,
-      var(--color-auth-orange) 0%,
-      oklch(0.78 0.16 80) 25%,
-      oklch(0.82 0.18 95) 50%,
-      oklch(0.78 0.16 80) 75%,
-      var(--color-auth-orange) 100%
-    ) border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-size: 100% 100%, 200% auto;
-  animation: border-shimmer 3s linear infinite;
-  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.08);
+/* Default / Jade gradient background */
+.premium-hover-card::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-auth-accent) 0%,
+    var(--color-brand-400) 25%,
+    var(--color-accent-300) 50%,
+    var(--color-brand-400) 75%,
+    var(--color-auth-accent) 100%
+  ) !important;
+  background-size: 200% auto !important;
 }
 
-/* Red Hover */
-.premium-hover-card-red:hover {
-  background: 
-    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
-    linear-gradient(
-      90deg,
-      var(--color-auth-error) 0%,
-      oklch(0.60 0.20 15) 25%,
-      oklch(0.63 0.24 25) 50%,
-      oklch(0.60 0.20 15) 75%,
-      var(--color-auth-error) 100%
-    ) border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-size: 100% 100%, 200% auto;
-  animation: border-shimmer 3s linear infinite;
-  box-shadow: 0 8px 30px rgba(239, 68, 68, 0.08);
+/* Cyan gradient background */
+.premium-hover-card-cyan::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-auth-cyan) 0%,
+    var(--color-accent-300) 25%,
+    var(--color-brand-400) 50%,
+    var(--color-accent-300) 75%,
+    var(--color-auth-cyan) 100%
+  ) !important;
+  background-size: 200% auto !important;
 }
 
-/* Flow Hover */
-.premium-hover-card-flow:hover {
-  background: 
-    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
-    linear-gradient(
-      90deg,
-      var(--color-auth-accent) 0%,
-      var(--color-auth-cyan) 33%,
-      var(--color-auth-purple) 66%,
-      var(--color-auth-accent) 100%
-    ) border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-size: 100% 100%, 200% auto;
-  animation: border-shimmer 2.5s linear infinite;
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.1);
+/* Purple gradient background */
+.premium-hover-card-purple::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-auth-purple) 0%,
+    oklch(0.65 0.15 320) 25%,
+    oklch(0.72 0.18 290) 50%,
+    oklch(0.65 0.15 320) 75%,
+    var(--color-auth-purple) 100%
+  ) !important;
+  background-size: 200% auto !important;
+}
+
+/* Amber gradient background */
+.premium-hover-card-amber::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-auth-orange) 0%,
+    oklch(0.78 0.16 80) 25%,
+    oklch(0.82 0.18 95) 50%,
+    oklch(0.78 0.16 80) 75%,
+    var(--color-auth-orange) 100%
+  ) !important;
+  background-size: 200% auto !important;
+}
+
+/* Red gradient background */
+.premium-hover-card-red::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-auth-error) 0%,
+    oklch(0.60 0.20 15) 25%,
+    oklch(0.63 0.24 25) 50%,
+    oklch(0.60 0.20 15) 75%,
+    var(--color-auth-error) 100%
+  ) !important;
+  background-size: 200% auto !important;
+}
+
+/* Flow gradient background */
+.premium-hover-card-flow::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-auth-accent) 0%,
+    var(--color-auth-cyan) 33%,
+    var(--color-auth-purple) 66%,
+    var(--color-auth-accent) 100%
+  ) !important;
+  background-size: 200% auto !important;
 }
 
