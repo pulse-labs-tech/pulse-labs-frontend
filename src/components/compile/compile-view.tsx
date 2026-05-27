@@ -589,27 +589,33 @@ export function CompileView() {
 
             <LocaleSwitcher id="compile-header" />
             {authUser && (
-              <div className="hidden text-right md:block">
-                <div className="text-xs font-bold text-auth-text">
-                  {authUser.displayName || authUser.email}
+              <div className="flex items-center gap-2">
+                {/* Avatar initials */}
+                <div className="hidden md:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
+                  {(authUser.displayName || authUser.email || "U").charAt(0).toUpperCase()}
                 </div>
-                <span className="inline-flex mt-0.5 items-center gap-1 rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-px text-[10px] font-semibold text-auth-accent">
-                  {authUser.plan === "pro" ? t("common.proPlan", "Pro Plan") : t("common.freePlan", "Free Plan")}
-                </span>
+
+                {/* Name + plan (desktop only) */}
+                <div className="hidden lg:flex flex-col items-start leading-none gap-0.5 text-left">
+                  <span className="text-[11px] font-semibold text-white truncate max-w-[80px]">
+                    {authUser.displayName?.split(" ").slice(-1)[0] || authUser.email?.split("@")[0]}
+                  </span>
+                  <span className="text-[9px] font-semibold text-auth-accent/80 uppercase tracking-wide">
+                    {authUser.plan === "pro" ? "Pro Plan" : "Free Plan"}
+                  </span>
+                </div>
+
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  disabled={isPending}
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 cursor-pointer"
+                  title={t("common.logout", "Đăng xuất")}
+                >
+                  {isPending ? <DotMatrixLoader variant="pulse" size="sm" /> : <LineIcon name="exit" className="h-4 w-4" />}
+                </button>
               </div>
             )}
-            <button
-              onClick={handleLogout}
-              disabled={isPending}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
-              title={t("common.logout", "Đăng xuất")}
-            >
-              {isPending ? (
-                <DotMatrixLoader variant="pulse" size="sm" />
-              ) : (
-                <LineIcon name="exit" className="h-4 w-4" />
-              )}
-            </button>
           </div>
         </div>
       </header>
