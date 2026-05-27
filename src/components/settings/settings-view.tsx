@@ -163,15 +163,6 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
   if (globalError && !overview) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-auth-bg px-4 gap-4">
-        {/* Minimal logo header so user knows where they are */}
-        <Link
-          href={`/${locale}/dashboard`}
-          className="flex items-center gap-2 mb-2 opacity-70 hover:opacity-100 transition-opacity select-none"
-        >
-          <LineIcon name="arrow-left" className="h-4 w-4 text-auth-text-2" />
-          <span className="text-sm text-auth-text-2">{t("common.dashboard", "Dashboard")}</span>
-        </Link>
-
         <div className="w-full max-w-md rounded-2xl p-6 text-center shadow-auth relative premium-hover-card-red">
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
             <LineIcon name="warning" className="h-6 w-6" />
