@@ -191,9 +191,7 @@ export function PlanGateModal({
       aria-modal="true"
       aria-labelledby="plan-gate-title"
     >
-      <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl shadow-2xl relative group">
-        {/* Top accent bar */}
-        <div className="premium-accent-border premium-accent-border-flow" />
+      <div className="w-full max-w-md rounded-2xl shadow-2xl relative premium-hover-card-flow">
 
         {/* Header */}
         <div className="flex items-start justify-between p-6 pb-0">

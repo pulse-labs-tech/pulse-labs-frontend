@@ -136,21 +136,17 @@ function SourceTypeCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`group relative flex flex-col gap-3 rounded-2xl border p-5 text-left transition-all duration-200
-        ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+      className={`relative flex flex-col gap-3 rounded-2xl p-5 text-left transition-all duration-200
+        ${disabled ? "cursor-not-allowed opacity-50 border border-white/[0.06] bg-auth-surface/20" : "cursor-pointer"}
         ${
           selected
-            ? "border-auth-accent/60 bg-auth-accent-dim shadow-[0_0_20px_rgba(52,211,153,0.12)]"
+            ? "border border-auth-accent/60 bg-auth-accent-dim shadow-[0_0_20px_rgba(52,211,153,0.12)]"
             : disabled
-              ? "border-white/[0.06] bg-auth-surface/20"
-              : "border-white/[0.08] bg-auth-surface/30 hover:border-auth-accent/30 hover:bg-auth-surface/50"
+              ? ""
+              : "premium-hover-card"
         }
       `}
     >
-      {/* Top accent on selected */}
-      {selected && (
-        <div className="premium-accent-border premium-accent-border-default" />
-      )}
 
       {/* Pro badge */}
       {badge && (
@@ -692,8 +688,7 @@ export function CompileView() {
 
         {/* ────────── STEP 1 — Chọn loại nguồn ────────── */}
         {step === 1 && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 group">
-            <div className="premium-accent-border premium-accent-border-default" />
+          <div className="backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 premium-hover-card">
 
             <div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-auth-text-3">
@@ -745,8 +740,7 @@ export function CompileView() {
 
         {/* ────────── STEP 2 — Nhập nội dung ────────── */}
         {step === 2 && (
-          <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 group">
-            <div className="premium-accent-border premium-accent-border-default" />
+          <div className="backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 premium-hover-card">
 
             <div className="flex items-center justify-between">
               <div>
@@ -938,18 +932,15 @@ export function CompileView() {
           <div className="flex flex-col gap-4">
             {/* Processing card */}
             {currentJob && (
-              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 group">
-                <div
-                  className={`premium-accent-border
-                    ${
-                      currentJob.status === "failed"
-                        ? "premium-accent-border-red"
-                        : currentJob.status === "wiki_ready"
-                          ? "premium-accent-border-default"
-                          : "premium-accent-border-cyan animate-pulse"
-                    }
-                  `}
-                />
+              <div
+                className={`backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-6 ${
+                  currentJob.status === "failed"
+                    ? "premium-hover-card-red"
+                    : currentJob.status === "wiki_ready"
+                      ? "premium-hover-card"
+                      : "premium-hover-card-cyan"
+                }`}
+              >
 
                 {/* Status header */}
                 <div className="flex items-center justify-between gap-4">
@@ -1012,8 +1003,7 @@ export function CompileView() {
 
             {/* ── SUCCESS state ── */}
             {currentJob?.status === "wiki_ready" && (
-              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 group">
-                <div className="premium-accent-border premium-accent-border-default" />
+              <div className="backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 premium-hover-card">
 
                 <div className="flex flex-col items-center gap-4 py-4 text-center">
                   <div className="h-16 w-16 rounded-full bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-center">
@@ -1059,8 +1049,7 @@ export function CompileView() {
 
             {/* ── FAILED state ── */}
             {currentJob?.status === "failed" && (
-              <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 group">
-                <div className="premium-accent-border premium-accent-border-red" />
+              <div className="backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 premium-hover-card-red">
 
                 <div className="flex flex-col items-center gap-4 py-4 text-center">
                   <div className="h-16 w-16 rounded-full bg-red-950/40 border border-red-500/20 flex items-center justify-center">

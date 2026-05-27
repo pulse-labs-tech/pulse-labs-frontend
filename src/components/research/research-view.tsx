@@ -217,9 +217,7 @@ export function ResearchView() {
           </p>
         </div>
 
-        {/* ─── Create new research ─── */}
-        <section className="rounded-2xl border border-auth-border bg-auth-surface p-5 relative group">
-          <div className="premium-accent-border premium-accent-border-default" />
+        <section className="rounded-2xl p-5 relative premium-hover-card">
 
           <div className="flex items-center gap-2 mb-4">
             <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">

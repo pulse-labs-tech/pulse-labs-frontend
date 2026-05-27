@@ -579,8 +579,7 @@ export function DashboardView() {
   if (globalErrorMsg && !summary) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-auth-bg text-auth-text px-4">
-        <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center shadow-auth relative group backdrop-blur-md">
-          <div className="premium-accent-border premium-accent-border-red" />
+        <div className="w-full max-w-md rounded-2xl p-6 text-center shadow-auth relative backdrop-blur-md premium-hover-card-red">
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="h-6 w-6" />
           </div>
@@ -807,8 +806,7 @@ export function DashboardView() {
           </div>
         )}
 
-        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative group">
-          <div className="premium-accent-border premium-accent-border-default" />
+        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between backdrop-blur-md rounded-2xl p-6 relative premium-hover-card">
           <div>
             <h1 className="text-fluid-lg font-extrabold tracking-tight">
               {t("dashboard.welcome.hello", "Xin chào, {name} 👋").replace("{name}", userCtx.displayName || (locale === "vi" ? "Bạn" : "User"))}
@@ -874,8 +872,7 @@ export function DashboardView() {
 
         {/* Active Ingesting Jobs Section */}
         {activeJobs.length > 0 && (
-          <section className="bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 group">
-            <div className="premium-accent-border premium-accent-border-cyan" />
+          <section className="backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 premium-hover-card-cyan">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">
@@ -945,8 +942,7 @@ export function DashboardView() {
 
         {/* Quota Panel (Account Limits) */}
         {quota && (
-          <section className="bg-[#111113]/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-4 group">
-            <div className="premium-accent-border premium-accent-border-purple" />
+          <section className="backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-4 premium-hover-card-purple">
             <div>
               <h2 className="text-sm font-bold tracking-tight uppercase text-[#52525b]">
                 {locale === "vi" ? "Giới hạn tài khoản" : "Account Resource Limits"}

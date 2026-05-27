@@ -1913,167 +1913,133 @@ select:focus {
   }
 }
 
-.premium-accent-border {
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  right: 1px;
-  height: 2px;
-  z-index: 10;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
-  background-size: 200% 100%;
-  transition: opacity 0.3s ease, height 0.3s ease;
-  pointer-events: none;
+/* Base style for premium hover cards (border gradient on hover) */
+.premium-hover-card,
+.premium-hover-card-cyan,
+.premium-hover-card-purple,
+.premium-hover-card-amber,
+.premium-hover-card-red,
+.premium-hover-card-flow {
+  position: relative;
+  border: 1px solid transparent !important;
+  background: 
+    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)) border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease !important;
 }
 
-/* Default / Jade Accent */
-.premium-accent-border-default {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-accent) 0%,
-    var(--color-auth-accent) 40%,
-    transparent 100%
-  );
-  opacity: 0.6;
+/* Default / Jade Hover */
+.premium-hover-card:hover {
+  background: 
+    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
+    linear-gradient(
+      90deg,
+      var(--color-auth-accent) 0%,
+      var(--color-brand-400) 25%,
+      var(--color-accent-300) 50%,
+      var(--color-brand-400) 75%,
+      var(--color-auth-accent) 100%
+    ) border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-size: 100% 100%, 200% auto;
+  animation: border-shimmer 3s linear infinite;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.08);
 }
 
-/* Parent container hover triggers shimmer animation and fully reveals gradient */
-.group:hover .premium-accent-border-default,
-*:hover > .premium-accent-border-default {
-  opacity: 1;
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-accent) 0%,
-    var(--color-brand-400) 25%,
-    var(--color-accent-300) 50%,
-    var(--color-brand-400) 75%,
-    var(--color-auth-accent) 100%
-  );
+/* Cyan Hover */
+.premium-hover-card-cyan:hover {
+  background: 
+    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
+    linear-gradient(
+      90deg,
+      var(--color-auth-cyan) 0%,
+      var(--color-accent-300) 25%,
+      var(--color-brand-400) 50%,
+      var(--color-accent-300) 75%,
+      var(--color-auth-cyan) 100%
+    ) border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-size: 100% 100%, 200% auto;
+  animation: border-shimmer 3s linear infinite;
+  box-shadow: 0 8px 30px rgba(34, 211, 238, 0.08);
+}
+
+/* Purple Hover */
+.premium-hover-card-purple:hover {
+  background: 
+    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
+    linear-gradient(
+      90deg,
+      var(--color-auth-purple) 0%,
+      oklch(0.65 0.15 320) 25%,
+      oklch(0.72 0.18 290) 50%,
+      oklch(0.65 0.15 320) 75%,
+      var(--color-auth-purple) 100%
+    ) border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-size: 100% 100%, 200% auto;
+  animation: border-shimmer 3s linear infinite;
+  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.08);
+}
+
+/* Amber Hover */
+.premium-hover-card-amber:hover {
+  background: 
+    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
+    linear-gradient(
+      90deg,
+      var(--color-auth-orange) 0%,
+      oklch(0.78 0.16 80) 25%,
+      oklch(0.82 0.18 95) 50%,
+      oklch(0.78 0.16 80) 75%,
+      var(--color-auth-orange) 100%
+    ) border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-size: 100% 100%, 200% auto;
+  animation: border-shimmer 3s linear infinite;
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.08);
+}
+
+/* Red Hover */
+.premium-hover-card-red:hover {
+  background: 
+    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
+    linear-gradient(
+      90deg,
+      var(--color-auth-error) 0%,
+      oklch(0.60 0.20 15) 25%,
+      oklch(0.63 0.24 25) 50%,
+      oklch(0.60 0.20 15) 75%,
+      var(--color-auth-error) 100%
+    ) border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-size: 100% 100%, 200% auto;
+  animation: border-shimmer 3s linear infinite;
+  box-shadow: 0 8px 30px rgba(239, 68, 68, 0.08);
+}
+
+/* Flow Hover */
+.premium-hover-card-flow:hover {
+  background: 
+    linear-gradient(oklch(0.16 0.008 260 / 0.5), oklch(0.16 0.008 260 / 0.5)) padding-box,
+    linear-gradient(
+      90deg,
+      var(--color-auth-accent) 0%,
+      var(--color-auth-cyan) 33%,
+      var(--color-auth-purple) 66%,
+      var(--color-auth-accent) 100%
+    ) border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-size: 100% 100%, 200% auto;
   animation: border-shimmer 2.5s linear infinite;
-}
-
-/* Cyan Accent */
-.premium-accent-border-cyan {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-cyan) 0%,
-    var(--color-auth-cyan) 40%,
-    transparent 100%
-  );
-  opacity: 0.6;
-}
-
-.group:hover .premium-accent-border-cyan,
-*:hover > .premium-accent-border-cyan {
-  opacity: 1;
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-cyan) 0%,
-    var(--color-accent-300) 25%,
-    var(--color-brand-400) 50%,
-    var(--color-accent-300) 75%,
-    var(--color-auth-cyan) 100%
-  );
-  animation: border-shimmer 2.5s linear infinite;
-}
-
-/* Purple Accent */
-.premium-accent-border-purple {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-purple) 0%,
-    var(--color-auth-purple) 40%,
-    transparent 100%
-  );
-  opacity: 0.6;
-}
-
-.group:hover .premium-accent-border-purple,
-*:hover > .premium-accent-border-purple {
-  opacity: 1;
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-purple) 0%,
-    oklch(0.65 0.15 320) 25%,
-    oklch(0.72 0.18 290) 50%,
-    oklch(0.65 0.15 320) 75%,
-    var(--color-auth-purple) 100%
-  );
-  animation: border-shimmer 2.5s linear infinite;
-}
-
-/* Orange/Amber Accent */
-.premium-accent-border-amber {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-orange) 0%,
-    var(--color-auth-orange) 40%,
-    transparent 100%
-  );
-  opacity: 0.6;
-}
-
-.group:hover .premium-accent-border-amber,
-*:hover > .premium-accent-border-amber {
-  opacity: 1;
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-orange) 0%,
-    oklch(0.78 0.16 80) 25%,
-    oklch(0.82 0.18 95) 50%,
-    oklch(0.78 0.16 80) 75%,
-    var(--color-auth-orange) 100%
-  );
-  animation: border-shimmer 2.5s linear infinite;
-}
-
-/* Red Accent (Error) */
-.premium-accent-border-red {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-error) 0%,
-    var(--color-auth-error) 40%,
-    transparent 100%
-  );
-  opacity: 0.6;
-}
-
-.group:hover .premium-accent-border-red,
-*:hover > .premium-accent-border-red {
-  opacity: 1;
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-error) 0%,
-    oklch(0.60 0.20 15) 25%,
-    oklch(0.63 0.24 25) 50%,
-    oklch(0.60 0.20 15) 75%,
-    var(--color-auth-error) 100%
-  );
-  animation: border-shimmer 2.5s linear infinite;
-}
-
-/* Multi-color flow (For global search or specialized cards) */
-.premium-accent-border-flow {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-accent) 0%,
-    var(--color-auth-cyan) 50%,
-    var(--color-auth-purple) 100%
-  );
-  opacity: 0.8;
-}
-
-.group:hover .premium-accent-border-flow,
-*:hover > .premium-accent-border-flow {
-  opacity: 1;
-  background-image: linear-gradient(
-    90deg,
-    var(--color-auth-accent) 0%,
-    var(--color-auth-cyan) 33%,
-    var(--color-auth-purple) 66%,
-    var(--color-auth-accent) 100%
-  );
-  animation: border-shimmer 2s linear infinite;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.1);
 }
 

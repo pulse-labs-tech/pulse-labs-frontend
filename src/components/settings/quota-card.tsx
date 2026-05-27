@@ -137,21 +137,14 @@ export function QuotaCard({ quota, onRetry, isRetrying }: QuotaCardProps) {
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl border bg-auth-surface p-4 relative transition-all duration-300 group ${
+      className={`flex flex-col gap-3 rounded-xl p-4 relative transition-all duration-300 ${
         quota.status === "exceeded"
-          ? "border-red-500/30 bg-red-950/10"
+          ? "premium-hover-card-red"
           : quota.status === "warning"
-          ? "border-amber-500/30 bg-amber-950/10"
-          : "border-auth-border"
+          ? "premium-hover-card-amber"
+          : "premium-hover-card"
       }`}
     >
-      {/* Top accent line for exceeded/warning */}
-      {quota.status === "exceeded" && (
-        <div className="premium-accent-border premium-accent-border-red" />
-      )}
-      {quota.status === "warning" && (
-        <div className="premium-accent-border premium-accent-border-amber" />
-      )}
 
       {/* Header */}
       <div className="flex items-start justify-between gap-2">

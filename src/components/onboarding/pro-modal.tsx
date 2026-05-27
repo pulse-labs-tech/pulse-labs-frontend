@@ -37,13 +37,11 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-2xl rounded-2xl border border-auth-border bg-auth-surface shadow-2xl z-10 group"
+            className="relative w-full max-w-2xl rounded-2xl shadow-2xl z-10 premium-hover-card-flow"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
           >
-            {/* Top header pattern */}
-            <div className="premium-accent-border premium-accent-border-flow" />
 
             <div className="p-6 md:p-8">
               {/* Header */}

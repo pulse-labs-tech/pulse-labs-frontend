@@ -649,8 +649,7 @@ export function WikiListView() {
         </div>
 
         {/* Search & Filters bar */}
-        <div className="bg-auth-surface/40 border border-white/[0.06] backdrop-blur-md rounded-2xl p-4 flex flex-col gap-4 relative group">
-          <div className="premium-accent-border premium-accent-border-default" />
+        <div className="backdrop-blur-md rounded-2xl p-4 flex flex-col gap-4 relative premium-hover-card">
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Search input */}

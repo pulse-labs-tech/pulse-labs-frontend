@@ -195,8 +195,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           <span className="text-sm text-auth-text-2">{t("common.dashboard", "Dashboard")}</span>
         </Link>
 
-        <div className="w-full max-w-md bg-auth-surface border border-auth-border rounded-2xl p-6 text-center shadow-auth relative group">
-          <div className="premium-accent-border premium-accent-border-red" />
+        <div className="w-full max-w-md rounded-2xl p-6 text-center shadow-auth relative premium-hover-card-red">
           <div className="w-12 h-12 rounded-full bg-auth-error-dim text-auth-error flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="h-6 w-6" />
           </div>
@@ -295,10 +294,9 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Account summary */}
           <section
-            className="flex flex-col gap-4 rounded-2xl border border-auth-border bg-auth-surface p-5 relative group"
+            className="flex flex-col gap-4 rounded-2xl p-5 relative premium-hover-card"
             aria-labelledby="settings-account-heading"
           >
-            <div className="premium-accent-border premium-accent-border-default" />
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
                 <User className="h-3.5 w-3.5 text-auth-accent" />
@@ -354,18 +352,14 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           {/* Current plan card */}
           <section
             id="settings-section-plan"
-            className="flex flex-col gap-4 rounded-2xl border bg-auth-surface p-5 relative group"
+            className={`flex flex-col gap-4 rounded-2xl p-5 relative ${
+              isPro ? "premium-hover-card-amber" : "premium-hover-card"
+            }`}
             style={{
               borderColor: isPro ? "rgba(245, 158, 11, 0.3)" : undefined,
-              borderImage: isPro ? undefined : undefined,
             }}
             aria-labelledby="settings-plan-heading"
           >
-            {isPro ? (
-              <div className="premium-accent-border premium-accent-border-amber" />
-            ) : (
-              <div className="premium-accent-border premium-accent-border-default" />
-            )}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -448,10 +442,9 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         {!isPro && proPlan && (
           <section
             id="settings-section-upgrade"
-            className="rounded-2xl border border-white/[0.06] bg-auth-surface/40 p-6 relative group"
+            className="rounded-2xl p-6 relative premium-hover-card"
             aria-labelledby="settings-compare-heading"
           >
-            <div className="premium-accent-border premium-accent-border-default" />
             <div className="flex items-center gap-2 mb-6">
               <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
                 <Sparkles className="h-3.5 w-3.5 text-auth-accent" />

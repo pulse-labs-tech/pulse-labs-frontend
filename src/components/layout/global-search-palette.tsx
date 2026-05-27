@@ -223,10 +223,8 @@ export function GlobalSearchPalette() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="w-full max-w-xl bg-auth-surface/95 border border-white/[0.08] rounded-2xl shadow-[0_24px_50px_rgba(0,0,0,0.8)] relative backdrop-blur-xl flex flex-col z-10 group"
+            className="w-full max-w-xl rounded-2xl shadow-[0_24px_50px_rgba(0,0,0,0.8)] relative backdrop-blur-xl flex flex-col z-10 premium-hover-card-flow"
           >
-            {/* Top indicator glow */}
-            <div className="premium-accent-border premium-accent-border-flow" />
 
             {/* Input row */}
             <div className="relative flex items-center">
