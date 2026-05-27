@@ -13,12 +13,10 @@
     "fetch-svg": "node scripts/fetch-svg.js"
   },
   "dependencies": {
-    "@lineiconshq/free-icons": "^1.0.6",
-    "@lineiconshq/react-lineicons": "^1.0.5",
+    "@ant-design/icons": "^6.2.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "hls.js": "^1.6.16",
-    "lineicons": "^1.3.2",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
     "react": "19.2.4",
