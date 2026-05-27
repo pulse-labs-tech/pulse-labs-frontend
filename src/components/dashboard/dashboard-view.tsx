@@ -566,9 +566,7 @@ export function DashboardView() {
   }
 
   const { user: userCtx, role: roleCtx, stats } = summary!;
-  const planName = userCtx.plan === "pro"
-    ? (locale === "vi" ? "Gói Pro" : "Pro Plan")
-    : (locale === "vi" ? "Gói Miễn phí" : "Free Plan");
+  const planName = userCtx.plan === "pro" ? "Pro Plan" : "Free Plan";
 
   const sortedTechs = [...DEFAULT_TECHS].sort((a, b) => {
     if (sortBy === "name") {

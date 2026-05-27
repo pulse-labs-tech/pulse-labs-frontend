@@ -1954,30 +1954,18 @@ select:focus {
 .premium-hover-card-amber::before,
 .premium-hover-card-red::before,
 .premium-hover-card-flow::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: -1px !important;
-  border-radius: inherit !important;
-  padding: 1px !important;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
-  -webkit-mask-composite: xor !important;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
-  mask-composite: exclude !important;
-  opacity: 0 !important;
-  transition: opacity 0.3s ease-in-out;
-  pointer-events: none !important;
-  z-index: 1 !important;
+  display: none !important;
 }
 
-/* Hover trigger to show the pseudo border */
-.premium-hover-card:hover::before,
-.premium-hover-card-cyan:hover::before,
-.premium-hover-card-purple:hover::before,
-.premium-hover-card-amber:hover::before,
-.premium-hover-card-red:hover::before,
-.premium-hover-card-flow:hover::before {
-  opacity: 1 !important;
-  animation: border-shimmer 3s linear infinite !important;
+/* Hover trigger to show the slightly brighter gray border */
+.premium-hover-card:hover,
+.premium-hover-card-cyan:hover,
+.premium-hover-card-purple:hover,
+.premium-hover-card-amber:hover,
+.premium-hover-card-red:hover,
+.premium-hover-card-flow:hover {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* Default / Jade gradient background */
