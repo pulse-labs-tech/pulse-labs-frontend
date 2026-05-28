@@ -293,7 +293,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
+              className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
@@ -310,7 +310,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
+              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
@@ -672,7 +672,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
                 <Link
                    key={related.id}
                   href={`/${locale}/wiki/items/${related.id}`}
-                  className="group flex items-start gap-2.5 p-3 rounded-xl bg-auth-elevated/40 border border-white/[0.04] hover:border-white/[0.10] hover:bg-auth-elevated/70 transition-all"
+                  className="group flex items-start gap-2.5 p-3 rounded-xl bg-auth-elevated/40 border border-white/[0.04] hover:border-white/[0.15] hover:bg-auth-elevated/70 transition-all"
                 >
                   <div className="mt-0.5 shrink-0">
                     {getSourceTypeIcon(related.sourceType, "h-3.5 w-3.5")}

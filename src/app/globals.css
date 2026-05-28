@@ -742,7 +742,7 @@ select:focus {
 }
 
 .dashboard-page .role-panel:hover {
-  border-color: var(--text-3);
+  border-color: rgba(255, 255, 255, 0.15);
   box-shadow: var(--shadow-auth-card);
 }
 
@@ -942,15 +942,17 @@ select:focus {
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--dur) var(--ease);
+  display: none;
 }
 
 .dashboard-page .domain-kcard:hover::before {
-  transform: scaleX(1);
+  transform: scaleX(0);
+  display: none;
 }
 
 .dashboard-page .domain-kcard:hover {
   background: var(--card-hover);
-  border-color: var(--text-3);
+  border-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
   box-shadow: var(--shadow-auth-card);
 }
@@ -1783,7 +1785,7 @@ select:focus {
 }
 
 .plan-card-premium:hover {
-  border-color: var(--color-auth-text-3);
+  border-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
   box-shadow: var(--shadow-auth-card);
 }
@@ -2092,14 +2094,14 @@ select:focus {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, oklch(0.65 0.13 160 / 0.03) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
 }
 
 .stat-terminal-card:hover {
-  border-color: oklch(0.65 0.13 160 / 0.25);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .stat-terminal-card:hover::before {

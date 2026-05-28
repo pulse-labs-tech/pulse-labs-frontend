@@ -123,10 +123,10 @@ function WikiCard({ item }: { item: WikiItemCard }) {
   return (
     <Link
       href={`/${locale}/wiki/items/${item.id}`}
-      className="group relative bg-auth-surface/40 border border-white/[0.06] rounded-2xl p-5 hover:-translate-y-1 hover:border-white/[0.12] transition-all flex flex-col gap-3 overflow-hidden"
+      className="group relative bg-auth-surface/40 border border-white/[0.06] rounded-2xl p-5 hover:-translate-y-1 hover:border-white/[0.15] transition-all flex flex-col gap-3 overflow-hidden"
     >
       {/* Subtle left border glow on hover */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-transparent via-auth-accent/0 to-transparent group-hover:via-auth-accent/60 transition-all duration-300 rounded-l-2xl" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-transparent via-auth-accent/0 to-transparent group-hover:via-white/30 transition-all duration-300 rounded-l-2xl" />
 
       {/* Top row: source type + domain + status */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -192,7 +192,7 @@ function WikiRow({ item }: { item: WikiItemCard }) {
   return (
     <Link
       href={`/${locale}/wiki/items/${item.id}`}
-      className="group flex items-start gap-4 bg-auth-surface/30 border border-white/[0.06] rounded-xl px-4 py-3.5 hover:border-white/[0.12] hover:bg-auth-surface/50 transition-all"
+      className="group flex items-start gap-4 bg-auth-surface/30 border border-white/[0.06] rounded-xl px-4 py-3.5 hover:border-white/[0.15] hover:bg-auth-surface/50 transition-all"
     >
       {/* Source icon */}
       <div className="mt-0.5 shrink-0">{getSourceTypeIcon(item.sourceType)}</div>
@@ -495,7 +495,7 @@ export function WikiListView() {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
+              className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
@@ -512,7 +512,7 @@ export function WikiListView() {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
+              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
@@ -693,7 +693,7 @@ export function WikiListView() {
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
                   statusFilter === value
                     ? "bg-auth-accent-dim text-auth-accent border-auth-accent/30"
-                    : "bg-auth-elevated border-auth-border text-auth-text-3 hover:text-auth-text hover:border-white/20"
+                    : "bg-auth-elevated border-auth-border text-auth-text-3 hover:text-auth-text hover:border-white/[0.15]"
                 }`}
               >
                 {label}

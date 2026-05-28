@@ -713,7 +713,7 @@ export function OnboardingWizard() {
 
               {/* Feature Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
+                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-white/[0.15] transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <LineIcon name="brain-alt" className="h-5 w-5" />
                   </div>
@@ -725,7 +725,7 @@ export function OnboardingWizard() {
                   </p>
                 </div>
 
-                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
+                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-white/[0.15] transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <LineIcon name="search" className="h-5 w-5" />
                   </div>
@@ -737,7 +737,7 @@ export function OnboardingWizard() {
                   </p>
                 </div>
 
-                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-auth-text-3 transition-colors hover-lift">
+                <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3 items-center text-center hover:border-white/[0.15] transition-colors hover-lift">
                   <div className="w-9 h-9 rounded-lg border border-auth-border bg-transparent text-auth-accent flex items-center justify-center">
                     <LineIcon name="target" className="h-5 w-5" />
                   </div>
@@ -821,7 +821,7 @@ export function OnboardingWizard() {
                       className={`py-2 px-4 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                         activeGroup === group.id
                           ? "bg-auth-accent-dim border-auth-accent text-auth-accent"
-                          : "bg-auth-elevated border-auth-border text-auth-text-2 hover:border-auth-text-3 hover:text-auth-text"
+                          : "bg-auth-elevated border-auth-border text-auth-text-2 hover:border-white/[0.15] hover:text-auth-text"
                       }`}
                     >
                       {t("onboarding.groups." + group.id + ".label", group.label)}
@@ -849,7 +849,7 @@ export function OnboardingWizard() {
                             className={`flex flex-col items-center text-center gap-1 p-3.5 rounded-xl border cursor-pointer transition-all relative ${
                               isSelected
                                 ? "bg-auth-accent-dim border-auth-accent"
-                                : "bg-auth-elevated border-auth-border hover:border-auth-text-3"
+                                : "bg-auth-elevated border-auth-border hover:border-white/[0.15]"
                             }`}
                           >
                             {isSelected && (

@@ -796,7 +796,7 @@ export function DashboardView() {
                     e.stopPropagation();
                     setKbDropdownOpen(!kbDropdownOpen);
                   }}
-                  className="w-full bg-[#18181b] border border-[#27272a] hover:border-auth-accent/40 text-xs text-[#fafafa] font-semibold rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-all duration-300"
+                  className="w-full bg-[#18181b] border border-[#27272a] hover:border-white/[0.15] text-xs text-[#fafafa] font-semibold rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-all duration-300"
                 >
                   <span>
                     {userRoles.find((r) => r.id === selectedRoleKbId)?.roleName || t("dashboard.selectDomain", "Chọn Chuyên Ngành")}

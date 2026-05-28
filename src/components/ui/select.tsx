@@ -69,7 +69,7 @@ export function Select({
         onClick={() => setIsOpen(!isOpen)}
         className={`
           flex items-center justify-between gap-2 px-3.5 py-2
-          bg-[#18181b] border border-[#27272a] hover:border-auth-accent/40
+          bg-[#18181b] border border-[#27272a] hover:border-white/[0.15]
           text-xs text-[#fafafa] font-semibold rounded-xl cursor-pointer
           transition-all duration-300 focus:outline-none focus:border-auth-accent
           focus:ring-2 focus:ring-auth-accent-glow/50

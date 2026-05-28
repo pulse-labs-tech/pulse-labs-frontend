@@ -357,7 +357,7 @@ function ResearchRunCard({
   return (
     <Link
       href={`/${locale}/research/${run.id}`}
-      className={`flex items-start gap-4 p-4 rounded-xl border transition-all hover:border-auth-accent/30 hover:bg-auth-elevated/50 group ${
+      className={`flex items-start gap-4 p-4 rounded-xl border transition-all hover:border-white/[0.15] hover:bg-auth-elevated/50 group ${
         isActive
           ? "border-auth-accent/20 bg-auth-accent-dim/20"
           : "border-auth-border bg-auth-surface"

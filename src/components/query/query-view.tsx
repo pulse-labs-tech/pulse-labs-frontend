@@ -107,7 +107,7 @@ function CitationCard({ citation, index, t }: { citation: QueryCitation; index: 
       href={citation.sourcePointer?.url || "#"}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex-shrink-0 w-64 bg-auth-elevated border border-auth-border hover:border-emerald-500/30 rounded-xl p-3 flex flex-col gap-2 transition-all group hover:shadow-[0_0_15px_rgba(52,211,153,0.08)] cursor-pointer"
+      className="flex-shrink-0 w-64 bg-auth-elevated border border-auth-border hover:border-white/[0.15] rounded-xl p-3 flex flex-col gap-2 transition-all group hover:shadow-[0_0_15px_rgba(255,255,255,0.02)] cursor-pointer"
     >
       {/* Index + domain */}
       <div className="flex items-center justify-between gap-2">
@@ -304,7 +304,7 @@ function EmptyState({
           <button
             key={q}
             onClick={() => onExampleClick(q)}
-            className="w-full text-left bg-auth-surface/40 border border-white/[0.06] hover:border-emerald-500/30 hover:bg-auth-elevated rounded-xl px-4 py-3 text-xs text-auth-text-2 hover:text-auth-text transition-all group"
+            className="w-full text-left bg-auth-surface/40 border border-white/[0.06] hover:border-white/[0.15] hover:bg-auth-elevated rounded-xl px-4 py-3 text-xs text-auth-text-2 hover:text-auth-text transition-all group"
           >
             <span className="text-emerald-400 mr-2 group-hover:mr-3 transition-all">→</span>
             {q}
