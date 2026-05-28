@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { LineIcon } from "@/components/shared/line-icon";
+import { PulseLogo } from "@/components/shared/pulse-logo";
 import { Button } from "@/components/ui";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 
@@ -125,15 +126,7 @@ function WelcomeScreen() {
           {/* Logo */}
           <div className="mb-5 flex justify-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent-500)] shadow-[0_0_40px_oklch(0.72_0.11_145_/_0.4)]">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                className="h-8 w-8 text-white"
-              >
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
+              <PulseLogo size={36} className="drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
             </div>
           </div>
 

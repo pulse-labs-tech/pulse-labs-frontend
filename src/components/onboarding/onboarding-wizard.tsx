@@ -165,13 +165,23 @@ export function OnboardingWizard() {
   // ────────────────────────────────────────────────────────────────
   // 1. Initial State Sync (State Bootstrap & Resume)
   // ────────────────────────────────────────────────────────────────
+  const bootstrapCalledRef = useRef(false);
+
   useEffect(() => {
+    // Guard: prevent double execution in React StrictMode
+    if (bootstrapCalledRef.current) return;
+    bootstrapCalledRef.current = true;
+
+    let cancelled = false;
+
     async function bootstrap() {
       try {
         const [stateRes, optionsRes] = await Promise.all([
           getOnboardingStateAction(),
           getRoleOptionsAction(),
         ]);
+
+        if (cancelled) return;
 
         if (stateRes.status === "1" && stateRes.data) {
           const {
@@ -248,15 +258,23 @@ export function OnboardingWizard() {
           setRoleGroups(normalized);
         }
       } catch (err) {
+        if (cancelled) return;
         console.error("Bootstrap error:", err);
         setErrorMsg(t("auth.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Kiểm tra mạng và thử lại."));
       } finally {
-        setIsInitializing(false);
+        if (!cancelled) {
+          setIsInitializing(false);
+        }
       }
     }
 
     bootstrap();
-  }, [handleErrorCode]);
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ────────────────────────────────────────────────────────────────
   // 2. Cooldown timer for Rate Limiting
@@ -311,10 +329,13 @@ export function OnboardingWizard() {
       return;
     }
 
+    let cancelled = false;
+
     const timer = setTimeout(async () => {
+      if (cancelled) return;
       try {
         const res = await getCompileJobAction(compileJob.id);
-        if (res.status === "1" && res.data?.compileJob) {
+        if (!cancelled && res.status === "1" && res.data?.compileJob) {
           setCompileJob(res.data.compileJob);
         }
       } catch (err) {
@@ -322,7 +343,10 @@ export function OnboardingWizard() {
       }
     }, pollInterval);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [compileJob]);
 
   // ────────────────────────────────────────────────────────────────

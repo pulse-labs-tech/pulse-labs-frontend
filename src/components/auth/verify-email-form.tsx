@@ -9,6 +9,7 @@ import { verifyEmailAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import type { AuthErrorCode } from "@/types/auth";
 import { useTranslation } from "@/contexts/locale-context";
+import { PulseLogo } from "@/components/shared/pulse-logo";
 
 export function VerifyEmailForm() {
   const searchParams = useSearchParams();
@@ -89,16 +90,8 @@ export function VerifyEmailForm() {
         {/* Mobile logo — shown only on small screens */}
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 to-accent-500 shadow-[0_0_12px_var(--color-auth-accent-glow)]">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              className="h-4 w-4 text-white"
-            >
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-          </div>
+              <PulseLogo size={20} className="drop-shadow-[0_0_6px_var(--color-auth-accent-glow)]" />
+            </div>
           <span className="text-sm font-bold tracking-tight text-auth-text">
             Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
           </span>

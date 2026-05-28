@@ -21,6 +21,7 @@ import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
 import { useAuth } from "@/hooks/use-auth";
+import { PulseLogo } from "@/components/shared/pulse-logo";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -48,16 +49,8 @@ export function LoginForm() {
         {/* Mobile logo — shown only on small screens */}
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent-500)] shadow-[0_0_12px_oklch(0.72_0.11_145_/_0.3)]">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              className="h-4 w-4 text-white"
-            >
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-          </div>
+              <PulseLogo size={20} className="drop-shadow-[0_0_6px_var(--color-auth-accent-glow)]" />
+            </div>
           <span className="text-sm font-bold tracking-tight text-auth-text">
             Pulse
             <span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">
