@@ -41,11 +41,29 @@ function WelcomeScreen() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [visible, setVisible] = useState(false);
 
+  // Typewriter effect state
+  const [typedText, setTypedText] = useState("");
+  const fullTaglineText = t("onboarding.welcome.tagline");
+
   // Entry animation
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 50);
     return () => clearTimeout(timer);
   }, []);
+
+  // Typewriter effect
+  useEffect(() => {
+    setTypedText("");
+    let index = 0;
+    const interval = setInterval(() => {
+      setTypedText(fullTaglineText.slice(0, index + 1));
+      index++;
+      if (index >= fullTaglineText.length) {
+        clearInterval(interval);
+      }
+    }, 35); // 35ms per character
+    return () => clearInterval(interval);
+  }, [fullTaglineText]);
 
   const handleContinue = () => {
     setIsRedirecting(true);
@@ -150,8 +168,9 @@ function WelcomeScreen() {
             )}
           </h1>
 
-          <p className="mt-3 text-[15px] font-semibold bg-gradient-to-r from-[var(--color-brand-300)] to-[var(--color-accent-200)] bg-clip-text text-transparent leading-relaxed">
-            {t("onboarding.welcome.tagline")}
+          <p className="mt-3 text-[15px] font-semibold text-brand-400 leading-relaxed min-h-[24px] flex items-center justify-center">
+            <span>{typedText}</span>
+            <span className="typewriter-cursor ml-0.5 text-brand-300 font-normal select-none">|</span>
           </p>
           <p className="mt-2 text-sm text-auth-text-3 leading-relaxed max-w-lg mx-auto">
             {t("onboarding.welcome.desc")}
@@ -227,6 +246,15 @@ function WelcomeScreen() {
           </p>
         </div>
       </div>
+      <style>{`
+        @keyframes blink-caret {
+          from, to { opacity: 0 }
+          50% { opacity: 1 }
+        }
+        .typewriter-cursor {
+          animation: blink-caret 0.75s step-end infinite;
+        }
+      `}</style>
     </div>
   );
 }
