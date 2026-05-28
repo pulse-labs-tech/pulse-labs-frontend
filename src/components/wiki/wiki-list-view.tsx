@@ -464,7 +464,7 @@ export function WikiListView() {
             </Link>
           </div>
 
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 md:flex">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 lg:flex">
             <nav className="flex items-center gap-1.5">
               <Link
                 href={`/${locale}/dashboard`}
@@ -512,7 +512,7 @@ export function WikiListView() {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
+              className="hidden lg:flex xl:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
@@ -525,7 +525,7 @@ export function WikiListView() {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
+              className="flex lg:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
               title={locale === "vi" ? "Tìm kiếm" : "Search"}
             >
               <LineIcon name="search" className="h-4 w-4" />
@@ -535,7 +535,7 @@ export function WikiListView() {
             {authUser && (
               <div className="flex items-center gap-2">
                 {/* Avatar initials */}
-                <div className="hidden md:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
+                <div className="hidden lg:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
                   {(authUser.displayName || authUser.email || "U").charAt(0).toUpperCase()}
                 </div>
 

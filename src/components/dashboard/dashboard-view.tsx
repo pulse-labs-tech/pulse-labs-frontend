@@ -617,7 +617,7 @@ export function DashboardView() {
           </div>
 
           {/* ── Center: Nav pill group (desktop) ── */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex">
             <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1">
               <Link
                 href={`/${locale}/dashboard`}
@@ -691,7 +691,7 @@ export function DashboardView() {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="hidden md:flex lg:hidden h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] text-auth-text-3 hover:text-white transition-all cursor-pointer"
+              className="hidden lg:flex xl:hidden h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.07] text-auth-text-3 hover:text-white transition-all cursor-pointer"
             >
               <LineIcon name="search" className="h-3.5 w-3.5" />
             </button>
@@ -703,7 +703,7 @@ export function DashboardView() {
                   window.dispatchEvent(new CustomEvent("open-global-search"));
                 }
               }}
-              className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-auth-text-2 hover:text-white transition-all cursor-pointer"
+              className="flex lg:hidden h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-auth-text-2 hover:text-white transition-all cursor-pointer"
             >
               <LineIcon name="search" className="h-3.5 w-3.5" />
             </button>
@@ -712,12 +712,12 @@ export function DashboardView() {
             <LocaleSwitcher id="dashboard-header" />
 
             {/* Divider */}
-            <div className="hidden md:block h-5 w-px bg-white/10" />
+            <div className="hidden lg:block h-5 w-px bg-white/10" />
 
             {/* User avatar + name + logout */}
             <div className="flex items-center gap-2">
               {/* Avatar initials */}
-              <div className="hidden md:flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
+              <div className="hidden lg:flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
                 {(userCtx.displayName || userCtx.email || "U").charAt(0).toUpperCase()}
               </div>
 
