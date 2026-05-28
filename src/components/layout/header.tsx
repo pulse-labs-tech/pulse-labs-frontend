@@ -19,25 +19,27 @@ export function Header() {
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-white/[0.08] glass-premium">
-      {/* ── Desktop nav: CSS grid 3-column prevents overlap at any width ── */}
-      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-12 h-14 lg:h-16 hidden lg:grid lg:grid-cols-[auto_1fr_auto] items-center gap-8">
+      {/* ── Desktop nav: 1fr | auto | 1fr → nav always truly centered ── */}
+      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-12 h-14 lg:h-16 hidden lg:grid lg:grid-cols-[1fr_auto_1fr] items-center gap-6">
 
-        {/* Col 1 — Logo (fixed width, left-aligned) */}
-        <Link
-          href={`/${locale}`}
-          className="group flex items-center gap-2 shrink-0"
-          aria-label="Pulse Knowledge — trang chủ"
-        >
-          <PulseLogo
-            size={32}
-            className="transition-all duration-300 group-hover:drop-shadow-[0_0_10px_var(--color-auth-accent-glow)]"
-          />
-          <span className="text-[15px] font-extrabold tracking-tight text-auth-text leading-none whitespace-nowrap">
-            Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
-          </span>
-        </Link>
+        {/* Col 1 — Logo (1fr, left-aligned) */}
+        <div className="flex justify-start">
+          <Link
+            href={`/${locale}`}
+            className="group flex items-center gap-2 shrink-0"
+            aria-label="Pulse Knowledge — trang chủ"
+          >
+            <PulseLogo
+              size={32}
+              className="transition-all duration-300 group-hover:drop-shadow-[0_0_10px_var(--color-auth-accent-glow)]"
+            />
+            <span className="text-[15px] font-extrabold tracking-tight text-auth-text leading-none whitespace-nowrap">
+              Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
+            </span>
+          </Link>
+        </div>
 
-        {/* Col 2 — Nav links (centered in remaining space) */}
+        {/* Col 2 — Nav links (auto, truly centered) */}
         <nav className="flex justify-center items-center gap-8 xl:gap-10">
           {navLinks.map((l) => (
             <a
@@ -50,8 +52,8 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Col 3 — Actions (fixed width, right-aligned) */}
-        <div className="flex items-center gap-5 shrink-0 justify-end">
+        {/* Col 3 — Actions (1fr, right-aligned) */}
+        <div className="flex items-center gap-5 justify-end">
           <LocaleSwitcher id="desktop" />
           <Link
             href={`/${locale}/login`}
@@ -71,6 +73,7 @@ export function Header() {
           </Link>
         </div>
       </div>
+
 
       {/* ── Mobile nav bar ── */}
       <div className="w-full max-w-[1440px] mx-auto px-5 h-14 flex items-center justify-between lg:hidden">
