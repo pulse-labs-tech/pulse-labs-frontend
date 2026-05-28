@@ -246,15 +246,6 @@ function WelcomeScreen() {
           </p>
         </div>
       </div>
-      <style>{`
-        @keyframes blink-caret {
-          from, to { opacity: 0 }
-          50% { opacity: 1 }
-        }
-        .typewriter-cursor {
-          animation: blink-caret 0.75s step-end infinite;
-        }
-      `}</style>
     </div>
   );
 }

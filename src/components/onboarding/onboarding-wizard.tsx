@@ -136,6 +136,11 @@ export function OnboardingWizard() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [rateLimitCooldown, setRateLimitCooldown] = useState<number | null>(null);
 
+  // Typewriter effect for welcome tagline
+  const fullTagline = t("onboarding.welcome.tagline");
+  const [typedTagline, setTypedTagline] = useState("");
+  const [taglineDone, setTaglineDone] = useState(false);
+
   // Idempotency keys (kept for potential future use)
   const roleIdempotencyRef = useRef(generateIdempotencyKey());
   const seedIdempotencyRef = useRef(generateIdempotencyKey());
@@ -146,6 +151,23 @@ export function OnboardingWizard() {
 
   // Ref for timer
   const rateLimitTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Typewriter effect — runs only on the welcome step
+  useEffect(() => {
+    if (currentStep !== "welcome") return;
+    setTypedTagline("");
+    setTaglineDone(false);
+    let i = 0;
+    const iv = setInterval(() => {
+      setTypedTagline(fullTagline.slice(0, i + 1));
+      i++;
+      if (i >= fullTagline.length) {
+        clearInterval(iv);
+        setTaglineDone(true);
+      }
+    }, 30);
+    return () => clearInterval(iv);
+  }, [currentStep, fullTagline]);
 
   // ────────────────────────────────────────────────────────────────
   // Error Mapping Handler (Vietnamese Copy Mapping)
@@ -727,11 +749,16 @@ export function OnboardingWizard() {
                   {t("onboarding.welcome.title")}
                 </h1>
                 <p className="text-sm text-auth-text-2 mt-3 leading-relaxed">
-                  <strong className="text-auth-text text-gradient">
-                     {t("onboarding.welcome.tagline")}
+                  <strong className="text-auth-accent font-semibold">
+                    {typedTagline}
+                    {!taglineDone && <span className="typewriter-cursor ml-0.5 text-auth-accent/70 font-normal select-none">|</span>}
                   </strong>
-                  <br />
-                  {t("onboarding.welcome.desc")}
+                  {taglineDone && (
+                    <>
+                      <br />
+                      {t("onboarding.welcome.desc")}
+                    </>
+                  )}
                 </p>
               </div>
 
