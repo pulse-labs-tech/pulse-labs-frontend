@@ -6,6 +6,7 @@ import * as AntIcons from "@ant-design/icons";
 // Map custom string keys to the corresponding Ant Design icon component names.
 // This prevents compile-time errors for keys that do not translate directly.
 const ALIAS_MAP: Record<string, string> = {
+  // --- Original aliases ---
   "brain-alt": "BulbOutlined",
   "comment-text": "MessageOutlined",
   "comment": "MessageOutlined",
@@ -26,6 +27,42 @@ const ALIAS_MAP: Record<string, string> = {
   "popup": "ExportOutlined",
   "grow": "RiseOutlined",
   "text": "LineHeightOutlined",
+
+  // --- Chevron → Ant Design directional arrows ---
+  "chevron-right": "RightOutlined",
+  "chevron-left": "LeftOutlined",
+  "chevron-up": "UpOutlined",
+  "chevron-down": "DownOutlined",
+
+  // --- File & document icons ---
+  "files": "CopyOutlined",
+  "clipboard": "SnippetsOutlined",
+  "bookmark": "BookOutlined",
+  "quotation": "FileTextOutlined",
+
+  // --- Action icons ---
+  "trash": "DeleteOutlined",
+  "pencil": "EditOutlined",
+  "gear": "SettingOutlined",
+  "envelope": "MailOutlined",
+
+  // --- Status & indicator icons ---
+  "xmark-circle": "CloseCircleOutlined",
+  "questionmark-circle": "QuestionCircleOutlined",
+  "signal": "WifiOutlined",
+  "dot": "MinusOutlined",
+  "infinite": "SwapOutlined",
+
+  // --- Tech & hardware icons ---
+  "cpu": "DesktopOutlined",
+  "pin": "PushpinOutlined",
+  "package": "InboxOutlined",
+  "pulse": "HeartOutlined",
+  "shield": "SafetyCertificateOutlined",
+
+  // --- Misc ---
+  "comment-alt": "MessageOutlined",
+  "hash": "NumberOutlined",
 };
 
 // Dynamically look up the Ant Design Outlined icon component.
