@@ -1,7 +1,14 @@
 @import "tailwindcss";
 
-
-
+/* Override Tailwind v4 default border color (currentColor → auth-border).
+   Prevents bare `border` utilities from rendering as bright white on dark theme. */
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--color-auth-border, oklch(0.28 0.006 260));
+  }
+}
 
 
 /* ============================================================
