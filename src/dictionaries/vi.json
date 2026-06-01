@@ -69,7 +69,10 @@
     "feature5Title": "Auto Research",
     "feature5Desc": "Khi KB chưa đủ evidence, hệ thống tự identify gaps và trigger research flow bổ sung.",
     "feature6Title": "Expert Advisor",
-    "feature6Desc": "Chuyên gia theo domain của bạn, trả lời có chiều sâu. Không phải chatbot generic."
+    "feature6Desc": "Chuyên gia theo domain của bạn, trả lời có chiều sâu. Không phải chatbot generic.",
+    "trustKBs": "Knowledge Bases",
+    "trustSources": "Nguồn đã xử lý",
+    "trustUptime": "Uptime"
   },
   "auth": {
     "login": {

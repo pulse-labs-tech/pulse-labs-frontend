@@ -69,7 +69,10 @@
     "feature5Title": "Auto Research",
     "feature5Desc": "When the KB lacks evidence, the system identifies gaps and triggers research flows automatically.",
     "feature6Title": "Expert Advisor",
-    "feature6Desc": "An expert tailored to your domain delivering deep insights, not a generic chatbot."
+    "feature6Desc": "An expert tailored to your domain delivering deep insights, not a generic chatbot.",
+    "trustKBs": "Knowledge Bases",
+    "trustSources": "Sources Compiled",
+    "trustUptime": "Uptime"
   },
   "auth": {
     "login": {

@@ -7,6 +7,9 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { ScrollToTop } from "@/components/ui";
 import { getDictionary } from "@/dictionaries";
 import { ShowcaseVideo } from "@/components/shared/showcase-video";
+import { HeroBackground } from "@/components/landing/hero-background";
+import { BrowserFrame } from "@/components/landing/browser-frame";
+import { TrustBar } from "@/components/landing/trust-bar";
 import { 
   FileText, 
   Globe, 
@@ -47,6 +50,12 @@ export default async function HomePage({
     { number: "03", title: dict.landing.step3, description: dict.landing.step3Desc },
   ];
 
+  const trustStats = [
+    { value: 500, suffix: "+", label: dict.landing.trustKBs },
+    { value: 12400, suffix: "+", label: dict.landing.trustSources },
+    { value: 99, suffix: ".9%", label: dict.landing.trustUptime },
+  ];
+
   const jsonLd = generateWebPageJsonLd({
     title: `${dict.landing.title1} ${dict.landing.title2} — Pulse Knowledge`,
     description: dict.landing.subtitle,
@@ -61,21 +70,29 @@ export default async function HomePage({
         <main id="main-content">
           
           {/* HERO */}
-          <section className="relative overflow-hidden pb-24 pt-32 lg:pb-32 lg:pt-40 3xl:pb-40 3xl:pt-48">
-            <div className="pointer-events-none absolute left-1/2 top-0 h-[700px] w-[900px] -translate-x-1/2 -translate-y-1/4 blur-[120px]" style={{ background: "radial-gradient(ellipse, var(--color-auth-accent-glow) 0%, transparent 70%)" }} aria-hidden="true" />
-            <div className="pointer-events-none absolute -right-[100px] top-[20%] h-[500px] w-[500px] blur-[100px]" style={{ background: "radial-gradient(circle, oklch(0.78 0.14 195 / 0.08) 0%, transparent 70%)" }} aria-hidden="true" />
-            <div className="pointer-events-none absolute -left-[80px] bottom-[10%] h-[350px] w-[350px] blur-[80px]" style={{ background: "radial-gradient(circle, oklch(0.68 0.18 280 / 0.05) 0%, transparent 70%)" }} aria-hidden="true" />
+          <section className="hero-section relative overflow-hidden pb-16 pt-32 lg:pb-24 lg:pt-40 3xl:pb-32 3xl:pt-48">
+            {/* Animated mesh background */}
+            <HeroBackground />
 
-            <div className="relative container-focused text-center">
+            <div className="relative z-10 container-focused text-center">
               <div className="mx-auto max-w-4xl">
+                
+                {/* Badge with pulse dot */}
                 <ScrollReveal delay={0.05}>
-                  <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold text-auth-text-2 backdrop-blur-md uppercase tracking-wider">
-                    {dict.landing.badge}
+                  <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-auth-accent/20 bg-auth-accent/[0.06] px-5 py-2 backdrop-blur-md">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-auth-accent opacity-60" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-auth-accent" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-auth-accent uppercase tracking-wider">
+                      {dict.landing.badge}
+                    </span>
                   </div>
                 </ScrollReveal>
 
+                {/* Hero Title */}
                 <ScrollReveal delay={0.1} direction="up">
-                  <h1 className="text-[clamp(2.25rem,6vw,4rem)] font-extrabold leading-[1.05] tracking-[-0.03em] 3xl:text-[4.5rem] 4xl:text-[5rem] text-white">
+                  <h1 className="text-[clamp(2.5rem,7vw,4.5rem)] font-extrabold leading-[1.02] tracking-[-0.035em] 3xl:text-[5rem] 4xl:text-[5.5rem] text-white">
                     {dict.landing.title1}
                     <br />
                     <span className="text-auth-accent">
@@ -84,29 +101,38 @@ export default async function HomePage({
                   </h1>
                 </ScrollReveal>
 
+                {/* Subtitle */}
                 <ScrollReveal delay={0.2} direction="up">
-                  <p className="mx-auto mt-6 max-w-2xl text-[clamp(0.9375rem,1.5vw,1.125rem)] leading-relaxed text-auth-text-2">
+                  <p className="mx-auto mt-7 max-w-2xl text-[clamp(1rem,1.6vw,1.175rem)] leading-[1.7] text-auth-text-2">
                     {dict.landing.subtitle}
                   </p>
                 </ScrollReveal>
 
+                {/* CTA Buttons */}
                 <ScrollReveal delay={0.3} direction="up">
                   <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-                    <Link href={`/${locale}/register`} className="group btn-primary-pulse px-8 py-3.5 text-sm font-bold shadow-[0_0_20px_var(--color-auth-accent-glow)] transition-all duration-300 active:scale-95">
+                    <Link href={`/${locale}/register`} className="group btn-primary-pulse px-9 py-4 text-[15px] font-bold shadow-[0_0_24px_var(--color-auth-accent-glow),0_4px_16px_rgba(0,0,0,0.4)] transition-all duration-300 active:scale-95">
                       {dict.landing.ctaStart}
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
-                    <a href="#how-it-works" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 py-3.5 text-sm font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95">
+                    <a href="#how-it-works" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-9 py-4 text-[15px] font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:bg-white/10 active:scale-95">
                       {dict.landing.ctaHow}
                       <ChevronRight className="h-4 w-4" />
                     </a>
                   </div>
                 </ScrollReveal>
 
-                {/* HLS Video Showcase */}
+                {/* Trust Stats */}
                 <ScrollReveal delay={0.4} direction="up">
-                  <div className="mx-auto mt-16 max-w-4xl 3xl:max-w-5xl">
-                    <ShowcaseVideo />
+                  <TrustBar stats={trustStats} />
+                </ScrollReveal>
+
+                {/* Video in Browser Frame */}
+                <ScrollReveal delay={0.5} direction="up">
+                  <div className="mx-auto mt-16 max-w-5xl 3xl:max-w-6xl">
+                    <BrowserFrame>
+                      <ShowcaseVideo />
+                    </BrowserFrame>
                   </div>
                 </ScrollReveal>
               </div>
