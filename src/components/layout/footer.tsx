@@ -27,7 +27,7 @@ export function Footer() {
             <Link href={`/${locale}`} className="group inline-flex items-center gap-2.5">
               <PulseLogo size={28} className="opacity-90 transition-opacity duration-200 group-hover:opacity-100" />
               <span className="text-sm font-bold tracking-tight text-auth-text">
-                Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
+                Pulse<span className="text-auth-accent">Knowledge</span>
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-xs leading-relaxed text-auth-text-3">{t("common.tagline")}</p>

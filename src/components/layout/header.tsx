@@ -34,7 +34,7 @@ export function Header() {
               className="transition-all duration-300 group-hover:drop-shadow-[0_0_10px_var(--color-auth-accent-glow)]"
             />
             <span className="text-[15px] font-extrabold tracking-tight text-auth-text leading-none whitespace-nowrap">
-              Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
+              Pulse<span className="text-auth-accent">Knowledge</span>
             </span>
           </Link>
         </div>
@@ -88,7 +88,7 @@ export function Header() {
             className="transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]"
           />
           <span className="text-[14px] font-extrabold tracking-tight text-auth-text leading-none">
-            Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
+            Pulse<span className="text-auth-accent">Knowledge</span>
           </span>
         </Link>
 
