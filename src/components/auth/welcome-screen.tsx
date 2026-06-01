@@ -130,7 +130,7 @@ function WelcomeScreen() {
           <div className="flex items-center gap-2 rounded-full border border-[var(--color-brand-500)]/30 bg-[var(--color-brand-600)]/10 px-4 py-1.5">
             <LineIcon name="star" className="h-3.5 w-3.5 text-[var(--color-brand-400)]" />
             <span className="text-xs font-semibold text-[var(--color-brand-300)]">
-              Tài khoản đã được kích hoạt thành công
+              {t("onboarding.welcome.activationSuccess")}
             </span>
           </div>
         </div>
@@ -143,7 +143,7 @@ function WelcomeScreen() {
         >
           {/* Logo */}
           <div className="mb-5 flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent-500)] shadow-[0_0_40px_oklch(0.72_0.11_145_/_0.4)]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-auth-surface border border-white/[0.08] shadow-[0_0_30px_rgba(16,185,129,0.2)]">
               <PulseLogo size={36} className="drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
             </div>
           </div>
@@ -151,7 +151,7 @@ function WelcomeScreen() {
           <h1 className="text-3xl font-extrabold tracking-tight text-auth-text sm:text-[2.25rem]">
             {firstName ? (
               <>
-                Chào mừng,{" "}
+                {t("onboarding.welcome.welcomeUser")},{" "}
                 <span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">
                   {firstName}
                 </span>
@@ -159,7 +159,7 @@ function WelcomeScreen() {
               </>
             ) : (
               <>
-                Chào mừng đến với{" "}
+                {t("onboarding.welcome.welcomeTo")}{" "}
                 <span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">
                   Pulse Knowledge
                 </span>
@@ -214,9 +214,9 @@ function WelcomeScreen() {
           }`}
         >
           {[
-            { icon: "bolt", label: "AI hỏi đáp theo domain" },
-            { icon: "book", label: "Auto-research khi thiếu KB" },
-            { icon: "brain-alt", label: "Expert Advisor cá nhân" },
+            { icon: "bolt", label: t("onboarding.welcome.statFeature1") },
+            { icon: "book", label: t("onboarding.welcome.statFeature2") },
+            { icon: "brain-alt", label: t("onboarding.welcome.statFeature3") },
           ].map(({ icon: Icon, label }, i) => (
             <div key={i} className="flex items-center gap-1.5">
               <LineIcon name={Icon} className="h-3.5 w-3.5 shrink-0 text-[var(--color-brand-400)]" />
@@ -242,7 +242,7 @@ function WelcomeScreen() {
             {t("onboarding.welcome.btn")}
           </Button>
           <p className="text-[11px] text-auth-text-3">
-            Thiết lập chỉ mất ~2 phút • Hoàn toàn miễn phí
+            {t("onboarding.welcome.setupDuration")}
           </p>
         </div>
       </div>

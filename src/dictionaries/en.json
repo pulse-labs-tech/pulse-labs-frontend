@@ -207,7 +207,14 @@
       "feat2Desc": "Automatically searches the Internet when KB lacks info or data is outdated.",
       "feat3Title": "Expert Advisor",
       "feat3Desc": "Deep domain expert advisor tailored to your specialized field.",
-      "btn": "Start Setup"
+      "btn": "Start Setup",
+      "activationSuccess": "Account has been successfully activated",
+      "welcomeUser": "Welcome",
+      "welcomeTo": "Welcome to",
+      "statFeature1": "AI domain Q&A",
+      "statFeature2": "Auto-research when KB lacks info",
+      "statFeature3": "Personal Expert Advisor",
+      "setupDuration": "Setup takes only ~2 minutes • Completely free"
     },
     "pickRole": {
       "stepName": "Select Role",

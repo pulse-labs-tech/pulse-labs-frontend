@@ -207,7 +207,14 @@
       "feat2Desc": "Tự động tìm kiếm Internet khi KB thiếu hụt hoặc dữ liệu cũ.",
       "feat3Title": "Expert Advisor",
       "feat3Desc": "Cố vấn chuyên môn cao sâu theo từng lĩnh vực chuyên ngành.",
-      "btn": "Bắt đầu thiết lập"
+      "btn": "Bắt đầu thiết lập",
+      "activationSuccess": "Tài khoản đã được kích hoạt thành công",
+      "welcomeUser": "Chào mừng",
+      "welcomeTo": "Chào mừng đến với",
+      "statFeature1": "AI hỏi đáp theo domain",
+      "statFeature2": "Auto-research khi thiếu KB",
+      "statFeature3": "Expert Advisor cá nhân",
+      "setupDuration": "Thiết lập chỉ mất ~2 phút • Hoàn toàn miễn phí"
     },
     "pickRole": {
       "stepName": "Chọn Vai Trò",
