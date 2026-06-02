@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LineIcon } from "@/components/shared/line-icon";
@@ -8,20 +8,30 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
+import { Select } from "@/components/ui/select";
+import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import {
   createResearchRunAction,
   listResearchRunsAction,
+  submitDocumentAction,
 } from "@/app/actions/research";
 import type {
   ResearchRunDto,
   ResearchStatus,
   ResearchTrigger,
-  ACTIVE_RESEARCH_STATUSES,
+  ResearchStreamEvent,
 } from "@/types/research";
+import type { RoleKbDto } from "@/types/onboarding";
 
 const ACTIVE_STATUSES: ResearchStatus[] = [
-  "queued", "planning", "searching", "selecting_sources",
-  "fetching_sources", "extracting_claims", "reflecting", "synthesizing",
+  "queued",
+  "planning",
+  "searching",
+  "selecting_sources",
+  "fetching_sources",
+  "extracting_claims",
+  "reflecting",
+  "synthesizing",
 ];
 
 function getStatusIcon(status: ResearchStatus) {
@@ -84,7 +94,11 @@ export function ResearchView() {
   const { user } = useAuth();
   const { t, locale } = useTranslation();
 
-  const [query, setQuery] = useState("");
+  // Tab state
+  const [activeTab, setActiveTab] = useState<"interactive" | "history">("interactive");
+
+  // --- Background/History States ---
+  const [bgQuery, setBgQuery] = useState("");
   const [trigger, setTrigger] = useState<ResearchTrigger>("explicit_research");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -95,6 +109,35 @@ export function ResearchView() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
 
+  // --- Interactive Lab States ---
+  // Ingestion
+  const [docSource, setDocSource] = useState("");
+  const [docSourceType, setDocSourceType] = useState<"web" | "pdf" | "text" | "git">("web");
+  const [docDomainHint, setDocDomainHint] = useState("");
+  const [isIngesting, setIsIngesting] = useState(false);
+  const [ingestError, setIngestError] = useState<string | null>(null);
+  const [ingestedDocId, setIngestedDocId] = useState<string | null>(null);
+  const [ingestStatus, setIngestStatus] = useState<"COMPLETE" | "PROCESSING" | null>(null);
+
+  // Stream Query
+  const [streamQuery, setStreamQuery] = useState("");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState("");
+  const [limitToIngested, setLimitToIngested] = useState(false);
+  const [topK, setTopK] = useState(10);
+  const [domainFiltersInput, setDomainFiltersInput] = useState("");
+
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamProgress, setStreamProgress] = useState<string[]>([]);
+  const [streamResults, setStreamResults] = useState<ResearchStreamEvent[]>([]);
+  const [streamAnswer, setStreamAnswer] = useState("");
+  const [streamError, setStreamError] = useState<string | null>(null);
+
+  const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
+
+  const [copied, setCopied] = useState(false);
+
+  // Load Roles & Runs
   const loadRuns = useCallback(async (cursor?: string) => {
     setIsLoadingRuns(true);
     setListError(null);
@@ -110,7 +153,6 @@ export function ResearchView() {
         setNextCursor(res.data?.pageInfo?.nextCursor ?? null);
       } else {
         if (res.error_code === "RESEARCH_NOT_ENABLED") {
-          // Feature disabled, show empty state
           setRuns([]);
         } else {
           setListError(res.msg || "Không tải được danh sách nghiên cứu.");
@@ -124,12 +166,28 @@ export function ResearchView() {
   }, []);
 
   useEffect(() => {
+    async function loadRoles() {
+      setRolesLoading(true);
+      try {
+        const res = await getOnboardingStateAction();
+        if (res.status === "1" && res.data?.roles?.length) {
+          setUserRoles(res.data.roles);
+          setSelectedRoleKbId(res.data.roles[0].id);
+        }
+      } catch (err) {
+        console.error("loadRoles error:", err);
+      } finally {
+        setRolesLoading(false);
+      }
+    }
+    loadRoles();
     loadRuns();
   }, [loadRuns]);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  // handle background create
+  const handleCreateBg = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = query.trim();
+    const trimmed = bgQuery.trim();
     if (!trimmed || trimmed.length < 2) return;
     if (isCreating) return;
 
@@ -146,8 +204,7 @@ export function ResearchView() {
       });
 
       if (res.status === "1" && res.data?.researchRun?.id) {
-        // Navigate to run detail
-        setQuery("");
+        setBgQuery("");
         router.push(`/${locale}/research/${res.data.researchRun.id}`);
       } else {
         const errMap: Record<string, string> = {
@@ -167,11 +224,135 @@ export function ResearchView() {
     }
   };
 
+  // handle document submission
+  const handleIngestDocument = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const sourceVal = docSource.trim();
+    if (!sourceVal) return;
+    if (isIngesting) return;
+
+    setIsIngesting(true);
+    setIngestError(null);
+    setIngestedDocId(null);
+    setIngestStatus(null);
+
+    try {
+      const res = await submitDocumentAction({
+        source: sourceVal,
+        source_type: docSourceType,
+        domain_hint: docDomainHint.trim() || undefined,
+      });
+
+      if (res.status === "1" && res.data?.document_id) {
+        setIngestedDocId(res.data.document_id);
+        setIngestStatus(res.data.status);
+        setLimitToIngested(true); // default to restrict research to this doc
+        setDocSource("");
+        setDocDomainHint("");
+      } else {
+        setIngestError(res.msg || "Không thể nạp tài liệu này. Vui lòng kiểm tra lại dữ liệu.");
+      }
+    } catch (err) {
+      setIngestError("Không kết nối được máy chủ.");
+    } finally {
+      setIsIngesting(false);
+    }
+  };
+
+  const handleClearIngestedDoc = () => {
+    setIngestedDocId(null);
+    setIngestStatus(null);
+    setLimitToIngested(false);
+  };
+
+  // handle stream research
+  const handleStreamResearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const qVal = streamQuery.trim();
+    if (!qVal || isStreaming) return;
+
+    setIsStreaming(true);
+    setStreamError(null);
+    setStreamProgress(["Khởi tạo đường truyền nghiên cứu..."]);
+    setStreamResults([]);
+    setStreamAnswer("");
+
+    try {
+      const params = new URLSearchParams();
+      params.set("query", qVal);
+      if (selectedRoleKbId) params.set("role_id", selectedRoleKbId);
+      if (limitToIngested && ingestedDocId) params.set("document_id", ingestedDocId);
+      params.set("top_k", String(topK));
+
+      if (domainFiltersInput.trim()) {
+        const filters = domainFiltersInput.split(",").map((f) => f.trim()).filter(Boolean);
+        filters.forEach((f) => params.append("domain_filters", f));
+      }
+
+      const response = await fetch(`/api/research/stream?${params.toString()}`);
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.msg || `Lỗi đường truyền (HTTP ${response.status})`);
+      }
+
+      if (!response.body) {
+        throw new Error("Luồng dữ liệu phản hồi bị trống.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+
+          if (trimmed.startsWith("data:")) {
+            const jsonStr = trimmed.substring(5).trim();
+            try {
+              const event = JSON.parse(jsonStr) as ResearchStreamEvent;
+              if (event.type === "PROGRESS") {
+                setStreamProgress((prev) => [...prev, event.message]);
+              } else if (event.type === "RESULT") {
+                setStreamResults((prev) => [...prev, event]);
+              } else if (event.type === "ANSWER") {
+                setStreamAnswer(event.message);
+              } else if (event.type === "ERROR") {
+                setStreamError(event.message);
+              }
+            } catch (err) {
+              console.warn("Failed to parse stream event JSON:", err);
+            }
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error("handleStreamResearch error:", err);
+      setStreamError(err.message || "Không kết nối được máy chủ.");
+    } finally {
+      setIsStreaming(false);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(streamAnswer);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const activeRuns = runs.filter((r) => ACTIVE_STATUSES.includes(r.status));
   const historyRuns = runs.filter((r) => !ACTIVE_STATUSES.includes(r.status));
 
   return (
-    <div className="min-h-screen bg-auth-bg text-white relative overflow-hidden">
+    <div className="min-h-screen bg-auth-bg text-white relative overflow-hidden flex flex-col">
       {/* Background glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/3 blur-[100px]"
@@ -193,155 +374,592 @@ export function ResearchView() {
         </div>
       </header>
 
-      <main className="container-focused py-8 space-y-6 relative z-10">
-        {/* Page title */}
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">
-            {t("research.title", "Nghiên cứu AI")}
-          </h1>
-          <p className="text-sm text-auth-text-2 mt-1">
-            {t("research.subtitle", "Nghiên cứu chuyên sâu tự động có nguồn gốc xác minh từ web.")}
-          </p>
-        </div>
-
-        <section className="rounded-2xl p-5 relative premium-hover-card">
-
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
-              <LineIcon name="plus" className="h-3.5 w-3.5 text-auth-accent" />
-            </div>
-            <h2 className="text-sm font-bold text-white">
-              {t("research.create.title", "Tạo nghiên cứu mới")}
-            </h2>
+      <main className="container-focused py-8 space-y-6 relative z-10 flex-grow">
+        {/* Page Title & Subtitle */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              {t("research.title", "Nghiên cứu AI")}
+            </h1>
+            <p className="text-sm text-auth-text-2 mt-1">
+              Khám phá và xây dựng tri thức tự động dựa trên tài liệu cá nhân và tìm kiếm web.
+            </p>
           </div>
 
-          <form onSubmit={handleCreate} className="space-y-3">
-            <div>
-              <label htmlFor="research-query" className="block text-xs font-semibold text-auth-text-2 mb-1.5">
-                {t("research.create.queryLabel", "Chủ đề nghiên cứu")}
-              </label>
-              <textarea
-                id="research-query"
-                rows={3}
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  if (createError) setCreateError(null);
-                }}
-                placeholder={t("research.create.placeholder", "Nhập chủ đề hoặc câu hỏi bạn muốn nghiên cứu... (ví dụ: Best practices để deploy Next.js lên Vercel với Edge Runtime)")}
-                className="w-full rounded-xl border border-auth-border bg-auth-elevated px-4 py-3 text-sm text-white placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/50 focus:ring-1 focus:ring-auth-accent/20 transition-colors resize-none"
-                disabled={isCreating}
-              />
-              <div className="flex items-center justify-between mt-1">
-                <span className={`text-[10px] ${query.length > 8000 ? "text-red-400" : "text-auth-text-3"}`}>
-                  {query.length.toLocaleString()} / 8,000
-                </span>
-              </div>
-            </div>
-
-            {createError && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-950/20 px-3 py-2.5 text-xs text-red-300">
-                <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                <span>{createError}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] text-auth-text-3">
-                {t("research.create.asyncNote", "Nghiên cứu chạy nền — bạn có thể xem tiến độ sau.")}
-              </div>
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                isLoading={isCreating}
-                disabled={query.trim().length < 2 || query.length > 8000}
-                leftIcon={<LineIcon name="search" className="h-3.5 w-3.5" />}
-              >
-                {t("research.create.button", "Bắt đầu nghiên cứu")}
-              </Button>
-            </div>
-          </form>
-        </section>
-
-        {/* ─── Active runs ─── */}
-        {activeRuns.length > 0 && (
-          <section>
-            <h2 className="text-xs font-bold text-auth-text-2 uppercase tracking-wider mb-3">
-              {t("research.active.title", "Đang chạy")} ({activeRuns.length})
-            </h2>
-            <div className="space-y-2">
-              {activeRuns.map((run) => (
-                <ResearchRunCard key={run.id} run={run} locale={locale} t={t} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ─── History ─── */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-bold text-auth-text-2 uppercase tracking-wider">
-              {t("research.history.title", "Lịch sử nghiên cứu")}
-            </h2>
+          {/* Mode Switcher */}
+          <div className="flex bg-[#121214] border border-[#27272a] rounded-xl p-1 shrink-0 self-start">
             <button
-              onClick={() => loadRuns()}
-              disabled={isLoadingRuns}
-              className="flex items-center gap-1.5 text-xs text-auth-text-2 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+              onClick={() => setActiveTab("interactive")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "interactive"
+                  ? "bg-auth-accent text-black"
+                  : "text-auth-text-3 hover:text-white"
+              }`}
             >
-              <LineIcon name="sync" className={`h-3.5 w-3.5 ${isLoadingRuns ? "animate-spin" : ""}`} />
+              Phòng Lab Tương Tác (Live)
+            </button>
+            <button
+              onClick={() => setActiveTab("history")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "history"
+                  ? "bg-auth-accent text-black"
+                  : "text-auth-text-3 hover:text-white"
+              }`}
+            >
+              Chạy Nền & Lịch Sử
             </button>
           </div>
+        </div>
 
-          {isLoadingRuns ? (
-            <div className="flex items-center justify-center py-12 text-auth-text-3">
-              <DotMatrixLoader variant="ripple" size="md" />
-            </div>
-          ) : listError ? (
-            <div className="text-center py-8 space-y-3">
-              <LineIcon name="warning" className="h-8 w-8 text-auth-text-3 mx-auto" />
-              <p className="text-sm text-auth-text-2">{listError}</p>
-              <Button variant="ghost" size="sm" onClick={() => loadRuns()}>
-                {t("common.retry", "Thử lại")}
-              </Button>
-            </div>
-          ) : historyRuns.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-auth-border rounded-2xl space-y-3">
-              <LineIcon name="search" className="h-10 w-10 text-auth-text-3 mx-auto opacity-50" />
-              <p className="text-sm font-semibold text-auth-text-2">
-                {t("research.history.empty", "Chưa có nghiên cứu nào")}
-              </p>
-              <p className="text-xs text-auth-text-3">
-                {t("research.history.emptyDesc", "Tạo nghiên cứu đầu tiên để bắt đầu xây dựng kho nghiên cứu có nguồn gốc.")}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {historyRuns.map((run) => (
-                <ResearchRunCard key={run.id} run={run} locale={locale} t={t} />
-              ))}
-              {hasMore && (
-                <div className="flex justify-center pt-2">
+        {/* ========================================================================= */}
+        {/* TAB 1: INTERACTIVE RESEARCH LAB */}
+        {/* ========================================================================= */}
+        {activeTab === "interactive" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Left Column: Form Settings (Ingestion & Filters) */}
+            <div className="lg:col-span-1 space-y-6">
+              
+              {/* Document Ingestion Form */}
+              <section className="rounded-2xl p-5 relative border border-auth-border bg-auth-surface/50 backdrop-blur-md">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
+                    <LineIcon name="upload" className="h-3.5 w-3.5 text-auth-accent" />
+                  </div>
+                  <h2 className="text-sm font-bold text-white">Nạp tài liệu nhanh vào Vector DB</h2>
+                </div>
+
+                <form onSubmit={handleIngestDocument} className="space-y-4">
+                  {/* Source Type Chips */}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-2">
+                      Loại tài liệu
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5 bg-[#121214] p-1 border border-[#27272a] rounded-xl">
+                      {(["web", "pdf", "text", "git"] as const).map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => {
+                            setDocSourceType(type);
+                            setDocSource("");
+                            setIngestError(null);
+                          }}
+                          className={`py-1.5 text-[10px] font-bold rounded-lg uppercase tracking-wider cursor-pointer text-center transition-all ${
+                            docSourceType === type
+                              ? "bg-white/[0.08] text-auth-accent border border-auth-accent/20"
+                              : "text-auth-text-3 hover:text-white border border-transparent"
+                          }`}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dynamic inputs */}
+                  <div>
+                    <label htmlFor="doc-source" className="block text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1.5">
+                      {docSourceType === "text" ? "Nội dung văn bản thuần" : "Đường dẫn URL nguồn"}
+                    </label>
+                    {docSourceType === "text" ? (
+                      <textarea
+                        id="doc-source"
+                        rows={5}
+                        required
+                        value={docSource}
+                        onChange={(e) => setDocSource(e.target.value)}
+                        placeholder="Nhập hoặc dán nội dung tri thức tại đây (tối thiểu 10 ký tự)..."
+                        className="w-full rounded-xl border border-auth-border bg-auth-elevated px-4 py-3 text-xs text-white placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/50 focus:ring-1 focus:ring-auth-accent/20 transition-all resize-none"
+                      />
+                    ) : (
+                      <div className="relative">
+                        <LineIcon name={docSourceType === "git" ? "github" : "link"} className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-auth-text-3" />
+                        <input
+                          id="doc-source"
+                          type="url"
+                          required
+                          value={docSource}
+                          onChange={(e) => setDocSource(e.target.value)}
+                          placeholder={
+                            docSourceType === "git"
+                              ? "https://github.com/org/repo.git"
+                              : docSourceType === "pdf"
+                                ? "https://example.com/document.pdf"
+                                : "https://example.com/docs/api-guide"
+                          }
+                          className="w-full rounded-xl border border-auth-border bg-auth-elevated pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/50 focus:ring-1 focus:ring-auth-accent/20 transition-all"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Domain Hint */}
+                  <div>
+                    <label htmlFor="doc-domain-hint" className="block text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1.5">
+                      Gợi ý Domain (Phân loại)
+                    </label>
+                    <input
+                      id="doc-domain-hint"
+                      type="text"
+                      value={docDomainHint}
+                      onChange={(e) => setDocDomainHint(e.target.value)}
+                      placeholder="Ví dụ: backend, ai, frontend (không bắt buộc)"
+                      className="w-full rounded-xl border border-auth-border bg-auth-elevated px-4 py-2.5 text-xs text-white placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/50 focus:ring-1 focus:ring-auth-accent/20 transition-all"
+                    />
+                  </div>
+
+                  {ingestError && (
+                    <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-950/20 px-3 py-2 text-[11px] text-red-300">
+                      <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                      <span>{ingestError}</span>
+                    </div>
+                  )}
+
+                  {/* Ingestion Success Banner */}
+                  {ingestedDocId && (
+                    <div className="rounded-xl border border-auth-accent/20 bg-auth-accent-dim/10 p-3 space-y-1.5">
+                      <div className="flex items-start justify-between">
+                        <span className="text-[11px] font-bold text-auth-accent flex items-center gap-1.5">
+                          <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" />
+                          Nạp tài liệu thành công!
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleClearIngestedDoc}
+                          className="text-auth-text-3 hover:text-white transition-colors cursor-pointer"
+                        >
+                          <LineIcon name="xmark" className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <div className="text-[9px] text-auth-text-2 space-y-0.5 font-mono">
+                        <p className="truncate">ID: {ingestedDocId}</p>
+                        <p>Trạng thái: <span className="text-auth-accent font-bold">{ingestStatus}</span></p>
+                      </div>
+                      <p className="text-[10px] text-auth-text-3">
+                        Hệ thống đã tự động liên kết tài liệu này cho Research Query tiếp theo của bạn.
+                      </p>
+                    </div>
+                  )}
+
                   <Button
-                    variant="ghost"
+                    type="submit"
+                    variant="primary"
                     size="sm"
-                    onClick={() => nextCursor && loadRuns(nextCursor)}
-                    isLoading={isLoadingRuns}
+                    fullWidth
+                    isLoading={isIngesting}
+                    disabled={!docSource.trim()}
+                    leftIcon={<LineIcon name="upload" className="h-3.5 w-3.5" />}
                   >
-                    {t("research.history.loadMore", "Tải thêm")}
+                    Nạp tài liệu mới
+                  </Button>
+                </form>
+              </section>
+
+              {/* Research Scope & Stream settings */}
+              <section className="rounded-2xl p-5 border border-auth-border bg-auth-surface/50 backdrop-blur-md space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
+                    <LineIcon name="settings" className="h-3.5 w-3.5 text-auth-accent" />
+                  </div>
+                  <h2 className="text-sm font-bold text-white">Cấu hình nghiên cứu</h2>
+                </div>
+
+                {/* KB (Role) Selector */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                    Knowledge Base Đích (Role)
+                  </label>
+                  {rolesLoading ? (
+                    <div className="h-9 bg-auth-elevated border border-auth-border rounded-xl flex items-center px-3 gap-2 text-xs text-auth-text-3">
+                      <DotMatrixLoader variant="pulse" size="xs" />
+                      <span>Đang tải...</span>
+                    </div>
+                  ) : userRoles.length > 0 ? (
+                    <Select
+                      value={selectedRoleKbId}
+                      onChange={setSelectedRoleKbId}
+                      options={userRoles.map((r) => ({
+                        value: r.id,
+                        label: r.roleName,
+                        sublabel: r.roleGroup,
+                      }))}
+                      fullWidth
+                      className="bg-auth-elevated border-auth-border rounded-xl py-2"
+                    />
+                  ) : (
+                    <span className="text-xs text-red-400">Không tìm thấy KB. Hãy onboarding trước.</span>
+                  )}
+                </div>
+
+                {/* Restrict to Ingested Doc Option */}
+                {ingestedDocId && (
+                  <div className="flex items-start gap-2.5 p-2.5 rounded-xl border border-auth-accent/20 bg-auth-accent-dim/5">
+                    <input
+                      id="limit-doc-checkbox"
+                      type="checkbox"
+                      checked={limitToIngested}
+                      onChange={(e) => setLimitToIngested(e.target.checked)}
+                      className="mt-0.5 rounded border-[#27272a] bg-[#121214] text-auth-accent focus:ring-auth-accent/20 cursor-pointer"
+                    />
+                    <label htmlFor="limit-doc-checkbox" className="text-xs font-semibold text-auth-accent cursor-pointer select-none">
+                      Chỉ nghiên cứu trên tài liệu vừa nạp (Document-Filtered Mode)
+                    </label>
+                  </div>
+                )}
+
+                {/* Top K */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                      Số lượng chunk trích xuất (Top K)
+                    </label>
+                    <span className="text-xs text-auth-accent font-semibold">{topK}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={50}
+                    value={topK}
+                    onChange={(e) => setTopK(Number(e.target.value))}
+                    className="w-full accent-auth-accent cursor-pointer bg-[#18181b] rounded-lg appearance-none h-1"
+                  />
+                </div>
+
+                {/* Domain filters */}
+                <div>
+                  <label htmlFor="domain-filters-in" className="block text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1.5">
+                    Bộ lọc Domain Tags (cách nhau bằng dấu phẩy)
+                  </label>
+                  <input
+                    id="domain-filters-in"
+                    type="text"
+                    value={domainFiltersInput}
+                    onChange={(e) => setDomainFiltersInput(e.target.value)}
+                    placeholder="Ví dụ: python, async, backend"
+                    className="w-full rounded-xl border border-auth-border bg-auth-elevated px-4 py-2 text-xs text-white placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/50 focus:ring-1 focus:ring-auth-accent/20 transition-all"
+                  />
+                </div>
+              </section>
+
+            </div>
+
+            {/* Right Column: Live Stream Console */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* Question Text Area */}
+              <section className="rounded-2xl p-5 border border-auth-border bg-auth-surface/50 backdrop-blur-md">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
+                    <LineIcon name="search" className="h-3.5 w-3.5 text-auth-accent" />
+                  </div>
+                  <h2 className="text-sm font-bold text-white">Nghiên cứu & Truy vấn thời gian thực</h2>
+                </div>
+
+                <form onSubmit={handleStreamResearch} className="space-y-4">
+                  <div>
+                    <label htmlFor="stream-query-in" className="block text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1.5">
+                      Chủ đề / Câu hỏi nghiên cứu
+                    </label>
+                    <textarea
+                      id="stream-query-in"
+                      rows={3}
+                      required
+                      value={streamQuery}
+                      onChange={(e) => {
+                        setStreamQuery(e.target.value);
+                        if (streamError) setStreamError(null);
+                      }}
+                      placeholder="Nhập câu hỏi bạn muốn nghiên cứu chuyên sâu (hệ thống sẽ stream tiến trình, nguồn, và câu trả lời theo thời gian thực)..."
+                      className="w-full rounded-xl border border-auth-border bg-auth-elevated px-4 py-3 text-sm text-white placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/50 focus:ring-1 focus:ring-auth-accent/20 transition-all resize-none leading-relaxed"
+                      disabled={isStreaming}
+                    />
+                  </div>
+
+                  {streamError && (
+                    <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-950/20 px-3 py-2.5 text-xs text-red-300">
+                      <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                      <span>{streamError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="sm"
+                      isLoading={isStreaming}
+                      disabled={!streamQuery.trim()}
+                      leftIcon={<LineIcon name="play" className="h-3.5 w-3.5" />}
+                    >
+                      Bắt đầu nghiên cứu Live Stream
+                    </Button>
+                  </div>
+                </form>
+              </section>
+
+              {/* Streaming Output Panel */}
+              {(isStreaming || streamAnswer || streamResults.length > 0 || streamProgress.length > 0) && (
+                <section className="rounded-2xl border border-auth-border bg-auth-surface p-6 space-y-6">
+                  
+                  {/* Header output status */}
+                  <div className="flex items-center justify-between border-b border-[#27272a] pb-4">
+                    <div className="flex items-center gap-2">
+                      {isStreaming ? (
+                        <DotMatrixLoader variant="pulse" size="xs" />
+                      ) : (
+                        <div className="h-2 w-2 rounded-full bg-auth-accent animate-ping" />
+                      )}
+                      <span className="text-xs font-bold text-auth-text-2">
+                        {isStreaming ? "Đang tiến hành nghiên cứu..." : "Nghiên cứu hoàn tất"}
+                      </span>
+                    </div>
+
+                    {streamAnswer && !isStreaming && (
+                      <button
+                        onClick={handleCopy}
+                        className="flex items-center gap-1 text-xs text-auth-text-2 hover:text-white transition-colors cursor-pointer border border-[#27272a] rounded-lg px-2.5 py-1 bg-white/[0.02]"
+                      >
+                        <LineIcon name={copied ? "checkmark-circle" : "copy"} className={`h-3.5 w-3.5 ${copied ? "text-auth-accent" : ""}`} />
+                        <span>{copied ? "Đã sao chép" : "Sao chép"}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Progress Logs */}
+                  {streamProgress.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">Tiến trình xử lý</h3>
+                      <div className="bg-[#121214] border border-[#27272a] rounded-xl p-3.5 space-y-1.5 max-h-[140px] overflow-y-auto font-mono text-[10px] text-auth-text-2">
+                        {streamProgress.map((prog, index) => (
+                          <div key={index} className="flex items-start gap-1.5">
+                            <span className="text-auth-accent">›</span>
+                            <span>{prog}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Results: Chunks found */}
+                  {streamResults.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                        Nguồn trích xuất liên quan ({streamResults.length})
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {streamResults.map((event, index) => {
+                          if (event.type !== "RESULT") return null;
+                          return (
+                            <div key={event.chunk_id || index} className="rounded-xl border border-auth-border bg-[#18181b] p-3 flex flex-col justify-between gap-3 premium-hover-card">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-auth-accent-dim border border-auth-accent/20 text-auth-accent">
+                                    {Math.round(event.score * 100)}% Match
+                                  </span>
+                                  <span className="text-[9px] text-auth-text-3 font-mono">Index: #{event.chunk_index}</span>
+                                </div>
+                                <p className="text-xs text-white line-clamp-3 leading-relaxed italic bg-white/[0.01] p-2 rounded-lg border border-white/[0.03]">
+                                  "{event.message}"
+                                </p>
+                              </div>
+                              
+                              {/* Domain tags */}
+                              {event.domain_tags && event.domain_tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {event.domain_tags.map((tag) => (
+                                    <span key={tag} className="text-[8px] bg-white/[0.04] text-auth-text-2 border border-white/5 rounded-md px-1.5 py-0.5">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LLM stream Answer */}
+                  {(streamAnswer || isStreaming) && (
+                    <div className="space-y-2 border-t border-[#27272a] pt-4">
+                      <h3 className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 flex items-center gap-1.5">
+                        <LineIcon name="brain-alt" className="h-3.5 w-3.5 text-auth-accent" />
+                        Báo cáo tổng hợp tri thức
+                      </h3>
+
+                      <div className="prose prose-invert prose-sm max-w-none rounded-xl border border-auth-border bg-[#121214] p-4 min-h-[120px] relative overflow-hidden">
+                        {isStreaming && !streamAnswer && (
+                          <div className="absolute inset-0 flex items-center justify-center text-xs text-auth-text-3 gap-2 bg-[#121214]/80 z-10">
+                            <DotMatrixLoader variant="ripple" size="sm" />
+                            <span>Đang tổng hợp câu trả lời từ AI...</span>
+                          </div>
+                        )}
+                        <div
+                          className="text-xs text-white leading-relaxed whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={{
+                            __html: streamAnswer
+                              ? streamAnswer.replace(/\n/g, "<br/>")
+                              : "",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                </section>
+              )}
+
+            </div>
+
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 2: BACKGROUND RUNS & HISTORY (Original UI) */}
+        {/* ========================================================================= */}
+        {activeTab === "history" && (
+          <div className="space-y-6">
+            
+            {/* Background Create Section */}
+            <section className="rounded-2xl p-5 relative border border-auth-border bg-auth-surface/50 backdrop-blur-md">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
+                  <LineIcon name="plus" className="h-3.5 w-3.5 text-auth-accent" />
+                </div>
+                <h2 className="text-sm font-bold text-white">Tạo nghiên cứu chạy nền mới</h2>
+              </div>
+
+              <form onSubmit={handleCreateBg} className="space-y-3">
+                <div>
+                  <label htmlFor="research-query-bg" className="block text-xs font-semibold text-auth-text-2 mb-1.5">
+                    {t("research.create.queryLabel", "Chủ đề nghiên cứu")}
+                  </label>
+                  <textarea
+                    id="research-query-bg"
+                    rows={3}
+                    value={bgQuery}
+                    onChange={(e) => {
+                      setBgQuery(e.target.value);
+                      if (createError) setCreateError(null);
+                    }}
+                    placeholder={t("research.create.placeholder", "Nhập chủ đề hoặc câu hỏi bạn muốn nghiên cứu... (ví dụ: Best practices để deploy Next.js lên Vercel với Edge Runtime)")}
+                    className="w-full rounded-xl border border-auth-border bg-auth-elevated px-4 py-3 text-sm text-white placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/50 focus:ring-1 focus:ring-auth-accent/20 transition-colors resize-none"
+                    disabled={isCreating}
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className={`text-[10px] ${bgQuery.length > 8000 ? "text-red-400" : "text-auth-text-3"}`}>
+                      {bgQuery.length.toLocaleString()} / 8,000
+                    </span>
+                  </div>
+                </div>
+
+                {createError && (
+                  <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-950/20 px-3 py-2.5 text-xs text-red-300">
+                    <LineIcon name="warning" className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    <span>{createError}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] text-auth-text-3">
+                    {t("research.create.asyncNote", "Nghiên cứu chạy nền — bạn có thể xem tiến độ sau.")}
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    isLoading={isCreating}
+                    disabled={bgQuery.trim().length < 2 || bgQuery.length > 8000}
+                    leftIcon={<LineIcon name="search" className="h-3.5 w-3.5" />}
+                  >
+                    {t("research.create.button", "Bắt đầu nghiên cứu")}
                   </Button>
                 </div>
+              </form>
+            </section>
+
+            {/* Active Runs */}
+            {activeRuns.length > 0 && (
+              <section>
+                <h2 className="text-xs font-bold text-auth-text-2 uppercase tracking-wider mb-3">
+                  {t("research.active.title", "Đang chạy")} ({activeRuns.length})
+                </h2>
+                <div className="space-y-2">
+                  {activeRuns.map((run) => (
+                    <ResearchRunCard key={run.id} run={run} locale={locale} t={t} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Historical list */}
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-bold text-auth-text-2 uppercase tracking-wider">
+                  {t("research.history.title", "Lịch sử nghiên cứu")}
+                </h2>
+                <button
+                  onClick={() => loadRuns()}
+                  disabled={isLoadingRuns}
+                  className="flex items-center gap-1.5 text-xs text-auth-text-2 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <LineIcon name="sync" className={`h-3.5 w-3.5 ${isLoadingRuns ? "animate-spin" : ""}`} />
+                </button>
+              </div>
+
+              {isLoadingRuns ? (
+                <div className="flex items-center justify-center py-12 text-auth-text-3">
+                  <DotMatrixLoader variant="ripple" size="md" />
+                </div>
+              ) : listError ? (
+                <div className="text-center py-8 space-y-3">
+                  <LineIcon name="warning" className="h-8 w-8 text-auth-text-3 mx-auto" />
+                  <p className="text-sm text-auth-text-2">{listError}</p>
+                  <Button variant="ghost" size="sm" onClick={() => loadRuns()}>
+                    {t("common.retry", "Thử lại")}
+                  </Button>
+                </div>
+              ) : historyRuns.length === 0 ? (
+                <div className="text-center py-12 border border-dashed border-auth-border rounded-2xl space-y-3 bg-auth-surface/20">
+                  <LineIcon name="search" className="h-10 w-10 text-auth-text-3 mx-auto opacity-50" />
+                  <p className="text-sm font-semibold text-auth-text-2">
+                    {t("research.history.empty", "Chưa có nghiên cứu nào")}
+                  </p>
+                  <p className="text-xs text-auth-text-3">
+                    {t("research.history.emptyDesc", "Tạo nghiên cứu đầu tiên để bắt đầu xây dựng kho nghiên cứu có nguồn gốc.")}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {historyRuns.map((run) => (
+                    <ResearchRunCard key={run.id} run={run} locale={locale} t={t} />
+                  ))}
+                  {hasMore && (
+                    <div className="flex justify-center pt-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => nextCursor && loadRuns(nextCursor)}
+                        isLoading={isLoadingRuns}
+                      >
+                        {t("research.history.loadMore", "Tải thêm")}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-        </section>
+            </section>
+
+          </div>
+        )}
       </main>
     </div>
   );
 }
 
-// ─── Run Card ────────────────────────────────────────────────────
-
+// --- Run Card ---
 function ResearchRunCard({
   run,
   locale,

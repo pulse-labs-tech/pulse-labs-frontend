@@ -10,6 +10,7 @@ import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import type { AuthErrorCode } from "@/types/auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { PulseLogo } from "@/components/shared/pulse-logo";
+import { getLocalizedPath } from "@/lib/utils";
 
 export function VerifyEmailForm() {
   const searchParams = useSearchParams();
@@ -45,10 +46,7 @@ export function VerifyEmailForm() {
         const result = await verifyEmailAction(token);
         if (result.success) {
           if (result.nextRoute) {
-            const cleanRoute = result.nextRoute.startsWith("/")
-              ? result.nextRoute
-              : `/${result.nextRoute}`;
-            setNextRoute(`/${locale}${cleanRoute}`);
+            setNextRoute(getLocalizedPath(result.nextRoute, locale));
           }
           setStatus("success");
         } else {

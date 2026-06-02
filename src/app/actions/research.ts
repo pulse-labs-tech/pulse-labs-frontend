@@ -8,6 +8,7 @@
  */
 
 import { authClient } from "@/lib/authenticated-client";
+import { getAccessToken } from "@/lib/token-storage";
 import type {
   CreateResearchRunRequest,
   CreateResearchRunResponseData,
@@ -18,6 +19,8 @@ import type {
   SaveResearchToWikiRequest,
   SaveResearchToWikiResponseData,
   ResearchRunDto,
+  SubmitDocumentRequest,
+  SubmitDocumentResponseData,
 } from "@/types/research";
 
 type ResearchResult<T> = {
@@ -164,3 +167,62 @@ export async function saveResearchToWikiAction(
     return makeError({} as SaveResearchToWikiResponseData);
   }
 }
+
+/**
+ * POST /documents
+ * Ingest document into knowledge base.
+ */
+export async function submitDocumentAction(
+  request: SubmitDocumentRequest
+): Promise<ResearchResult<SubmitDocumentResponseData>> {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return {
+        status: "0",
+        error_code: "UNAUTHORIZED",
+        msg: "Chưa đăng nhập hoặc phiên làm việc hết hạn.",
+        data: {} as SubmitDocumentResponseData,
+      };
+    }
+
+    const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
+    const res = await fetch(`${RESEARCH_API_BASE}/documents`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      let msg = "Lỗi nạp tài liệu từ hệ thống.";
+      let error_code = "INGESTION_ERROR";
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.msg) msg = parsed.msg;
+        if (parsed.error_code) error_code = parsed.error_code;
+      } catch {}
+      return {
+        status: "0",
+        error_code,
+        msg,
+        data: {} as SubmitDocumentResponseData,
+      };
+    }
+
+    const json = await res.json();
+    return {
+      status: json.status ?? "1",
+      error_code: json.error_code ?? "0",
+      msg: json.msg ?? "Success",
+      data: json.data ?? json,
+    };
+  } catch (error) {
+    console.error("submitDocumentAction error:", error);
+    return makeError({} as SubmitDocumentResponseData);
+  }
+}
+

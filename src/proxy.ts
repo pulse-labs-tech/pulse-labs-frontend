@@ -134,6 +134,27 @@ function getLocaleAndSubpath(pathname: string): { locale: string | null; subpath
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Failsafe: Detect and redirect duplicate or multiple locale prefixes in the URL (e.g., /en/en/onboarding)
+  const segments = pathname.split("/").filter(Boolean);
+  if (
+    segments.length >= 2 &&
+    LOCALES.includes(segments[0]) &&
+    LOCALES.includes(segments[1])
+  ) {
+    let firstNonLocaleIndex = 0;
+    while (
+      firstNonLocaleIndex < segments.length &&
+      LOCALES.includes(segments[firstNonLocaleIndex])
+    ) {
+      firstNonLocaleIndex++;
+    }
+    const finalLocale = segments[0];
+    const restPath = segments.slice(firstNonLocaleIndex).join("/");
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = `/${finalLocale}${restPath ? "/" + restPath : ""}`;
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // Extract locale and relative subpath (e.g. "/vi/dashboard" -> "vi", "/dashboard")
   const { locale: pathLocale, subpath } = getLocaleAndSubpath(pathname);
 

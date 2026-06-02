@@ -48,3 +48,35 @@ export function truncate(text: string, maxLength: number): string {
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * Safely localizes a path/URL with the current locale, avoiding double-prefixing.
+ * e.g., "/en/onboarding" with locale "en" -> "/en/onboarding"
+ * e.g., "/onboarding" with locale "en" -> "/en/onboarding"
+ * e.g., "onboarding" with locale "en" -> "/en/onboarding"
+ * e.g., "https://example.com/foo" with locale "en" -> "https://example.com/foo" (external link remains untouched)
+ */
+export function getLocalizedPath(path: string, locale: string): string {
+  if (!path) return `/${locale}`;
+
+  // If path is external URL (starts with http://, https://, or //), return as-is
+  if (/^(https?:)?\/\//i.test(path)) {
+    return path;
+  }
+
+  const cleanPath = path.startsWith("/") ? path : "/" + path;
+  
+  if (cleanPath === "/") {
+    return `/${locale}`;
+  }
+
+  const segments = cleanPath.split("/").filter(Boolean);
+  
+  // If first segment matches a known locale (en or vi), return as-is
+  if (segments.length > 0 && (segments[0] === "en" || segments[0] === "vi")) {
+    return cleanPath;
+  }
+
+  return `/${locale}${cleanPath}`;
+}
+

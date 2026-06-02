@@ -14,12 +14,20 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
-import { createQuerySessionAction, submitQueryMessageAction } from "@/app/actions/query";
+import {
+  createQuerySessionAction,
+  submitQueryMessageAction,
+  listQuerySessionsAction,
+  getQuerySessionAction,
+  submitQueryFeedbackAction,
+  saveQueryToWikiAction,
+} from "@/app/actions/query";
+import { getDashboardSummaryAction } from "@/app/actions/dashboard";
 import { getOnboardingStateAction } from "@/app/actions/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
-import type { QueryCitation } from "@/types/query";
+import type { QueryCitation, QuerySession } from "@/types/query";
 import type { RoleKbDto } from "@/types/onboarding";
 
 export interface QueryMessage {
@@ -28,10 +36,16 @@ export interface QueryMessage {
   content: string;
   citations: QueryCitation[];
   confidenceLevel: "high" | "medium" | "low" | null;
+  confidenceScore?: number;
+  freshnessStatus?: "fresh" | "stale" | "updating" | "verified" | "unknown";
+  freshnessMessage?: string | null;
   kbGapDetected: boolean;
   kbGapSuggestion: string | null;
+  kbGapActions?: string[];
+  followUps?: string[];
   usedItems: number;
   createdAt: string;
+  feedbackRating?: "up" | "down";
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -70,7 +84,7 @@ function TypingIndicator({ t }: { t: (path: string) => string }) {
 }
 
 /** Confidence level pill badge */
-function ConfidenceBadge({ level, t }: { level: "high" | "medium" | "low"; t: (path: string) => string }) {
+function ConfidenceBadge({ level, score, t }: { level: "high" | "medium" | "low"; score?: number; t: (path: string) => string }) {
   const map = {
     high: {
       label: t("query.confidenceHigh"),
@@ -91,10 +105,10 @@ function ConfidenceBadge({ level, t }: { level: "high" | "medium" | "low"; t: (p
   const { label, cls, Icon } = map[level];
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${cls}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${cls}`}
     >
       <LineIcon name={Icon} className="h-2.5 w-2.5" />
-      {label}
+      {label} {score !== undefined ? ` · ${score}` : ""}
     </span>
   );
 }
@@ -107,7 +121,7 @@ function CitationCard({ citation, index, t }: { citation: QueryCitation; index: 
       href={citation.sourcePointer?.url || "#"}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex-shrink-0 w-64 bg-auth-elevated border border-auth-border hover:border-white/[0.15] rounded-xl p-3 flex flex-col gap-2 transition-all group hover:shadow-[0_0_15px_rgba(255,255,255,0.02)] cursor-pointer"
+      className="flex-shrink-0 w-64 bg-auth-elevated border border-auth-border hover:border-white/[0.15] rounded-xl p-3 flex flex-col gap-2 transition-all group hover:shadow-[0_0_15px_rgba(255,255,255,0.02)] cursor-pointer text-left"
     >
       {/* Index + domain */}
       <div className="flex items-center justify-between gap-2">
@@ -125,7 +139,7 @@ function CitationCard({ citation, index, t }: { citation: QueryCitation; index: 
         {citation.knowledgeItemTitle}
       </p>
 
-      {/* Snippet */}
+      {/* Excerpt */}
       <p className="text-[11px] text-auth-text-2 line-clamp-2 leading-relaxed">
         {citation.excerpt}
       </p>
@@ -177,83 +191,201 @@ function CitationsPanel({ citations, t }: { citations: QueryCitation[]; t: (path
 }
 
 /** KB Gap warning box */
-function KbGapWarning({ suggestion, locale, t }: { suggestion: string | null; locale: string; t: (path: string) => string }) {
+function KbGapWarning({
+  suggestion,
+  locale,
+  actions = [],
+  t,
+}: {
+  suggestion: string | null;
+  locale: string;
+  actions?: string[];
+  t: (path: string) => string;
+}) {
   return (
-    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
+    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-left">
       <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
-      <div>
+      <div className="flex-1">
         <p className="text-xs font-bold text-amber-300">{t("query.gapTitle")}</p>
         {suggestion && (
           <p className="text-xs text-amber-200/70 mt-1 leading-relaxed">{suggestion}</p>
         )}
-        <Link
-          href={`/${locale}/compile/new`}
-          className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
-        >
-          <LineIcon name="plus" className="h-3 w-3" /> {t("query.gapButton")}
-        </Link>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {actions.includes("compile_source") && (
+            <Link
+              href={`/${locale}/compile/new`}
+              className="inline-flex items-center gap-1 bg-amber-950/50 hover:bg-amber-900/60 border border-amber-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              <LineIcon name="plus" className="h-2.5 w-2.5" /> {t("query.gapButton")}
+            </Link>
+          )}
+          {actions.includes("change_scope") && (
+            <span className="inline-flex items-center gap-1 bg-amber-950/30 border border-amber-500/10 px-2.5 py-1 rounded-lg text-[10px] text-amber-400/80">
+              💡 {locale === "vi" ? "Đổi phạm vi hỏi" : "Change scope"}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 /** User message bubble */
-function UserMessage({ msg, locale }: { msg: QueryMessage; locale: string }) {
+function UserMessage({ msg }: { msg: QueryMessage; locale: string }) {
   return (
-    <div className="flex justify-end">
-      <div className="max-w-[75%]">
-        <div className="bg-auth-elevated border border-auth-border rounded-2xl rounded-tr-sm px-4 py-3">
-          <p className="text-sm text-auth-text whitespace-pre-wrap leading-relaxed break-words">
-            {msg.content}
-          </p>
-        </div>
-        <p className="text-[10px] text-auth-text-3 mt-1 text-right">{formatTime(msg.createdAt, locale)}</p>
+    <div className="message-row user animate-fade-in">
+      <div className="user-bubble">
+        {msg.content}
       </div>
     </div>
   );
 }
 
 /** Assistant message (no bubble) */
-function AssistantMessage({ msg, locale, t }: { msg: QueryMessage; locale: string; t: (path: string, defaultValue?: string) => string }) {
+function AssistantMessage({
+  msg,
+  locale,
+  onFeedback,
+  t,
+}: {
+  msg: QueryMessage;
+  locale: string;
+  onFeedback: (messageId: string, rating: "up" | "down") => void;
+  t: (path: string, defaultValue?: string) => string;
+}) {
+  const [thinkingCollapsed, setThinkingCollapsed] = useState(true);
+
   return (
-    <div className="flex justify-start">
-      <div className="w-full max-w-[90%]">
-        {/* Header row */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
-            <LineIcon name="star" className="h-3 w-3 text-white" />
-          </div>
-          <span className="text-[11px] font-bold text-auth-text-3 uppercase tracking-wider">
-            Pulse AI
-          </span>
+    <div className="message-row animate-fade-in text-left">
+      <div className="ai-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+        </svg>
+      </div>
+      <div className="ai-content">
+        <div className="ai-name">Pulse AI</div>
+
+        {/* Badges Row */}
+        <div className="flex flex-wrap items-center gap-2 mb-2 select-none">
           {msg.confidenceLevel && (
-            <ConfidenceBadge level={msg.confidenceLevel} t={t} />
+            <ConfidenceBadge level={msg.confidenceLevel} score={msg.confidenceScore} t={t} />
           )}
-          <span className="ml-auto text-[10px] text-auth-text-3">
-            {formatTime(msg.createdAt, locale)}
-          </span>
+
+          {/* Reasoning complete toggle button */}
+          <div
+            onClick={() => setThinkingCollapsed(!thinkingCollapsed)}
+            className="thinking-bar done"
+          >
+            <div className="thinking-dot"></div>
+            <span>{t("query.reasoningComplete", "Reasoning complete")}</span>
+            <LineIcon
+              name="chevron-down"
+              className={`h-3 w-3 transition-transform duration-200 ${!thinkingCollapsed ? "rotate-180" : ""}`}
+            />
+          </div>
         </div>
 
+        {/* Collapsible Reasoning Log Panel */}
+        {!thinkingCollapsed && (
+          <div className="p-3.5 bg-white/[0.02] border border-white/[0.06] rounded-xl text-xs text-auth-text-3 font-mono leading-relaxed mb-3.5 animate-dropdown-enter">
+            {t("query.thinkingProcessMock", "Searching vector db chunks... 5 contexts matched. Synthesizing response using Gemini 2.0 Flash.")}
+          </div>
+        )}
+
         {/* Answer text */}
-        <div className="prose prose-sm prose-invert max-w-none">
-          <p className="text-sm text-auth-text-2 leading-relaxed whitespace-pre-wrap m-0 break-words">
+        <div className="ai-text">
+          <p className="whitespace-pre-wrap leading-relaxed break-words">
             {msg.content}
           </p>
         </div>
 
-        {/* KB Gap warning */}
+        {/* Freshness Badge */}
+        {msg.freshnessStatus && msg.freshnessStatus !== "fresh" && msg.freshnessStatus !== "unknown" && (
+          <div className={`freshness-badge ${msg.freshnessStatus} mt-3`}>
+            <span className="fresh-icon">
+              {msg.freshnessStatus === "stale" ? "⏳" : msg.freshnessStatus === "updating" ? "🔍" : "✅"}
+            </span>
+            <span className="fresh-text">
+              {msg.freshnessMessage ||
+                (msg.freshnessStatus === "stale"
+                  ? t("query.staleInfo", "Dữ liệu có thể chưa mới nhất")
+                  : msg.freshnessStatus === "updating"
+                  ? t("query.updatingInfo", "Đang tìm thông tin mới nhất...")
+                  : t("query.verifiedInfo", "Đã xác minh"))}
+            </span>
+          </div>
+        )}
+
+        {/* KB Gap Warning */}
         {msg.kbGapDetected && (
-          <KbGapWarning suggestion={msg.kbGapSuggestion} locale={locale} t={t} />
+          <KbGapWarning
+            suggestion={msg.kbGapSuggestion}
+            locale={locale}
+            actions={msg.kbGapActions}
+            t={t}
+          />
         )}
 
         {/* Citations */}
         <CitationsPanel citations={msg.citations} t={t} />
 
-        {/* Used items info */}
-        {msg.usedItems > 0 && (
-          <p className="mt-2 text-[10px] text-auth-text-3">
-            {t("query.sourceSummary", "Synthesized from {count} knowledge items").replace("{count}", msg.usedItems.toString())}
-          </p>
+        {/* Actions Row */}
+        <div className="ai-actions">
+          <button
+            onClick={() => onFeedback(msg.id, "up")}
+            className={`ai-action-btn ${msg.feedbackRating === "up" ? "liked" : ""}`}
+            title={t("query.actionGood", "Good")}
+          >
+            <LineIcon name="like" className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => onFeedback(msg.id, "down")}
+            className={`ai-action-btn ${msg.feedbackRating === "down" ? "disliked" : ""}`}
+            title={t("query.actionBad", "Bad")}
+          >
+            <LineIcon name="dislike" className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                const event = new CustomEvent("prefill-query-input", { detail: msg.content });
+                window.dispatchEvent(event);
+              }
+            }}
+            className="ai-action-btn"
+            title={t("query.actionRegen", "Regenerate")}
+          >
+            <LineIcon name="sync" className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(msg.content);
+            }}
+            className="ai-action-btn"
+            title={t("query.actionCopy", "Copy")}
+          >
+            <LineIcon name="files" className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        {/* Follow-up suggestions */}
+        {msg.followUps && msg.followUps.length > 0 && (
+          <div className="followup-chips select-none">
+            {msg.followUps.map((f, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    const event = new CustomEvent("prefill-query-input", { detail: f });
+                    window.dispatchEvent(event);
+                  }
+                }}
+                className="followup-chip"
+              >
+                💡 {f}
+              </button>
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -276,37 +408,23 @@ function EmptyState({
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
-      {/* Icon */}
-      <div className="relative mb-6">
-        <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.1)]">
-          <LineIcon name="comment" className="h-10 w-10 text-emerald-400" />
-        </div>
-        <div
-          className="absolute inset-0 rounded-2xl blur-xl opacity-30"
-          style={{ background: "radial-gradient(ellipse, oklch(0.75 0.19 160) 0%, transparent 70%)" }}
-        />
+    <div id="empty-state">
+      <div className="empty-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
       </div>
-
-      <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2">
-        {t("query.startTitle")}
-      </h2>
-      <p className="text-xs text-auth-text-2 max-w-sm leading-relaxed mb-8">
-        {t("query.startDesc")}
-      </p>
-
-      {/* Example chips */}
-      <div className="flex flex-col gap-2.5 w-full max-w-md">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1">
-          {t("query.suggestedQuestions")}
-        </p>
+      <div className="empty-title">{t("query.startTitle")}</div>
+      <div className="empty-sub">{t("query.startDesc")}</div>
+      <div className="suggestion-chips">
         {examples.map((q) => (
           <button
             key={q}
             onClick={() => onExampleClick(q)}
-            className="w-full text-left bg-auth-surface/40 border border-white/[0.06] hover:border-white/[0.15] hover:bg-auth-elevated rounded-xl px-4 py-3 text-xs text-auth-text-2 hover:text-auth-text transition-all group"
+            className="chip"
           >
-            <span className="text-emerald-400 mr-2 group-hover:mr-3 transition-all">→</span>
             {q}
           </button>
         ))}
@@ -342,7 +460,7 @@ function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => stri
 /** Quota exceeded state */
 function QuotaExceededBanner({ locale, t }: { locale: string; t: (path: string) => string }) {
   return (
-    <div className="mx-4 mb-4 rounded-xl border border-red-500/20 bg-red-950/20 p-4 flex items-start gap-3">
+    <div className="mx-4 mb-4 rounded-xl border border-red-500/20 bg-red-950/20 p-4 flex items-start gap-3 text-left">
       <LineIcon name="warning" className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
       <div className="flex-1">
         <p className="text-sm font-bold text-red-300">{t("query.limitTitle")}</p>
@@ -385,9 +503,36 @@ export function QueryView() {
   const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || "");
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
 
+  // Sessions history state
+  const [sessions, setSessions] = useState<QuerySession[]>([]);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Selector dropdowns state
+  const [selectedModel, setSelectedModel] = useState("Gemini 2.0 Flash");
+  const [modelDotColor, setModelDotColor] = useState("#10b981");
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
+  const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
+  const [domainDropdownOpen, setDomainDropdownOpen] = useState(false);
+  const [domains, setDomains] = useState<{ id: string; name: string; slug: string }[]>([]);
+
+  // Floating Compile insights state
+  const [showCompileBar, setShowCompileBar] = useState(false);
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
+  const domainDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Models list
+  const models = [
+    { name: "Gemini 2.0 Flash", icon: "✨", sub: "Fast · Best for most tasks", color: "#10b981", pro: false },
+    { name: "Gemini 2.5 Pro", icon: "🔮", sub: "Advanced reasoning · Complex queries", color: "#8b5cf6", pro: true },
+    { name: "GPT-4o", icon: "🤖", sub: "OpenAI · Multimodal", color: "#10a37f", pro: true },
+    { name: "Claude Sonnet 4.5", icon: "🌿", sub: "Anthropic · Great for writing", color: "#d97706", pro: true },
+    { name: "Claude Opus 4", icon: "🔒", sub: "Upgrade required", color: "#6b7280", pro: true, max: true, disabled: true },
+  ];
 
   // ─── Bootstrap: load roles ───
   useEffect(() => {
@@ -399,7 +544,6 @@ export function QueryView() {
         const res = await getOnboardingStateAction();
         if (res.status === "1" && res.data?.roles) {
           setUserRoles(res.data.roles);
-          // If no roleKbId from params, use primary role
           if (!initRoleKbId) {
             const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
             if (primary) setSelectedRoleKbId(primary.id);
@@ -416,6 +560,73 @@ export function QueryView() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ─── Load domains of the selected role KB ───
+  const loadDomains = useCallback(async (roleKbId: string) => {
+    try {
+      const res = await getDashboardSummaryAction(roleKbId);
+      if (res.status === "1" && res.data?.domainSnapshot) {
+        const fetched = res.data.domainSnapshot.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          slug: d.slug,
+        }));
+        setDomains(fetched);
+      }
+    } catch (err) {
+      console.error("loadDomains error:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedRoleKbId) {
+      loadDomains(selectedRoleKbId);
+    }
+  }, [selectedRoleKbId, loadDomains]);
+
+  // ─── Sessions: load recent history list ───
+  const loadSessions = useCallback(async () => {
+    setIsLoadingSessions(true);
+    try {
+      const res = await listQuerySessionsAction({ limit: 20 });
+      if (res.status === "1" && res.data?.items) {
+        setSessions(res.data.items);
+      }
+    } catch (err) {
+      console.error("loadSessions error:", err);
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSessions();
+  }, [loadSessions]);
+
+  // ─── Click outside dropdowns listener ───
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
+        setModelDropdownOpen(false);
+      }
+      if (domainDropdownRef.current && !domainDropdownRef.current.contains(e.target as Node)) {
+        setDomainDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  // ─── Prefill listener ───
+  useEffect(() => {
+    const handlePrefill = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      setInputValue(customEvent.detail);
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    };
+    window.addEventListener("prefill-query-input", handlePrefill);
+    return () => window.removeEventListener("prefill-query-input", handlePrefill);
+  }, []);
+
   // ─── Scroll to bottom on new messages ───
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -426,7 +637,7 @@ export function QueryView() {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    const maxH = 200; // Allow expansion up to 200px (approx 8 rows) for spacious inputting
+    const maxH = 180;
     el.style.height = Math.min(el.scrollHeight, maxH) + "px";
   }, []);
 
@@ -449,30 +660,129 @@ export function QueryView() {
     setInlineError(null);
     setErrorCode(null);
     setQuotaExceeded(false);
-    textareaRef.current?.focus();
+    setShowCompileBar(false);
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  };
+
+  // ─── Load specific history session ───
+  const handleLoadSession = async (sessionId: string) => {
+    setInlineError(null);
+    setErrorCode(null);
+    setQuotaExceeded(false);
+    setConversationId(sessionId);
+    setMessages([]);
+    setIsAnswering(true);
+    setShowCompileBar(false);
+
+    try {
+      const res = await getQuerySessionAction(sessionId);
+      if (res.status === "1" && res.data) {
+        const loadedMessages: QueryMessage[] = res.data.messages.map((m: any) => {
+          if (m.role === "user") {
+            return {
+              id: m.id || generateId(),
+              role: "user" as const,
+              content: m.content || "",
+              citations: [],
+              confidenceLevel: null,
+              kbGapDetected: false,
+              kbGapSuggestion: null,
+              usedItems: 0,
+              createdAt: m.createdAt,
+            };
+          } else {
+            return {
+              id: m.messageId || m.id || generateId(),
+              role: "assistant" as const,
+              content: m.answer || "",
+              citations: m.citations || [],
+              confidenceLevel: m.confidence?.level || null,
+              confidenceScore: m.confidence?.score,
+              freshnessStatus: m.freshness?.status,
+              freshnessMessage: m.freshness?.message,
+              kbGapDetected: m.knowledgeGap?.hasGap || false,
+              kbGapSuggestion: m.knowledgeGap?.message || null,
+              kbGapActions: m.knowledgeGap?.recommendedActions || [],
+              followUps: m.followUps || [],
+              usedItems: m.citations?.length || 0,
+              createdAt: m.createdAt,
+            };
+          }
+        });
+        setMessages(loadedMessages);
+      } else {
+        setInlineError(res.msg || "Không thể tải nội dung cuộc hội thoại.");
+      }
+    } catch (err) {
+      console.error("handleLoadSession error:", err);
+      setInlineError("Không thể kết nối máy chủ.");
+    } finally {
+      setIsAnswering(false);
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+  };
+
+  // ─── Handle feedback ───
+  const handleFeedback = async (messageId: string, rating: "up" | "down") => {
+    try {
+      const res = await submitQueryFeedbackAction(messageId, rating);
+      if (res.status === "1") {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? { ...m, feedbackRating: rating }
+              : m
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Feedback error:", err);
+    }
+  };
+
+  // ─── Handle Save To Wiki ───
+  const handleSaveToWiki = async (messageId: string) => {
+    const msg = messages.find((m) => m.id === messageId);
+    const titleHint = msg ? msg.content.slice(0, 40) + "..." : "Tri thức từ Hỏi đáp AI";
+    try {
+      const res = await saveQueryToWikiAction(messageId, {
+        mode: "full_answer",
+        title: titleHint,
+        domainId: selectedDomainId,
+      });
+      if (res.status === "1") {
+        alert(locale === "vi" ? "Đã lưu vào Wiki cá nhân thành công!" : "Successfully compiled to Wiki!");
+        setShowCompileBar(false);
+      } else {
+        alert(res.msg || (locale === "vi" ? "Không thể lưu vào Wiki." : "Could not compile to Wiki."));
+      }
+    } catch (err) {
+      console.error("Save to Wiki error:", err);
+      alert(locale === "vi" ? "Lỗi kết nối máy chủ." : "Server connection error.");
+    }
   };
 
   // ─── Handle role change ───
   const handleRoleChange = (roleKbId: string) => {
     setSelectedRoleKbId(roleKbId);
-    // Clear conversation when switching roles
     setMessages([]);
     setConversationId(undefined);
     setInlineError(null);
     setErrorCode(null);
     setQuotaExceeded(false);
+    setShowCompileBar(false);
+    setSelectedDomainId(null);
   };
 
   // ─── Submit question ───
   const handleSubmit = useCallback(async () => {
     const question = inputValue.trim();
-    if (!question || isAnswering || !selectedRoleKbId) return;
+    if (question.length < 2 || isAnswering || !selectedRoleKbId) return;
 
     setInlineError(null);
     setErrorCode(null);
     setQuotaExceeded(false);
 
-    // Optimistic: add user message
     const userMsg: QueryMessage = {
       id: generateId(),
       role: "user",
@@ -491,13 +801,14 @@ export function QueryView() {
     try {
       let activeSessionId = conversationId;
       if (!activeSessionId) {
-        // Create session first
         const sessionRes = await createQuerySessionAction({
           roleKbId: selectedRoleKbId,
+          domainId: selectedDomainId,
         });
         if (sessionRes.status === "1" && sessionRes.data?.session?.id) {
           activeSessionId = sessionRes.data.session.id;
           setConversationId(activeSessionId);
+          loadSessions();
         } else {
           const code = sessionRes.error_code;
           setErrorCode(code);
@@ -514,14 +825,9 @@ export function QueryView() {
         }
       }
 
-      // Submit message
       const res = await submitQueryMessageAction(activeSessionId, {
         question,
-        scope: {
-          roleKbId: selectedRoleKbId,
-          domainId: null,
-          knowledgeItemId: null,
-        },
+        scope: { roleKbId: selectedRoleKbId, domainId: selectedDomainId, knowledgeItemId: null },
       });
 
       if (res.status === "1" && res.data) {
@@ -532,12 +838,19 @@ export function QueryView() {
           content: d.assistantMessage.answer,
           citations: d.assistantMessage.citations || [],
           confidenceLevel: d.assistantMessage.confidence?.level || null,
+          confidenceScore: d.assistantMessage.confidence?.score,
+          freshnessStatus: d.assistantMessage.freshness?.status,
+          freshnessMessage: d.assistantMessage.freshness?.message,
           kbGapDetected: d.assistantMessage.knowledgeGap?.hasGap || false,
           kbGapSuggestion: d.assistantMessage.knowledgeGap?.message || null,
+          kbGapActions: d.assistantMessage.knowledgeGap?.recommendedActions || [],
+          followUps: d.assistantMessage.followUps || [],
           usedItems: d.assistantMessage.citations?.length || 0,
           createdAt: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, assistantMsg]);
+        loadSessions();
+        setTimeout(() => setShowCompileBar(true), 1500);
       } else {
         const code = res.error_code;
         setErrorCode(code);
@@ -560,9 +873,9 @@ export function QueryView() {
       setInlineError("Không kết nối được máy chủ. Vui lòng thử lại.");
     } finally {
       setIsAnswering(false);
-      textareaRef.current?.focus();
+      setTimeout(() => textareaRef.current?.focus(), 50);
     }
-  }, [inputValue, isAnswering, selectedRoleKbId, conversationId, clearAuth, router]);
+  }, [inputValue, isAnswering, selectedRoleKbId, selectedDomainId, conversationId, clearAuth, router, locale, loadSessions]);
 
   // ─── Keyboard handler ───
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -582,7 +895,6 @@ export function QueryView() {
   const handleRetry = () => {
     const lastUser = [...messages].reverse().find((m) => m.role === "user");
     if (lastUser) {
-      // Remove the last user message and re-submit
       setMessages((prev) => prev.filter((m) => m.id !== lastUser.id));
       setInputValue(lastUser.content);
       setInlineError(null);
@@ -590,14 +902,12 @@ export function QueryView() {
     }
   };
 
-  // ─── Computed values ───
   const selectedRole = userRoles.find((r) => r.id === selectedRoleKbId);
-  const canSend = inputValue.trim().length > 0 && !isAnswering && !!selectedRoleKbId;
+  const canSend = inputValue.trim().length >= 2 && !isAnswering && !!selectedRoleKbId;
   const showKbEmpty = errorCode === "KB_INSUFFICIENT" || inlineError === "KB_INSUFFICIENT";
+  const selectedDomain = domains.find((d) => d.id === selectedDomainId);
 
-  // ────────────────────────────────────────────────────────────────
-  // RENDER
-  // ────────────────────────────────────────────────────────────────
+  const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
 
   return (
     <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
@@ -608,14 +918,14 @@ export function QueryView() {
         aria-hidden="true"
       />
 
-      {/* ──────────── Header ──────────── */}
+      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
         <div className="container-focused flex h-full items-center justify-between relative">
           <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse
-                <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                <span className="text-auth-accent">
                   Knowledge
                 </span>
               </span>
@@ -634,19 +944,18 @@ export function QueryView() {
                 href={`/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
-                <LineIcon name="comment" className="h-3.5 w-3.5" /> Hỏi đáp AI
+                <LineIcon name="comment" className="h-3.5 w-3.5" /> Query AI
               </Link>
               <Link
                 href={`/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
-                <LineIcon name="book" className="h-3.5 w-3.5" /> Wiki Cá nhân
+                <LineIcon name="book" className="h-3.5 w-3.5" /> Wiki
               </Link>
             </nav>
           </div>
 
           <div className="flex items-center gap-4 justify-end z-10">
-            {/* Search Trigger Button (Desktop - wide pill) */}
             <button
               onClick={() => {
                 if (typeof window !== "undefined") {
@@ -657,47 +966,16 @@ export function QueryView() {
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
-              <span>{locale === "vi" ? "Tìm kiếm..." : "Search..."}</span>
-              <kbd className="inline-flex items-center ml-1 px-1.5 py-0.2 text-[8px] font-mono bg-white/5 border border-white/10 rounded text-auth-text-3">
-                Ctrl K
-              </kbd>
-            </button>
-
-            {/* Search Trigger Button (Tablet - compact icon) */}
-            <button
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  window.dispatchEvent(new CustomEvent("open-global-search"));
-                }
-              }}
-              className="hidden lg:flex xl:hidden h-8 w-8 items-center justify-center rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 cursor-pointer"
-              title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
-            >
-              <LineIcon name="search" className="h-4 w-4 text-auth-text-3/70" />
-            </button>
-
-            {/* Mobile Search Trigger Icon */}
-            <button
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  window.dispatchEvent(new CustomEvent("open-global-search"));
-                }
-              }}
-              className="flex lg:hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
-              title={locale === "vi" ? "Tìm kiếm" : "Search"}
-            >
-              <LineIcon name="search" className="h-4 w-4" />
+              <span>Search</span>
             </button>
 
             <LocaleSwitcher id="query-header" />
             {authUser && (
               <div className="flex items-center gap-2">
-                {/* Avatar initials */}
                 <div className="hidden lg:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
                   {(authUser.displayName || authUser.email || "U").charAt(0).toUpperCase()}
                 </div>
 
-                {/* Name + plan (desktop only) */}
                 <div className="hidden lg:flex flex-col items-start leading-none gap-0.5 text-left">
                   <span className="text-[11px] font-semibold text-white truncate max-w-[80px]">
                     {authUser.displayName?.split(" ").slice(-1)[0] || authUser.email?.split("@")[0]}
@@ -707,7 +985,6 @@ export function QueryView() {
                   </span>
                 </div>
 
-                {/* Logout */}
                 <button
                   onClick={handleLogout}
                   disabled={isPending}
@@ -722,155 +999,133 @@ export function QueryView() {
         </div>
       </header>
 
-      {/* ──────────── Main Split Layout ──────────── */}
-      <div className="flex flex-1 overflow-hidden container-focused py-6 gap-6 relative z-10">
-        {/* ──────── Left Sidebar ──────── */}
-        <aside className="hidden lg:flex w-[280px] shrink-0 flex-col gap-4">
-          <div className="backdrop-blur-md rounded-2xl p-5 relative premium-hover-card">
+      {/* Main Layout */}
+      <div id="body">
+        {/* Left Sidebar */}
+        <aside
+          id="sidebar"
+          className={!sidebarOpen ? "collapsed" : ""}
+        >
+          <div className="sb-top">
+            <div className="sb-row1">
+              <span className="sb-title">Query History</span>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="sb-collapse"
+                title={t("query.collapseSidebar", "Collapse")}
+              >
+                <LineIcon name="chevron-left" className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <button
+              onClick={handleClearConversation}
+              className="btn-new-chat"
+            >
+              <LineIcon name="plus" className="h-3.5 w-3.5" />
+              New Conversation
+            </button>
+          </div>
 
-            <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-3">
-              {t("query.sidebarKb", "Knowledge Base đang dùng")}
-            </p>
-
-            {isLoadingRoles ? (
-              <div className="flex items-center gap-2 text-xs text-auth-text-3">
-                <DotMatrixLoader variant="pulse" size="sm" />
-                {t("common.loading", "Đang tải...")}
-              </div>
-            ) : selectedRole ? (
-              <>
-                {/* Role name */}
-                <div className="flex items-start gap-2 mb-3">
-                  <div className="h-8 w-8 rounded-lg bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
-                    <LineIcon name="comment" className="h-4 w-4" />
-                  </div>
+          <div className="sb-scroll select-none">
+            {/* Active KB Context Selector */}
+            {selectedRole && (
+              <div className="mb-4 px-1 text-left">
+                <label className="text-[9px] font-bold uppercase tracking-wider text-auth-text-3 block mb-1">
+                  Active KB
+                </label>
+                <div className="flex items-center justify-between gap-2 bg-auth-bg/60 border border-white/[0.06] rounded-xl p-2.5">
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-auth-text truncate">
+                    <p className="text-xs font-bold text-auth-text truncate">
                       {selectedRole.roleName}
                     </p>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-auth-text-3 bg-auth-bg/60 border border-white/[0.06] rounded-full px-2 py-0.5 mt-0.5">
+                    <span className="inline-block text-[9px] font-semibold text-auth-text-3 uppercase mt-0.5">
                       {selectedRole.roleGroup}
                     </span>
                   </div>
-                </div>
-
-                {/* Role selector for multi-role */}
-                {userRoles.length > 1 && (
-                  <div className="mb-3">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 block mb-1.5">
-                      {t("query.changeKb", "Chuyển KB")}
-                    </label>
+                  {userRoles.length > 1 && (
                     <Select
                       value={selectedRoleKbId}
                       onChange={handleRoleChange}
                       options={userRoles.map((r) => ({
                         value: r.id,
                         label: r.roleName,
-                        sublabel: r.roleGroup,
                       }))}
-                      fullWidth
-                      className="bg-auth-elevated border border-auth-border rounded-xl py-2"
+                      align="right"
+                      className="bg-auth-elevated border border-auth-border rounded-lg text-[10px] py-0.5 px-1.5"
                     />
-                  </div>
-                )}
-              </>
-            ) : (
-              <p className="text-xs text-auth-text-3">{t("query.noKbSelected", "Chưa chọn Knowledge Base")}</p>
-            )}
-
-            {/* Conversation info */}
-            {conversationId && (
-              <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                <p className="text-[10px] text-auth-text-3">
-                  {t("query.activeSession", "Phiên hội thoại đang hoạt động")}
-                </p>
-                <p className="text-[10px] font-mono text-auth-text-3 truncate mt-0.5">
-                  {conversationId.slice(0, 18)}...
-                </p>
+                  )}
+                </div>
               </div>
             )}
-          </div>
 
-          <div className="backdrop-blur-md rounded-2xl p-5 flex flex-col gap-2.5 relative premium-hover-card">
-
-            <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-1">
-              {t("query.actions", "Thao tác")}
-            </p>
-
-            <Link
-              href={`/${locale}/compile/new`}
-              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-white transition-all"
-            >
-              <LineIcon name="plus" className="h-4 w-4 text-auth-accent" />
-              {t("query.gapButton", "Nạp thêm tài liệu")}
-            </Link>
-
-            <button
-              onClick={handleClearConversation}
-              disabled={messages.length === 0}
-              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-red-950/30 hover:border-red-500/20 px-3 py-2.5 text-xs font-semibold text-auth-text-2 hover:text-red-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <LineIcon name="trash" className="h-4 w-4" />
-              {t("query.deleteSession", "Xóa cuộc hội thoại")}
-            </button>
-          </div>
-
-          {/* Tips */}
-          <div className="rounded-2xl border border-white/[0.04] bg-auth-surface/20 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 mb-2">
-              {t("query.tips", "Mẹo sử dụng")}
-            </p>
-            <ul className="space-y-1.5">
-              {[
-                t("query.tipsList.0", "Đặt câu hỏi cụ thể để có câu trả lời chính xác hơn"),
-                t("query.tipsList.1", "Enter để gửi, Shift+Enter để xuống dòng"),
-                t("query.tipsList.2", "Trích dẫn có thể mở rộng để xem nguồn đầy đủ"),
-              ].map((tip) => (
-                <li key={tip} className="text-[11px] text-auth-text-3 flex items-start gap-1.5">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
+            <div className="sb-group-label text-left">Recent Sessions</div>
+            {isLoadingSessions ? (
+              <div className="flex items-center justify-center py-12">
+                <DotMatrixLoader variant="pulse" size="sm" />
+              </div>
+            ) : sessions.length === 0 ? (
+              <div className="sb-empty py-12 text-center flex flex-col items-center justify-center gap-2">
+                <LineIcon name="comment" className="h-8 w-8 text-auth-text-3 opacity-25" />
+                <p className="text-xs text-auth-text-3 max-w-[200px]">
+                  {t("query.noSessions", "Chưa có cuộc hội thoại nào.")}
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 text-left">
+                {sessions.map((s) => {
+                  const isActive = s.id === conversationId;
+                  const roleName = userRoles.find((r) => r.id === s.scope.roleKbId)?.roleName || "Fintech";
+                  return (
+                    <div
+                      key={s.id}
+                      onClick={() => handleLoadSession(s.id)}
+                      className={`conv-card ${isActive ? "active" : ""}`}
+                    >
+                      <div className="conv-card-head">
+                        <span className="conv-card-icon">{s.scope.domainId ? "🌐" : "📚"}</span>
+                        <span className="conv-card-title">{s.title || "Untitled Conversation"}</span>
+                      </div>
+                      {s.lastMessagePreview && (
+                        <div className="conv-card-snippet">{s.lastMessagePreview}</div>
+                      )}
+                      <div className="conv-card-foot">
+                        <span className="conv-domain-badge"> {roleName}</span>
+                        <span className="conv-date">{formatTime(s.updatedAt || s.createdAt, locale)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </aside>
 
-        {/* ──────── Main Chat Area ──────── */}
-        <div className="flex-1 flex flex-col min-h-0 backdrop-blur-md rounded-2xl overflow-hidden relative premium-hover-card">
-
-          {/* Chat header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-[0_0_10px_rgba(52,211,153,0.2)]">
-                <LineIcon name="star" className="h-3.5 w-3.5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-auth-text">{t("query.headerTitle", "Hỏi đáp AI")}</p>
-                <p className="text-[10px] text-auth-text-3">
-                  {selectedRole ? selectedRole.roleName : t("query.selectKbPlaceholder", "Chọn Knowledge Base để bắt đầu")}
-                </p>
-              </div>
-            </div>
-
-            {/* Mobile: clear conversation */}
-            <button
-              onClick={handleClearConversation}
-              disabled={messages.length === 0}
-              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs text-auth-text-2 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <LineIcon name="trash" className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{t("query.btnDelete", "Xóa hội thoại")}</span>
-            </button>
+        {/* Main Chat Area */}
+        <div id="chat-main">
+          <div className="chat-topbar border-b border-white/[0.04]">
+            {!sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="topbar-collapse"
+                title={t("query.expandSidebar", "Toggle sidebar")}
+              >
+                <LineIcon name="grid-alt" className="h-4 w-4" />
+              </button>
+            )}
+            <span className="chat-topbar-title text-left pl-2">
+              {conversationId
+                ? (sessions.find(s => s.id === conversationId)?.title || "Current Conversation")
+                : "New Conversation"}
+            </span>
           </div>
 
-          {/* Quota exceeded banner */}
           {quotaExceeded && (
             <div className="px-4 pt-4 shrink-0">
               <QuotaExceededBanner locale={locale} t={t} />
             </div>
           )}
 
-          {/* ── Messages area ── */}
+          {/* Messages container */}
           <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6 min-h-0 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {showKbEmpty ? (
               <KbEmptyState locale={locale} t={t} />
@@ -882,25 +1137,39 @@ export function QueryView() {
                   msg.role === "user" ? (
                     <UserMessage key={msg.id} msg={msg} locale={locale} />
                   ) : (
-                    <AssistantMessage key={msg.id} msg={msg} locale={locale} t={t} />
+                    <AssistantMessage
+                      key={msg.id}
+                      msg={msg}
+                      locale={locale}
+                      onFeedback={handleFeedback}
+                      t={t}
+                    />
                   )
                 )}
 
-                {/* Typing indicator */}
-                {isAnswering && (
-                  <div className="flex justify-start">
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
-                        <LineIcon name="star" className="h-3 w-3 text-white" />
+                {/* Inline loading typing animation */}
+                {isAnswering && messages.length > 0 && messages[messages.length - 1].role === "user" && (
+                  <div className="message-row text-left">
+                    <div className="ai-avatar">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                      </svg>
+                    </div>
+                    <div className="ai-content">
+                      <div className="ai-name">Pulse AI</div>
+                      <div className="thinking-bar">
+                        <div className="thinking-dot"></div>
+                        <span>{t("query.thinking", "Đang nghiên cứu tri thức triệt để...")}</span>
                       </div>
-                      <TypingIndicator t={t} />
+                      <div className="ai-text">
+                        <TypingIndicator t={t} />
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Inline error (non-KB-empty, non-quota) */}
                 {inlineError && inlineError !== "KB_INSUFFICIENT" && (
-                  <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
+                  <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3 mx-auto max-w-[840px] w-full text-left">
                     <LineIcon name="warning" className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs text-red-300">{inlineError}</p>
@@ -918,78 +1187,204 @@ export function QueryView() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* ── Input area (sticky bottom) ── */}
+          {/* Composer zone */}
           {!showKbEmpty && (
-            <div className="shrink-0 border-t border-white/[0.06] px-5 py-4 bg-auth-bg/40 backdrop-blur-md">
-              {/* Role selector (mobile + top of input) */}
-              <div className="flex items-center justify-end mb-2.5 gap-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
-                  KB:
-                </label>
-                {isLoadingRoles ? (
-                  <span className="text-[10px] text-auth-text-3 animate-pulse">{t("common.loading", "Đang tải...")}</span>
-                ) : (
-                  <Select
-                    value={selectedRoleKbId}
-                    onChange={handleRoleChange}
-                    options={
-                      userRoles.length === 0
-                        ? [{ value: "", label: t("query.noKb", "Chưa có KB") }]
-                        : userRoles.map((r) => ({
-                            value: r.id,
-                            label: r.roleName,
-                            sublabel: r.roleGroup,
-                          }))
-                    }
-                    align="right"
-                    className="bg-auth-elevated border border-auth-border rounded-lg px-2.5 py-1 text-[11px] max-w-[180px]"
-                  />
-                )}
-              </div>
-
-              {/* Textarea + send button row */}
-              <div className="flex items-end gap-3">
-                <div className="flex-1 relative">
+            <div id="input-zone">
+              <div className="input-wrap select-none">
+                <div className="input-box">
                   <textarea
                     ref={textareaRef}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={t("query.placeholderTextarea", "Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)")}
+                    placeholder={t("query.placeholderTextarea", "Ask your knowledge base anything...")}
                     disabled={isAnswering || quotaExceeded}
                     rows={1}
-                    className="w-full bg-auth-elevated border border-auth-border rounded-xl text-auth-text placeholder:text-auth-text-3 text-sm pl-4 pr-12 py-3 resize-none focus:outline-none focus:border-auth-accent/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed leading-relaxed"
-                    style={{ minHeight: "48px", maxHeight: "200px" }}
+                    className="input-textarea"
                   />
-                  {inputValue.length > 0 && (
-                    <div className="absolute right-3.5 bottom-2 text-[10px] font-mono text-auth-text-3 select-none pointer-events-none bg-auth-elevated/90 px-1 rounded backdrop-blur-sm">
-                      {inputValue.length}
+                  <div className="input-bar">
+                    <div className="input-left">
+                      {/* Nested Model Selector Dropdown */}
+                      <div className="model-selector" ref={modelDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
+                          className={`model-btn ${modelDropdownOpen ? "open" : ""}`}
+                          disabled={isAnswering}
+                        >
+                          <div className="model-dot" style={{ backgroundColor: modelDotColor }}></div>
+                          <span>{selectedModel}</span>
+                          <svg className="chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="6 9 12 15 18 9" />
+                          </svg>
+                        </button>
+                        <div className={`model-dropdown ${modelDropdownOpen ? "open" : ""}`}>
+                          {models.map((m) => (
+                            <div
+                              key={m.name}
+                              onClick={() => {
+                                if (m.disabled) return;
+                                setSelectedModel(m.name);
+                                setModelDotColor(m.color);
+                                setModelDropdownOpen(false);
+                              }}
+                              className={`model-option ${selectedModel === m.name ? "selected" : ""} ${m.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                            >
+                              <div className="model-option-icon">{m.icon}</div>
+                              <div className="model-info text-left">
+                                <div className="model-info-name">
+                                  {m.name}
+                                  {m.pro && <span className="model-pro-tag">{m.max ? "Max" : "Pro"}</span>}
+                                </div>
+                                <div className="model-info-sub">{m.sub}</div>
+                              </div>
+                              {selectedModel === m.name && (
+                                <svg className="model-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                              {m.disabled && <span className="model-lock">🔒</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Nested Domain Selector Dropdown */}
+                      <div className="model-selector" ref={domainDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setDomainDropdownOpen(!domainDropdownOpen)}
+                          className={`domain-pill ${selectedDomainId ? "active" : ""} ${domainDropdownOpen ? "open" : ""}`}
+                          disabled={isAnswering}
+                        >
+                          <span>{selectedDomainId ? "🌐" : "📚"}</span>
+                          <span>{selectedDomainId ? (selectedDomain?.name || "Selected Domain") : (locale === "vi" ? "Tất cả Domain" : "All Domains")}</span>
+                          <svg className="chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="6 9 12 15 18 9" />
+                          </svg>
+                        </button>
+                        <div className={`model-dropdown ${domainDropdownOpen ? "open" : ""}`} style={{ width: "220px" }}>
+                          <div
+                            onClick={() => {
+                              setSelectedDomainId(null);
+                              setDomainDropdownOpen(false);
+                            }}
+                            className={`model-option ${selectedDomainId === null ? "selected" : ""}`}
+                          >
+                            <div className="model-option-icon">📚</div>
+                            <div className="model-info text-left">
+                              <div className="model-info-name">{locale === "vi" ? "Tất cả Domain" : "All Domains"}</div>
+                            </div>
+                            {selectedDomainId === null && (
+                              <svg className="model-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
+                          </div>
+                          <div className="model-divider"></div>
+                          {domains.map((d) => (
+                            <div
+                              key={d.id}
+                              onClick={() => {
+                                setSelectedDomainId(d.id);
+                                setDomainDropdownOpen(false);
+                              }}
+                              className={`model-option ${selectedDomainId === d.id ? "selected" : ""}`}
+                            >
+                              <div className="model-option-icon">🌐</div>
+                              <div className="model-info text-left">
+                                <div className="model-info-name">{d.name}</div>
+                              </div>
+                              {selectedDomainId === d.id && (
+                                <svg className="model-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  )}
+
+                    <div className="input-right">
+                      {/* Mic voice triggers (disabled per BA spec) */}
+                      <button className="voice-btn" disabled title={locale === "vi" ? "Hỗ trợ giọng nói (Sắp ra mắt)" : "Voice input (Coming soon)"}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+                          <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+                        </svg>
+                      </button>
+
+                      {/* Send button */}
+                      <button
+                        onClick={handleSubmit}
+                        disabled={!canSend || quotaExceeded}
+                        className="send-btn"
+                        title={t("query.button", "Gửi")}
+                      >
+                        {isAnswering ? (
+                          <DotMatrixLoader variant="wave" size="sm" />
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                <button
-                  onClick={handleSubmit}
-                  disabled={!canSend || quotaExceeded}
-                  className="shrink-0 h-12 w-12 flex items-center justify-center bg-gradient-to-r from-[var(--color-auth-accent-dark)] to-[oklch(0.50_0.12_175)] text-white rounded-full shadow-[0_2px_12px_var(--color-auth-accent-glow)] hover:shadow-[0_6px_22px_var(--color-auth-accent-glow)] hover:-translate-y-[1px] active:scale-[0.97] transition-all disabled:opacity-40 disabled:pointer-events-none"
-                  title={t("query.button", "Gửi")}
-                >
-                  {isAnswering ? (
-                    <DotMatrixLoader variant="wave" size="md" />
-                  ) : (
-                    <LineIcon name="send" className="h-5 w-5" />
-                  )}
-                </button>
+                {/* Keyboard hints footer */}
+                <div className="input-footer">
+                  <kbd>Enter ↵</kbd> {locale === "vi" ? "để gửi" : "to send"} &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> {locale === "vi" ? "để xuống dòng" : "for new line"} &nbsp;·&nbsp; Pulse AI may make mistakes
+                </div>
               </div>
-
-              {/* Disclaimer */}
-              <p className="mt-2 text-center text-[10px] text-auth-text-3">
-                {t("query.subtitle", "Hỏi đáp dựa trên Knowledge Base của bạn. Câu trả lời có trích dẫn nguồn.")}
-              </p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Floating Compile Insights Notification Bar */}
+      {showCompileBar && lastAssistantMsg && (
+        <div id="compileBar" className="text-left select-none animate-dropdown-enter">
+          <div className="flex items-start gap-3">
+            <div className="h-7 w-7 rounded-lg bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <LineIcon name="star" className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-auth-text">
+                {locale === "vi" ? "Phát hiện tri thức mới!" : "New insights detected!"}
+              </p>
+              <p className="text-[10px] text-auth-text-2 mt-0.5 leading-relaxed">
+                {locale === "vi"
+                  ? "Câu trả lời này chứa các khái niệm mới. Bạn có muốn lưu vào Wiki không?"
+                  : "This answer contains new concepts. Would you like to compile them to Wiki?"}
+              </p>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => handleSaveToWiki(lastAssistantMsg.id)}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                >
+                  {locale === "vi" ? "Lưu vào Wiki" : "Compile to Wiki"}
+                </button>
+                <button
+                  onClick={() => setShowCompileBar(false)}
+                  className="bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                >
+                  {locale === "vi" ? "Để sau" : "Later"}
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowCompileBar(false)}
+              className="text-auth-text-3 hover:text-auth-text-2 transition-colors cursor-pointer"
+            >
+              <LineIcon name="close" className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

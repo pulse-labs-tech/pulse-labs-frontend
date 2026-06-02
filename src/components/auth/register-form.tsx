@@ -27,6 +27,7 @@ import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
 import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo } from "@/components/shared/pulse-logo";
+import { getLocalizedPath } from "@/lib/utils";
 
 export function RegisterForm() {
   const { t, locale } = useTranslation();
@@ -42,10 +43,9 @@ export function RegisterForm() {
       if (state.sessionUser) {
         setUser(state.sessionUser);
       }
-      const path = state.redirectTo.startsWith("/") ? state.redirectTo : "/" + state.redirectTo;
-      router.push(`/${locale}${path}`);
+      router.push(getLocalizedPath(state.redirectTo, locale));
     }
-  }, [state?.redirectTo, state?.sessionUser]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state?.redirectTo, state?.sessionUser, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -363,10 +363,7 @@ function VerifyEmailScreen({
         // If server auto-verified in dev mode, redirect is handled via window.location
         if (result.autoVerifiedRedirect) {
           setResendMessage(t("auth.register.verifiedRedirecting"));
-          const path = result.autoVerifiedRedirect.startsWith("/")
-            ? result.autoVerifiedRedirect
-            : "/" + result.autoVerifiedRedirect;
-          window.location.href = `/${locale}${path}`;
+          window.location.href = getLocalizedPath(result.autoVerifiedRedirect, locale);
           return;
         }
         setCountdown(result.resendAvailableInSeconds || 60);

@@ -22,6 +22,7 @@ import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
 import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo } from "@/components/shared/pulse-logo";
+import { getLocalizedPath } from "@/lib/utils";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -38,10 +39,9 @@ export function LoginForm() {
   useEffect(() => {
     if (state?.redirectTo && state.sessionUser) {
       setUser(state.sessionUser);
-      const path = state.redirectTo.startsWith("/") ? state.redirectTo : "/" + state.redirectTo;
-      router.push(`/${locale}${path}`);
+      router.push(getLocalizedPath(state.redirectTo, locale));
     }
-  }, [state?.redirectTo, state?.sessionUser]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state?.redirectTo, state?.sessionUser, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">

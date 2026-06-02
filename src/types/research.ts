@@ -304,3 +304,52 @@ export type ResearchErrorCode =
   | "RESEARCH_SYNTHESIS_FAILED"
   | "SERVER_ERROR"
   | "NETWORK_ERROR";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Documents & Research Stream Integration Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface SubmitDocumentRequest {
+  source: string;
+  source_type: "web" | "pdf" | "text" | "git";
+  domain_hint?: string;
+}
+
+export interface SubmitDocumentResponseData {
+  document_id: string;
+  status: "COMPLETE" | "PROCESSING";
+}
+
+export interface ResearchStreamProgressEvent {
+  type: "PROGRESS";
+  message: string;
+  document_id: string;
+}
+
+export interface ResearchStreamResultEvent {
+  type: "RESULT";
+  message: string;
+  chunk_id: string;
+  document_id: string;
+  score: number;
+  domain_tags: string[];
+  chunk_index: number;
+}
+
+export interface ResearchStreamAnswerEvent {
+  type: "ANSWER";
+  message: string;
+  document_id: string;
+}
+
+export interface ResearchStreamErrorEvent {
+  type: "ERROR";
+  message: string;
+}
+
+export type ResearchStreamEvent =
+  | ResearchStreamProgressEvent
+  | ResearchStreamResultEvent
+  | ResearchStreamAnswerEvent
+  | ResearchStreamErrorEvent;
+

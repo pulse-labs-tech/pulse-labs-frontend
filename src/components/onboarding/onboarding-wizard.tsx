@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { getLocalizedPath } from "@/lib/utils";
 import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
@@ -582,8 +583,7 @@ export function OnboardingWizard() {
         }
         // API returns { nextRoute: "/dashboard" }
         const nextRoute = res.data?.nextRoute || "/dashboard";
-        const routePath = nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute;
-        router.push(`/${locale}${routePath}`);
+        router.push(getLocalizedPath(nextRoute, locale));
       } else {
         // 409 ONBOARDING_ALREADY_COMPLETED is non-fatal — treat as success
         if (res.error_code === "ONBOARDING_ALREADY_COMPLETED") {

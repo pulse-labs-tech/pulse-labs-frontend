@@ -21,10 +21,21 @@ export function GlobalSearchPalette() {
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [category, setCategory] = useState<"all" | "files" | "links" | "notes">("all");
+  const [recentSearches, setRecentSearches] = useState([
+    "RAG Architecture",
+    "OAuth 2.0 Patterns",
+    "Fintech Domain",
+    "FastAPI",
+  ]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [, startTransition] = useTransition();
+
+  const handleRemoveRecent = (e: React.MouseEvent, item: string) => {
+    e.stopPropagation();
+    setRecentSearches((prev) => prev.filter((r) => r !== item));
+  };
 
   // Handle item selection (hoisted to prevent declaration-order lint errors)
   const handleSelect = useCallback((itemId: string | number) => {
@@ -133,7 +144,7 @@ export function GlobalSearchPalette() {
     return () => clearTimeout(delayDebounceFn);
   }, [query, open]);
 
-  // Handle arrow key navigation & Escape
+  // Handle arrow key navigation & Escape & quick hotkeys
   useEffect(() => {
     if (!open) return;
 
@@ -141,6 +152,14 @@ export function GlobalSearchPalette() {
       if (e.key === "Escape") {
         e.preventDefault();
         setOpen(false);
+      } else if (query.trim() === "" && (e.key === "q" || e.key === "Q")) {
+        e.preventDefault();
+        setOpen(false);
+        router.push(`/${locale}/query`);
+      } else if (query.trim() === "" && (e.key === "w" || e.key === "W")) {
+        e.preventDefault();
+        setOpen(false);
+        router.push(`/${locale}/compile/new`);
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         setActiveIndex((prev) => (filteredResults.length > 0 ? (prev + 1) % filteredResults.length : 0));
@@ -157,7 +176,7 @@ export function GlobalSearchPalette() {
 
     window.addEventListener("keydown", handleNav);
     return () => window.removeEventListener("keydown", handleNav);
-  }, [open, filteredResults, activeIndex, handleSelect]);
+  }, [open, filteredResults, activeIndex, handleSelect, query, locale, router]);
 
   // Scroll active item into view
   useEffect(() => {
@@ -223,7 +242,7 @@ export function GlobalSearchPalette() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="w-full max-w-xl rounded-2xl shadow-[0_24px_50px_rgba(0,0,0,0.8)] relative backdrop-blur-xl flex flex-col z-10 premium-hover-card-flow"
+            className="w-full max-w-[620px] rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.7)] relative bg-auth-surface border border-auth-border flex flex-col z-10"
           >
 
             {/* Input row */}
@@ -281,20 +300,89 @@ export function GlobalSearchPalette() {
             )}
 
             {/* Content pane */}
-            <div className="bg-[#0c0c0e]/30">
+            <div className="bg-[#0c0c0e]/10">
               {query.trim() === "" ? (
-                <div className="py-6 px-4 text-center text-xs text-auth-text-3 flex flex-col items-center gap-2 select-none">
-                  <div className="h-8 w-8 rounded-lg bg-white/[0.02] border border-white/[0.05] flex items-center justify-center">
-                    <LineIcon name="search" className="h-4 w-4 text-auth-text-3/60" />
+                <div className="flex flex-col text-left py-2 max-h-[360px] overflow-y-auto">
+                  <div className="gs-section-label">
+                    {locale === "vi" ? "Tìm kiếm gần đây" : "Recent Searches"}
                   </div>
-                  <p className="font-semibold text-auth-text-2/80">
-                    {locale === "vi" ? "Tìm kiếm tri thức trong Wiki" : "Search knowledge in Wiki"}
-                  </p>
-                  <p className="text-[10.5px] leading-relaxed max-w-xs text-auth-text-3/70">
-                    {locale === "vi"
-                      ? "Nhập từ khóa để tìm nhanh các SRS, Use Case, API Specs hoặc mã nguồn đã lưu trữ."
-                      : "Type keywords to search compiled SRS, Use Cases, API Specs, or manual notes."}
-                  </p>
+                  {recentSearches.length === 0 ? (
+                    <p className="text-[11px] text-auth-text-3 px-5 py-2">
+                      {locale === "vi" ? "Không có tìm kiếm gần đây" : "No recent searches"}
+                    </p>
+                  ) : (
+                    recentSearches.map((r) => (
+                      <div
+                        key={r}
+                        onClick={() => setQuery(r)}
+                        className="gs-recent-item"
+                      >
+                        <LineIcon name="time" className="h-3.5 w-3.5 text-auth-text-3" />
+                        <span className="gs-recent-text">{r}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveRecent(e, r)}
+                          className="gs-recent-del"
+                          title={locale === "vi" ? "Xóa" : "Remove"}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))
+                  )}
+                  
+                  <div className="gs-divider"></div>
+                  
+                  <div className="gs-section-label">
+                    {locale === "vi" ? "Hành động nhanh" : "Quick Actions"}
+                  </div>
+                  {[
+                    {
+                      icon: "📝",
+                      label: locale === "vi" ? "Hỏi đáp AI Mới" : "New Query AI",
+                      key: "Q",
+                      bg: "rgba(16, 185, 129, 0.12)",
+                      color: "var(--color-auth-accent)",
+                      action: () => {
+                        setOpen(false);
+                        router.push(`/${locale}/query`);
+                      }
+                    },
+                    {
+                      icon: "➕",
+                      label: locale === "vi" ? "Nạp Tài Liệu Mới" : "Add Wiki Item",
+                      key: "W",
+                      bg: "rgba(139, 92, 246, 0.12)",
+                      color: "#8b5cf6",
+                      action: () => {
+                        setOpen(false);
+                        router.push(`/${locale}/compile/new`);
+                      }
+                    },
+                    {
+                      icon: "📧",
+                      label: locale === "vi" ? "Bản tin Tri thức" : "Daily Digest",
+                      key: "D",
+                      bg: "rgba(59, 130, 246, 0.12)",
+                      color: "#3b82f6",
+                      action: () => {}
+                    }
+                  ].map((act) => (
+                    <div
+                      key={act.key}
+                      onClick={act.action}
+                      className="gs-action-item"
+                    >
+                      <div
+                        className="gs-action-icon"
+                        style={{ backgroundColor: act.bg, color: act.color }}
+                      >
+                        {act.icon}
+                      </div>
+                      <span className="gs-action-label">{act.label}</span>
+                      <span className="gs-action-key">{act.key}</span>
+                    </div>
+                  ))}
                 </div>
               ) : filteredResults.length === 0 && !loading ? (
                 <div className="py-8 px-4 text-center text-xs text-auth-text-3 select-none flex flex-col items-center gap-1.5">
