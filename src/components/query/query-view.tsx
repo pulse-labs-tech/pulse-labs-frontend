@@ -1064,9 +1064,11 @@ export function QueryView() {
                 <DotMatrixLoader variant="pulse" size="sm" />
               </div>
             ) : sessions.length === 0 ? (
-              <div className="sb-empty py-12 text-center flex flex-col items-center justify-center gap-2">
-                <LineIcon name="comment" className="h-8 w-8 text-auth-text-3 opacity-25" />
-                <p className="text-xs text-auth-text-3 max-w-[200px]">
+              <div className="sb-empty">
+                <div className="sb-empty-icon-wrap">
+                  <LineIcon name="comment" className="h-4.5 w-4.5 text-auth-text-3/60" />
+                </div>
+                <p className="text-xs text-auth-text-3 max-w-[200px] leading-relaxed">
                   {t("query.noSessions", "Chưa có cuộc hội thoại nào.")}
                 </p>
               </div>
