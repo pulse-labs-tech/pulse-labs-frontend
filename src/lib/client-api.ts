@@ -46,19 +46,24 @@ const API_BASE =
 const RESEARCH_API_BASE =
   process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
 
-async function getClientAccessToken(): Promise<string | null> {
+export async function getClientAccessToken(forceRefresh = false): Promise<string | null> {
   if (typeof document === "undefined") return null;
 
-  // 1. Try to read from client cookie
-  const match = document.cookie.match(/(?:^|;\s*)pulse_at=([^;]*)/);
-  if (match && match[1]) {
-    return match[1];
+  if (!forceRefresh) {
+    // 1. Try to read from client cookie
+    const match = document.cookie.match(/(?:^|;\s*)pulse_at=([^;]*)/);
+    if (match && match[1]) {
+      return match[1];
+    }
+  } else {
+    // Clear client-side cookie to ensure a fresh fetch
+    document.cookie = "pulse_at=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   }
 
   // 2. Fallback: Ask Next.js Server Action for the token
   try {
     const { getAccessTokenAction } = await import("@/app/actions/auth");
-    const token = await getAccessTokenAction();
+    const token = await getAccessTokenAction(forceRefresh);
     if (token) {
       // Set local cookie so subsequent calls don't hit the server action
       document.cookie = `pulse_at=${token}; path=/; secure; samesite=lax`;
@@ -75,7 +80,7 @@ async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<AuthApiResponse<T>> {
-  const token = await getClientAccessToken();
+  let token = await getClientAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "X-Platform": "web",
@@ -85,13 +90,29 @@ async function apiFetch<T>(
   }
 
   try {
-    const response = await fetch(`${API_BASE}${path}`, {
+    let response = await fetch(`${API_BASE}${path}`, {
       ...options,
       headers: {
         ...headers,
         ...options.headers,
       },
     });
+
+    if (response.status === 401) {
+      console.warn(`Unauthorized (401) on ${path}. Attempting token refresh...`);
+      token = await getClientAccessToken(true);
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+        response = await fetch(`${API_BASE}${path}`, {
+          ...options,
+          headers: {
+            ...headers,
+            ...options.headers,
+          },
+        });
+      }
+    }
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return {
@@ -348,7 +369,7 @@ export async function createResearchRunAction(
 export async function submitDocumentAction(
   data: SubmitDocumentRequest
 ): Promise<AuthApiResponse<any>> {
-  const token = await getClientAccessToken();
+  let token = await getClientAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -357,11 +378,25 @@ export async function submitDocumentAction(
   }
 
   try {
-    const response = await fetch(`${RESEARCH_API_BASE}/documents`, {
+    let response = await fetch(`${RESEARCH_API_BASE}/documents`, {
       method: "POST",
       headers,
       body: JSON.stringify(data),
     });
+
+    if (response.status === 401) {
+      console.warn("Unauthorized (401) on /documents. Attempting token refresh...");
+      token = await getClientAccessToken(true);
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+        response = await fetch(`${RESEARCH_API_BASE}/documents`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(data),
+        });
+      }
+    }
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return {

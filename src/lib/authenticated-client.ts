@@ -42,7 +42,7 @@ let refreshPromise: Promise<RefreshResult> | null = null;
  * Uses a lock to prevent multiple simultaneous refresh calls.
  * Returns the new access token, and whether the session has expired.
  */
-async function tryRefresh(): Promise<RefreshResult> {
+export async function tryRefresh(): Promise<RefreshResult> {
   // If a refresh is already in progress, wait for it
   if (refreshPromise) {
     return refreshPromise;

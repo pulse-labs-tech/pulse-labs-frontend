@@ -38,6 +38,8 @@ import {
   getRefreshToken,
 } from "@/lib/token-storage";
 import type { AuthErrorCode, LoginResponseData } from "@/types/auth";
+import { tryRefresh } from "@/lib/authenticated-client";
+
 
 // ────────────────────────────────────────────────────────────────
 // Known error codes (for type-safe mapping)
@@ -624,10 +626,16 @@ export async function verifyEmailAction(
   }
 }
 
-export async function getAccessTokenAction(): Promise<string | null> {
+export async function getAccessTokenAction(forceRefresh = false): Promise<string | null> {
   try {
-    return (await getAccessToken()) || null;
-  } catch {
+    let token = await getAccessToken();
+    if (!token || forceRefresh) {
+      const refreshResult = await tryRefresh();
+      token = refreshResult.accessToken || undefined;
+    }
+    return token || null;
+  } catch (err) {
+    console.error("getAccessTokenAction error:", err);
     return null;
   }
 }
