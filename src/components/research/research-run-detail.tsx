@@ -14,7 +14,7 @@ import {
   getResearchRunClaimsAction,
   cancelResearchRunAction,
   saveResearchToWikiAction,
-} from "@/app/actions/research";
+} from "@/lib/client-api";
 import type {
   ResearchRunDto,
   ResearchRunDetailData,

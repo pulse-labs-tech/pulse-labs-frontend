@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { Select } from "@/components/ui/select";
-import { getOnboardingStateAction } from "@/app/actions/onboarding";
+import { getOnboardingStateAction } from "@/lib/client-api";
 import {
   createResearchRunAction,
   listResearchRunsAction,
   submitDocumentAction,
-} from "@/app/actions/research";
+} from "@/lib/client-api";
 import type {
   ResearchRunDto,
   ResearchStatus,

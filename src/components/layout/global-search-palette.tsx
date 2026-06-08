@@ -7,7 +7,7 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
-import { getWikiItemsAction } from "@/app/actions/wiki";
+import { getWikiItemsAction } from "@/lib/client-api";
 import type { WikiItemCard } from "@/types/wiki";
 
 export function GlobalSearchPalette() {

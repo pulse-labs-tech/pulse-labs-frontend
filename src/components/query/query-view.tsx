@@ -21,9 +21,9 @@ import {
   getQuerySessionAction,
   submitQueryFeedbackAction,
   saveQueryToWikiAction,
-} from "@/app/actions/query";
-import { getDashboardSummaryAction } from "@/app/actions/dashboard";
-import { getOnboardingStateAction } from "@/app/actions/onboarding";
+  getDashboardSummaryAction,
+  getOnboardingStateAction,
+} from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";

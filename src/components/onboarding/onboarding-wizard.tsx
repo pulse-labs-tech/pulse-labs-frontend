@@ -16,7 +16,7 @@ import {
   submitSeedAction,
   getCompileJobAction,
   completeOnboardingAction,
-} from "@/app/actions/onboarding";
+} from "@/lib/client-api";
 import type {
   RoleGroup,
   RoleGroupOption,

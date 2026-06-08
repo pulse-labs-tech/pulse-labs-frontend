@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
-import { recordUpgradeIntentAction } from "@/app/actions/settings";
+import { recordUpgradeIntentAction } from "@/lib/client-api";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export function PricingView() {

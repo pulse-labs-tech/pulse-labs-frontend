@@ -11,9 +11,8 @@ import { logoutAction } from "@/app/actions/auth";
 import {
   getDashboardSummaryAction,
   getActiveJobsAction,
-  getQuotaAction,
-} from "@/app/actions/dashboard";
-import { getOnboardingStateAction } from "@/app/actions/onboarding";
+  getOnboardingStateAction,
+} from "@/lib/client-api";
 import type {
   DashboardSummaryData,
   DashboardCompileJob,

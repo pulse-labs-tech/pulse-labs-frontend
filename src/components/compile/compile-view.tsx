@@ -19,11 +19,11 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
-import { getOnboardingStateAction } from "@/app/actions/onboarding";
+import { getOnboardingStateAction } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
-import { createSourceAction, getCompileJobAction } from "@/app/actions/compile";
+import { createSourceAction, getCompileJobAction } from "@/lib/client-api";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { CompileJob } from "@/types/compile";
 

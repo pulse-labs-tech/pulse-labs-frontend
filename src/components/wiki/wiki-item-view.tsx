@@ -7,7 +7,7 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
-import { getWikiItemAction } from "@/app/actions/wiki";
+import { getWikiItemAction } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import type { WikiItemDetail, WikiRetrievalStatus, WikiSourceType } from "@/types/wiki";

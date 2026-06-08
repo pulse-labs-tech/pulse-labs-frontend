@@ -17,7 +17,7 @@ import { logoutAction } from "@/app/actions/auth";
 import {
   getSettingsOverviewAction,
   recordUpgradeIntentAction,
-} from "@/app/actions/settings";
+} from "@/lib/client-api";
 import type {
   SettingsOverviewData,
   QuotaCardData,
