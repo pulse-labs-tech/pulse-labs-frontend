@@ -209,6 +209,9 @@ export function OnboardingWizard() {
 
         if (cancelled) return;
 
+        const urlParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+        const isForced = urlParams.get("force") === "true";
+
         if (stateRes.status === "1" && stateRes.data) {
           const {
             currentStep: step,
@@ -222,14 +225,14 @@ export function OnboardingWizard() {
           setRoleLimit(limits?.roleLimit ?? 1);
 
           // Restore step state (FR-ONB-011 Resume rules)
-          if (step === "done") {
+          if (step === "done" && !isForced) {
             // Onboarding already completed — redirect to dashboard
             if (user) {
               setUser({ ...user, onboardingStatus: "completed" });
             }
             router.replace("/dashboard");
             return; // Don't set isInitializing to false — keep loading screen
-          } else if (step === "welcome") {
+          } else if (step === "welcome" || isForced) {
             setCurrentStep("welcome");
           } else {
             setCurrentStep(step);

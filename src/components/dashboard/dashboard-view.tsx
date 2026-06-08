@@ -787,6 +787,32 @@ export function DashboardView() {
           </div>
         )}
 
+        {!selectedRoleKbId && (
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-xl border border-amber-500/20 bg-amber-950/10 p-5 text-xs text-amber-300 animate-pulse">
+            <div className="flex items-start gap-3">
+              <LineIcon name="warning" className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-sm text-amber-400 mb-1">
+                  {locale === "vi" ? "Chưa chọn Knowledge Base Chuyên Ngành" : "No Professional Knowledge Base Selected"}
+                </h4>
+                <p className="text-[#a1a1aa] leading-relaxed">
+                  {locale === "vi" 
+                    ? "Bạn chưa thiết lập vị trí chuyên môn. Hãy hoàn thành onboarding để tạo Knowledge Base và bắt đầu làm việc."
+                    : "You haven't configured your professional role yet. Complete onboarding to create your Knowledge Base and start working."}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push(`/${locale}/onboarding?force=true`)}
+              className="w-full md:w-auto shrink-0 bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>{locale === "vi" ? "Thiết lập ngay" : "Set up now"}</span>
+              <LineIcon name="external-link" className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
         <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between backdrop-blur-md rounded-2xl p-6 relative premium-hover-card">
           <div>
             <h1 className="text-fluid-lg font-extrabold tracking-tight">
@@ -841,12 +867,23 @@ export function DashboardView() {
                 )}
               </div>
             ) : (
-              <div className="bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-semibold text-auth-accent flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => router.push(`/${locale}/onboarding?force=true`)}
+                className={`rounded-lg px-3 py-2 text-xs font-semibold flex items-center gap-2 transition-all duration-300 ${
+                  !selectedRoleKbId
+                    ? "bg-[#18181b] border border-amber-500/40 hover:border-amber-500 text-amber-400 hover:text-amber-300 cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.1)] hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                    : "bg-[#18181b] border border-[#27272a] text-auth-accent cursor-default"
+                }`}
+                title={!selectedRoleKbId ? (locale === "vi" ? "Click để thiết lập Knowledge Base của bạn" : "Click to set up your Knowledge Base") : undefined}
+                disabled={!!selectedRoleKbId}
+              >
                 <span>{roleCtx?.roleName || t("dashboard.status.unknown", "Chưa xác định")}</span>
                 <span className="text-[10px] text-[#52525b] font-normal">
                   ({roleCtx?.roleGroup || (locale === "vi" ? "Khác" : "Other")})
                 </span>
-              </div>
+                {!selectedRoleKbId && <LineIcon name="external-link" className="h-3.5 w-3.5 ml-1 animate-pulse" />}
+              </button>
             )}
           </div>
         </section>

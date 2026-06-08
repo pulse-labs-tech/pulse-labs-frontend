@@ -188,6 +188,9 @@ export function ResearchView() {
           const newParams = new URLSearchParams(searchParams.toString());
           newParams.set("roleKbId", activeRoleId);
           router.replace(`/${locale}/research?${newParams.toString()}`);
+        } else {
+          router.replace(`/${locale}/onboarding?force=true`);
+          return;
         }
         await loadRuns(activeRoleId);
       } catch (err) {

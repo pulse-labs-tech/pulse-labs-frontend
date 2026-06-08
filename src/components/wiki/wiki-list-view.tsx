@@ -409,8 +409,7 @@ export function WikiListView() {
           }
           fetchItems({ roleKbId: resolvedId });
         } else {
-          setApiWarning(locale === "vi" ? "Không tải được danh sách vai trò." : "Failed to load user roles.");
-          setIsLoading(false);
+          router.replace(`/${locale}/onboarding?force=true`);
         }
       } catch (err) {
         console.error("loadRoles error:", err);

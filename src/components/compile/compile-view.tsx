@@ -308,6 +308,8 @@ export function CompileView() {
             newParams.set("roleKbId", resolvedId);
             router.replace(`/${locale}/compile/new?${newParams.toString()}`);
           }
+        } else {
+          router.replace(`/${locale}/onboarding?force=true`);
         }
       } catch (err) {
         console.error("loadRoles error:", err);

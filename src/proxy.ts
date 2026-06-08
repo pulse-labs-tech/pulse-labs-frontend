@@ -250,9 +250,13 @@ export default async function proxy(request: NextRequest) {
 
     // ── Onboarding route + already onboarded → redirect to dashboard ──
     if (isOnboardingRoute(subpath) && isOnboarded) {
-      return NextResponse.redirect(
-        new URL(`/${pathLocale}/dashboard`, request.url),
-      );
+      const url = new URL(request.url);
+      const isForced = url.searchParams.get("force") === "true";
+      if (!isForced) {
+        return NextResponse.redirect(
+          new URL(`/${pathLocale}/dashboard`, request.url),
+        );
+      }
     }
 
     // ── Protected route + not onboarded → redirect to onboarding ──

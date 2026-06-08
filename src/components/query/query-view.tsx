@@ -563,6 +563,8 @@ export function QueryView() {
           } else {
             setSelectedRoleKbId(resolvedId);
           }
+        } else {
+          router.replace(`/${locale}/onboarding?force=true`);
         }
       } catch (err) {
         console.error("loadRoles error:", err);
