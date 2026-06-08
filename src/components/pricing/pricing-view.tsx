@@ -47,6 +47,7 @@ export function PricingView() {
         targetPlan: "pro",
         source: "pricing_page",
       });
+      console.log("🟢 [F12 API RESPONSE] recordUpgradeIntentAction:", res);
 
       if (res.status === "1" && res.data?.intent) {
         setUpgradeStatus("recorded");

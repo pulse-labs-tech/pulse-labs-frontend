@@ -83,6 +83,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
     setGlobalError(null);
     try {
       const res = await getSettingsOverviewAction();
+      console.log("🟢 [F12 API RESPONSE] getSettingsOverviewAction:", res);
       if (res.status === "1" && res.data) {
         setOverview(res.data);
         if (res.data.upgradeIntent?.status && res.data.upgradeIntent.status !== "none") {
@@ -126,6 +127,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         targetPlan: "pro",
         source: "settings_page",
       });
+      console.log("🟢 [F12 API RESPONSE] recordUpgradeIntentAction (settings):", res);
       if (res.status === "1" && res.data?.intent) {
         setUpgradeStatus(res.data.intent.status);
         // Reload overview to reflect intent in plan card

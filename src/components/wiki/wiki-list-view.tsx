@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemsAction } from "@/app/actions/wiki";
+import { getOnboardingStateAction } from "@/app/actions/onboarding";
+import type { RoleKbDto } from "@/types/onboarding";
 import type { WikiItemCard, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
@@ -310,7 +312,9 @@ export function WikiListView() {
   const [isLoading, setIsLoading] = useState(true);
   const [apiWarning, setApiWarning] = useState<string | null>(null);
 
-  const roleKbId = searchParams.get("roleKbId") ?? "";
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(searchParams.get("roleKbId") || "");
+  const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
   const LIMIT = 12;
   const totalPages = Math.ceil(total / LIMIT);
 
@@ -319,7 +323,7 @@ export function WikiListView() {
 
   // ── Fetch ──────────────────────────────────────────────────────
   const fetchItems = useCallback(
-    async (overrides?: Partial<{ search: string; status: string; domainId: string; tag: string; page: number }>) => {
+    async (overrides?: Partial<{ search: string; status: string; domainId: string; tag: string; page: number; roleKbId: string }>) => {
       setIsLoading(true);
       setApiWarning(null);
 
@@ -328,10 +332,16 @@ export function WikiListView() {
       const effectiveDomain = overrides?.domainId !== undefined ? overrides.domainId : domainFilter;
       const effectiveTag = overrides?.tag !== undefined ? overrides.tag : tagFilter;
       const effectivePage = overrides?.page !== undefined ? overrides.page : page;
+      const effectiveRoleKbId = overrides?.roleKbId !== undefined ? overrides.roleKbId : selectedRoleKbId;
+
+      if (!effectiveRoleKbId) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const res = await getWikiItemsAction({
-          roleKbId: roleKbId || undefined,
+          roleKbId: effectiveRoleKbId || undefined,
           page: effectivePage,
           limit: LIMIT,
           q: effectiveSearch || undefined,
@@ -340,6 +350,7 @@ export function WikiListView() {
           tag: effectiveTag || undefined,
           sort: getSortParam(sortBy),
         });
+        console.log("🟢 [F12 API RESPONSE] getWikiItemsAction:", res);
 
         if (res.status === "1" && res.data) {
           const fetchedItems = res.data.items ?? [];
@@ -371,15 +382,48 @@ export function WikiListView() {
         setIsLoading(false);
       }
     },
-    [search, statusFilter, domainFilter, tagFilter, page, roleKbId, sortBy, clearAuth, router, locale, t]
+    [search, statusFilter, domainFilter, tagFilter, page, selectedRoleKbId, sortBy, clearAuth, router, locale, t]
   );
 
-  // Initial load
+  // Initial load & Roles resolver
   useEffect(() => {
-    const t = setTimeout(() => fetchItems(), 0);
-    return () => clearTimeout(t);
+    async function loadRoles() {
+      setRolesLoading(true);
+      try {
+        const res = await getOnboardingStateAction();
+        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
+        if (res.status === "1" && res.data?.roles?.length) {
+          setUserRoles(res.data.roles);
+          const initialId = searchParams.get("roleKbId") || "";
+          const isValid = res.data.roles.some((r) => r.id === initialId);
+          let resolvedId = initialId;
+          if (!isValid) {
+            const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
+            resolvedId = primary.id;
+            setSelectedRoleKbId(resolvedId);
+            // Update URL
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.set("roleKbId", resolvedId);
+            router.replace(`/${locale}/wiki?${newParams.toString()}`);
+          } else {
+            setSelectedRoleKbId(resolvedId);
+          }
+          fetchItems({ roleKbId: resolvedId });
+        } else {
+          setApiWarning(locale === "vi" ? "Không tải được danh sách vai trò." : "Failed to load user roles.");
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error("loadRoles error:", err);
+        setApiWarning(locale === "vi" ? "Không kết nối được máy chủ." : "Could not connect to server.");
+        setIsLoading(false);
+      } finally {
+        setRolesLoading(false);
+      }
+    }
+    loadRoles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [locale]);
 
   // Refetch when sort changes
   useEffect(() => {
@@ -467,19 +511,19 @@ export function WikiListView() {
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 lg:flex">
             <nav className="flex items-center gap-1.5">
               <Link
-                href={`/${locale}/dashboard`}
+                href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> {t("common.dashboard", "Dashboard")}
               </Link>
               <Link
-                href={roleKbId ? `/${locale}/query?roleKbId=${roleKbId}` : `/${locale}/query`}
+                href={selectedRoleKbId ? `/${locale}/query?roleKbId=${selectedRoleKbId}` : `/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="comment" className="h-3.5 w-3.5" /> {t("common.query", "Ask AI")}
               </Link>
               <Link
-                href={`/${locale}/wiki`}
+                href={selectedRoleKbId ? `/${locale}/wiki?roleKbId=${selectedRoleKbId}` : `/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <LineIcon name="book" className="h-3.5 w-3.5" /> {t("common.wiki", "Personal Wiki")}
@@ -602,6 +646,30 @@ export function WikiListView() {
               </span>
             )}
           </div>
+
+          {/* Active KB switcher */}
+          {!rolesLoading && userRoles.length > 0 && (
+            <div className="flex items-center gap-2 bg-auth-surface/40 border border-white/[0.06] rounded-xl p-1.5 px-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                {locale === "vi" ? "Chuyên ngành:" : "Domain:"}
+              </span>
+              <Select
+                value={selectedRoleKbId}
+                onChange={(roleId) => {
+                  setSelectedRoleKbId(roleId);
+                  const newParams = new URLSearchParams(searchParams.toString());
+                  newParams.set("roleKbId", roleId);
+                  router.replace(`/${locale}/wiki?${newParams.toString()}`);
+                  fetchItems({ roleKbId: roleId, page: 1 });
+                }}
+                options={userRoles.map((r) => ({
+                  value: r.id,
+                  label: r.roleName,
+                }))}
+                className="bg-auth-elevated border-auth-border rounded-xl text-xs py-1"
+              />
+            </div>
+          )}
 
           {/* View toggle */}
           <div className="flex items-center gap-1 bg-auth-elevated border border-auth-border rounded-xl p-1">
@@ -781,7 +849,7 @@ export function WikiListView() {
                 </p>
               </div>
               <Link
-                href={roleKbId ? `/${locale}/compile/new?roleKbId=${roleKbId}` : `/${locale}/compile/new`}
+                href={selectedRoleKbId ? `/${locale}/compile/new?roleKbId=${selectedRoleKbId}` : `/${locale}/compile/new`}
                 className="btn-primary-pulse text-sm"
               >
                 <LineIcon name="upload" className="h-4 w-4" /> {t("wiki.uploadCta", "Ingest your first document")}

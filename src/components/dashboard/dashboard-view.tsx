@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useTransition, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, ScrollToTop } from "@/components/ui";
 import { LineIcon } from "@/components/shared/line-icon";
@@ -165,6 +165,8 @@ const getIconComponent = (iconName: string) => {
 
 export function DashboardView() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const roleKbIdFromUrl = searchParams.get("roleKbId") || "";
   const { user: authUser, clearAuth } = useAuth();
   const [isPending, startTransition] = useTransition();
   const { t, locale } = useTranslation();
@@ -174,7 +176,7 @@ export function DashboardView() {
   const [activeJobs, setActiveJobs] = useState<DashboardCompileJob[]>([]);
   const [quota, setQuota] = useState<DashboardQuota | null>(null);
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>("");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(roleKbIdFromUrl);
 
   // UI Page States
   const [sortBy, setSortBy] = useState<"name" | "domain" | "pct" | "updated">("updated");
@@ -290,6 +292,7 @@ export function DashboardView() {
       try {
         // Load dashboard summary
         const summaryRes = await getDashboardSummaryAction(roleKbId);
+        console.log("🟢 [F12 API RESPONSE] getDashboardSummaryAction:", summaryRes);
 
         if (summaryRes.status === "1" && summaryRes.data) {
           const data = summaryRes.data;
@@ -298,6 +301,11 @@ export function DashboardView() {
           setQuota(data.quota);
           if (data.role?.roleKbId) {
             setSelectedRoleKbId(data.role.roleKbId);
+            if (roleKbIdFromUrl !== data.role.roleKbId) {
+              const newParams = new URLSearchParams(searchParams.toString());
+              newParams.set("roleKbId", data.role.roleKbId);
+              router.replace(`/${locale}/dashboard?${newParams.toString()}`);
+            }
           }
 
           // Fetch user's roles list to support switcher for Pro users
@@ -334,10 +342,10 @@ export function DashboardView() {
   useEffect(() => {
     // Avoid synchronous execution by deferring with setTimeout
     const timer = setTimeout(() => {
-      fetchDashboardData(undefined, true);
+      fetchDashboardData(roleKbIdFromUrl || undefined, true);
     }, 0);
     return () => clearTimeout(timer);
-  }, [fetchDashboardData]);
+  }, [fetchDashboardData, roleKbIdFromUrl]);
 
   // Handle click outside to close custom dropdown menus (DeepMind design switcher)
   useEffect(() => {
@@ -384,6 +392,7 @@ export function DashboardView() {
 
         try {
           const res = await getActiveJobsAction(selectedRoleKbId);
+          console.log("🟢 [F12 API RESPONSE] getActiveJobsAction:", res);
           if (res.status === "1" && res.data) {
             const newJobs = res.data.jobs || [];
             setActiveJobs(newJobs);
@@ -417,6 +426,12 @@ export function DashboardView() {
   const handleRoleChange = (roleKbId: string) => {
     if (roleKbId === selectedRoleKbId) return;
     setSelectedRoleKbId(roleKbId);
+    
+    // Update URL
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set("roleKbId", roleKbId);
+    router.replace(`/${locale}/dashboard?${newParams.toString()}`);
+    
     fetchDashboardData(roleKbId, false);
   };
 
@@ -620,7 +635,7 @@ export function DashboardView() {
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex">
             <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1">
               <Link
-                href={`/${locale}/dashboard`}
+                href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/25 transition-all"
                 title="Dashboard"
               >
@@ -628,7 +643,7 @@ export function DashboardView() {
                 <span className="hidden lg:inline">{t("dashboard.title", "Dashboard")}</span>
               </Link>
               <Link
-                href={stats.totalItems > 0 ? `/${locale}/query` : "#"}
+                href={stats.totalItems > 0 ? `/${locale}/query${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}` : "#"}
                 onClick={(e) => { if (stats.totalItems === 0) e.preventDefault(); }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
                   stats.totalItems > 0
@@ -641,7 +656,7 @@ export function DashboardView() {
                 <span className="hidden lg:inline">{t("compile.labels.sidebarQuery", "Hỏi đáp AI")}</span>
               </Link>
               <Link
-                href={`/${locale}/research`}
+                href={`/${locale}/research${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("common.research", "Nghiên cứu AI")}
               >
@@ -649,7 +664,7 @@ export function DashboardView() {
                 <span className="hidden lg:inline">{t("common.research", "Nghiên cứu")}</span>
               </Link>
               <Link
-                href={`/${locale}/wiki`}
+                href={`/${locale}/wiki${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("compile.labels.sidebarWiki", "Wiki")}
               >

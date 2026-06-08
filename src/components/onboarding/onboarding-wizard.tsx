@@ -204,6 +204,9 @@ export function OnboardingWizard() {
           getRoleOptionsAction(),
         ]);
 
+        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", stateRes);
+        console.log("🟢 [F12 API RESPONSE] getRoleOptionsAction:", optionsRes);
+
         if (cancelled) return;
 
         if (stateRes.status === "1" && stateRes.data) {
@@ -358,6 +361,7 @@ export function OnboardingWizard() {
       if (cancelled) return;
       try {
         const res = await getCompileJobAction(compileJob.id);
+        console.log("🟢 [F12 API RESPONSE] getCompileJobAction (onboarding):", res);
         if (!cancelled && res.status === "1" && res.data?.compileJob) {
           setCompileJob(res.data.compileJob);
         }
@@ -472,6 +476,7 @@ export function OnboardingWizard() {
       }));
 
       const res = await saveRolesAction(rolesInput);
+      console.log("🟢 [F12 API RESPONSE] saveRolesAction:", res);
 
       if (res.status === "1") {
         // After save, we need to fetch the state again to get roleKbId
@@ -479,6 +484,7 @@ export function OnboardingWizard() {
         // Fetch updated state to get the roleKbId created by the server
         try {
           const stateRes = await getOnboardingStateAction();
+          console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction (after saveRoles):", stateRes);
           if (stateRes.status === "1" && stateRes.data?.roles?.length > 0) {
             const primaryRole = stateRes.data.roles.find((r) => r.isPrimary) ?? stateRes.data.roles[0];
             if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
@@ -527,6 +533,7 @@ export function OnboardingWizard() {
       // Fetch state to try recover roleKbId
       try {
         const stateRes = await getOnboardingStateAction();
+        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction (recover roleKbId):", stateRes);
         if (stateRes.status === "1" && stateRes.data?.roles?.length > 0) {
           const primaryRole = stateRes.data.roles.find((r) => r.isPrimary) ?? stateRes.data.roles[0];
           if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
@@ -547,6 +554,7 @@ export function OnboardingWizard() {
       };
 
       const res = await submitSeedAction(payload);
+      console.log("🟢 [F12 API RESPONSE] submitSeedAction:", res);
 
       if (res.status === "1") {
         // API returns 202 — seed job started in background
@@ -575,6 +583,7 @@ export function OnboardingWizard() {
         compileJobId: compileJob?.id || null,
         idempotencyKey: completeIdempotencyRef.current,
       });
+      console.log("🟢 [F12 API RESPONSE] completeOnboardingAction:", res);
 
       if (res.status === "1") {
         // Hydrate context user state

@@ -126,6 +126,7 @@ export function GlobalSearchPalette() {
       setLoading(true);
       try {
         const res = await getWikiItemsAction({ q: query, limit: 8 });
+        console.log("🟢 [F12 API RESPONSE] getWikiItemsAction (global search):", res);
         if (res.status === "1" && res.data?.items) {
           setResults(res.data.items);
         } else {

@@ -37,11 +37,14 @@ export function LoginForm() {
   // root layout is NOT re-fetched from cache — AuthProvider gets the new
   // user synchronously before ProtectedRoute renders on the target page.
   useEffect(() => {
+    if (state) {
+      console.log("🟢 [F12 API RESPONSE] loginAction:", state);
+    }
     if (state?.redirectTo && state.sessionUser) {
       setUser(state.sessionUser);
       router.push(getLocalizedPath(state.redirectTo, locale));
     }
-  }, [state?.redirectTo, state?.sessionUser, locale]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">

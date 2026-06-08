@@ -44,6 +44,7 @@ export function VerifyEmailForm() {
     const verify = async () => {
       try {
         const result = await verifyEmailAction(token);
+        console.log("🟢 [F12 API RESPONSE] verifyEmailAction:", result);
         if (result.success) {
           if (result.nextRoute) {
             setNextRoute(getLocalizedPath(result.nextRoute, locale));

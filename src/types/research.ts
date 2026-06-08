@@ -313,7 +313,10 @@ export interface SubmitDocumentRequest {
   source: string;
   source_type: "web" | "pdf" | "text" | "git";
   domain_hint?: string;
+  role_id?: string;
+  roleKbId?: string;
 }
+
 
 export interface SubmitDocumentResponseData {
   document_id: string;

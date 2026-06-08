@@ -206,6 +206,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
 
     try {
       const res = await getWikiItemAction(id);
+      console.log("🟢 [F12 API RESPONSE] getWikiItemAction:", res);
 
       if (res.status === "1" && res.data?.item) {
         setItem(res.data.item);
@@ -265,19 +266,19 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 lg:flex">
             <nav className="flex items-center gap-1.5">
               <Link
-                href={`/${locale}/dashboard`}
+                href={item?.roleKbId ? `/${locale}/dashboard?roleKbId=${item.roleKbId}` : `/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> {t("common.dashboard")}
               </Link>
               <Link
-                href={`/${locale}/query`}
+                href={item?.roleKbId ? `/${locale}/query?roleKbId=${item.roleKbId}` : `/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="comment" className="h-3.5 w-3.5" /> {t("common.query")}
               </Link>
               <Link
-                href={`/${locale}/wiki`}
+                href={item?.roleKbId ? `/${locale}/wiki?roleKbId=${item.roleKbId}` : `/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <LineIcon name="book" className="h-3.5 w-3.5" /> {t("common.wiki")}
@@ -437,14 +438,14 @@ export function WikiItemView({ id }: WikiItemViewProps) {
 
         {/* Breadcrumb */}
         <nav className="flex items-center gap-1.5 text-xs text-auth-text-3 flex-wrap" aria-label="Breadcrumb">
-          <Link href={`/${locale}/dashboard`} className="hover:text-auth-text transition-colors">{t("common.dashboard")}</Link>
+          <Link href={item?.roleKbId ? `/${locale}/dashboard?roleKbId=${item.roleKbId}` : `/${locale}/dashboard`} className="hover:text-auth-text transition-colors">{t("common.dashboard")}</Link>
           <LineIcon name="chevron-right" className="h-3 w-3 shrink-0" />
-          <Link href={`/${locale}/wiki`} className="hover:text-auth-text transition-colors">{t("common.wiki")}</Link>
+          <Link href={item?.roleKbId ? `/${locale}/wiki?roleKbId=${item.roleKbId}` : `/${locale}/wiki`} className="hover:text-auth-text transition-colors">{t("common.wiki")}</Link>
           {item.domain?.name && (
             <>
               <LineIcon name="chevron-right" className="h-3 w-3 shrink-0" />
               <Link
-                href={`/${locale}/wiki?domainId=${item.domain.id}`}
+                href={item?.roleKbId ? `/${locale}/wiki?roleKbId=${item.roleKbId}&domainId=${item.domain.id}` : `/${locale}/wiki?domainId=${item.domain.id}`}
                 className="hover:text-auth-text transition-colors"
               >
                 {item.domain.name}

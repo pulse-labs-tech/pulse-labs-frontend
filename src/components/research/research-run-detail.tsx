@@ -114,6 +114,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
     if (!silent) setIsLoading(true);
     try {
       const res = await getResearchRunAction(runId);
+      console.log("🟢 [F12 API RESPONSE] getResearchRunAction:", res);
       if (res.status === "1") {
         setDetail(res.data);
 
@@ -124,6 +125,8 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
             getResearchRunSourcesAction(runId),
             getResearchRunClaimsAction(runId),
           ]);
+          console.log("🟢 [F12 API RESPONSE] getResearchRunSourcesAction:", srcRes);
+          console.log("🟢 [F12 API RESPONSE] getResearchRunClaimsAction:", clmRes);
           if (srcRes.status === "1") setSources(srcRes.data?.items ?? []);
           if (clmRes.status === "1") setClaims(clmRes.data?.items ?? []);
 
@@ -171,6 +174,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
     setCancelError(null);
     try {
       const res = await cancelResearchRunAction(runId);
+      console.log("🟢 [F12 API RESPONSE] cancelResearchRunAction:", res);
       if (res.status === "1") {
         await fetchDetail(true);
       } else {
@@ -205,6 +209,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
         includeClaims: true,
         note: "Lưu từ Research Flow.",
       });
+      console.log("🟢 [F12 API RESPONSE] saveResearchToWikiAction:", res);
 
       if (res.status === "1") {
         setSavedWikiUrl(res.data?.links?.detailUrl ?? null);
@@ -266,7 +271,10 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
         <div className="container-focused flex h-16 items-center gap-3">
-          <Link href={`/${locale}/research`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
+          <Link
+            href={detail?.researchRun?.roleKbId ? `/${locale}/research?roleKbId=${detail.researchRun.roleKbId}` : `/${locale}/research`}
+            className="text-auth-text-2 hover:text-white transition-colors text-sm"
+          >
             ← {t("research.title", "Nghiên cứu AI")}
           </Link>
           <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3" />

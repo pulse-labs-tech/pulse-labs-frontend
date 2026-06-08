@@ -39,13 +39,16 @@ export function RegisterForm() {
 
   // Handle successful auto-login after register: update AuthProvider THEN navigate.
   useEffect(() => {
+    if (state) {
+      console.log("🟢 [F12 API RESPONSE] registerAction:", state);
+    }
     if (state?.redirectTo) {
       if (state.sessionUser) {
         setUser(state.sessionUser);
       }
       router.push(getLocalizedPath(state.redirectTo, locale));
     }
-  }, [state?.redirectTo, state?.sessionUser, locale]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -359,6 +362,7 @@ function VerifyEmailScreen({
 
     try {
       const result = await resendVerificationAction(email);
+      console.log("🟢 [F12 API RESPONSE] resendVerificationAction:", result);
       if (result.success) {
         // If server auto-verified in dev mode, redirect is handled via window.location
         if (result.autoVerifiedRedirect) {

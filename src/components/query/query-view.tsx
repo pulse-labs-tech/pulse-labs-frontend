@@ -196,11 +196,13 @@ function KbGapWarning({
   locale,
   actions = [],
   t,
+  roleKbId,
 }: {
   suggestion: string | null;
   locale: string;
   actions?: string[];
   t: (path: string) => string;
+  roleKbId?: string;
 }) {
   return (
     <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-left">
@@ -213,7 +215,7 @@ function KbGapWarning({
         <div className="flex flex-wrap gap-2 mt-3">
           {actions.includes("compile_source") && (
             <Link
-              href={`/${locale}/compile/new`}
+              href={roleKbId ? `/${locale}/compile/new?roleKbId=${roleKbId}` : `/${locale}/compile/new`}
               className="inline-flex items-center gap-1 bg-amber-950/50 hover:bg-amber-900/60 border border-amber-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
             >
               <LineIcon name="plus" className="h-2.5 w-2.5" /> {t("query.gapButton")}
@@ -247,11 +249,13 @@ function AssistantMessage({
   locale,
   onFeedback,
   t,
+  roleKbId,
 }: {
   msg: QueryMessage;
   locale: string;
   onFeedback: (messageId: string, rating: "up" | "down") => void;
   t: (path: string, defaultValue?: string) => string;
+  roleKbId?: string;
 }) {
   const [thinkingCollapsed, setThinkingCollapsed] = useState(true);
 
@@ -323,6 +327,7 @@ function AssistantMessage({
             locale={locale}
             actions={msg.kbGapActions}
             t={t}
+            roleKbId={roleKbId}
           />
         )}
 
@@ -434,7 +439,7 @@ function EmptyState({
 }
 
 /** Special empty KB error state */
-function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => string }) {
+function KbEmptyState({ locale, t, roleKbId }: { locale: string; t: (path: string) => string; roleKbId?: string }) {
   return (
     <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
       <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center mb-6">
@@ -447,7 +452,7 @@ function KbEmptyState({ locale, t }: { locale: string; t: (path: string) => stri
         {t("query.emptyKbDesc")}
       </p>
       <Link
-        href={`/${locale}/compile/new`}
+        href={roleKbId ? `/${locale}/compile/new?roleKbId=${roleKbId}` : `/${locale}/compile/new`}
         className="btn-primary-pulse text-sm"
       >
         <LineIcon name="plus" className="h-4 w-4" />
@@ -542,11 +547,21 @@ export function QueryView() {
       setIsLoadingRoles(true);
       try {
         const res = await getOnboardingStateAction();
-        if (res.status === "1" && res.data?.roles) {
+        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
+        if (res.status === "1" && res.data?.roles?.length) {
           setUserRoles(res.data.roles);
-          if (!initRoleKbId) {
+          const isValid = res.data.roles.some((r) => r.id === initRoleKbId);
+          let resolvedId = initRoleKbId;
+          if (!isValid) {
             const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
-            if (primary) setSelectedRoleKbId(primary.id);
+            resolvedId = primary.id;
+            setSelectedRoleKbId(resolvedId);
+            // Update URL
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.set("roleKbId", resolvedId);
+            router.replace(`/${locale}/query?${newParams.toString()}`);
+          } else {
+            setSelectedRoleKbId(resolvedId);
           }
         }
       } catch (err) {
@@ -584,10 +599,11 @@ export function QueryView() {
   }, [selectedRoleKbId, loadDomains]);
 
   // ─── Sessions: load recent history list ───
-  const loadSessions = useCallback(async () => {
+  const loadSessions = useCallback(async (roleId?: string) => {
     setIsLoadingSessions(true);
     try {
-      const res = await listQuerySessionsAction({ limit: 20 });
+      const res = await listQuerySessionsAction({ limit: 20, roleKbId: roleId || undefined });
+      console.log("🟢 [F12 API RESPONSE] listQuerySessionsAction:", res);
       if (res.status === "1" && res.data?.items) {
         setSessions(res.data.items);
       }
@@ -599,8 +615,10 @@ export function QueryView() {
   }, []);
 
   useEffect(() => {
-    loadSessions();
-  }, [loadSessions]);
+    if (selectedRoleKbId) {
+      loadSessions(selectedRoleKbId);
+    }
+  }, [selectedRoleKbId, loadSessions]);
 
   // ─── Click outside dropdowns listener ───
   useEffect(() => {
@@ -676,6 +694,7 @@ export function QueryView() {
 
     try {
       const res = await getQuerySessionAction(sessionId);
+      console.log("🟢 [F12 API RESPONSE] getQuerySessionAction:", res);
       if (res.status === "1" && res.data) {
         const loadedMessages: QueryMessage[] = res.data.messages.map((m: any) => {
           if (m.role === "user") {
@@ -726,6 +745,7 @@ export function QueryView() {
   const handleFeedback = async (messageId: string, rating: "up" | "down") => {
     try {
       const res = await submitQueryFeedbackAction(messageId, rating);
+      console.log("🟢 [F12 API RESPONSE] submitQueryFeedbackAction:", res);
       if (res.status === "1") {
         setMessages((prev) =>
           prev.map((m) =>
@@ -750,6 +770,7 @@ export function QueryView() {
         title: titleHint,
         domainId: selectedDomainId,
       });
+      console.log("🟢 [F12 API RESPONSE] saveQueryToWikiAction:", res);
       if (res.status === "1") {
         alert(locale === "vi" ? "Đã lưu vào Wiki cá nhân thành công!" : "Successfully compiled to Wiki!");
         setShowCompileBar(false);
@@ -772,6 +793,10 @@ export function QueryView() {
     setQuotaExceeded(false);
     setShowCompileBar(false);
     setSelectedDomainId(null);
+
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set("roleKbId", roleKbId);
+    router.replace(`/${locale}/query?${newParams.toString()}`);
   };
 
   // ─── Submit question ───
@@ -805,10 +830,11 @@ export function QueryView() {
           roleKbId: selectedRoleKbId,
           domainId: selectedDomainId,
         });
+        console.log("🟢 [F12 API RESPONSE] createQuerySessionAction:", sessionRes);
         if (sessionRes.status === "1" && sessionRes.data?.session?.id) {
           activeSessionId = sessionRes.data.session.id;
           setConversationId(activeSessionId);
-          loadSessions();
+          loadSessions(selectedRoleKbId);
         } else {
           const code = sessionRes.error_code;
           setErrorCode(code);
@@ -829,6 +855,7 @@ export function QueryView() {
         question,
         scope: { roleKbId: selectedRoleKbId, domainId: selectedDomainId, knowledgeItemId: null },
       });
+      console.log("🟢 [F12 API RESPONSE] submitQueryMessageAction:", res);
 
       if (res.status === "1" && res.data) {
         const d = res.data;
@@ -935,19 +962,19 @@ export function QueryView() {
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 lg:flex">
             <nav className="flex items-center gap-1.5">
               <Link
-                href={`/${locale}/dashboard`}
+                href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> Dashboard
               </Link>
               <Link
-                href={`/${locale}/query`}
+                href={selectedRoleKbId ? `/${locale}/query?roleKbId=${selectedRoleKbId}` : `/${locale}/query`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <LineIcon name="comment" className="h-3.5 w-3.5" /> Query AI
               </Link>
               <Link
-                href={`/${locale}/wiki`}
+                href={selectedRoleKbId ? `/${locale}/wiki?roleKbId=${selectedRoleKbId}` : `/${locale}/wiki`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="book" className="h-3.5 w-3.5" /> Wiki
@@ -1130,7 +1157,7 @@ export function QueryView() {
           {/* Messages container */}
           <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6 min-h-0 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {showKbEmpty ? (
-              <KbEmptyState locale={locale} t={t} />
+              <KbEmptyState locale={locale} t={t} roleKbId={selectedRoleKbId} />
             ) : messages.length === 0 && !isAnswering ? (
               <EmptyState onExampleClick={handleExampleClick} t={t} />
             ) : (
@@ -1145,6 +1172,7 @@ export function QueryView() {
                       locale={locale}
                       onFeedback={handleFeedback}
                       t={t}
+                      roleKbId={selectedRoleKbId}
                     />
                   )
                 )}

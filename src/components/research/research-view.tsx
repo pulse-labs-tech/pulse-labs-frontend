@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
@@ -91,6 +91,8 @@ function formatRelativeTime(dateStr: string): string {
 
 export function ResearchView() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const roleKbIdFromUrl = searchParams.get("roleKbId") || searchParams.get("role_id") || "";
   const { user } = useAuth();
   const { t, locale } = useTranslation();
 
@@ -121,7 +123,7 @@ export function ResearchView() {
 
   // Stream Query
   const [streamQuery, setStreamQuery] = useState("");
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState("");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(roleKbIdFromUrl);
   const [limitToIngested, setLimitToIngested] = useState(false);
   const [topK, setTopK] = useState(10);
   const [domainFiltersInput, setDomainFiltersInput] = useState("");
@@ -138,14 +140,16 @@ export function ResearchView() {
   const [copied, setCopied] = useState(false);
 
   // Load Roles & Runs
-  const loadRuns = useCallback(async (cursor?: string) => {
+  const loadRuns = useCallback(async (roleId?: string, cursor?: string) => {
     setIsLoadingRuns(true);
     setListError(null);
     try {
       const res = await listResearchRunsAction({
         limit: 20,
         cursor: cursor ?? undefined,
+        roleKbId: roleId || undefined,
       });
+      console.log("🟢 [F12 API RESPONSE] listResearchRunsAction:", res);
       if (res.status === "1") {
         const items = res.data?.items ?? [];
         setRuns(cursor ? (prev) => [...prev, ...items] : items);
@@ -166,23 +170,43 @@ export function ResearchView() {
   }, []);
 
   useEffect(() => {
-    async function loadRoles() {
+    async function loadRolesAndRuns() {
       setRolesLoading(true);
       try {
         const res = await getOnboardingStateAction();
+        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
+        let activeRoleId = roleKbIdFromUrl;
         if (res.status === "1" && res.data?.roles?.length) {
           setUserRoles(res.data.roles);
-          setSelectedRoleKbId(res.data.roles[0].id);
+          const isValidRole = res.data.roles.some((r) => r.id === roleKbIdFromUrl);
+          if (!isValidRole) {
+            const primaryRole = res.data.roles.find((r) => r.isPrimary);
+            activeRoleId = primaryRole ? primaryRole.id : res.data.roles[0].id;
+          }
+          setSelectedRoleKbId(activeRoleId);
+          // Update URL
+          const newParams = new URLSearchParams(searchParams.toString());
+          newParams.set("roleKbId", activeRoleId);
+          router.replace(`/${locale}/research?${newParams.toString()}`);
         }
+        await loadRuns(activeRoleId);
       } catch (err) {
-        console.error("loadRoles error:", err);
+        console.error("loadRolesAndRuns error:", err);
+        await loadRuns(roleKbIdFromUrl || undefined);
       } finally {
         setRolesLoading(false);
       }
     }
-    loadRoles();
-    loadRuns();
-  }, [loadRuns]);
+    loadRolesAndRuns();
+  }, [loadRuns, roleKbIdFromUrl, locale, searchParams, router]);
+
+  const handleRoleChange = (roleId: string) => {
+    setSelectedRoleKbId(roleId);
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set("roleKbId", roleId);
+    router.replace(`/${locale}/research?${newParams.toString()}`);
+    loadRuns(roleId);
+  };
 
   // handle background create
   const handleCreateBg = async (e: React.FormEvent) => {
@@ -198,10 +222,12 @@ export function ResearchView() {
       const res = await createResearchRunAction({
         trigger,
         query: trimmed,
+        roleKbId: selectedRoleKbId || undefined,
         freshnessRequired: false,
         mode: "background",
         options: { saveTrace: true },
       });
+      console.log("🟢 [F12 API RESPONSE] createResearchRunAction:", res);
 
       if (res.status === "1" && res.data?.researchRun?.id) {
         setBgQuery("");
@@ -241,7 +267,10 @@ export function ResearchView() {
         source: sourceVal,
         source_type: docSourceType,
         domain_hint: docDomainHint.trim() || undefined,
+        role_id: selectedRoleKbId || undefined,
+        roleKbId: selectedRoleKbId || undefined,
       });
+      console.log("🟢 [F12 API RESPONSE] submitDocumentAction:", res);
 
       if (res.status === "1" && res.data?.document_id) {
         setIngestedDocId(res.data.document_id);
@@ -320,12 +349,16 @@ export function ResearchView() {
             try {
               const event = JSON.parse(jsonStr) as ResearchStreamEvent;
               if (event.type === "PROGRESS") {
+                console.log("🟢 [F12 API RESPONSE] Research Stream Event [PROGRESS]:", event);
                 setStreamProgress((prev) => [...prev, event.message]);
               } else if (event.type === "RESULT") {
+                console.log("🟢 [F12 API RESPONSE] Research Stream Event [RESULT]:", event);
                 setStreamResults((prev) => [...prev, event]);
               } else if (event.type === "ANSWER") {
+                console.log("🟢 [F12 API RESPONSE] Research Stream Event [ANSWER]:", event);
                 setStreamAnswer(event.message);
               } else if (event.type === "ERROR") {
+                console.log("🔴 [F12 API RESPONSE] Research Stream Event [ERROR]:", event);
                 setStreamError(event.message);
               }
             } catch (err) {
@@ -363,7 +396,7 @@ export function ResearchView() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
         <div className="container-focused flex h-16 items-center gap-3">
-          <Link href={`/${locale}/dashboard`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
+          <Link href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
             ← {t("common.dashboard", "Dashboard")}
           </Link>
           <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3" />
@@ -578,7 +611,7 @@ export function ResearchView() {
                   ) : userRoles.length > 0 ? (
                     <Select
                       value={selectedRoleKbId}
-                      onChange={setSelectedRoleKbId}
+                      onChange={handleRoleChange}
                       options={userRoles.map((r) => ({
                         value: r.id,
                         label: r.roleName,
