@@ -623,3 +623,11 @@ export async function verifyEmailAction(
     return { error: "NETWORK_ERROR" };
   }
 }
+
+export async function getAccessTokenAction(): Promise<string | null> {
+  try {
+    return (await getAccessToken()) || null;
+  } catch {
+    return null;
+  }
+}

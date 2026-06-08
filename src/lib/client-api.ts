@@ -43,17 +43,39 @@ import type { DashboardSummaryData, ActiveJobsResponseData } from "@/types/dashb
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
 
-function getClientAccessToken(): string | null {
+const RESEARCH_API_BASE =
+  process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
+
+async function getClientAccessToken(): Promise<string | null> {
   if (typeof document === "undefined") return null;
+
+  // 1. Try to read from client cookie
   const match = document.cookie.match(/(?:^|;\s*)pulse_at=([^;]*)/);
-  return match ? match[1] : null;
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  // 2. Fallback: Ask Next.js Server Action for the token
+  try {
+    const { getAccessTokenAction } = await import("@/app/actions/auth");
+    const token = await getAccessTokenAction();
+    if (token) {
+      // Set local cookie so subsequent calls don't hit the server action
+      document.cookie = `pulse_at=${token}; path=/; secure; samesite=lax`;
+      return token;
+    }
+  } catch (err) {
+    console.error("getClientAccessToken server fallback error:", err);
+  }
+
+  return null;
 }
 
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<AuthApiResponse<T>> {
-  const token = getClientAccessToken();
+  const token = await getClientAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "X-Platform": "web",
@@ -326,10 +348,39 @@ export async function createResearchRunAction(
 export async function submitDocumentAction(
   data: SubmitDocumentRequest
 ): Promise<AuthApiResponse<any>> {
-  return apiFetch<any>("/v1/documents", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  const token = await getClientAccessToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await fetch(`${RESEARCH_API_BASE}/documents`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        status: "0",
+        error_code: errorData.error_code || "INGESTION_ERROR",
+        msg: errorData.msg || `Lỗi HTTP ${response.status}`,
+        data: null,
+      };
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Client API error on POST /documents:", error);
+    return {
+      status: "0",
+      error_code: "NETWORK_ERROR",
+      msg: "Không kết nối được máy chủ.",
+      data: null,
+    };
+  }
 }
 
 export async function getResearchRunAction(
