@@ -30,6 +30,7 @@ async function handleProxy(
     const res = await authFetch<any>(targetPath, {
       method,
       body,
+      noRedirect: true,
     });
     return NextResponse.json(res);
   } catch (error) {
