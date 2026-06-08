@@ -64,7 +64,7 @@ export async function setAuthTokens(
 
   cookieStore.set(COOKIE_KEYS.ACCESS_TOKEN, accessToken, {
     ...BASE_OPTIONS,
-    httpOnly: true,
+    httpOnly: false,
     maxAge: expiresIn,
   });
 

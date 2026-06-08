@@ -23,6 +23,14 @@ import type {
 } from "@/types/research";
 import type { RoleKbDto } from "@/types/onboarding";
 
+const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
+
+function getClientAccessToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)pulse_at=([^;]*)/);
+  return match ? match[1] : null;
+}
+
 const ACTIVE_STATUSES: ResearchStatus[] = [
   "queued",
   "planning",
@@ -321,7 +329,15 @@ export function ResearchView() {
         filters.forEach((f) => params.append("domain_filters", f));
       }
 
-      const response = await fetch(`/api/research/stream?${params.toString()}`);
+      const token = getClientAccessToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${RESEARCH_API_BASE}/research/stream?${params.toString()}`, {
+        headers,
+      });
       if (!response.ok) {
         const errJson = await response.json().catch(() => ({}));
         throw new Error(errJson.msg || `Lỗi đường truyền (HTTP ${response.status})`);
