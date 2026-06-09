@@ -389,23 +389,6 @@ export function WikiListView() {
     async function loadRoles() {
       const initialId = searchParams.get("roleKbId") || authUser?.roleKbId || "";
       
-      // Optimization: If user is Free and already has a roleKbId, bypass loading onboarding state list
-      if (authUser?.plan === "free" && authUser?.roleKbId) {
-        setUserRoles([{
-          id: authUser.roleKbId,
-          roleName: "",
-          roleGroup: "other",
-          roleOptionId: "",
-          isCustom: false,
-          status: "active",
-          isPrimary: true,
-          createdAt: new Date().toISOString(),
-        }]);
-        setRolesLoading(false);
-        fetchItems({ roleKbId: authUser.roleKbId });
-        return;
-      }
-
       setRolesLoading(true);
       try {
         let roles: RoleKbDto[] = [];

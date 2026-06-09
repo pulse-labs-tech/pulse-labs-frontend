@@ -573,22 +573,6 @@ export function QueryView() {
     const initRoleKbId = searchParams.get("roleKbId") || authUser?.roleKbId || "";
 
     const loadRoles = async () => {
-      // Optimization: If user is Free and already has a roleKbId, bypass loading onboarding state list
-      if (authUser?.plan === "free" && authUser?.roleKbId) {
-        setUserRoles([{
-          id: authUser.roleKbId,
-          roleName: "",
-          roleGroup: "other",
-          roleOptionId: "",
-          isCustom: false,
-          status: "active",
-          isPrimary: true,
-          createdAt: new Date().toISOString(),
-        }]);
-        setIsLoadingRoles(false);
-        return;
-      }
-
       setIsLoadingRoles(true);
       try {
         let roles: RoleKbDto[] = [];

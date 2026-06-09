@@ -179,25 +179,6 @@ export function ResearchView() {
 
   useEffect(() => {
     async function loadRolesAndRuns() {
-      // Optimization: If user is Free and already has a roleKbId, bypass loading onboarding state list
-      if (user?.plan === "free" && user?.roleKbId) {
-        const activeRoleId = roleKbIdFromUrl || user.roleKbId;
-        setUserRoles([{
-          id: user.roleKbId,
-          roleName: "",
-          roleGroup: "other",
-          roleOptionId: "",
-          isCustom: false,
-          status: "active",
-          isPrimary: true,
-          createdAt: new Date().toISOString(),
-        }]);
-        setSelectedRoleKbId(activeRoleId);
-        setRolesLoading(false);
-        await loadRuns(activeRoleId);
-        return;
-      }
-
       setRolesLoading(true);
       try {
         let roles: RoleKbDto[] = [];
