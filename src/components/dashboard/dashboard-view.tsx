@@ -13,6 +13,7 @@ import {
   getDashboardSummaryAction,
   getActiveJobsAction,
   getOnboardingStateAction,
+  completeOnboardingAction,
 } from "@/lib/client-api";
 import type {
   DashboardSummaryData,
@@ -212,6 +213,7 @@ export function DashboardView() {
           setGlobalErrorMsg(t("dashboard.errors.EMAIL_NOT_VERIFIED", "Vui lòng xác thực email để tiếp tục sử dụng hệ thống."));
           break;
         case "ONBOARDING_REQUIRED":
+        case "ROLE_KB_REQUIRED":
           // Do not kick the user to the onboarding page. Keep them on dashboard and let them see the setup warning banner.
           setGlobalErrorMsg(null);
           setSelectedRoleKbId("");
@@ -346,10 +348,39 @@ export function DashboardView() {
             if (!summary) setSummary(buildFallbackSummary());
             setApiWarning(summaryRes.msg || t("dashboard.errors.loadFailed", "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật."));
           }
+        } else if (summaryRes.error_code === "ONBOARDING_REQUIRED" || summaryRes.error_code === "ROLE_KB_REQUIRED") {
+          const stateRes = await getOnboardingStateAction();
+          if (stateRes.status === "1" && stateRes.data?.roles && stateRes.data.roles.length > 0) {
+            const primary = stateRes.data.roles.find((r) => r.isPrimary) || stateRes.data.roles[0];
+            console.log("🟢 [ONBOARDING_REQUIRED / ROLE_KB_REQUIRED] Synchronizing onboarding completed status with roleKbId:", primary.id);
+            
+            // 1. Sync onboarding completed to local cookies
+            await syncCompletedOnboardingAction(primary.id);
+            
+            // 2. Try to complete onboarding on backend so it gets updated there too!
+            await completeOnboardingAction({ seedSkipped: true });
+
+            // 3. Set selectedRoleKbId state
+            setSelectedRoleKbId(primary.id);
+
+            // 4. Update url search params
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.set("roleKbId", primary.id);
+            router.replace(`/${locale}/dashboard?${newParams.toString()}`);
+
+            // 5. Re-fetch dashboard data using this roleKbId!
+            fetchDashboardData(primary.id, false);
+            return;
+          } else {
+            // Fallback: show the setup warning banner
+            if (!summary) setSummary(buildFallbackSummary());
+            setSelectedRoleKbId("");
+            handleGlobalError(summaryRes.error_code, summaryRes.msg);
+          }
         } else {
           const errCode = summaryRes.error_code;
           // Auth/permission errors → hard block (redirect)
-          if (errCode === "UNAUTHORIZED" || errCode === "FORBIDDEN" || errCode === "ONBOARDING_REQUIRED") {
+          if (errCode === "UNAUTHORIZED" || errCode === "FORBIDDEN" || errCode === "ONBOARDING_REQUIRED" || errCode === "ROLE_KB_REQUIRED") {
             handleGlobalError(errCode, summaryRes.msg);
           } else {
             // Non-auth error (API not ready, network, etc.) → graceful degradation
