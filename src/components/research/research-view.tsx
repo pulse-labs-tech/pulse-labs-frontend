@@ -213,10 +213,11 @@ export function ResearchView() {
           newParams.set("roleKbId", activeRoleId);
           router.replace(`/${locale}/research?${newParams.toString()}`);
         } else {
-          router.replace(`/${locale}/dashboard`);
-          return;
+          setUserRoles([]);
+          setSelectedRoleKbId("");
+          activeRoleId = "";
         }
-        await loadRuns(activeRoleId);
+        await loadRuns(activeRoleId || undefined);
       } catch (err) {
         console.error("loadRolesAndRuns error:", err);
         await loadRuns(roleKbIdFromUrl || undefined);

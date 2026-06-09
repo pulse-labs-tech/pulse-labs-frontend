@@ -427,7 +427,9 @@ export function WikiListView() {
           }
           fetchItems({ roleKbId: resolvedId });
         } else {
-          router.replace(`/${locale}/dashboard`);
+          setUserRoles([]);
+          setSelectedRoleKbId("");
+          setIsLoading(false);
         }
       } catch (err) {
         console.error("loadRoles error:", err);

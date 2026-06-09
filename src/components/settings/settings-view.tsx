@@ -69,10 +69,6 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         router.push(`/${locale}/login`);
         return;
       }
-      if (code === "ONBOARDING_REQUIRED") {
-        router.push(`/${locale}/dashboard`);
-        return;
-      }
       setGlobalError(ERROR_MESSAGES[code] ?? ERROR_MESSAGES.SERVER_ERROR);
     },
     [clearAuth, router, locale]

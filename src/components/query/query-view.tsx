@@ -580,7 +580,8 @@ export function QueryView() {
             setSelectedRoleKbId(resolvedId);
           }
         } else {
-          router.replace(`/${locale}/dashboard`);
+          setUserRoles([]);
+          setSelectedRoleKbId("");
         }
       } catch (err) {
         console.error("loadRoles error:", err);
