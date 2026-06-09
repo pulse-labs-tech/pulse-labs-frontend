@@ -17,6 +17,7 @@ import {
   getCompileJobAction,
   completeOnboardingAction,
   getClientAccessToken,
+  setStoredRoleKbId,
 } from "@/lib/client-api";
 import type {
   RoleGroup,
@@ -239,7 +240,10 @@ export function OnboardingWizard() {
             );
             // Restore primary roleKbId for seed step
             const primaryRole = roles.find((r) => r.isPrimary) ?? roles[0];
-            if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+            if (primaryRole) {
+              primaryRoleKbIdRef.current = primaryRole.id;
+              setStoredRoleKbId(primaryRole.id);
+            }
           }
 
           // Restore step state (FR-ONB-011 Resume rules)
@@ -493,7 +497,10 @@ export function OnboardingWizard() {
         const returnedRoles = res.data?.roles;
         if (returnedRoles && returnedRoles.length > 0) {
           const primaryRole = returnedRoles.find((r: any) => r.isPrimary) ?? returnedRoles[0];
-          if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+          if (primaryRole) {
+            primaryRoleKbIdRef.current = primaryRole.id;
+            setStoredRoleKbId(primaryRole.id);
+          }
         } else {
           // Fallback: Fetch state to recover roleKbId
           try {
@@ -501,7 +508,10 @@ export function OnboardingWizard() {
             console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction (after saveRoles recover fallback):", stateRes);
             if (stateRes.status === "1" && stateRes.data?.roles?.length > 0) {
               const primaryRole = stateRes.data.roles.find((r) => r.isPrimary) ?? stateRes.data.roles[0];
-              if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+              if (primaryRole) {
+                primaryRoleKbIdRef.current = primaryRole.id;
+                setStoredRoleKbId(primaryRole.id);
+              }
             }
           } catch {
             // Non-fatal — seed step will handle if roleKbId is missing
@@ -601,6 +611,9 @@ export function OnboardingWizard() {
       console.log("🟢 [F12 API RESPONSE] completeOnboardingAction:", res);
 
       if (res.status === "1") {
+        if (primaryRoleKbIdRef.current) {
+          setStoredRoleKbId(primaryRoleKbIdRef.current);
+        }
         // Force refresh the access token to update JWT claims (onboardingStatus -> "completed")
         try {
           await getClientAccessToken(true);
@@ -618,6 +631,9 @@ export function OnboardingWizard() {
       } else {
         // 409 ONBOARDING_ALREADY_COMPLETED is non-fatal — treat as success
         if (res.error_code === "ONBOARDING_ALREADY_COMPLETED") {
+          if (primaryRoleKbIdRef.current) {
+            setStoredRoleKbId(primaryRoleKbIdRef.current);
+          }
           try {
             await getClientAccessToken(true);
           } catch (refreshErr) {

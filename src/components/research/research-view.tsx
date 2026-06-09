@@ -15,6 +15,8 @@ import {
   listResearchRunsAction,
   submitDocumentAction,
   getClientAccessToken,
+  getStoredRoleKbId,
+  setStoredRoleKbId,
 } from "@/lib/client-api";
 import type {
   ResearchRunDto,
@@ -128,7 +130,7 @@ export function ResearchView() {
 
   // Stream Query
   const [streamQuery, setStreamQuery] = useState("");
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState(() => roleKbIdFromUrl || user?.roleKbId || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(() => roleKbIdFromUrl || getStoredRoleKbId() || user?.roleKbId || "");
   const [limitToIngested, setLimitToIngested] = useState(false);
   const [topK, setTopK] = useState(10);
   const [domainFiltersInput, setDomainFiltersInput] = useState("");
@@ -208,6 +210,7 @@ export function ResearchView() {
             activeRoleId = primaryRole ? primaryRole.id : res.data.roles[0].id;
           }
           setSelectedRoleKbId(activeRoleId);
+          setStoredRoleKbId(activeRoleId);
           // Update URL
           const newParams = new URLSearchParams(searchParams.toString());
           newParams.set("roleKbId", activeRoleId);
@@ -230,6 +233,7 @@ export function ResearchView() {
 
   const handleRoleChange = (roleId: string) => {
     setSelectedRoleKbId(roleId);
+    setStoredRoleKbId(roleId);
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("roleKbId", roleId);
     router.replace(`/${locale}/research?${newParams.toString()}`);

@@ -23,7 +23,7 @@ import { getOnboardingStateAction } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
-import { createSourceAction, getCompileJobAction } from "@/lib/client-api";
+import { createSourceAction, getCompileJobAction, getStoredRoleKbId, setStoredRoleKbId } from "@/lib/client-api";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { CompileJob } from "@/types/compile";
 
@@ -264,7 +264,7 @@ export function CompileView() {
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [titleHint, setTitleHint] = useState("");
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState(() => roleKbIdFromUrl || authUser?.roleKbId || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(() => roleKbIdFromUrl || getStoredRoleKbId() || authUser?.roleKbId || "");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [textError, setTextError] = useState<string | null>(null);
 
@@ -315,10 +315,12 @@ export function CompileView() {
           let resolvedId = roleKbIdFromUrl;
           if (validRole) {
             setSelectedRoleKbId(validRole.id);
+            setStoredRoleKbId(validRole.id);
           } else if (res.data.roles[0]) {
             const defaultRole = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
             resolvedId = defaultRole.id;
             setSelectedRoleKbId(resolvedId);
+            setStoredRoleKbId(resolvedId);
             // Update URL
             const newParams = new URLSearchParams(searchParams.toString());
             newParams.set("roleKbId", resolvedId);
@@ -445,6 +447,7 @@ export function CompileView() {
 
   const handleRoleChange = (roleId: string) => {
     setSelectedRoleKbId(roleId);
+    setStoredRoleKbId(roleId);
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("roleKbId", roleId);
     router.replace(`/${locale}/compile/new?${newParams.toString()}`);

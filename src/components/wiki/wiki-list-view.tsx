@@ -8,7 +8,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
-import { getWikiItemsAction, getOnboardingStateAction } from "@/lib/client-api";
+import { getWikiItemsAction, getOnboardingStateAction, getStoredRoleKbId, setStoredRoleKbId } from "@/lib/client-api";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { WikiItemCard, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
 import { useTranslation } from "@/contexts/locale-context";
@@ -311,7 +311,7 @@ export function WikiListView() {
   const [isLoading, setIsLoading] = useState(true);
   const [apiWarning, setApiWarning] = useState<string | null>(null);
 
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState(searchParams.get("roleKbId") || authUser?.roleKbId || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(searchParams.get("roleKbId") || getStoredRoleKbId() || authUser?.roleKbId || "");
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
   const [rolesLoading, setRolesLoading] = useState(true);
   const LIMIT = 12;
@@ -418,12 +418,14 @@ export function WikiListView() {
             const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
             resolvedId = primary.id;
             setSelectedRoleKbId(resolvedId);
+            setStoredRoleKbId(resolvedId);
             // Update URL
             const newParams = new URLSearchParams(searchParams.toString());
             newParams.set("roleKbId", resolvedId);
             router.replace(`/${locale}/wiki?${newParams.toString()}`);
           } else {
             setSelectedRoleKbId(resolvedId);
+            setStoredRoleKbId(resolvedId);
           }
           fetchItems({ roleKbId: resolvedId });
         } else {
@@ -678,6 +680,7 @@ export function WikiListView() {
                 value={selectedRoleKbId}
                 onChange={(roleId) => {
                   setSelectedRoleKbId(roleId);
+                  setStoredRoleKbId(roleId);
                   const newParams = new URLSearchParams(searchParams.toString());
                   newParams.set("roleKbId", roleId);
                   router.replace(`/${locale}/wiki?${newParams.toString()}`);

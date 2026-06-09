@@ -14,6 +14,9 @@ import {
   getActiveJobsAction,
   getOnboardingStateAction,
   completeOnboardingAction,
+  getStoredRoleKbId,
+  setStoredRoleKbId,
+  getFallbackRoleKbId,
 } from "@/lib/client-api";
 import type {
   DashboardSummaryData,
@@ -177,7 +180,7 @@ export function DashboardView() {
   const [activeJobs, setActiveJobs] = useState<DashboardCompileJob[]>([]);
   const [quota, setQuota] = useState<DashboardQuota | null>(null);
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(roleKbIdFromUrl);
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => roleKbIdFromUrl || getStoredRoleKbId() || authUser?.roleKbId || "");
 
   // UI Page States
   const [sortBy, setSortBy] = useState<"name" | "domain" | "pct" | "updated">("updated");
@@ -292,9 +295,18 @@ export function DashboardView() {
       else setIsChangingRole(true);
       setGlobalErrorMsg(null);
 
+      const activeRoleId = roleKbId || getFallbackRoleKbId();
+      if (!activeRoleId) {
+        if (!summary) setSummary(buildFallbackSummary());
+        setSelectedRoleKbId("");
+        setIsLoading(false);
+        setIsChangingRole(false);
+        return;
+      }
+
       try {
         // Load dashboard summary
-        const summaryRes = await getDashboardSummaryAction(roleKbId);
+        const summaryRes = await getDashboardSummaryAction(activeRoleId);
         console.log("🟢 [F12 API RESPONSE] getDashboardSummaryAction:", summaryRes);
 
         if (summaryRes.status === "1" && summaryRes.data) {
@@ -304,6 +316,7 @@ export function DashboardView() {
           setQuota(data.quota);
           if (data.role?.roleKbId) {
             setSelectedRoleKbId(data.role.roleKbId);
+            setStoredRoleKbId(data.role.roleKbId);
             if (roleKbIdFromUrl !== data.role.roleKbId) {
               const newParams = new URLSearchParams(searchParams.toString());
               newParams.set("roleKbId", data.role.roleKbId);
@@ -362,6 +375,7 @@ export function DashboardView() {
 
             // 3. Set selectedRoleKbId state
             setSelectedRoleKbId(primary.id);
+            setStoredRoleKbId(primary.id);
 
             // 4. Update url search params
             const newParams = new URLSearchParams(searchParams.toString());
@@ -488,6 +502,7 @@ export function DashboardView() {
   const handleRoleChange = (roleKbId: string) => {
     if (roleKbId === selectedRoleKbId) return;
     setSelectedRoleKbId(roleKbId);
+    setStoredRoleKbId(roleKbId);
     
     // Update URL
     const newParams = new URLSearchParams(searchParams.toString());

@@ -23,6 +23,8 @@ import {
   saveQueryToWikiAction,
   getDashboardSummaryAction,
   getOnboardingStateAction,
+  getStoredRoleKbId,
+  setStoredRoleKbId,
 } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
@@ -505,7 +507,7 @@ export function QueryView() {
 
   // Role KB state
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || authUser?.roleKbId || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || getStoredRoleKbId() || authUser?.roleKbId || "");
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
 
   // Sessions history state
@@ -572,12 +574,14 @@ export function QueryView() {
             const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
             resolvedId = primary.id;
             setSelectedRoleKbId(resolvedId);
+            setStoredRoleKbId(resolvedId);
             // Update URL
             const newParams = new URLSearchParams(searchParams.toString());
             newParams.set("roleKbId", resolvedId);
             router.replace(`/${locale}/query?${newParams.toString()}`);
           } else {
             setSelectedRoleKbId(resolvedId);
+            setStoredRoleKbId(resolvedId);
           }
         } else {
           setUserRoles([]);
@@ -805,6 +809,7 @@ export function QueryView() {
   // ─── Handle role change ───
   const handleRoleChange = (roleKbId: string) => {
     setSelectedRoleKbId(roleKbId);
+    setStoredRoleKbId(roleKbId);
     setMessages([]);
     setConversationId(undefined);
     setInlineError(null);
