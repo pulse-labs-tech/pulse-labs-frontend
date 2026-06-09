@@ -225,22 +225,10 @@ export function OnboardingWizard() {
           setPlan(userPlan);
           setRoleLimit(limits?.roleLimit ?? 1);
 
-          // Restore step state (FR-ONB-011 Resume rules)
-          if (step === "done" && !isForced) {
-            // Onboarding already completed — redirect to dashboard
-            if (user) {
-              setUser({ ...user, onboardingStatus: "completed" });
-            }
-            router.replace("/dashboard");
-            return; // Don't set isInitializing to false — keep loading screen
-          } else if (step === "welcome" || isForced) {
-            setCurrentStep("welcome");
-          } else {
-            setCurrentStep(step);
-          }
-
           // Restore previously saved roles
+          let hasSavedRoles = false;
           if (roles && roles.length > 0) {
+            hasSavedRoles = true;
             setSelectedRoles(
               roles.map((r) => ({
                 id: r.roleOptionId || r.id,
@@ -252,6 +240,24 @@ export function OnboardingWizard() {
             // Restore primary roleKbId for seed step
             const primaryRole = roles.find((r) => r.isPrimary) ?? roles[0];
             if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+          }
+
+          // Restore step state (FR-ONB-011 Resume rules)
+          if (step === "done" && !isForced) {
+            // Onboarding already completed — redirect to dashboard
+            if (user) {
+              setUser({ ...user, onboardingStatus: "completed" });
+            }
+            router.replace("/dashboard");
+            return; // Don't set isInitializing to false — keep loading screen
+          } else if (isForced) {
+            setCurrentStep("welcome");
+          } else if (step === "welcome") {
+            setCurrentStep(hasSavedRoles ? "seed_kb" : "welcome");
+          } else if (step === "pick_role") {
+            setCurrentStep(hasSavedRoles ? "seed_kb" : "pick_role");
+          } else {
+            setCurrentStep(step);
           }
 
           // Restore seed / compile job state
@@ -837,7 +843,13 @@ export function OnboardingWizard() {
                 <Button
                   variant="primary"
                   size="md"
-                  onClick={() => setCurrentStep("pick_role")}
+                  onClick={() => {
+                    if (primaryRoleKbIdRef.current || selectedRoles.length > 0) {
+                      setCurrentStep("seed_kb");
+                    } else {
+                      setCurrentStep("pick_role");
+                    }
+                  }}
                   rightIcon={<LineIcon name="chevron-right" className="h-4 w-4" />}
                 >
                   {t("onboarding.welcome.btn")}
