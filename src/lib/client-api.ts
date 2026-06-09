@@ -41,7 +41,9 @@ import type { SettingsOverviewData, UpgradeIntentStatus } from "@/types/settings
 import type { DashboardSummaryData, ActiveJobsResponseData } from "@/types/dashboard";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
+  typeof window !== "undefined"
+    ? "/api"
+    : (process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api");
 
 const RESEARCH_API_BASE =
   process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
