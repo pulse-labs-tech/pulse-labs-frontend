@@ -309,7 +309,7 @@ export function CompileView() {
             router.replace(`/${locale}/compile/new?${newParams.toString()}`);
           }
         } else {
-          router.replace(`/${locale}/onboarding?force=true`);
+          router.replace(`/${locale}/dashboard`);
         }
       } catch (err) {
         console.error("loadRoles error:", err);

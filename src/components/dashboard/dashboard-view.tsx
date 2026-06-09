@@ -212,8 +212,9 @@ export function DashboardView() {
           setGlobalErrorMsg(t("dashboard.errors.EMAIL_NOT_VERIFIED", "Vui lòng xác thực email để tiếp tục sử dụng hệ thống."));
           break;
         case "ONBOARDING_REQUIRED":
-          setGlobalErrorMsg(t("dashboard.errors.ONBOARDING_REQUIRED", "Hoàn tất thiết lập ban đầu (onboarding) để tạo knowledge base đầu tiên."));
-          router.push(`/${locale}/onboarding`);
+          // Do not kick the user to the onboarding page. Keep them on dashboard and let them see the setup warning banner.
+          setGlobalErrorMsg(null);
+          setSelectedRoleKbId("");
           break;
         case "ROLE_KB_NOT_FOUND":
           setGlobalErrorMsg(t("dashboard.errors.ROLE_NOT_FOUND", "Không tìm thấy dữ liệu vị trí chuyên ngành này."));

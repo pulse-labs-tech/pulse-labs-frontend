@@ -260,11 +260,14 @@ export default async function proxy(request: NextRequest) {
     }
 
     // ── Protected route + not onboarded → redirect to onboarding ──
+    // Commented out to allow users to view the dashboard directly and choose when to set up their Knowledge Base.
+    /*
     if (!isPublic && !isOnboardingRoute(subpath) && !isWelcomeRoute(subpath) && !isOnboarded) {
       return NextResponse.redirect(
         new URL(`/${pathLocale}/onboarding`, request.url),
       );
     }
+    */
   }
 
   // ─── Default: Proceed normally ──

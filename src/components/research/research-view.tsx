@@ -194,7 +194,7 @@ export function ResearchView() {
           newParams.set("roleKbId", activeRoleId);
           router.replace(`/${locale}/research?${newParams.toString()}`);
         } else {
-          router.replace(`/${locale}/onboarding?force=true`);
+          router.replace(`/${locale}/dashboard`);
           return;
         }
         await loadRuns(activeRoleId);

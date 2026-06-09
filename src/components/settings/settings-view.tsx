@@ -70,7 +70,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
         return;
       }
       if (code === "ONBOARDING_REQUIRED") {
-        router.push(`/${locale}/onboarding`);
+        router.push(`/${locale}/dashboard`);
         return;
       }
       setGlobalError(ERROR_MESSAGES[code] ?? ERROR_MESSAGES.SERVER_ERROR);

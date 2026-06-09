@@ -564,7 +564,7 @@ export function QueryView() {
             setSelectedRoleKbId(resolvedId);
           }
         } else {
-          router.replace(`/${locale}/onboarding?force=true`);
+          router.replace(`/${locale}/dashboard`);
         }
       } catch (err) {
         console.error("loadRoles error:", err);
