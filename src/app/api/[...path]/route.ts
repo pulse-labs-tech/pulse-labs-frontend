@@ -51,11 +51,46 @@ async function handleProxy(
   }
 
   try {
-    let res = await authFetch<any>(targetPath, {
-      method,
-      body,
-      noRedirect: true,
-    });
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
+    const isPublicRoute =
+      path.includes("/auth/login") ||
+      path.includes("/auth/register") ||
+      path.includes("/auth/verify-email") ||
+      path.includes("/auth/resend-verification") ||
+      path.includes("/auth/forgot-password") ||
+      path.includes("/auth/reset-password");
+
+    let res: any;
+    if (isPublicRoute) {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-Platform": request.headers.get("X-Platform") || "web",
+      };
+      
+      const fetchRes = await fetch(`${API_BASE}${targetPath}`, {
+        method,
+        headers,
+        body,
+      });
+
+      if (!fetchRes.ok) {
+        const errorData = await fetchRes.json().catch(() => ({}));
+        res = {
+          status: "0",
+          error_code: errorData.error_code || "HTTP_ERROR",
+          msg: errorData.msg || `Lỗi HTTP ${fetchRes.status}`,
+          data: {},
+        };
+      } else {
+        res = await fetchRes.json();
+      }
+    } else {
+      res = await authFetch<any>(targetPath, {
+        method,
+        body,
+        noRedirect: true,
+      });
+    }
 
     // ────────────────────────────────────────────────────────
     // Auth & Onboarding cookie management
