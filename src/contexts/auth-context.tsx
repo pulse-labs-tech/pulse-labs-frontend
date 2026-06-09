@@ -175,6 +175,42 @@ export function AuthProvider({
     return () => clearTimeout(retryTimer);
   }, [initialUser]);
 
+  // Synchronize user roles and details from /users/me on mount
+  useEffect(() => {
+    if (state.status === "authenticated" && state.user) {
+      const userId = state.user.id;
+      import("@/lib/client-api").then(({ getCurrentUserAction, setStoredRoleKbId }) => {
+        getCurrentUserAction().then((res) => {
+          if (res.status === "1" && res.data) {
+            const roles = res.data.roles || [];
+            const primaryRole = roles.find((r: any) => r.isPrimary) || roles[0];
+            const roleKbId = primaryRole?.id || "";
+            
+            if (roleKbId) {
+              setStoredRoleKbId(roleKbId);
+            }
+            
+            dispatch({
+              type: "SET_USER",
+              user: {
+                id: res.data.id || userId,
+                email: res.data.email,
+                firstName: res.data.firstName,
+                lastName: res.data.lastName,
+                displayName: `${res.data.firstName || ""} ${res.data.lastName || ""}`.trim() || res.data.email,
+                emailVerified: true,
+                plan: res.data.plan,
+                selectedPlanIntent: res.data.plan,
+                onboardingStatus: res.data.onboardingStatus,
+                roleKbId: roleKbId || undefined,
+              }
+            });
+          }
+        }).catch((err) => console.error("Error fetching user profile in auth provider:", err));
+      });
+    }
+  }, [state.status, state.user?.id]);
+
   const setUser = useCallback((user: AuthUser) => {
     dispatch({ type: "SET_USER", user });
   }, []);

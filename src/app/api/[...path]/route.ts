@@ -84,6 +84,7 @@ async function handleProxy(
   const isCompileSource = path.endsWith("/compile/sources");
   const isCompileJob = path.includes("/compile/jobs/") || path.includes("/onboarding/compile-jobs/");
   const isWikiDetail = path.includes("/wiki/items/") && !path.endsWith("/note") && !path.endsWith("/citations");
+  const isUsersMe = path.endsWith("/users/me");
 
   let res: any;
   let errorTriggered = false;
@@ -149,7 +150,39 @@ async function handleProxy(
     const plan = cookieUser?.plan || onboardingState?.plan || "free";
     const hasUpgrade = request.cookies.get("pulse_upgrade_intent")?.value === "recorded";
 
-    if (isSettingsOverview) {
+    if (isUsersMe) {
+      const roles = onboardingState?.roles || [];
+      const rolesList = roles.length > 0 ? roles.map((r: any) => ({
+        id: r.id || r.roleOptionId || "mock_role_kb_id",
+        roleName: r.roleName || "Software Engineer",
+        roleGroup: r.roleGroup || "engineering",
+        isPrimary: r.isPrimary ?? true,
+        isCustom: r.isCustom ?? false
+      })) : (cookieUser?.roleKbId ? [
+        {
+          id: cookieUser.roleKbId,
+          roleName: cookieUser.primaryRoleName || "Software Engineer",
+          roleGroup: "engineering",
+          isPrimary: true,
+          isCustom: false
+        }
+      ] : []);
+
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          id: cookieUser?.id || onboardingState?.userId || "a3f2c1d0-1234-5678-abcd-ef0123456789",
+          email: cookieUser?.email || onboardingState?.email || "user@example.com",
+          firstName: cookieUser?.firstName || "An",
+          lastName: cookieUser?.lastName || "Nguyễn",
+          plan: plan,
+          onboardingStatus: onboardingState?.status === "completed" || cookieUser?.onboardingStatus === "completed" ? "completed" : "pending",
+          roles: rolesList
+        }
+      };
+    } else if (isSettingsOverview) {
       const rolesCount = onboardingState?.roles?.length || (cookieUser?.roleKbId ? 1 : 0) || 1;
       const primaryRoleName = onboardingState?.roles?.[0]?.roleName || cookieUser?.primaryRoleName || "Software Engineer";
       const primaryRoleKbId = onboardingState?.roles?.[0]?.id || cookieUser?.roleKbId || "mock_role_kb_id";
@@ -524,6 +557,7 @@ async function handleProxy(
   const isLoginEndpoint = path.endsWith("/auth/login");
   const isRegisterEndpoint = path.endsWith("/auth/register");
   const isLogoutEndpoint = path.endsWith("/auth/logout");
+  const isUsersMeEndpoint = path.endsWith("/users/me");
 
   if (isLoginEndpoint && res.status === "1" && res.data) {
     const { setAuthTokens, setUserData } = await import("@/lib/token-storage");
@@ -593,6 +627,36 @@ async function handleProxy(
           plan: (res.data.plan === "pro" ? "pro" : "free") as "free" | "pro",
         });
       }
+    }
+  } else if (isUsersMeEndpoint && res.status === "1" && res.data) {
+    const roles = res.data.roles || [];
+    const primaryRole = roles.find((r: any) => r.isPrimary) || roles[0];
+    const roleKbId = primaryRole?.id || "";
+
+    const { getUserData, setUserData } = await import("@/lib/token-storage");
+    const user = await getUserData();
+    if (user) {
+      await setUserData({
+        ...user,
+        plan: res.data.plan || user.plan,
+        onboardingStatus: res.data.onboardingStatus || user.onboardingStatus,
+        firstName: res.data.firstName || user.firstName,
+        lastName: res.data.lastName || user.lastName,
+        roleKbId: roleKbId || user.roleKbId,
+      });
+    } else {
+      await setUserData({
+        id: res.data.id || "",
+        email: res.data.email || "",
+        firstName: res.data.firstName || "",
+        lastName: res.data.lastName || "",
+        displayName: `${res.data.firstName || ""} ${res.data.lastName || ""}`.trim() || res.data.email || "",
+        emailVerified: true,
+        plan: res.data.plan || "free",
+        selectedPlanIntent: res.data.plan || "free",
+        onboardingStatus: res.data.onboardingStatus || "pending",
+        roleKbId: roleKbId || "",
+      });
     }
   }
 

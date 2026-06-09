@@ -839,6 +839,29 @@ export function WikiListView() {
         {/* Content area */}
         {isLoading ? (
           <WikiGridSkeleton />
+        ) : !selectedRoleKbId ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
+            <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center text-amber-400 animate-pulse">
+              <LineIcon name="warning" className="h-10 w-10" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-amber-400">
+                {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
+              </h3>
+              <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
+                {locale === "vi"
+                  ? "Wiki yêu cầu vai trò chuyên môn để tùy chỉnh cơ sở tri thức. Vui lòng thiết lập vai trò của bạn tại trang Cài đặt."
+                  : "Wiki requires a professional role to customize your knowledge base. Please configure your role in Settings."}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/settings#settings-section-role`}
+              className="btn-primary-pulse text-sm bg-amber-500 hover:bg-amber-400 text-black border-none"
+            >
+              <LineIcon name="settings" className="h-4 w-4" />
+              {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}
+            </Link>
+          </div>
         ) : items.length === 0 ? (
           /* Empty states */
           hasActiveFilters ? (

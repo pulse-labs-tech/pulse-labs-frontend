@@ -5,7 +5,7 @@
  * DevTools (F12) can intercept and display the clean, unencoded JSON responses.
  */
 
-import type { AuthApiResponse } from "@/types/auth";
+import type { AuthApiResponse, CurrentUserResponseData } from "@/types/auth";
 import type {
   WikiListParams,
   WikiListResponse,
@@ -617,6 +617,12 @@ export async function completeOnboardingAction(
   return apiFetch<any>("/v1/onboarding/complete", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export async function getCurrentUserAction(): Promise<AuthApiResponse<CurrentUserResponseData>> {
+  return apiFetch<CurrentUserResponseData>("/v1/users/me", {
+    method: "GET",
   });
 }
 

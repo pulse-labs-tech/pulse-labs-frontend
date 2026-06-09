@@ -464,6 +464,32 @@ function KbEmptyState({ locale, t, roleKbId }: { locale: string; t: (path: strin
   );
 }
 
+/** Missing role configuration warning state */
+function MissingRoleState({ locale }: { locale: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center animate-fade-in">
+      <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center mb-6">
+        <LineIcon name="warning" className="h-10 w-10 text-amber-400" />
+      </div>
+      <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2 text-amber-400">
+        {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
+      </h2>
+      <p className="text-xs text-auth-text-2 max-w-sm leading-relaxed mb-6">
+        {locale === "vi"
+          ? "Tính năng hỏi đáp AI yêu cầu vai trò chuyên môn để tùy chỉnh cơ sở tri thức. Vui lòng hoàn tất thiết lập tại trang Cài đặt."
+          : "The Query AI feature requires a professional role to customize your knowledge base. Please configure your role in Settings."}
+      </p>
+      <Link
+        href={`/${locale}/settings#settings-section-role`}
+        className="btn-primary-pulse text-sm bg-amber-500 hover:bg-amber-400 text-black border-none"
+      >
+        <LineIcon name="settings" className="h-4 w-4" />
+        {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}
+      </Link>
+    </div>
+  );
+}
+
 /** Quota exceeded state */
 function QuotaExceededBanner({ locale, t }: { locale: string; t: (path: string) => string }) {
   return (
@@ -1192,7 +1218,9 @@ export function QueryView() {
 
           {/* Messages container */}
           <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6 min-h-0 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-            {showKbEmpty ? (
+            {!selectedRoleKbId ? (
+              <MissingRoleState locale={locale} />
+            ) : showKbEmpty ? (
               <KbEmptyState locale={locale} t={t} roleKbId={selectedRoleKbId} />
             ) : messages.length === 0 && !isAnswering ? (
               <EmptyState onExampleClick={handleExampleClick} t={t} />

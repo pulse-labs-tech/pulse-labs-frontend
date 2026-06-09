@@ -164,3 +164,22 @@ export interface RefreshTokenRequest {
 export interface ResendVerificationRequest {
   email: string;
 }
+
+export interface CurrentUserRoleDto {
+  id: string;
+  roleName: string;
+  roleGroup: string;
+  isPrimary: boolean;
+  isCustom: boolean;
+}
+
+export interface CurrentUserResponseData {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  plan: PlanType;
+  onboardingStatus: OnboardingStatus;
+  roles: CurrentUserRoleDto[];
+}
+
