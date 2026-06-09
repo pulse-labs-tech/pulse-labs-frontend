@@ -298,7 +298,7 @@ export function DashboardView() {
 
       const activeRoleId = roleKbId || getFallbackRoleKbId();
       if (!activeRoleId) {
-        if (!summary) setSummary(buildFallbackSummary());
+        setSummary(prev => prev || buildFallbackSummary());
         setSelectedRoleKbId("");
         setIsLoading(false);
         setIsChangingRole(false);
@@ -378,7 +378,7 @@ export function DashboardView() {
             return;
           } else {
             // Fallback if msg is somehow empty
-            if (!summary) setSummary(buildFallbackSummary());
+            setSummary(prev => prev || buildFallbackSummary());
             setApiWarning(summaryRes.msg || t("dashboard.errors.loadFailed", "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật."));
           }
         } else if (summaryRes.error_code === "ONBOARDING_REQUIRED" || summaryRes.error_code === "ROLE_KB_REQUIRED") {
@@ -407,7 +407,7 @@ export function DashboardView() {
             return;
           } else {
             // Fallback: show the setup warning banner
-            if (!summary) setSummary(buildFallbackSummary());
+            setSummary(prev => prev || buildFallbackSummary());
             setSelectedRoleKbId("");
             handleGlobalError(summaryRes.error_code, summaryRes.msg);
           }
@@ -418,21 +418,21 @@ export function DashboardView() {
             handleGlobalError(errCode, summaryRes.msg);
           } else {
             // Non-auth error (API not ready, network, etc.) → graceful degradation
-            if (!summary) setSummary(buildFallbackSummary());
+            setSummary(prev => prev || buildFallbackSummary());
             setApiWarning(summaryRes.msg || t("dashboard.errors.loadFailed", "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật."));
           }
         }
       } catch (err) {
         console.error("fetchDashboardData error:", err);
         // Network error → degrade gracefully, never block the whole dashboard
-        if (!summary) setSummary(buildFallbackSummary());
+        setSummary(prev => prev || buildFallbackSummary());
         setApiWarning(t("dashboard.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Một số dữ liệu có thể chưa cập nhật."));
       } finally {
         setIsLoading(false);
         setIsChangingRole(false);
       }
     },
-    [handleGlobalError, summary, buildFallbackSummary, t, locale, router, searchParams, roleKbIdFromUrl]
+    [handleGlobalError, buildFallbackSummary, t, locale, router, searchParams, roleKbIdFromUrl]
   );
 
   useEffect(() => {
