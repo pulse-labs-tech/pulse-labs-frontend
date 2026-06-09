@@ -23,6 +23,7 @@ import {
   completeOnboardingAction,
   getClientAccessToken,
   setStoredRoleKbId,
+  getCurrentUserAction,
 } from "@/lib/client-api";
 import type {
   SettingsOverviewData,
@@ -183,23 +184,28 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
 
   const initRoles = useCallback(async () => {
     try {
-      const [stateRes, optionsRes] = await Promise.all([
+      const [userRes, stateRes, optionsRes] = await Promise.all([
+        getCurrentUserAction(),
         getOnboardingStateAction(),
         getRoleOptionsAction(),
       ]);
 
-      if (stateRes.status === "1" && stateRes.data) {
-        const { roles } = stateRes.data;
-        if (roles && roles.length > 0) {
-          setSelectedRoles(
-            roles.map((r: any) => ({
-              id: r.roleOptionId || r.id,
-              label: r.roleName,
-              group: r.roleGroup,
-              isCustom: r.isCustom,
-            }))
-          );
-        }
+      let roles: any[] = [];
+      if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
+        roles = userRes.data.roles;
+      } else if (stateRes.status === "1" && stateRes.data?.roles) {
+        roles = stateRes.data.roles;
+      }
+
+      if (roles.length > 0) {
+        setSelectedRoles(
+          roles.map((r: any) => ({
+            id: r.roleOptionId || r.id,
+            label: r.roleName,
+            group: r.roleGroup,
+            isCustom: r.isCustom,
+          }))
+        );
       }
 
       if (optionsRes.status === "1" && optionsRes.data?.groups) {

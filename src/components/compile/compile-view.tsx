@@ -19,11 +19,10 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
-import { getOnboardingStateAction } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
-import { createSourceAction, getCompileJobAction, getStoredRoleKbId, setStoredRoleKbId } from "@/lib/client-api";
+import { createSourceAction, getCompileJobAction, getStoredRoleKbId, setStoredRoleKbId, getOnboardingStateAction, getCurrentUserAction } from "@/lib/client-api";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { CompileJob } from "@/types/compile";
 
@@ -306,18 +305,36 @@ export function CompileView() {
 
       setRolesLoading(true);
       try {
-        const res = await getOnboardingStateAction();
-        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
-        if (res.status === "1" && res.data?.roles?.length) {
-          setUserRoles(res.data.roles);
+        let roles: RoleKbDto[] = [];
+        const userRes = await getCurrentUserAction();
+        if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
+          roles = userRes.data.roles.map((r: any) => ({
+            id: r.id,
+            roleName: r.roleName,
+            roleGroup: r.roleGroup,
+            roleOptionId: r.roleOptionId || "",
+            isCustom: r.isCustom ?? false,
+            isPrimary: r.isPrimary ?? false,
+            status: r.status || "active",
+            createdAt: r.createdAt || new Date().toISOString(),
+          }));
+        } else {
+          const res = await getOnboardingStateAction();
+          if (res.status === "1" && res.data?.roles) {
+            roles = res.data.roles;
+          }
+        }
+
+        if (roles.length) {
+          setUserRoles(roles);
           // Default: use URL param if valid, else primary role or first role
-          const validRole = res.data.roles.find((r) => r.id === roleKbIdFromUrl);
+          const validRole = roles.find((r) => r.id === roleKbIdFromUrl);
           let resolvedId = roleKbIdFromUrl;
           if (validRole) {
             setSelectedRoleKbId(validRole.id);
             setStoredRoleKbId(validRole.id);
-          } else if (res.data.roles[0]) {
-            const defaultRole = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
+          } else if (roles[0]) {
+            const defaultRole = roles.find((r) => r.isPrimary) || roles[0];
             resolvedId = defaultRole.id;
             setSelectedRoleKbId(resolvedId);
             setStoredRoleKbId(resolvedId);
@@ -337,8 +354,20 @@ export function CompileView() {
       }
     }
     loadRoles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authUser, roleKbIdFromUrl]);
+  }, [authUser, roleKbIdFromUrl, locale, searchParams, router]);
+
+  // ─── Synchronize selectedRoleKbId when authUser finishes loading ───
+  useEffect(() => {
+    if (authUser?.roleKbId && authUser.roleKbId !== selectedRoleKbId) {
+      console.log("🔄 [Auth State Sync Compile] Updating selectedRoleKbId from authUser:", authUser.roleKbId);
+      setSelectedRoleKbId(authUser.roleKbId);
+      setStoredRoleKbId(authUser.roleKbId);
+      
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("roleKbId", authUser.roleKbId);
+      router.replace(`/${locale}/compile/new?${newParams.toString()}`);
+    }
+  }, [authUser?.roleKbId, selectedRoleKbId, router, locale, searchParams]);
 
   // ────────────────────────────────────────────────────────────────
   // 2. Polling logic

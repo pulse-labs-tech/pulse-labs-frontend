@@ -25,6 +25,7 @@ import {
   getOnboardingStateAction,
   getStoredRoleKbId,
   setStoredRoleKbId,
+  getCurrentUserAction,
 } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
@@ -590,14 +591,32 @@ export function QueryView() {
 
       setIsLoadingRoles(true);
       try {
-        const res = await getOnboardingStateAction();
-        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
-        if (res.status === "1" && res.data?.roles?.length) {
-          setUserRoles(res.data.roles);
-          const isValid = res.data.roles.some((r) => r.id === initRoleKbId);
+        let roles: RoleKbDto[] = [];
+        const userRes = await getCurrentUserAction();
+        if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
+          roles = userRes.data.roles.map((r: any) => ({
+            id: r.id,
+            roleName: r.roleName,
+            roleGroup: r.roleGroup,
+            roleOptionId: r.roleOptionId || "",
+            isCustom: r.isCustom ?? false,
+            isPrimary: r.isPrimary ?? false,
+            status: r.status || "active",
+            createdAt: r.createdAt || new Date().toISOString(),
+          }));
+        } else {
+          const res = await getOnboardingStateAction();
+          if (res.status === "1" && res.data?.roles) {
+            roles = res.data.roles;
+          }
+        }
+
+        if (roles.length) {
+          setUserRoles(roles);
+          const isValid = roles.some((r) => r.id === initRoleKbId);
           let resolvedId = initRoleKbId;
           if (!isValid) {
-            const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
+            const primary = roles.find((r) => r.isPrimary) || roles[0];
             resolvedId = primary.id;
             setSelectedRoleKbId(resolvedId);
             setStoredRoleKbId(resolvedId);
@@ -621,8 +640,20 @@ export function QueryView() {
     };
 
     loadRoles();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authUser?.roleKbId, authUser?.plan, searchParams, router, locale]);
+
+  // ─── Synchronize selectedRoleKbId when authUser finishes loading ───
+  useEffect(() => {
+    if (authUser?.roleKbId && authUser.roleKbId !== selectedRoleKbId) {
+      console.log("🔄 [Auth State Sync Query] Updating selectedRoleKbId from authUser:", authUser.roleKbId);
+      setSelectedRoleKbId(authUser.roleKbId);
+      setStoredRoleKbId(authUser.roleKbId);
+      
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("roleKbId", authUser.roleKbId);
+      router.replace(`/${locale}/query?${newParams.toString()}`);
+    }
+  }, [authUser?.roleKbId, selectedRoleKbId, router, locale, searchParams]);
 
   // ─── Load domains of the selected role KB ───
   const loadDomains = useCallback(async (roleKbId: string) => {

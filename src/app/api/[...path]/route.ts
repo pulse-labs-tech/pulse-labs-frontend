@@ -85,6 +85,8 @@ async function handleProxy(
   const isCompileJob = path.includes("/compile/jobs/") || path.includes("/onboarding/compile-jobs/");
   const isWikiDetail = path.includes("/wiki/items/") && !path.endsWith("/note") && !path.endsWith("/citations");
   const isUsersMe = path.endsWith("/users/me");
+  const isDashboardSummary = path.endsWith("/dashboard/summary");
+  const isDashboardJobsActive = path.endsWith("/dashboard/jobs/active");
 
   let res: any;
   let errorTriggered = false;
@@ -544,6 +546,89 @@ async function handleProxy(
             updatedAt: new Date().toISOString(),
             compiledAt: new Date().toISOString()
           }
+        }
+      };
+    } else if (isDashboardSummary) {
+      const url = new URL(request.url);
+      const roleKbId = url.searchParams.get("roleKbId") || url.searchParams.get("roleId") || url.searchParams.get("role_id") || cookieUser?.roleKbId || "mock_role_kb_id";
+
+      const roles = onboardingState?.roles || [];
+      const rolesList = roles.length > 0 ? roles.map((r: any) => ({
+        id: r.id || r.roleOptionId || "mock_role_kb_id",
+        roleName: r.roleName || "Software Engineer",
+        roleGroup: r.roleGroup || "engineering",
+        isPrimary: r.isPrimary ?? true,
+        isCustom: r.isCustom ?? false
+      })) : (cookieUser?.roleKbId ? [
+        {
+          id: cookieUser.roleKbId,
+          roleName: cookieUser.primaryRoleName || "Software Engineer",
+          roleGroup: "engineering",
+          isPrimary: true,
+          isCustom: false
+        }
+      ] : []);
+
+      const matchedRole = rolesList.find((r: any) => r.id === roleKbId) || rolesList[0] || {
+        id: roleKbId,
+        roleName: cookieUser?.primaryRoleName || "Frontend Engineer",
+        roleGroup: "engineering",
+        isPrimary: true,
+        isCustom: false
+      };
+
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          user: {
+            id: cookieUser?.id || "mock_user_id",
+            displayName: cookieUser?.displayName || cookieUser?.email || "User",
+            email: cookieUser?.email || "user@example.com",
+            isEmailVerified: true,
+            onboardingStatus: onboardingState?.status === "completed" || cookieUser?.onboardingStatus === "completed" ? "completed" : "pending",
+            plan: plan
+          },
+          role: {
+            roleKbId: matchedRole.id,
+            roleName: matchedRole.roleName,
+            roleGroup: matchedRole.roleGroup,
+            isPrimary: matchedRole.isPrimary,
+            createdAt: new Date().toISOString()
+          },
+          stats: {
+            totalItems: 0,
+            activeDomains: 0,
+            processingJobs: 0,
+            failedJobs: 0,
+            indexedItems: 0,
+            degradedItems: 0,
+            pendingRetrievalItems: 0,
+            queriesUsedToday: 0,
+            queriesLimitToday: plan === "pro" ? 100 : 20,
+            compilesUsedThisMonth: 0,
+            compilesLimitThisMonth: plan === "pro" ? 200 : 30,
+            storageUsedBytes: 0,
+            storageLimitBytes: plan === "pro" ? 1073741824 : 104857600
+          },
+          quickActions: [],
+          recentItems: [],
+          activeJobs: [],
+          domainSnapshot: [],
+          activity: [],
+          quota: null,
+          sectionErrors: [],
+          serverTime: new Date().toISOString()
+        }
+      };
+    } else if (isDashboardJobsActive) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          jobs: []
         }
       };
     }

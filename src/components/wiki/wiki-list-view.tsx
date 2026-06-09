@@ -8,7 +8,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
-import { getWikiItemsAction, getOnboardingStateAction, getStoredRoleKbId, setStoredRoleKbId } from "@/lib/client-api";
+import { getWikiItemsAction, getOnboardingStateAction, getStoredRoleKbId, setStoredRoleKbId, getCurrentUserAction } from "@/lib/client-api";
 import type { RoleKbDto } from "@/types/onboarding";
 import type { WikiItemCard, WikiRetrievalStatus, WikiSourceType, WikiListDomainSummary, WikiSort } from "@/types/wiki";
 import { useTranslation } from "@/contexts/locale-context";
@@ -408,14 +408,32 @@ export function WikiListView() {
 
       setRolesLoading(true);
       try {
-        const res = await getOnboardingStateAction();
-        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
-        if (res.status === "1" && res.data?.roles?.length) {
-          setUserRoles(res.data.roles);
-          const isValid = res.data.roles.some((r) => r.id === initialId);
+        let roles: RoleKbDto[] = [];
+        const userRes = await getCurrentUserAction();
+        if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
+          roles = userRes.data.roles.map((r: any) => ({
+            id: r.id,
+            roleName: r.roleName,
+            roleGroup: r.roleGroup,
+            roleOptionId: r.roleOptionId || "",
+            isCustom: r.isCustom ?? false,
+            isPrimary: r.isPrimary ?? false,
+            status: r.status || "active",
+            createdAt: r.createdAt || new Date().toISOString(),
+          }));
+        } else {
+          const res = await getOnboardingStateAction();
+          if (res.status === "1" && res.data?.roles) {
+            roles = res.data.roles;
+          }
+        }
+
+        if (roles.length) {
+          setUserRoles(roles);
+          const isValid = roles.some((r) => r.id === initialId);
           let resolvedId = initialId;
           if (!isValid) {
-            const primary = res.data.roles.find((r) => r.isPrimary) || res.data.roles[0];
+            const primary = roles.find((r) => r.isPrimary) || roles[0];
             resolvedId = primary.id;
             setSelectedRoleKbId(resolvedId);
             setStoredRoleKbId(resolvedId);
@@ -442,8 +460,22 @@ export function WikiListView() {
       }
     }
     loadRoles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale]);
+  }, [locale, authUser?.roleKbId, authUser?.plan]);
+
+  // ─── Synchronize selectedRoleKbId when authUser finishes loading ───
+  useEffect(() => {
+    if (authUser?.roleKbId && authUser.roleKbId !== selectedRoleKbId) {
+      console.log("🔄 [Auth State Sync Wiki] Updating selectedRoleKbId from authUser:", authUser.roleKbId);
+      setSelectedRoleKbId(authUser.roleKbId);
+      setStoredRoleKbId(authUser.roleKbId);
+      
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("roleKbId", authUser.roleKbId);
+      router.replace(`/${locale}/wiki?${newParams.toString()}`);
+      
+      fetchItems({ roleKbId: authUser.roleKbId });
+    }
+  }, [authUser?.roleKbId, selectedRoleKbId, router, locale, searchParams, fetchItems]);
 
   // Refetch when sort changes
   useEffect(() => {

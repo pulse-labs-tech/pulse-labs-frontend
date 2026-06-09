@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { Select } from "@/components/ui/select";
-import { getOnboardingStateAction } from "@/lib/client-api";
 import {
   createResearchRunAction,
   listResearchRunsAction,
@@ -17,6 +16,8 @@ import {
   getClientAccessToken,
   getStoredRoleKbId,
   setStoredRoleKbId,
+  getOnboardingStateAction,
+  getCurrentUserAction,
 } from "@/lib/client-api";
 import type {
   ResearchRunDto,
@@ -199,15 +200,33 @@ export function ResearchView() {
 
       setRolesLoading(true);
       try {
-        const res = await getOnboardingStateAction();
-        console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
+        let roles: RoleKbDto[] = [];
+        const userRes = await getCurrentUserAction();
+        if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
+          roles = userRes.data.roles.map((r: any) => ({
+            id: r.id,
+            roleName: r.roleName,
+            roleGroup: r.roleGroup,
+            roleOptionId: r.roleOptionId || "",
+            isCustom: r.isCustom ?? false,
+            isPrimary: r.isPrimary ?? false,
+            status: r.status || "active",
+            createdAt: r.createdAt || new Date().toISOString(),
+          }));
+        } else {
+          const res = await getOnboardingStateAction();
+          if (res.status === "1" && res.data?.roles) {
+            roles = res.data.roles;
+          }
+        }
+
         let activeRoleId = roleKbIdFromUrl;
-        if (res.status === "1" && res.data?.roles?.length) {
-          setUserRoles(res.data.roles);
-          const isValidRole = res.data.roles.some((r) => r.id === roleKbIdFromUrl);
+        if (roles.length) {
+          setUserRoles(roles);
+          const isValidRole = roles.some((r) => r.id === roleKbIdFromUrl);
           if (!isValidRole) {
-            const primaryRole = res.data.roles.find((r) => r.isPrimary);
-            activeRoleId = primaryRole ? primaryRole.id : res.data.roles[0].id;
+            const primaryRole = roles.find((r) => r.isPrimary);
+            activeRoleId = primaryRole ? primaryRole.id : roles[0].id;
           }
           setSelectedRoleKbId(activeRoleId);
           setStoredRoleKbId(activeRoleId);
@@ -230,6 +249,21 @@ export function ResearchView() {
     }
     loadRolesAndRuns();
   }, [loadRuns, roleKbIdFromUrl, locale, searchParams, router, user]);
+
+  // ─── Synchronize selectedRoleKbId when user finishes loading ───
+  useEffect(() => {
+    if (user?.roleKbId && user.roleKbId !== selectedRoleKbId) {
+      console.log("🔄 [Auth State Sync Research] Updating selectedRoleKbId from user:", user.roleKbId);
+      setSelectedRoleKbId(user.roleKbId);
+      setStoredRoleKbId(user.roleKbId);
+      
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("roleKbId", user.roleKbId);
+      router.replace(`/${locale}/research?${newParams.toString()}`);
+      
+      loadRuns(user.roleKbId);
+    }
+  }, [user?.roleKbId, selectedRoleKbId, router, locale, searchParams, loadRuns]);
 
   const handleRoleChange = (roleId: string) => {
     setSelectedRoleKbId(roleId);

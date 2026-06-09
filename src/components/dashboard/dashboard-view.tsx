@@ -17,6 +17,7 @@ import {
   getStoredRoleKbId,
   setStoredRoleKbId,
   getFallbackRoleKbId,
+  getCurrentUserAction,
 } from "@/lib/client-api";
 import type {
   DashboardSummaryData,
@@ -331,9 +332,28 @@ export function DashboardView() {
 
           // Fetch user's roles list to support switcher for Pro users
           if (isInitial) {
-            const stateRes = await getOnboardingStateAction();
-            if (stateRes.status === "1" && stateRes.data?.roles) {
-              setUserRoles(stateRes.data.roles);
+            try {
+              const userRes = await getCurrentUserAction();
+              if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
+                const mappedRoles: RoleKbDto[] = userRes.data.roles.map((r: any) => ({
+                  id: r.id,
+                  roleName: r.roleName,
+                  roleGroup: r.roleGroup,
+                  roleOptionId: r.roleOptionId || "",
+                  isCustom: r.isCustom ?? false,
+                  isPrimary: r.isPrimary ?? false,
+                  status: r.status || "active",
+                  createdAt: r.createdAt || new Date().toISOString(),
+                }));
+                setUserRoles(mappedRoles);
+              } else {
+                const stateRes = await getOnboardingStateAction();
+                if (stateRes.status === "1" && stateRes.data?.roles) {
+                  setUserRoles(stateRes.data.roles);
+                }
+              }
+            } catch (err) {
+              console.error("Error loading user roles in dashboard:", err);
             }
           }
         } else if (summaryRes.error_code === "ONBOARDING_ALREADY_COMPLETED") {
@@ -422,6 +442,21 @@ export function DashboardView() {
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchDashboardData, roleKbIdFromUrl]);
+
+  // Synchronize auth context state changes with selected role KB ID
+  useEffect(() => {
+    if (authUser?.roleKbId && authUser.roleKbId !== selectedRoleKbId) {
+      console.log("🔄 [Auth State Sync Dashboard] Updating selectedRoleKbId from authUser:", authUser.roleKbId);
+      setSelectedRoleKbId(authUser.roleKbId);
+      setStoredRoleKbId(authUser.roleKbId);
+      
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("roleKbId", authUser.roleKbId);
+      router.replace(`/${locale}/dashboard?${newParams.toString()}`);
+      
+      fetchDashboardData(authUser.roleKbId, false);
+    }
+  }, [authUser?.roleKbId, selectedRoleKbId, fetchDashboardData, router, locale, searchParams]);
 
   // Handle click outside to close custom dropdown menus (DeepMind design switcher)
   useEffect(() => {
