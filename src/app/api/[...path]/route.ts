@@ -88,6 +88,22 @@ async function handleProxy(
   const isDashboardSummary = path.endsWith("/dashboard/summary");
   const isDashboardJobsActive = path.endsWith("/dashboard/jobs/active");
 
+  const isOnboardingState = path.endsWith("/onboarding/state");
+  const isOnboardingRoleOptions = path.endsWith("/onboarding/role-options");
+  const isOnboardingRoles = path.endsWith("/onboarding/roles");
+  const isOnboardingSeed = path.endsWith("/onboarding/seed");
+  const isOnboardingComplete = path.endsWith("/onboarding/complete");
+
+  const isQuerySessions = path.endsWith("/query/sessions");
+  const isQuerySessionDetail = path.includes("/query/sessions/") && !path.endsWith("/messages");
+  const isQueryMessageSubmit = path.includes("/query/sessions/") && path.endsWith("/messages");
+  const isQueryFeedback = path.endsWith("/query/feedback");
+  const isQuerySaveToWiki = path.endsWith("/query/save-to-wiki");
+
+  const isWikiList = path.endsWith("/wiki/items");
+  const isWikiNote = path.includes("/wiki/items/") && path.endsWith("/note");
+  const isWikiCitations = path.includes("/wiki/items/") && path.endsWith("/citations");
+
   let res: any;
   let errorTriggered = false;
 
@@ -629,6 +645,301 @@ async function handleProxy(
         msg: "Success",
         data: {
           jobs: []
+        }
+      };
+    } else if (isOnboardingState) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          userId: cookieUser?.id || "mock_user_id",
+          email: cookieUser?.email || "user@example.com",
+          status: cookieUser?.onboardingStatus === "completed" ? "completed" : "pending",
+          currentStep: cookieUser?.onboardingStatus === "completed" ? "done" : "welcome",
+          roles: cookieUser?.roleKbId ? [
+            {
+              id: cookieUser.roleKbId,
+              roleName: cookieUser.primaryRoleName || "Software Engineer",
+              roleGroup: "engineering",
+              isPrimary: true,
+              isCustom: false
+            }
+          ] : [],
+          plan: plan
+        }
+      };
+    } else if (isOnboardingRoleOptions) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          categories: [
+            {
+              id: "engineering",
+              name: "Kỹ thuật & Công nghệ",
+              options: [
+                { id: "eng_1", roleName: "Backend Engineer", roleGroup: "engineering" },
+                { id: "eng_2", roleName: "Frontend Engineer", roleGroup: "engineering" },
+                { id: "eng_3", roleName: "DevOps Engineer", roleGroup: "engineering" }
+              ]
+            },
+            {
+              id: "business",
+              name: "Kinh doanh & Quản lý",
+              options: [
+                { id: "biz_1", roleName: "Product Manager", roleGroup: "business" },
+                { id: "biz_2", roleName: "Business Analyst", roleGroup: "business" }
+              ]
+            }
+          ]
+        }
+      };
+    } else if (isOnboardingRoles) {
+      const parsedBody = body ? JSON.parse(body) : {};
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          roles: [
+            {
+              id: "mock_role_kb_id",
+              roleName: parsedBody.customRoleName || "Frontend Engineer",
+              roleGroup: parsedBody.roleGroup || "engineering",
+              isPrimary: true,
+              isCustom: !!parsedBody.customRoleName
+            }
+          ]
+        }
+      };
+    } else if (isOnboardingSeed) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          seedJobs: []
+        }
+      };
+    } else if (isOnboardingComplete) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          nextRoute: "/dashboard"
+        }
+      };
+    } else if (isQuerySessions) {
+      if (method === "POST") {
+        const parsedBody = body ? JSON.parse(body) : {};
+        const activeRoleId = parsedBody.roleKbId || cookieUser?.roleKbId || "mock_role_kb_id";
+        res = {
+          status: "1",
+          error_code: "0",
+          msg: "Success",
+          data: {
+            session: {
+              id: "qs_mock_" + Date.now(),
+              title: "Cuộc hội thoại mới",
+              scope: { roleKbId: activeRoleId, domainId: parsedBody.domainId || null, knowledgeItemId: null },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          }
+        };
+      } else {
+        const activeRoleId = cookieUser?.roleKbId || "mock_role_kb_id";
+        res = {
+          status: "1",
+          error_code: "0",
+          msg: "Success",
+          data: {
+            items: [
+              {
+                id: "qs_mock_1",
+                title: "Tóm tắt quy trình thực hiện theo tài liệu đã nạp",
+                scope: { roleKbId: activeRoleId, domainId: null, knowledgeItemId: null },
+                lastMessagePreview: "Quy trình thực hiện bao gồm các bước...",
+                messageCount: 2,
+                updatedAt: new Date().toISOString()
+              }
+            ],
+            pageInfo: { nextCursor: null, hasMore: false }
+          }
+        };
+      }
+    } else if (isQuerySessionDetail) {
+      if (method === "DELETE") {
+        res = {
+          status: "1",
+          error_code: "0",
+          msg: "Success",
+          data: {}
+        };
+      } else {
+        const activeRoleId = cookieUser?.roleKbId || "mock_role_kb_id";
+        res = {
+          status: "1",
+          error_code: "0",
+          msg: "Success",
+          data: {
+            session: {
+              id: "qs_mock_1",
+              title: "Tóm tắt quy trình thực hiện theo tài liệu đã nạp",
+              scope: { roleKbId: activeRoleId, domainId: null, knowledgeItemId: null },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            messages: [
+              {
+                id: "msg_user_1",
+                role: "user",
+                status: "completed",
+                content: "Tóm tắt quy trình thực hiện theo tài liệu đã nạp",
+                createdAt: new Date(Date.now() - 60000).toISOString()
+              },
+              {
+                id: "msg_ai_1",
+                role: "assistant",
+                status: "completed",
+                content: "Quy trình thực hiện bao gồm các bước sau:\n1. Nạp tài liệu nguồn thông qua giao diện Upload.\n2. Chờ hệ thống phân tích, trích xuất thực thể và lập chỉ mục vector.\n3. Tiến hành đặt câu hỏi trên màn hình Hỏi đáp để AI tổng hợp thông tin.\n4. Lưu lại các câu trả lời hữu ích vào Wiki cá nhân.",
+                citations: [
+                  {
+                    id: "cit_1",
+                    knowledgeItemId: "ki_mock",
+                    title: "Kiến thức nạp từ Mock Source",
+                    snippet: "Nội dung nạp thử nghiệm dùng để kiểm thử tính năng của hệ thống.",
+                    relevanceScore: 0.95,
+                    sourceType: "text",
+                    domain: { id: "mock_domain", name: "Chung", slug: "chung" },
+                    href: "/wiki/items/ki_mock"
+                  }
+                ],
+                confidenceLevel: "high",
+                kbGapDetected: false,
+                kbGapSuggestion: null,
+                usedItems: 1,
+                createdAt: new Date().toISOString()
+              }
+            ]
+          }
+        };
+      }
+    } else if (isQueryMessageSubmit) {
+      const parsedBody = body ? JSON.parse(body) : {};
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          userMessage: { id: "msg_user_" + Date.now(), role: "user", status: "completed" },
+          answer: {
+            messageId: "msg_ai_" + Date.now(),
+            role: "assistant",
+            status: "completed",
+            answer: `Dựa trên Knowledge Base của bạn, đây là câu trả lời mô phỏng cho câu hỏi: "${parsedBody.question || ''}".\n\nHệ thống đang chạy ở chế độ dự phòng (mock fallback) do không kết nối được API chính thức. Tuy nhiên, luồng làm việc đầy đủ từ nạp tài liệu đến hỏi đáp vẫn được đảm bảo hoạt động tốt.`,
+            answerFormat: "markdown",
+            confidence: { level: "high", score: 0.88, reason: "Tìm thấy tài liệu phù hợp trong KB." },
+            freshness: { status: "fresh", oldestRelevantSourceAgeDays: 1, ttlDays: 30, message: null },
+            knowledgeGap: { hasGap: false, reason: null, message: null, missingAspects: [], recommendedActions: [] },
+            citations: [
+              {
+                id: "cit_mock",
+                knowledgeItemId: "ki_mock",
+                title: "Tài liệu hướng dẫn sử dụng hệ thống",
+                snippet: "Quy trình tích hợp hoàn chỉnh bao gồm các khâu nạp dữ liệu, đồng bộ hóa và hỏi đáp tự động.",
+                relevanceScore: 0.9,
+                sourceType: "text",
+                domain: { id: "mock_domain", name: "Chung", slug: "chung" },
+                href: "/wiki/items/ki_mock"
+              }
+            ],
+            followUps: ["Làm thế nào để tải tài liệu lên?", "Xem tài liệu trong Wiki"],
+            createdAt: new Date().toISOString()
+          }
+        }
+      };
+    } else if (isQueryFeedback) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {}
+      };
+    } else if (isQuerySaveToWiki) {
+      const parsedBody = body ? JSON.parse(body) : {};
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          savedItem: {
+            id: "ki_mock_" + Date.now(),
+            title: parsedBody.title || "Câu trả lời đã lưu từ AI",
+            origin: "query_output",
+            sourceSessionId: "qs_mock_1",
+            sourceMessageId: parsedBody.messageId || "msg_ai_1",
+            retrievalStatus: "indexed",
+            createdAt: new Date().toISOString()
+          }
+        }
+      };
+    } else if (isWikiList) {
+      const activeRoleId = cookieUser?.roleKbId || "mock_role_kb_id";
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          items: [
+            {
+              id: "ki_mock",
+              roleKbId: activeRoleId,
+              title: "Kiến thức nạp từ Mock Source",
+              summarySnippet: "Ý chính từ nguồn tài liệu nạp thử nghiệm dùng để kiểm thử tính năng của hệ thống.",
+              domain: { id: "mock_domain", name: "Chung", slug: "chung" },
+              tags: ["mock", "knowledge", "compiled"],
+              sourceType: "text",
+              retrievalStatus: "indexed",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              compiledAt: new Date().toISOString(),
+              href: "/wiki/items/ki_mock"
+            }
+          ],
+          total: 1,
+          page: 1,
+          limit: 20,
+          domains: [{ id: "mock_domain", name: "Chung", slug: "chung" }],
+          tags: ["mock", "knowledge", "compiled"]
+        }
+      };
+    } else if (isWikiNote) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {}
+      };
+    } else if (isWikiCitations) {
+      res = {
+        status: "1",
+        error_code: "0",
+        msg: "Success",
+        data: {
+          citations: [
+            {
+              chunkId: "chunk_1",
+              excerpt: "Nội dung nạp thử nghiệm dùng để kiểm thử tính năng của hệ thống.",
+              headingPath: "Giới thiệu",
+              pageNumber: 1,
+              urlFragment: null,
+              sourceLabel: "Mock Source"
+            }
+          ]
         }
       };
     }
