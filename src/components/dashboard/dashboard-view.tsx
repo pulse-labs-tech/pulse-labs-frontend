@@ -306,15 +306,102 @@ export function DashboardView() {
       }
 
       try {
+        // Load user's roles list in parallel to support switcher and display mapping
+        if (isInitial) {
+          getCurrentUserAction().then(async (userRes) => {
+            if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
+              const mappedRoles: RoleKbDto[] = userRes.data.roles.map((r: any) => ({
+                id: r.id,
+                roleName: r.roleName,
+                roleGroup: r.roleGroup,
+                roleOptionId: r.roleOptionId || "",
+                isCustom: r.isCustom ?? false,
+                isPrimary: r.isPrimary ?? false,
+                status: r.status || "active",
+                createdAt: r.createdAt || new Date().toISOString(),
+              }));
+              setUserRoles(mappedRoles);
+            } else {
+              const stateRes = await getOnboardingStateAction();
+              if (stateRes.status === "1" && stateRes.data?.roles) {
+                setUserRoles(stateRes.data.roles);
+              }
+            }
+          }).catch(async (err) => {
+            console.error("Error loading user roles, attempting onboarding state fallback:", err);
+            try {
+              const stateRes = await getOnboardingStateAction();
+              if (stateRes.status === "1" && stateRes.data?.roles) {
+                setUserRoles(stateRes.data.roles);
+              }
+            } catch (err2) {
+              console.error("Error loading onboarding state fallback:", err2);
+            }
+          });
+        }
+
         // Load dashboard summary
         const summaryRes = await getDashboardSummaryAction(activeRoleId);
         console.log("🟢 [F12 API RESPONSE] getDashboardSummaryAction:", summaryRes);
 
         if (summaryRes.status === "1" && summaryRes.data) {
           const data = summaryRes.data;
+
+          // 1. Normalize role fields to match frontend expectations (roleKbId, roleName, roleGroup)
+          if (data.role) {
+            const role = data.role as any;
+            data.role = {
+              roleKbId: role.roleKbId || role.id || "",
+              roleName: role.roleName || role.name || role.roleLabel || "",
+              roleGroup: role.roleGroup || "",
+              isPrimary: role.isPrimary ?? false,
+              createdAt: role.createdAt || new Date().toISOString(),
+            };
+          }
+
+          // 2. Normalize stats fields to ensure compatibility with backend contract and quota limits
+          if (data.stats) {
+            const s = data.stats as any;
+            const q = data.quota;
+            data.stats = {
+              totalItems: s.totalItems ?? s.knowledgeItemCount ?? 0,
+              activeDomains: s.activeDomains ?? s.domainCount ?? 0,
+              processingJobs: s.processingJobs ?? s.activeCompileJobCount ?? 0,
+              failedJobs: s.failedJobs ?? s.failedCompileJobCount ?? 0,
+              indexedItems: s.indexedItems ?? s.indexedItemCount ?? 0,
+              degradedItems: s.degradedItems ?? s.degradedItemCount ?? 0,
+              pendingRetrievalItems: s.pendingRetrievalItems ?? s.pendingItemCount ?? 0,
+              queriesUsedToday: s.queriesUsedToday ?? q?.queries?.used ?? 0,
+              queriesLimitToday: s.queriesLimitToday ?? q?.queries?.limit ?? 0,
+              compilesUsedThisMonth: s.compilesUsedThisMonth ?? q?.compiles?.used ?? 0,
+              compilesLimitThisMonth: s.compilesLimitThisMonth ?? q?.compiles?.limit ?? 0,
+              storageUsedBytes: s.storageUsedBytes ?? q?.storage?.usedBytes ?? 0,
+              storageLimitBytes: s.storageLimitBytes ?? q?.storage?.limitBytes ?? 0,
+            };
+          }
+
+          // 3. Normalize recentItems and activeJobs fields
+          if (data.recentItems) {
+            data.recentItems = data.recentItems.map((item: any) => ({
+              ...item,
+              title: item.title || item.name || "",
+              summarySnippet: item.summarySnippet || item.preview || "",
+              compiledAt: item.compiledAt || item.updatedAt || item.createdAt || new Date().toISOString(),
+            }));
+          }
+
+          if (data.activeJobs) {
+            data.activeJobs = data.activeJobs.map((job: any) => ({
+              ...job,
+              title: job.title || job.sourceTitle || "",
+              isTerminal: job.isTerminal ?? ["wiki_ready", "failed", "cancelled"].includes(job.status),
+            }));
+          }
+
           setSummary(data);
           setActiveJobs(data.activeJobs || []);
           setQuota(data.quota);
+          
           if (data.role?.roleKbId) {
             setSelectedRoleKbId(data.role.roleKbId);
             setStoredRoleKbId(data.role.roleKbId);
@@ -327,33 +414,6 @@ export function DashboardView() {
             if (authUser && authUser.roleKbId !== data.role.roleKbId) {
               setUser({ ...authUser, roleKbId: data.role.roleKbId });
               await syncCompletedOnboardingAction(data.role.roleKbId);
-            }
-          }
-
-          // Fetch user's roles list to support switcher for Pro users
-          if (isInitial) {
-            try {
-              const userRes = await getCurrentUserAction();
-              if (userRes.status === "1" && userRes.data?.roles && userRes.data.roles.length > 0) {
-                const mappedRoles: RoleKbDto[] = userRes.data.roles.map((r: any) => ({
-                  id: r.id,
-                  roleName: r.roleName,
-                  roleGroup: r.roleGroup,
-                  roleOptionId: r.roleOptionId || "",
-                  isCustom: r.isCustom ?? false,
-                  isPrimary: r.isPrimary ?? false,
-                  status: r.status || "active",
-                  createdAt: r.createdAt || new Date().toISOString(),
-                }));
-                setUserRoles(mappedRoles);
-              } else {
-                const stateRes = await getOnboardingStateAction();
-                if (stateRes.status === "1" && stateRes.data?.roles) {
-                  setUserRoles(stateRes.data.roles);
-                }
-              }
-            } catch (err) {
-              console.error("Error loading user roles in dashboard:", err);
             }
           }
         } else if (summaryRes.error_code === "ONBOARDING_ALREADY_COMPLETED") {
@@ -996,9 +1056,11 @@ export function DashboardView() {
                 title={!selectedRoleKbId ? (locale === "vi" ? "Click để thiết lập Knowledge Base của bạn" : "Click to set up your Knowledge Base") : undefined}
                 disabled={!!selectedRoleKbId}
               >
-                <span>{roleCtx?.roleName || t("dashboard.status.unknown", "Chưa xác định")}</span>
+                <span>
+                  {userRoles.find((r) => r.id === selectedRoleKbId)?.roleName || roleCtx?.roleName || t("dashboard.status.unknown", "Chưa xác định")}
+                </span>
                 <span className="text-[10px] text-[#52525b] font-normal">
-                  ({roleCtx?.roleGroup || (locale === "vi" ? "Khác" : "Other")})
+                  ({userRoles.find((r) => r.id === selectedRoleKbId)?.roleGroup || roleCtx?.roleGroup || (locale === "vi" ? "Khác" : "Other")})
                 </span>
                 {!selectedRoleKbId && <LineIcon name="external-link" className="h-3.5 w-3.5 ml-1 animate-pulse" />}
               </button>
