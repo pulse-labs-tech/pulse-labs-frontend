@@ -243,7 +243,7 @@ export function OnboardingWizard() {
           }
 
           // Restore step state (FR-ONB-011 Resume rules)
-          if (step === "done" && !isForced) {
+          if ((step === "done" || hasSavedRoles) && !isForced) {
             // Onboarding already completed — redirect to dashboard
             if (user) {
               setUser({ ...user, onboardingStatus: "completed" });

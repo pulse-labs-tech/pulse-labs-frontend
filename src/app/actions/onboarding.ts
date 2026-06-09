@@ -35,7 +35,11 @@ export async function getOnboardingStateAction(): Promise<
   try {
     const res = await authClient.get<OnboardingStateResponse>("/v1/onboarding/state");
     if (res.status === "1" && res.data) {
-      if (res.data.currentStep === "done" || res.data.status === "completed") {
+      if (
+        res.data.currentStep === "done" ||
+        res.data.status === "completed" ||
+        (res.data.roles && res.data.roles.length > 0)
+      ) {
         const user = await getUserData();
         if (user) {
           await setUserData({
