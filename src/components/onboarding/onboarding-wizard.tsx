@@ -16,6 +16,7 @@ import {
   submitSeedAction,
   getCompileJobAction,
   completeOnboardingAction,
+  getClientAccessToken,
 } from "@/lib/client-api";
 import type {
   RoleGroup,
@@ -589,6 +590,13 @@ export function OnboardingWizard() {
       console.log("🟢 [F12 API RESPONSE] completeOnboardingAction:", res);
 
       if (res.status === "1") {
+        // Force refresh the access token to update JWT claims (onboardingStatus -> "completed")
+        try {
+          await getClientAccessToken(true);
+        } catch (refreshErr) {
+          console.error("Failed to refresh token after onboarding completion:", refreshErr);
+        }
+
         // Hydrate context user state
         if (user) {
           setUser({ ...user, onboardingStatus: "completed" });
@@ -599,6 +607,11 @@ export function OnboardingWizard() {
       } else {
         // 409 ONBOARDING_ALREADY_COMPLETED is non-fatal — treat as success
         if (res.error_code === "ONBOARDING_ALREADY_COMPLETED") {
+          try {
+            await getClientAccessToken(true);
+          } catch (refreshErr) {
+            void refreshErr;
+          }
           if (user) setUser({ ...user, onboardingStatus: "completed" });
           router.push(`/${locale}/dashboard`);
           return;
