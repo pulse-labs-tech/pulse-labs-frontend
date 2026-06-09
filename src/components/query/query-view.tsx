@@ -961,7 +961,7 @@ export function QueryView() {
   const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
 
   return (
-    <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
+    <div className="h-screen w-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-row">
       {/* Ambient glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]"
@@ -969,10 +969,13 @@ export function QueryView() {
         aria-hidden="true"
       />
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
-        <div className="container-focused flex h-full items-center justify-between relative">
-          <div className="flex justify-start z-10">
+      {/* Left Sidebar */}
+      <aside
+        id="sidebar"
+        className={!sidebarOpen ? "collapsed" : ""}
+      >
+        <div className="sb-top">
+          <div className="sb-row1 flex items-center justify-between mb-4">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
                 Pulse
@@ -981,193 +984,199 @@ export function QueryView() {
                 </span>
               </span>
             </Link>
-          </div>
-
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 lg:flex">
-            <nav className="flex items-center gap-1.5">
-              <Link
-                href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
-                prefetch={false}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
-              >
-                <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> Dashboard
-              </Link>
-              <Link
-                href={selectedRoleKbId ? `/${locale}/query?roleKbId=${selectedRoleKbId}` : `/${locale}/query`}
-                prefetch={false}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
-              >
-                <LineIcon name="comment" className="h-3.5 w-3.5" /> Query AI
-              </Link>
-              <Link
-                href={selectedRoleKbId ? `/${locale}/wiki?roleKbId=${selectedRoleKbId}` : `/${locale}/wiki`}
-                prefetch={false}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
-              >
-                <LineIcon name="book" className="h-3.5 w-3.5" /> Wiki
-              </Link>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-4 justify-end z-10">
             <button
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  window.dispatchEvent(new CustomEvent("open-global-search"));
-                }
-              }}
-              className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
-              title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
+              onClick={() => setSidebarOpen(false)}
+              className="sb-collapse cursor-pointer"
+              title={t("query.collapseSidebar", "Collapse")}
             >
-              <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
-              <span>Search</span>
+              <LineIcon name="chevron-left" className="h-3.5 w-3.5" />
             </button>
-
-            <LocaleSwitcher id="query-header" />
-            {authUser && (
-              <div className="flex items-center gap-2">
-                <div className="hidden lg:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
-                  {(authUser.displayName || authUser.email || "U").charAt(0).toUpperCase()}
-                </div>
-
-                <div className="hidden lg:flex flex-col items-start leading-none gap-0.5 text-left">
-                  <span className="text-[11px] font-semibold text-white truncate max-w-[80px]">
-                    {authUser.displayName?.split(" ").slice(-1)[0] || authUser.email?.split("@")[0]}
-                  </span>
-                  <span className="text-[9px] font-semibold text-auth-accent/80 uppercase tracking-wide">
-                    {authUser.plan === "pro" ? "Pro Plan" : "Free Plan"}
-                  </span>
-                </div>
-
-                <button
-                  onClick={handleLogout}
-                  disabled={isPending}
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 cursor-pointer"
-                  title={t("common.logout", "Đăng xuất")}
-                >
-                  {isPending ? <DotMatrixLoader variant="pulse" size="sm" /> : <LineIcon name="exit" className="h-4 w-4" />}
-                </button>
-              </div>
-            )}
           </div>
+          <button
+            onClick={handleClearConversation}
+            className="btn-new-chat"
+          >
+            <LineIcon name="plus" className="h-3.5 w-3.5" />
+            New Conversation
+          </button>
         </div>
-      </header>
 
-      {/* Main Layout */}
-      <div id="body">
-        {/* Left Sidebar */}
-        <aside
-          id="sidebar"
-          className={!sidebarOpen ? "collapsed" : ""}
-        >
-          <div className="sb-top">
-            <div className="sb-row1">
-              <span className="sb-title">Query History</span>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="sb-collapse"
-                title={t("query.collapseSidebar", "Collapse")}
-              >
-                <LineIcon name="chevron-left" className="h-3.5 w-3.5" />
-              </button>
+        <div className="sb-scroll select-none">
+          {/* Active KB Context Selector */}
+          {selectedRole && (
+            <div className="mb-4 px-1 text-left">
+              <label className="text-[9px] font-bold uppercase tracking-wider text-auth-text-3 block mb-1">
+                Active KB
+              </label>
+              <div className="flex items-center justify-between gap-2 bg-auth-bg/60 border border-white/[0.06] rounded-xl p-2.5">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-auth-text truncate">
+                    {selectedRole.roleName}
+                  </p>
+                  <span className="inline-block text-[9px] font-semibold text-auth-text-3 uppercase mt-0.5">
+                    {selectedRole.roleGroup}
+                  </span>
+                </div>
+                {userRoles.length > 1 && (
+                  <Select
+                    value={selectedRoleKbId}
+                    onChange={handleRoleChange}
+                    options={userRoles.map((r) => ({
+                      value: r.id,
+                      label: r.roleName,
+                    }))}
+                    align="right"
+                    className="bg-auth-elevated border border-auth-border rounded-lg text-[10px] py-0.5 px-1.5"
+                  />
+                )}
+              </div>
             </div>
-            <button
-              onClick={handleClearConversation}
-              className="btn-new-chat"
-            >
-              <LineIcon name="plus" className="h-3.5 w-3.5" />
-              New Conversation
-            </button>
-          </div>
+          )}
 
-          <div className="sb-scroll select-none">
-            {/* Active KB Context Selector */}
-            {selectedRole && (
-              <div className="mb-4 px-1 text-left">
-                <label className="text-[9px] font-bold uppercase tracking-wider text-auth-text-3 block mb-1">
-                  Active KB
-                </label>
-                <div className="flex items-center justify-between gap-2 bg-auth-bg/60 border border-white/[0.06] rounded-xl p-2.5">
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-auth-text truncate">
-                      {selectedRole.roleName}
-                    </p>
-                    <span className="inline-block text-[9px] font-semibold text-auth-text-3 uppercase mt-0.5">
-                      {selectedRole.roleGroup}
+          <div className="sb-group-label text-left">Recent Sessions</div>
+          {isLoadingSessions ? (
+            <div className="flex items-center justify-center py-12">
+              <DotMatrixLoader variant="pulse" size="sm" />
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="sb-empty text-center">
+              <div className="sb-empty-icon-wrap">
+                <LineIcon name="comment" className="h-4.5 w-4.5 text-auth-text-3/60" />
+              </div>
+              <p className="text-xs text-auth-text-3 max-w-[200px] leading-relaxed mx-auto">
+                {t("query.noSessions", "Chưa có cuộc hội thoại nào.")}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 text-left">
+              {sessions.map((s) => {
+                const isActive = s.id === conversationId;
+                const roleName = userRoles.find((r) => r.id === s.scope.roleKbId)?.roleName || "Fintech";
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => handleLoadSession(s.id)}
+                    className={`conv-card ${isActive ? "active" : ""}`}
+                  >
+                    <div className="conv-card-head">
+                      <span className="conv-card-icon">{s.scope.domainId ? "🌐" : "📚"}</span>
+                      <span className="conv-card-title">{s.title || "Untitled Conversation"}</span>
+                    </div>
+                    {s.lastMessagePreview && (
+                      <div className="conv-card-snippet">{s.lastMessagePreview}</div>
+                    )}
+                    <div className="conv-card-foot">
+                      <span className="conv-domain-badge"> {roleName}</span>
+                      <span className="conv-date">{formatTime(s.updatedAt || s.createdAt, locale)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* Right Content Area */}
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
+        {/* Header */}
+        <header className="border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16 flex-shrink-0">
+          <div className="px-6 flex h-full items-center justify-between relative">
+            <div className="flex justify-start z-10">
+              {!sidebarOpen && (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white cursor-pointer"
+                    title={t("query.expandSidebar", "Toggle sidebar")}
+                  >
+                    <LineIcon name="grid-alt" className="h-4 w-4" />
+                  </button>
+                  <Link href={`/${locale}`} className="flex items-center gap-2">
+                    <span className="text-base font-bold tracking-tight text-auth-text">
+                      Pulse
+                      <span className="text-auth-accent">
+                        Knowledge
+                      </span>
+                    </span>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center gap-1.5 lg:flex">
+              <nav className="flex items-center gap-1.5">
+                <Link
+                  href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
+                  prefetch={false}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
+                >
+                  <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> Dashboard
+                </Link>
+                <Link
+                  href={selectedRoleKbId ? `/${locale}/query?roleKbId=${selectedRoleKbId}` : `/${locale}/query`}
+                  prefetch={false}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
+                >
+                  <LineIcon name="comment" className="h-3.5 w-3.5" /> Query AI
+                </Link>
+                <Link
+                  href={selectedRoleKbId ? `/${locale}/wiki?roleKbId=${selectedRoleKbId}` : `/${locale}/wiki`}
+                  prefetch={false}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
+                >
+                  <LineIcon name="book" className="h-3.5 w-3.5" /> Wiki
+                </Link>
+              </nav>
+            </div>
+
+            <div className="flex items-center gap-4 justify-end z-10">
+              <button
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-global-search"));
+                  }
+                }}
+                className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.14] text-auth-text-3 hover:text-auth-text-2 transition-all duration-300 select-none cursor-pointer text-xs font-semibold"
+                title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
+              >
+                <LineIcon name="search" className="h-3.5 w-3.5 text-auth-text-3/70" />
+                <span>Search</span>
+              </button>
+
+              <LocaleSwitcher id="query-header" />
+              {authUser && (
+                <div className="flex items-center gap-2">
+                  <div className="hidden lg:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/30 to-accent-400/30 border border-white/[0.12] text-[11px] font-bold text-white select-none">
+                    {(authUser.displayName || authUser.email || "U").charAt(0).toUpperCase()}
+                  </div>
+
+                  <div className="hidden lg:flex flex-col items-start leading-none gap-0.5 text-left">
+                    <span className="text-[11px] font-semibold text-white truncate max-w-[80px]">
+                      {authUser.displayName?.split(" ").slice(-1)[0] || authUser.email?.split("@")[0]}
+                    </span>
+                    <span className="text-[9px] font-semibold text-auth-accent/80 uppercase tracking-wide">
+                      {authUser.plan === "pro" ? "Pro Plan" : "Free Plan"}
                     </span>
                   </div>
-                  {userRoles.length > 1 && (
-                    <Select
-                      value={selectedRoleKbId}
-                      onChange={handleRoleChange}
-                      options={userRoles.map((r) => ({
-                        value: r.id,
-                        label: r.roleName,
-                      }))}
-                      align="right"
-                      className="bg-auth-elevated border border-auth-border rounded-lg text-[10px] py-0.5 px-1.5"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
 
-            <div className="sb-group-label text-left">Recent Sessions</div>
-            {isLoadingSessions ? (
-              <div className="flex items-center justify-center py-12">
-                <DotMatrixLoader variant="pulse" size="sm" />
-              </div>
-            ) : sessions.length === 0 ? (
-              <div className="sb-empty">
-                <div className="sb-empty-icon-wrap">
-                  <LineIcon name="comment" className="h-4.5 w-4.5 text-auth-text-3/60" />
+                  <button
+                    onClick={handleLogout}
+                    disabled={isPending}
+                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-auth-text-2 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 cursor-pointer"
+                    title={t("common.logout", "Đăng xuất")}
+                  >
+                    {isPending ? <DotMatrixLoader variant="pulse" size="sm" /> : <LineIcon name="exit" className="h-4 w-4" />}
+                  </button>
                 </div>
-                <p className="text-xs text-auth-text-3 max-w-[200px] leading-relaxed">
-                  {t("query.noSessions", "Chưa có cuộc hội thoại nào.")}
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2 text-left">
-                {sessions.map((s) => {
-                  const isActive = s.id === conversationId;
-                  const roleName = userRoles.find((r) => r.id === s.scope.roleKbId)?.roleName || "Fintech";
-                  return (
-                    <div
-                      key={s.id}
-                      onClick={() => handleLoadSession(s.id)}
-                      className={`conv-card ${isActive ? "active" : ""}`}
-                    >
-                      <div className="conv-card-head">
-                        <span className="conv-card-icon">{s.scope.domainId ? "🌐" : "📚"}</span>
-                        <span className="conv-card-title">{s.title || "Untitled Conversation"}</span>
-                      </div>
-                      {s.lastMessagePreview && (
-                        <div className="conv-card-snippet">{s.lastMessagePreview}</div>
-                      )}
-                      <div className="conv-card-foot">
-                        <span className="conv-domain-badge"> {roleName}</span>
-                        <span className="conv-date">{formatTime(s.updatedAt || s.createdAt, locale)}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </aside>
+        </header>
 
         {/* Main Chat Area */}
-        <div id="chat-main">
+        <div id="chat-main" className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <div className="chat-topbar border-b border-white/[0.04]">
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="topbar-collapse"
-                title={t("query.expandSidebar", "Toggle sidebar")}
-              >
-                <LineIcon name="grid-alt" className="h-4 w-4" />
-              </button>
-            )}
             <span className="chat-topbar-title text-left pl-2">
               {conversationId
                 ? (sessions.find(s => s.id === conversationId)?.title || "Current Conversation")

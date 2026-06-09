@@ -17,6 +17,12 @@ import { logoutAction } from "@/app/actions/auth";
 import {
   getSettingsOverviewAction,
   recordUpgradeIntentAction,
+  getOnboardingStateAction,
+  getRoleOptionsAction,
+  saveRolesAction,
+  completeOnboardingAction,
+  getClientAccessToken,
+  setStoredRoleKbId,
 } from "@/lib/client-api";
 import type {
   SettingsOverviewData,
@@ -24,6 +30,12 @@ import type {
   UpgradeIntentStatus,
   SettingsErrorCode,
 } from "@/types/settings";
+import type {
+  RoleGroup,
+  RoleGroupOption,
+  RoleOption,
+  SaveRoleInput,
+} from "@/types/onboarding";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import Loading from "@/app/[locale]/loading";
@@ -31,6 +43,61 @@ import Loading from "@/app/[locale]/loading";
 interface SettingsViewProps {
   initialSection?: "plan" | "upgrade" | "quota";
 }
+
+const STATIC_ROLE_GROUPS: RoleGroupOption[] = [
+  {
+    id: "engineering",
+    label: "Engineering",
+    icon: "settings",
+    roles: [
+      { id: "frontend", label: "Frontend Dev", description: "React, Vue, CSS, UI, Performance" },
+      { id: "backend", label: "Backend Dev", description: "API, DB, Architecture, Security" },
+      { id: "mobile", label: "Mobile Dev", description: "iOS, Android, Flutter, RN" },
+      { id: "devops", label: "DevOps / Platform", description: "CI/CD, K8s, Cloud, SRE" },
+      { id: "security", label: "Security Eng", description: "AppSec, Infra, Compliance" },
+      { id: "qa", label: "QA / Testing", description: "Automation, Test strategy" },
+    ],
+  },
+  {
+    id: "business",
+    label: "Business",
+    icon: "briefcase",
+    roles: [
+      { id: "ba", label: "Business Analyst", description: "Requirements, BPMN, User Stories" },
+      { id: "pm", label: "Product Manager", description: "Roadmap, OKR, Go-to-market" },
+      { id: "marketing", label: "Marketing", description: "Growth, Content, Campaign" },
+      { id: "sales", label: "Sales", description: "Pipeline, Objection, CRM" },
+      { id: "finance", label: "Finance / Accounting", description: "Budgeting, Reporting, Audit" },
+      { id: "operations", label: "Operations", description: "Process, Supply chain, Logistics" },
+    ],
+  },
+  {
+    id: "design",
+    label: "Design & Product",
+    icon: "palette",
+    roles: [
+      { id: "ux", label: "UX Designer", description: "Research, Wireframe, Usability" },
+      { id: "ui", label: "UI Designer", description: "Design system, Figma, Visual" },
+      { id: "prod_design", label: "Product Designer", description: "End-to-end product design" },
+    ],
+  },
+  {
+    id: "data",
+    label: "Data & AI",
+    icon: "bar-chart",
+    roles: [
+      { id: "data_analyst", label: "Data Analyst", description: "SQL, BI, Dashboard, Insight" },
+      { id: "data_eng", label: "Data Engineer", description: "Pipeline, ETL, Warehouse" },
+      { id: "ai_ml", label: "AI / ML Engineer", description: "LLM, RAG, Training, MLOps" },
+    ],
+  },
+  {
+    id: "other",
+    label: "Khác",
+    icon: "plus",
+    roles: [],
+  },
+];
 
 const ERROR_MESSAGES: Record<string, string> = {
   UNAUTHORIZED: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
@@ -48,7 +115,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 export function SettingsView({ initialSection }: SettingsViewProps) {
   const router = useRouter();
-  const { user: authUser, clearAuth } = useAuth();
+  const { user: authUser, setUser, clearAuth } = useAuth();
   const { t, locale } = useTranslation();
   const [isPending, startTransition] = useTransition();
 
@@ -61,6 +128,20 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [isRefreshingQuota, setIsRefreshingQuota] = useState(false);
+
+  // Specialization & Role setup states
+  const [roleGroups, setRoleGroups] = useState<RoleGroupOption[]>(STATIC_ROLE_GROUPS);
+  const [activeGroup, setActiveGroup] = useState<RoleGroup>("engineering");
+  const [selectedRoles, setSelectedRoles] = useState<{
+    id: string;
+    label: string;
+    group: RoleGroup;
+    isCustom: boolean;
+  }[]>([]);
+  const [customRoleInput, setCustomRoleInput] = useState("");
+  const [isSavingRoles, setIsSavingRoles] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const [roleSuccess, setRoleSuccess] = useState<string | null>(null);
 
   const handleError = useCallback(
     (code: string) => {
@@ -100,9 +181,199 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
     }
   }, [handleError]);
 
+  const initRoles = useCallback(async () => {
+    try {
+      const [stateRes, optionsRes] = await Promise.all([
+        getOnboardingStateAction(),
+        getRoleOptionsAction(),
+      ]);
+
+      if (stateRes.status === "1" && stateRes.data) {
+        const { roles } = stateRes.data;
+        if (roles && roles.length > 0) {
+          setSelectedRoles(
+            roles.map((r: any) => ({
+              id: r.roleOptionId || r.id,
+              label: r.roleName,
+              group: r.roleGroup,
+              isCustom: r.isCustom,
+            }))
+          );
+        }
+      }
+
+      if (optionsRes.status === "1" && optionsRes.data?.groups) {
+        const normalized: RoleGroupOption[] = optionsRes.data.groups.map((g: any) => {
+          const groupId = (g.id || g.group || "") as RoleGroup;
+          const normalizedRoles: RoleOption[] = (g.roles ?? []).map((r: any) => ({
+            id: r.id || r.roleOptionId || "",
+            label: r.label || "",
+            description: r.description || r.desc || "",
+          }));
+          return {
+            id: groupId,
+            group: groupId,
+            label: g.label || groupId,
+            icon: g.icon || "",
+            roles: normalizedRoles,
+          };
+        });
+        setRoleGroups(normalized);
+      }
+    } catch (err) {
+      console.error("Failed to load roles setup:", err);
+    }
+  }, []);
+
   useEffect(() => {
     loadOverview();
-  }, [loadOverview]);
+    initRoles();
+  }, [loadOverview, initRoles]);
+
+  const isPro = overview?.user?.plan === "pro";
+
+  const handlePickDomain = (group: RoleGroup) => {
+    setActiveGroup(group);
+    setRoleError(null);
+    setRoleSuccess(null);
+  };
+
+  const handlePickRole = (roleOptionId: string, label: string) => {
+    setRoleError(null);
+    setRoleSuccess(null);
+
+    const isAlreadySelected = selectedRoles.some((r) => r.id === roleOptionId);
+
+    if (isAlreadySelected) {
+      setSelectedRoles(selectedRoles.filter((r) => r.id !== roleOptionId));
+      return;
+    }
+
+    if (!isPro) {
+      // Free limit: 1 role
+      setSelectedRoles([{ id: roleOptionId, label, group: activeGroup, isCustom: false }]);
+    } else {
+      // Pro limit: 5 roles
+      if (selectedRoles.length >= 5) {
+        setRoleError(t("onboarding.pickRole.customLimit", "Pro plan hỗ trợ tối đa 5 Role KB trong giai đoạn thiết lập ban đầu."));
+        return;
+      }
+      setSelectedRoles([
+        ...selectedRoles,
+        { id: roleOptionId, label, group: activeGroup, isCustom: false }
+      ]);
+    }
+  };
+
+  const handleCustomRoleSubmit = () => {
+    const trimmed = customRoleInput.trim();
+    if (!trimmed) return;
+
+    if (trimmed.length < 2 || trimmed.length > 80) {
+      setRoleError(t("onboarding.pickRole.customLengthError", "Role cần ít nhất từ 2 đến 80 ký tự."));
+      return;
+    }
+
+    setRoleError(null);
+    setRoleSuccess(null);
+
+    if (!isPro) {
+      setSelectedRoles([
+        { id: `custom_${Date.now()}`, label: trimmed, group: "other", isCustom: true }
+      ]);
+      setCustomRoleInput("");
+    } else {
+      if (selectedRoles.length >= 5) {
+        setRoleError(t("onboarding.pickRole.customLimit", "Pro plan hỗ trợ tối đa 5 Role KB trong giai đoạn thiết lập ban đầu."));
+        return;
+      }
+      setSelectedRoles([
+        ...selectedRoles,
+        { id: `custom_${Date.now()}`, label: trimmed, group: "other", isCustom: true }
+      ]);
+      setCustomRoleInput("");
+    }
+  };
+
+  const handleRemoveRole = (id: string) => {
+    setSelectedRoles(selectedRoles.filter((r) => r.id !== id));
+    setRoleError(null);
+    setRoleSuccess(null);
+  };
+
+  const handleSaveRoles = async () => {
+    if (selectedRoles.length === 0) {
+      setRoleError(t("onboarding.errors.ROLE_REQUIRED", "Chọn một vai trò để Pulse tạo Knowledge Base cho bạn."));
+      return;
+    }
+
+    setIsSavingRoles(true);
+    setRoleError(null);
+    setRoleSuccess(null);
+
+    try {
+      const rolesInput: SaveRoleInput[] = selectedRoles.map((r, index) => ({
+        roleOptionId: r.isCustom ? null : r.id,
+        roleName: r.label,
+        roleGroup: r.group,
+        isCustom: r.isCustom,
+        isPrimary: index === 0,
+      }));
+
+      const res = await saveRolesAction(rolesInput);
+      console.log("🟢 [Settings Roles] saveRolesAction response:", res);
+
+      if (res.status === "1") {
+        const returnedRoles = res.data?.roles;
+        let primaryRoleKbId = "";
+        if (returnedRoles && returnedRoles.length > 0) {
+          const primaryRole = returnedRoles.find((r: any) => r.isPrimary) ?? returnedRoles[0];
+          if (primaryRole) {
+            primaryRoleKbId = primaryRole.id;
+            setStoredRoleKbId(primaryRole.id);
+          }
+        }
+
+        // If user missed onboarding, complete onboarding
+        if (authUser && authUser.onboardingStatus !== "completed") {
+          const completeRes = await completeOnboardingAction({
+            seedSkipped: true,
+            compileJobId: null,
+            idempotencyKey: Math.random().toString(36).substring(2, 15),
+          });
+          console.log("🟢 [Settings Roles] completeOnboardingAction response:", completeRes);
+        }
+
+        // Force refresh access token to sync JWT claims/permissions
+        try {
+          await getClientAccessToken(true);
+        } catch (refreshErr) {
+          console.error("Failed to refresh token in settings:", refreshErr);
+        }
+
+        // Update the user profile context state locally
+        if (authUser) {
+          setUser({
+            ...authUser,
+            onboardingStatus: "completed",
+            roleKbId: primaryRoleKbId || authUser.roleKbId,
+          });
+        }
+
+        // Reload overview to update Settings UI
+        await loadOverview();
+
+        setRoleSuccess(locale === "vi" ? "Đã lưu chuyên ngành và Knowledge Base thành công!" : "Successfully saved specialization and Knowledge Base!");
+      } else {
+        setRoleError(res.msg || "Có lỗi xảy ra. Vui lòng thử lại.");
+      }
+    } catch (err) {
+      console.error("Save roles in settings error:", err);
+      setRoleError(t("auth.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Kiểm tra mạng và thử lại."));
+    } finally {
+      setIsSavingRoles(false);
+    }
+  };
 
   // Scroll to initial section on load
   useEffect(() => {
@@ -196,7 +467,6 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
   }
 
   const { user: userCtx, currentPlan, plans, quotas, upgradeIntent } = overview!;
-  const isPro = userCtx.plan === "pro";
   const hasUpgradeIntent =
     upgradeStatus === "recorded" ||
     upgradeStatus === "checkout_pending" ||
@@ -403,6 +673,170 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
             )}
           </section>
         </div>
+
+        {/* ─── Role / Specialization setup ─── */}
+        <section
+          id="settings-section-role"
+          className="rounded-2xl border border-auth-border bg-auth-surface p-6 flex flex-col gap-6 relative premium-hover-card"
+          aria-labelledby="settings-role-heading"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-auth-accent-dim flex items-center justify-center">
+              <LineIcon name="book" className="h-3.5 w-3.5 text-auth-accent" />
+            </div>
+            <h2 id="settings-role-heading" className="text-sm font-bold text-white uppercase tracking-wider">
+              {locale === "vi" ? "Chuyên ngành & Knowledge Base" : "Specialization & Knowledge Base"}
+            </h2>
+          </div>
+
+          <p className="text-xs text-auth-text-2">
+            {locale === "vi"
+              ? "Thiết lập các vai trò chuyên môn để Pulse Knowledge tùy chỉnh cơ sở tri thức phù hợp với công việc của bạn."
+              : "Set up professional roles to tailor Pulse Knowledge bases for your work."}
+          </p>
+
+          {/* Active / selected roles preview */}
+          {selectedRoles.length > 0 && (
+            <div className="flex flex-col gap-1.5 text-left">
+              <span className="text-[10px] font-bold text-auth-text-3 uppercase tracking-wider">
+                {locale === "vi" ? "Vai trò đang chọn" : "Selected roles"} ({selectedRoles.length}/{isPro ? 5 : 1}):
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedRoles.map((r) => (
+                  <span
+                    key={r.id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-auth-accent-dim border border-auth-accent/30 text-auth-text"
+                  >
+                    <span>{r.label}</span>
+                    <button
+                      onClick={() => handleRemoveRole(r.id)}
+                      className="hover:bg-auth-accent-dark/20 rounded-full p-0.5 cursor-pointer"
+                    >
+                      <LineIcon name="xmark" className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Domain Chips */}
+          <div className="flex flex-col gap-2 text-left">
+            <span className="text-[10px] font-bold text-auth-text-3 uppercase tracking-wider">
+              {locale === "vi" ? "Lĩnh vực chuyên môn" : "Domain Group"}
+            </span>
+            <div className="flex gap-2 flex-wrap">
+              {roleGroups.map((group) => (
+                <button
+                  key={group.id}
+                  onClick={() => handlePickDomain(group.id)}
+                  className={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                    activeGroup === group.id
+                      ? "bg-auth-accent-dim border-auth-accent text-auth-accent"
+                      : "bg-auth-elevated border-auth-border text-auth-text-2 hover:border-white/[0.15] hover:text-white"
+                  }`}
+                >
+                  {t("onboarding.groups." + group.id + ".label", group.label)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Roles Cards Grid */}
+          <div className="flex flex-col gap-2 text-left">
+            <span className="text-[10px] font-bold text-auth-text-3 uppercase tracking-wider">
+              {locale === "vi" ? "Chọn vai trò chi tiết" : "Select Specific Role"}
+            </span>
+
+            {activeGroup !== "other" ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+                {roleGroups
+                  .find((g) => g.id === activeGroup)
+                  ?.roles.map((role) => {
+                    const isSelected = selectedRoles.some((r) => r.id === role.id);
+                    return (
+                      <button
+                        key={role.id}
+                        onClick={() => handlePickRole(role.id, role.label)}
+                        className={`flex flex-col items-start text-left gap-1 p-3.5 rounded-xl border cursor-pointer transition-all relative ${
+                          isSelected
+                            ? "bg-auth-accent-dim border-auth-accent"
+                            : "bg-auth-elevated border-auth-border hover:border-white/[0.15]"
+                        }`}
+                      >
+                        {isSelected && (
+                          <span className="absolute top-2 right-2">
+                            <LineIcon name="checkmark" className="h-3 w-3 text-auth-accent" />
+                          </span>
+                        )}
+                        <span className="text-xs font-bold text-white leading-snug">
+                          {t("onboarding.groups." + activeGroup + ".roles." + role.id + ".label", role.label)}
+                        </span>
+                        <span className="text-[10px] text-auth-text-3 leading-normal mt-0.5">
+                          {t("onboarding.groups." + activeGroup + ".roles." + role.id + ".desc", role.description)}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div className="bg-auth-elevated border border-auth-border rounded-xl p-4 flex flex-col gap-3">
+                <label
+                  htmlFor="custom-role"
+                  className="text-xs font-bold text-auth-text-2 tracking-wide uppercase"
+                >
+                  {t("onboarding.pickRole.customLabel", "Vai trò tùy chỉnh")}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="custom-role"
+                    type="text"
+                    value={customRoleInput}
+                    onChange={(e) => setCustomRoleInput(e.target.value)}
+                    placeholder={t("onboarding.pickRole.customPlaceholder", "Ví dụ: Growth Hacker, Product Lead...")}
+                    className="flex-grow bg-auth-surface border border-auth-border rounded-lg px-4 py-2 text-xs text-white placeholder:text-auth-text-3 focus:border-auth-accent"
+                    maxLength={80}
+                  />
+                  <Button
+                    onClick={handleCustomRoleSubmit}
+                    variant="secondary"
+                    size="md"
+                  >
+                    {t("common.add", "Thêm")}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action / Error / Success message */}
+          <div className="flex flex-col gap-3 mt-2">
+            {roleError && (
+              <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3 text-xs text-red-300">
+                <LineIcon name="warning" className="h-4 w-4 shrink-0" />
+                <span>{roleError}</span>
+              </div>
+            )}
+
+            {roleSuccess && (
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-950/20 px-4 py-3 text-xs text-emerald-300">
+                <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
+                <span>{roleSuccess}</span>
+              </div>
+            )}
+
+            <Button
+              onClick={handleSaveRoles}
+              isLoading={isSavingRoles}
+              variant="primary"
+              size="md"
+              leftIcon={<LineIcon name="save" className="h-3.5 w-3.5" />}
+              className="self-start btn-primary-pulse"
+            >
+              {locale === "vi" ? "Lưu vai trò chuyên môn" : "Save specialization"}
+            </Button>
+          </div>
+        </section>
 
         {/* ─── Plan comparison ─── */}
         {!isPro && proPlan && (
