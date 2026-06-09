@@ -26,6 +26,8 @@ export type AssistantMessageStatus = "completed" | "streaming" | "cancelled" | "
 
 export interface QueryScope {
   roleKbId: string;
+  roleId?: string;
+  role_id?: string;
   domainId: string | null;
   knowledgeItemId: string | null;
 }

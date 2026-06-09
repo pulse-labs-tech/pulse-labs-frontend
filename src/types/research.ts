@@ -195,6 +195,8 @@ export interface CreateResearchRunRequest {
   trigger: ResearchTrigger;
   query: string;
   roleKbId?: string | null;
+  roleId?: string | null;
+  role_id?: string | null;
   querySessionId?: string | null;
   queryMessageId?: string | null;
   missingAspects?: string[];
@@ -315,6 +317,7 @@ export interface SubmitDocumentRequest {
   domain_hint?: string;
   role_id?: string;
   roleKbId?: string;
+  roleId?: string;
 }
 
 

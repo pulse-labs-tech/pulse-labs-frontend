@@ -483,18 +483,23 @@ export function OnboardingWizard() {
       console.log("🟢 [F12 API RESPONSE] saveRolesAction:", res);
 
       if (res.status === "1") {
-        // After save, we need to fetch the state again to get roleKbId
-        // (API returns {} on success, roleKbId is in the state response)
-        // Fetch updated state to get the roleKbId created by the server
-        try {
-          const stateRes = await getOnboardingStateAction();
-          console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction (after saveRoles):", stateRes);
-          if (stateRes.status === "1" && stateRes.data?.roles?.length > 0) {
-            const primaryRole = stateRes.data.roles.find((r) => r.isPrimary) ?? stateRes.data.roles[0];
-            if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+        // Retrieve the roleKbId directly from the saveRoles response roles list
+        const returnedRoles = res.data?.roles;
+        if (returnedRoles && returnedRoles.length > 0) {
+          const primaryRole = returnedRoles.find((r: any) => r.isPrimary) ?? returnedRoles[0];
+          if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+        } else {
+          // Fallback: Fetch state to recover roleKbId
+          try {
+            const stateRes = await getOnboardingStateAction();
+            console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction (after saveRoles recover fallback):", stateRes);
+            if (stateRes.status === "1" && stateRes.data?.roles?.length > 0) {
+              const primaryRole = stateRes.data.roles.find((r) => r.isPrimary) ?? stateRes.data.roles[0];
+              if (primaryRole) primaryRoleKbIdRef.current = primaryRole.id;
+            }
+          } catch {
+            // Non-fatal — seed step will handle if roleKbId is missing
           }
-        } catch {
-          // Non-fatal — seed step will handle if roleKbId is missing
         }
         setCurrentStep("seed_kb");
         roleIdempotencyRef.current = generateIdempotencyKey();

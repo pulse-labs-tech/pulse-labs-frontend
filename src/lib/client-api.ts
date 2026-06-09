@@ -142,7 +142,12 @@ export async function getWikiItemsAction(
   params: WikiListParams = {}
 ): Promise<AuthApiResponse<WikiListResponse>> {
   const p = new URLSearchParams();
-  if (params.roleKbId) p.append("roleKbId", params.roleKbId);
+  const activeRoleId = params.roleKbId ?? params.roleId ?? params.role_id;
+  if (activeRoleId) {
+    p.append("roleKbId", activeRoleId);
+    p.append("roleId", activeRoleId);
+    p.append("role_id", activeRoleId);
+  }
   if (params.domainId && params.domainId !== "all") p.append("domainId", params.domainId);
   if (params.q) p.append("q", params.q);
   if (params.sort) p.append("sort", params.sort);
@@ -198,6 +203,8 @@ export async function getWikiItemCitationsAction(
 
 export async function createSourceAction(data: {
   roleKbId: string;
+  roleId?: string;
+  role_id?: string;
   sourceType: "text" | "url";
   text?: string;
   url?: string;
@@ -206,10 +213,14 @@ export async function createSourceAction(data: {
   origin?: string;
   idempotencyKey: string;
 }): Promise<AuthApiResponse<CreateSourceResponse>> {
+  const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id;
   return apiFetch<CreateSourceResponse>("/v1/compile/sources", {
     method: "POST",
     body: JSON.stringify({
       ...data,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
       origin: data.origin ?? "dashboard",
     }),
   });
@@ -254,23 +265,38 @@ export async function cancelCompileJobAction(
 
 export async function createQuerySessionAction(data: {
   roleKbId: string;
+  roleId?: string;
+  role_id?: string;
   domainId?: string | null;
   knowledgeItemId?: string | null;
   title?: string | null;
 }): Promise<AuthApiResponse<CreateSessionResponse>> {
+  const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id;
   return apiFetch<CreateSessionResponse>("/v1/query/sessions", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
+    }),
   });
 }
 
 export async function listQuerySessionsAction(params?: {
   roleKbId?: string;
+  roleId?: string;
+  role_id?: string;
   limit?: number;
   cursor?: string;
 }): Promise<AuthApiResponse<ListSessionsResponse>> {
   const p = new URLSearchParams();
-  if (params?.roleKbId) p.append("roleKbId", params.roleKbId);
+  const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id;
+  if (activeRoleId) {
+    p.append("roleKbId", activeRoleId);
+    p.append("roleId", activeRoleId);
+    p.append("role_id", activeRoleId);
+  }
   if (params?.limit) p.append("limit", String(params.limit));
   if (params?.cursor) p.append("cursor", params.cursor);
   const qs = p.toString();
@@ -292,12 +318,22 @@ export async function submitQueryMessageAction(
   sessionId: string,
   data: {
     question: string;
-    scope: { roleKbId: string; domainId?: string | null; knowledgeItemId?: string | null };
+    scope: { roleKbId: string; roleId?: string; role_id?: string; domainId?: string | null; knowledgeItemId?: string | null };
   }
 ): Promise<AuthApiResponse<SubmitMessageResponse>> {
+  const activeRoleId = data.scope.roleKbId ?? data.scope.roleId ?? data.scope.role_id;
+  const scope = {
+    ...data.scope,
+    roleId: activeRoleId,
+    roleKbId: activeRoleId,
+    role_id: activeRoleId,
+  };
   return apiFetch<SubmitMessageResponse>(`/v1/query/sessions/${sessionId}/messages`, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      scope,
+    }),
   });
 }
 
@@ -339,13 +375,20 @@ export async function deleteQuerySessionAction(
 
 export async function listResearchRunsAction(params?: {
   roleKbId?: string;
+  roleId?: string;
+  role_id?: string;
   status?: string;
   trigger?: string;
   limit?: number;
   cursor?: string;
 }): Promise<AuthApiResponse<any>> {
   const p = new URLSearchParams();
-  if (params?.roleKbId) p.append("roleKbId", params.roleKbId);
+  const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id;
+  if (activeRoleId) {
+    p.append("roleKbId", activeRoleId);
+    p.append("roleId", activeRoleId);
+    p.append("role_id", activeRoleId);
+  }
   if (params?.status) p.append("status", params.status);
   if (params?.trigger) p.append("trigger", params.trigger);
   if (params?.limit) p.append("limit", String(params.limit));
@@ -360,9 +403,16 @@ export async function listResearchRunsAction(params?: {
 export async function createResearchRunAction(
   data: CreateResearchRunRequest
 ): Promise<AuthApiResponse<CreateResearchRunResponseData>> {
+  const activeRoleId = data.roleKbId ?? data.roleId ?? (data as any).role_id;
+  const payload = {
+    ...data,
+    roleId: activeRoleId,
+    roleKbId: activeRoleId,
+    role_id: activeRoleId,
+  };
   return apiFetch<CreateResearchRunResponseData>("/v1/research/runs", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 
@@ -377,11 +427,19 @@ export async function submitDocumentAction(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  const activeRoleId = data.roleId ?? data.roleKbId ?? data.role_id;
+  const payload = {
+    ...data,
+    roleId: activeRoleId,
+    roleKbId: activeRoleId,
+    role_id: activeRoleId,
+  };
+
   try {
     let response = await fetch(`${RESEARCH_API_BASE}/documents`, {
       method: "POST",
       headers,
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
 
     if (response.status === 401) {
@@ -497,9 +555,16 @@ export async function saveRolesAction(
 export async function submitSeedAction(
   data: any
 ): Promise<AuthApiResponse<any>> {
+  const activeRoleId = data.roleId ?? data.roleKbId ?? data.role_id;
+  const payload = {
+    ...data,
+    roleId: activeRoleId,
+    roleKbId: activeRoleId,
+    role_id: activeRoleId,
+  };
   return apiFetch<any>("/v1/onboarding/seed", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 
@@ -539,8 +604,14 @@ export async function recordUpgradeIntentAction(data: {
 export async function getDashboardSummaryAction(
   roleKbId?: string
 ): Promise<AuthApiResponse<DashboardSummaryData>> {
-  const qs = roleKbId ? `?roleKbId=${roleKbId}` : "";
-  return apiFetch<DashboardSummaryData>(`/v1/dashboard/summary${qs}`, {
+  const p = new URLSearchParams();
+  if (roleKbId) {
+    p.append("roleKbId", roleKbId);
+    p.append("roleId", roleKbId);
+    p.append("role_id", roleKbId);
+  }
+  const qs = p.toString();
+  return apiFetch<DashboardSummaryData>(`/v1/dashboard/summary${qs ? `?${qs}` : ""}`, {
     method: "GET",
   });
 }
@@ -548,8 +619,14 @@ export async function getDashboardSummaryAction(
 export async function getActiveJobsAction(
   roleKbId?: string
 ): Promise<AuthApiResponse<ActiveJobsResponseData>> {
-  const qs = roleKbId ? `?roleKbId=${roleKbId}` : "";
-  return apiFetch<ActiveJobsResponseData>(`/v1/dashboard/jobs/active${qs}`, {
+  const p = new URLSearchParams();
+  if (roleKbId) {
+    p.append("roleKbId", roleKbId);
+    p.append("roleId", roleKbId);
+    p.append("role_id", roleKbId);
+  }
+  const qs = p.toString();
+  return apiFetch<ActiveJobsResponseData>(`/v1/dashboard/jobs/active${qs ? `?${qs}` : ""}`, {
     method: "GET",
   });
 }

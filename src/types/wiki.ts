@@ -175,6 +175,8 @@ export interface WikiCitationsResponse {
 
 export interface WikiListParams {
   roleKbId?: string;
+  roleId?: string;
+  role_id?: string;
   domainId?: WikiDomainFilter;
   q?: string;
   sort?: WikiSort;
