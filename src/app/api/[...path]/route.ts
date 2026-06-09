@@ -27,11 +27,58 @@ async function handleProxy(
   }
 
   try {
-    const res = await authFetch<any>(targetPath, {
+    let res = await authFetch<any>(targetPath, {
       method,
       body,
       noRedirect: true,
     });
+
+    // ────────────────────────────────────────────────────────
+    // Onboarding cookie & response normalization
+    // ────────────────────────────────────────────────────────
+    const isCompleteEndpoint = path.endsWith("/onboarding/complete");
+    const isStateEndpoint = path.endsWith("/onboarding/state");
+
+    if (isCompleteEndpoint) {
+      if (res.status === "1" || res.error_code === "ONBOARDING_ALREADY_COMPLETED") {
+        const { getUserData, setUserData } = await import("@/lib/token-storage");
+        const user = await getUserData();
+        if (user) {
+          await setUserData({
+            ...user,
+            onboardingStatus: "completed",
+          });
+        }
+        if (res.status === "0") {
+          res = {
+            status: "1",
+            error_code: "0",
+            msg: "Success",
+            data: {
+              nextRoute: "/dashboard",
+            },
+          };
+        }
+      }
+    } else if (isStateEndpoint && res.status === "1" && res.data) {
+      const isCompleted =
+        res.data.currentStep === "done" ||
+        res.data.status === "completed" ||
+        (res.data.roles && res.data.roles.length > 0);
+
+      if (isCompleted) {
+        const { getUserData, setUserData } = await import("@/lib/token-storage");
+        const user = await getUserData();
+        if (user) {
+          await setUserData({
+            ...user,
+            onboardingStatus: "completed",
+            plan: (res.data.plan === "pro" ? "pro" : "free") as "free" | "pro",
+          });
+        }
+      }
+    }
+
     return NextResponse.json(res);
   } catch (error) {
     console.error(`Proxy error on ${method} ${targetPath}:`, error);

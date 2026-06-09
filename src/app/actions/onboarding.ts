@@ -180,7 +180,7 @@ export async function completeOnboardingAction(
       payload,
     );
 
-    if (result.status === "1") {
+    if (result.status === "1" || result.error_code === "ONBOARDING_ALREADY_COMPLETED") {
       // Hydrate local user cookie to 'completed'
       const user = await getUserData();
       if (user) {
@@ -200,6 +200,16 @@ export async function completeOnboardingAction(
           selectedPlanIntent: "free",
           onboardingStatus: "completed",
         });
+      }
+      if (result.status === "0") {
+        return {
+          status: "1",
+          error_code: "0",
+          msg: "Success",
+          data: {
+            nextRoute: "/dashboard",
+          },
+        };
       }
     }
 
