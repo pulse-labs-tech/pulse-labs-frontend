@@ -23,8 +23,13 @@ import type { AuthApiResponse } from "@/types/auth";
 // Config
 // ────────────────────────────────────────────────────────────────
 
-const API_BASE =
+const API_BASE_RAW =
   process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
+
+const API_BASE =
+  typeof window === "undefined" && API_BASE_RAW.startsWith("/")
+    ? "https://kbapi.pulsemarketspt.com/api"
+    : API_BASE_RAW;
 
 // ────────────────────────────────────────────────────────────────
 // Refresh Lock (prevents parallel refresh calls)

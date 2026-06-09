@@ -248,7 +248,7 @@ export function OnboardingWizard() {
             if (user) {
               setUser({ ...user, onboardingStatus: "completed" });
             }
-            router.replace("/dashboard");
+            router.replace(getLocalizedPath("/dashboard", locale));
             return; // Don't set isInitializing to false — keep loading screen
           } else if (isForced) {
             setCurrentStep("welcome");
