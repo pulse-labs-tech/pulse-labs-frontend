@@ -25,6 +25,8 @@ import type {
 
 export async function createSourceAction(data: {
   roleKbId: string;
+  roleId?: string;
+  role_id?: string;
   sourceType: "text" | "url";
   text?: string;
   url?: string;
@@ -34,8 +36,12 @@ export async function createSourceAction(data: {
   idempotencyKey: string;
 }): Promise<AuthApiResponse<CreateSourceResponse>> {
   try {
+    const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id;
     return await authClient.post<CreateSourceResponse>("/v1/compile/sources", {
       ...data,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
       origin: data.origin ?? "dashboard",
     });
   } catch (error) {

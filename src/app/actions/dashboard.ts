@@ -29,7 +29,11 @@ export async function getDashboardSummaryAction(
 ): Promise<AuthApiResponse<DashboardSummaryData>> {
   try {
     const params = new URLSearchParams();
-    if (roleKbId) params.append("roleKbId", roleKbId);
+    if (roleKbId) {
+      params.append("roleKbId", roleKbId);
+      params.append("roleId", roleKbId);
+      params.append("role_id", roleKbId);
+    }
     params.append("recentLimit", String(recentLimit));
     params.append("activityLimit", String(activityLimit));
     params.append("domainLimit", String(domainLimit));
@@ -58,7 +62,11 @@ export async function getActiveJobsAction(
 ): Promise<AuthApiResponse<ActiveJobsResponseData>> {
   try {
     const params = new URLSearchParams();
-    if (roleKbId) params.append("roleKbId", roleKbId);
+    if (roleKbId) {
+      params.append("roleKbId", roleKbId);
+      params.append("roleId", roleKbId);
+      params.append("role_id", roleKbId);
+    }
     params.append("limit", String(limit));
 
     const queryString = params.toString();

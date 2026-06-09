@@ -124,7 +124,14 @@ export async function submitSeedAction(
   payload: SeedRequest,
 ): Promise<AuthApiResponse<SeedResponseData>> {
   try {
-    return await authClient.post<SeedResponseData>("/v1/onboarding/seed", payload);
+    const activeRoleId = payload.roleKbId ?? (payload as any).roleId ?? (payload as any).role_id;
+    const mappedPayload = {
+      ...payload,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
+    };
+    return await authClient.post<SeedResponseData>("/v1/onboarding/seed", mappedPayload);
   } catch (error) {
     console.error("submitSeedAction error:", error);
     return {

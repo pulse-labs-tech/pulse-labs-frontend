@@ -47,7 +47,14 @@ export async function createResearchRunAction(
   request: CreateResearchRunRequest
 ): Promise<ResearchResult<CreateResearchRunResponseData>> {
   try {
-    const res = await authClient.post<CreateResearchRunResponseData>("/v1/research/runs", request);
+    const activeRoleId = request.roleKbId ?? request.roleId ?? request.role_id;
+    const payload = {
+      ...request,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
+    };
+    const res = await authClient.post<CreateResearchRunResponseData>("/v1/research/runs", payload);
     return { status: res.status, error_code: res.error_code, msg: res.msg, data: res.data };
   } catch {
     return makeError({} as CreateResearchRunResponseData);
@@ -60,6 +67,8 @@ export async function createResearchRunAction(
  */
 export async function listResearchRunsAction(params?: {
   roleKbId?: string;
+  roleId?: string;
+  role_id?: string;
   status?: string;
   trigger?: string;
   limit?: number;
@@ -67,7 +76,12 @@ export async function listResearchRunsAction(params?: {
 }): Promise<ResearchResult<ResearchListData>> {
   try {
     const searchParams = new URLSearchParams();
-    if (params?.roleKbId) searchParams.set("roleKbId", params.roleKbId);
+    const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id;
+    if (activeRoleId) {
+      searchParams.set("roleKbId", activeRoleId);
+      searchParams.set("roleId", activeRoleId);
+      searchParams.set("role_id", activeRoleId);
+    }
     if (params?.status) searchParams.set("status", params.status);
     if (params?.trigger) searchParams.set("trigger", params.trigger);
     if (params?.limit) searchParams.set("limit", String(params.limit));
@@ -186,6 +200,14 @@ export async function submitDocumentAction(
       };
     }
 
+    const activeRoleId = request.roleId ?? request.roleKbId ?? request.role_id;
+    const payload = {
+      ...request,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
+    };
+
     const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
     const res = await fetch(`${RESEARCH_API_BASE}/documents`, {
       method: "POST",
@@ -193,7 +215,7 @@ export async function submitDocumentAction(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {

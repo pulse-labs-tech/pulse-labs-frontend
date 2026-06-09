@@ -30,7 +30,12 @@ export async function getWikiItemsAction(
 ): Promise<AuthApiResponse<WikiListResponse>> {
   try {
     const p = new URLSearchParams();
-    if (params.roleKbId) p.append("roleKbId", params.roleKbId);
+    const activeRoleId = params.roleKbId ?? params.roleId ?? params.role_id;
+    if (activeRoleId) {
+      p.append("roleKbId", activeRoleId);
+      p.append("roleId", activeRoleId);
+      p.append("role_id", activeRoleId);
+    }
     if (params.domainId && params.domainId !== "all") p.append("domainId", params.domainId);
     if (params.q) p.append("q", params.q);
     if (params.sort) p.append("sort", params.sort);

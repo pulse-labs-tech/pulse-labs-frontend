@@ -27,12 +27,20 @@ import type {
 
 export async function createQuerySessionAction(data: {
   roleKbId: string;
+  roleId?: string;
+  role_id?: string;
   domainId?: string | null;
   knowledgeItemId?: string | null;
   title?: string | null;
 }): Promise<AuthApiResponse<CreateSessionResponse>> {
   try {
-    return await authClient.post<CreateSessionResponse>("/v1/query/sessions", data);
+    const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id;
+    return await authClient.post<CreateSessionResponse>("/v1/query/sessions", {
+      ...data,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
+    });
   } catch (error) {
     console.error("createQuerySessionAction error:", error);
     return {
@@ -50,12 +58,19 @@ export async function createQuerySessionAction(data: {
 
 export async function listQuerySessionsAction(params?: {
   roleKbId?: string;
+  roleId?: string;
+  role_id?: string;
   limit?: number;
   cursor?: string;
 }): Promise<AuthApiResponse<ListSessionsResponse>> {
   try {
     const p = new URLSearchParams();
-    if (params?.roleKbId) p.append("roleKbId", params.roleKbId);
+    const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id;
+    if (activeRoleId) {
+      p.append("roleKbId", activeRoleId);
+      p.append("roleId", activeRoleId);
+      p.append("role_id", activeRoleId);
+    }
     if (params?.limit) p.append("limit", String(params.limit));
     if (params?.cursor) p.append("cursor", params.cursor);
     const qs = p.toString();
@@ -101,6 +116,8 @@ export async function submitQueryMessageAction(
     question: string;
     scope: {
       roleKbId: string;
+      roleId?: string;
+      role_id?: string;
       domainId: string | null;
       knowledgeItemId: string | null;
     };
@@ -112,10 +129,18 @@ export async function submitQueryMessageAction(
   },
 ): Promise<AuthApiResponse<SubmitMessageResponse>> {
   try {
+    const activeRoleId = data.scope.roleKbId ?? data.scope.roleId ?? data.scope.role_id;
+    const scope = {
+      ...data.scope,
+      roleId: activeRoleId,
+      roleKbId: activeRoleId,
+      role_id: activeRoleId,
+    };
     return await authClient.post<SubmitMessageResponse>(
       `/v1/query/sessions/${sessionId}/messages`,
       {
         ...data,
+        scope,
         options: {
           stream: false,
           topK: 8,
