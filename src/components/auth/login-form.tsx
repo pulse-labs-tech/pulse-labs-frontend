@@ -11,35 +11,109 @@
  * sees authenticated state before the next page renders.
  */
 
-import { useActionState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
-import { loginAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
 import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { getLocalizedPath } from "@/lib/utils";
+import type { AuthErrorCode, AuthUser } from "@/types/auth";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl") || "";
-  const [state, formAction, isPending] = useActionState(loginAction, undefined);
   const { t, locale } = useTranslation();
   const { setUser } = useAuth();
   const router = useRouter();
 
-  // Handle successful login: update AuthProvider state THEN navigate.
-  // Using client-side navigation instead of server redirect() ensures the
-  // root layout is NOT re-fetched from cache — AuthProvider gets the new
-  // user synchronously before ProtectedRoute renders on the target page.
-  useEffect(() => {
-    if (state) {
-      console.log("🟢 [F12 API RESPONSE] loginAction:", state);
+  // Local state for client-side submission
+  const [state, setState] = useState<{
+    globalError?: AuthErrorCode;
+    serverMessage?: string;
+    errors?: { email?: string[]; password?: string[] };
+    redirectTo?: string;
+    sessionUser?: AuthUser;
+    retryAfterSeconds?: number;
+  } | null>(null);
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsPending(true);
+    setState(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    // Simple email/password validation on client side
+    const errors: { email?: string[]; password?: string[] } = {};
+    if (!email) {
+      errors.email = [t("auth.validation.emailRequired", "Email là bắt buộc")];
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = [t("auth.validation.emailInvalid", "Email không hợp lệ")];
     }
+    if (!password) {
+      errors.password = [t("auth.validation.passwordRequired", "Mật khẩu là bắt buộc")];
+    } else if (password.length < 8) {
+      errors.password = [t("auth.validation.passwordMin", "Mật khẩu phải từ 8 ký tự")];
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setState({ errors });
+      setIsPending(false);
+      return;
+    }
+
+    try {
+      // Call standard proxy endpoint
+      const response = await fetch("/api/v1/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Platform": "web",
+        },
+        body: JSON.stringify({ email, password, returnUrl }),
+      });
+
+      const res = await response.json();
+      console.log("🟢 [F12 API RESPONSE] Client login fetch:", res);
+
+      if (res.status === "1" && res.data) {
+        // Sync user state to Auth Provider
+        setUser(res.data.user);
+        
+        // Backend returns nextRoute/next_route
+        const nextRoute = res.data.nextRoute || res.data.next_route || "/dashboard";
+        setState({
+          redirectTo: nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute,
+          sessionUser: res.data.user,
+        });
+      } else {
+        const errCode = (res.error_code || "SERVER_ERROR") as AuthErrorCode;
+        setState({
+          globalError: errCode,
+          serverMessage: res.msg,
+          retryAfterSeconds: res.data?.retryAfterSeconds,
+        });
+      }
+    } catch (err) {
+      console.error("Client login error:", err);
+      setState({
+        globalError: "NETWORK_ERROR",
+      });
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  // Handle successful login: update AuthProvider state THEN navigate.
+  useEffect(() => {
     if (state?.redirectTo && state.sessionUser) {
       setUser(state.sessionUser);
       router.push(getLocalizedPath(state.redirectTo, locale));
@@ -89,7 +163,7 @@ export function LoginForm() {
           </div>
         ) : (
           <form
-            action={formAction}
+            onSubmit={handleSubmit}
             className="flex flex-col gap-5"
             aria-labelledby="login-heading"
             noValidate

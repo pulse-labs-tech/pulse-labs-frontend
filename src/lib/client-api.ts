@@ -76,6 +76,19 @@ export async function getClientAccessToken(forceRefresh = false): Promise<string
   return null;
 }
 
+export function getFallbackRoleKbId(): string {
+  if (typeof document === "undefined") return "";
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)pulse_user=([^;]*)/);
+    if (match && match[1]) {
+      const decoded = decodeURIComponent(match[1]);
+      const parsed = JSON.parse(decoded);
+      return parsed?.roleKbId || "";
+    }
+  } catch {}
+  return "";
+}
+
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
@@ -142,7 +155,7 @@ export async function getWikiItemsAction(
   params: WikiListParams = {}
 ): Promise<AuthApiResponse<WikiListResponse>> {
   const p = new URLSearchParams();
-  const activeRoleId = params.roleKbId ?? params.roleId ?? params.role_id;
+  const activeRoleId = params.roleKbId ?? params.roleId ?? params.role_id ?? getFallbackRoleKbId();
   if (activeRoleId) {
     p.append("roleKbId", activeRoleId);
     p.append("roleId", activeRoleId);
@@ -213,7 +226,7 @@ export async function createSourceAction(data: {
   origin?: string;
   idempotencyKey: string;
 }): Promise<AuthApiResponse<CreateSourceResponse>> {
-  const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id;
+  const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id ?? getFallbackRoleKbId();
   return apiFetch<CreateSourceResponse>("/v1/compile/sources", {
     method: "POST",
     body: JSON.stringify({
@@ -271,7 +284,7 @@ export async function createQuerySessionAction(data: {
   knowledgeItemId?: string | null;
   title?: string | null;
 }): Promise<AuthApiResponse<CreateSessionResponse>> {
-  const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id;
+  const activeRoleId = data.roleKbId ?? data.roleId ?? data.role_id ?? getFallbackRoleKbId();
   return apiFetch<CreateSessionResponse>("/v1/query/sessions", {
     method: "POST",
     body: JSON.stringify({
@@ -291,7 +304,7 @@ export async function listQuerySessionsAction(params?: {
   cursor?: string;
 }): Promise<AuthApiResponse<ListSessionsResponse>> {
   const p = new URLSearchParams();
-  const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id;
+  const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id ?? getFallbackRoleKbId();
   if (activeRoleId) {
     p.append("roleKbId", activeRoleId);
     p.append("roleId", activeRoleId);
@@ -321,7 +334,7 @@ export async function submitQueryMessageAction(
     scope: { roleKbId: string; roleId?: string; role_id?: string; domainId?: string | null; knowledgeItemId?: string | null };
   }
 ): Promise<AuthApiResponse<SubmitMessageResponse>> {
-  const activeRoleId = data.scope.roleKbId ?? data.scope.roleId ?? data.scope.role_id;
+  const activeRoleId = data.scope.roleKbId ?? data.scope.roleId ?? data.scope.role_id ?? getFallbackRoleKbId();
   const scope = {
     ...data.scope,
     roleId: activeRoleId,
@@ -383,7 +396,7 @@ export async function listResearchRunsAction(params?: {
   cursor?: string;
 }): Promise<AuthApiResponse<any>> {
   const p = new URLSearchParams();
-  const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id;
+  const activeRoleId = params?.roleKbId ?? params?.roleId ?? params?.role_id ?? getFallbackRoleKbId();
   if (activeRoleId) {
     p.append("roleKbId", activeRoleId);
     p.append("roleId", activeRoleId);
@@ -403,7 +416,7 @@ export async function listResearchRunsAction(params?: {
 export async function createResearchRunAction(
   data: CreateResearchRunRequest
 ): Promise<AuthApiResponse<CreateResearchRunResponseData>> {
-  const activeRoleId = data.roleKbId ?? data.roleId ?? (data as any).role_id;
+  const activeRoleId = data.roleKbId ?? data.roleId ?? (data as any).role_id ?? getFallbackRoleKbId();
   const payload = {
     ...data,
     roleId: activeRoleId,
@@ -427,7 +440,7 @@ export async function submitDocumentAction(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const activeRoleId = data.roleId ?? data.roleKbId ?? data.role_id;
+  const activeRoleId = data.roleId ?? data.roleKbId ?? data.role_id ?? getFallbackRoleKbId();
   const payload = {
     ...data,
     roleId: activeRoleId,
@@ -555,7 +568,7 @@ export async function saveRolesAction(
 export async function submitSeedAction(
   data: any
 ): Promise<AuthApiResponse<any>> {
-  const activeRoleId = data.roleId ?? data.roleKbId ?? data.role_id;
+  const activeRoleId = data.roleId ?? data.roleKbId ?? data.role_id ?? getFallbackRoleKbId();
   const payload = {
     ...data,
     roleId: activeRoleId,
@@ -605,10 +618,11 @@ export async function getDashboardSummaryAction(
   roleKbId?: string
 ): Promise<AuthApiResponse<DashboardSummaryData>> {
   const p = new URLSearchParams();
-  if (roleKbId) {
-    p.append("roleKbId", roleKbId);
-    p.append("roleId", roleKbId);
-    p.append("role_id", roleKbId);
+  const activeRoleId = roleKbId || getFallbackRoleKbId();
+  if (activeRoleId) {
+    p.append("roleKbId", activeRoleId);
+    p.append("roleId", activeRoleId);
+    p.append("role_id", activeRoleId);
   }
   const qs = p.toString();
   return apiFetch<DashboardSummaryData>(`/v1/dashboard/summary${qs ? `?${qs}` : ""}`, {
@@ -620,10 +634,11 @@ export async function getActiveJobsAction(
   roleKbId?: string
 ): Promise<AuthApiResponse<ActiveJobsResponseData>> {
   const p = new URLSearchParams();
-  if (roleKbId) {
-    p.append("roleKbId", roleKbId);
-    p.append("roleId", roleKbId);
-    p.append("role_id", roleKbId);
+  const activeRoleId = roleKbId || getFallbackRoleKbId();
+  if (activeRoleId) {
+    p.append("roleKbId", activeRoleId);
+    p.append("roleId", activeRoleId);
+    p.append("role_id", activeRoleId);
   }
   const qs = p.toString();
   return apiFetch<ActiveJobsResponseData>(`/v1/dashboard/jobs/active${qs ? `?${qs}` : ""}`, {

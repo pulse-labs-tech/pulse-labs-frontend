@@ -105,13 +105,14 @@ export async function getQuotaAction(): Promise<AuthApiResponse<{ quota: Dashboa
 /**
  * Synchronize the user's completed onboarding status in local cookies.
  */
-export async function syncCompletedOnboardingAction(): Promise<void> {
+export async function syncCompletedOnboardingAction(roleKbId?: string): Promise<void> {
   try {
     const user = await getUserData();
     if (user) {
       await setUserData({
         ...user,
         onboardingStatus: "completed",
+        roleKbId: roleKbId || user.roleKbId,
       });
     } else {
       await setUserData({
@@ -124,6 +125,7 @@ export async function syncCompletedOnboardingAction(): Promise<void> {
         plan: "free",
         selectedPlanIntent: "free",
         onboardingStatus: "completed",
+        roleKbId,
       });
     }
   } catch (error) {

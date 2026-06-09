@@ -69,6 +69,7 @@ export interface AuthUser {
   plan: PlanType;
   selectedPlanIntent: PlanType;
   onboardingStatus: OnboardingStatus;
+  roleKbId?: string;
 }
 
 // ────────────────────────────────────────────────────────────────

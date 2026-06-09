@@ -264,7 +264,7 @@ export function CompileView() {
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [titleHint, setTitleHint] = useState("");
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState(roleKbIdFromUrl);
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(() => roleKbIdFromUrl || authUser?.roleKbId || "");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [textError, setTextError] = useState<string | null>(null);
 
@@ -288,6 +288,22 @@ export function CompileView() {
   // ────────────────────────────────────────────────────────────────
   useEffect(() => {
     async function loadRoles() {
+      // Optimization: If user is Free and already has a roleKbId, bypass loading onboarding state list
+      if (authUser?.plan === "free" && authUser?.roleKbId) {
+        setUserRoles([{
+          id: authUser.roleKbId,
+          roleName: "",
+          roleGroup: "other",
+          roleOptionId: "",
+          isCustom: false,
+          status: "active",
+          isPrimary: true,
+          createdAt: new Date().toISOString(),
+        }]);
+        setRolesLoading(false);
+        return;
+      }
+
       setRolesLoading(true);
       try {
         const res = await getOnboardingStateAction();
@@ -319,7 +335,7 @@ export function CompileView() {
     }
     loadRoles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authUser, roleKbIdFromUrl]);
 
   // ────────────────────────────────────────────────────────────────
   // 2. Polling logic
@@ -533,6 +549,7 @@ export function CompileView() {
             <nav className="flex items-center gap-1.5">
               <Link
                 href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="grid-alt" className="h-3.5 w-3.5" />
@@ -540,6 +557,7 @@ export function CompileView() {
               </Link>
               <Link
                 href={selectedRoleKbId ? `/${locale}/query?roleKbId=${selectedRoleKbId}` : `/${locale}/query`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="comment" className="h-3.5 w-3.5" />
@@ -547,6 +565,7 @@ export function CompileView() {
               </Link>
               <Link
                 href={selectedRoleKbId ? `/${locale}/wiki?roleKbId=${selectedRoleKbId}` : `/${locale}/wiki`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="book" className="h-3.5 w-3.5" />
@@ -554,6 +573,7 @@ export function CompileView() {
               </Link>
               <Link
                 href={`/${locale}/compile/new${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <LineIcon name="upload" className="h-3.5 w-3.5" />
@@ -644,7 +664,7 @@ export function CompileView() {
         {/* Page title */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-auth-text-3 text-xs">
-            <Link href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`} className="hover:text-auth-text transition-colors">
+            <Link href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`} prefetch={false} className="hover:text-auth-text transition-colors">
               {t("common.dashboard", "Dashboard")}
             </Link>
             <LineIcon name="chevron-right" className="h-3 w-3" />
@@ -1025,6 +1045,7 @@ export function CompileView() {
                   {currentJob.outputKnowledgeItemId && (
                     <Link
                       href={`/${locale}/wiki/items/${currentJob.outputKnowledgeItemId}`}
+                      prefetch={false}
                       className="btn-primary-pulse flex-1 text-sm"
                     >
                       <LineIcon name="book" className="h-4 w-4" />
@@ -1042,6 +1063,7 @@ export function CompileView() {
                   </button>
                   <Link
                     href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
+                    prefetch={false}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
                     <LineIcon name="grid-alt" className="h-4 w-4" />
@@ -1090,6 +1112,7 @@ export function CompileView() {
                   </button>
                   <Link
                     href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
+                    prefetch={false}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm transition-all"
                   >
                     <LineIcon name="grid-alt" className="h-4 w-4" />

@@ -222,7 +222,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
         <div className="container-focused flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href={`/${locale}/dashboard`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
+            <Link href={`/${locale}/dashboard`} prefetch={false} className="text-auth-text-2 hover:text-white transition-colors text-sm">
               ← {t("common.dashboard", "Dashboard")}
             </Link>
             <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3" />

@@ -16,32 +16,133 @@
  *  2b. redirectTo set        → tokens stored, navigate to /welcome (new user) or /dashboard (existing)
  */
 
-import { useActionState, useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
-import { registerAction, resendVerificationAction } from "@/app/actions/auth";
+import { resendVerificationAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
 import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { getLocalizedPath } from "@/lib/utils";
+import type { AuthErrorCode, AuthUser } from "@/types/auth";
 
 export function RegisterForm() {
   const { t, locale } = useTranslation();
   const { setUser } = useAuth();
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(registerAction, undefined);
+
+  // Local state for client-side submission
+  const [state, setState] = useState<{
+    globalError?: AuthErrorCode;
+    serverMessage?: string;
+    errors?: { firstName?: string[]; lastName?: string[]; email?: string[]; password?: string[]; acceptedTerms?: string[] };
+    redirectTo?: string;
+    sessionUser?: AuthUser;
+    retryAfterSeconds?: number;
+    verifyPending?: boolean;
+    email?: string;
+    resendAvailableInSeconds?: number;
+    success?: boolean;
+  } | null>(null);
+  const [isPending, setIsPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
 
-  // Handle successful auto-login after register: update AuthProvider THEN navigate.
-  useEffect(() => {
-    if (state) {
-      console.log("🟢 [F12 API RESPONSE] registerAction:", state);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsPending(true);
+    setState(null);
+
+    const formData = new FormData(e.currentTarget);
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const email = formData.get("email") as string;
+    const passwordInput = formData.get("password") as string;
+    const acceptedTerms = formData.get("acceptedTerms") === "true";
+
+    // Client-side validations
+    const errors: any = {};
+    if (!firstName) errors.firstName = [t("auth.validation.firstNameRequired", "Tên là bắt buộc")];
+    if (!lastName) errors.lastName = [t("auth.validation.lastNameRequired", "Họ là bắt buộc")];
+    if (!email) {
+      errors.email = [t("auth.validation.emailRequired", "Email là bắt buộc")];
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = [t("auth.validation.emailInvalid", "Email không hợp lệ")];
     }
+    if (!passwordInput) {
+      errors.password = [t("auth.validation.passwordRequired", "Mật khẩu là bắt buộc")];
+    } else if (passwordInput.length < 8) {
+      errors.password = [t("auth.validation.passwordMin", "Mật khẩu phải từ 8 ký tự")];
+    }
+    if (!acceptedTerms) {
+      errors.acceptedTerms = [t("auth.validation.termsRequired", "Bạn phải đồng ý với Điều khoản")];
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setState({ errors });
+      setIsPending(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Platform": "web",
+        },
+        body: JSON.stringify({ firstName, lastName, email, password: passwordInput, selectedPlanIntent: "free", acceptedTerms }),
+      });
+
+      const res = await response.json();
+      console.log("🟢 [F12 API RESPONSE] Client register fetch:", res);
+
+      if (res.status === "1" && res.data) {
+        if (res.data.accessToken) {
+          // Auto-login success!
+          setUser(res.data.user);
+          const nextRoute = res.data.nextRoute || "/welcome";
+          setState({
+            redirectTo: nextRoute.startsWith("/") ? nextRoute : "/" + nextRoute,
+            sessionUser: res.data.user,
+          });
+        } else if (res.data.verificationRequired) {
+          setState({
+            verifyPending: true,
+            email: res.data.email,
+            resendAvailableInSeconds: res.data.resendAvailableInSeconds || 60,
+          });
+        } else {
+          // Fallback
+          setState({
+            verifyPending: true,
+            email: res.data.email,
+            resendAvailableInSeconds: res.data.resendAvailableInSeconds || 60,
+          });
+        }
+      } else {
+        const errCode = (res.error_code || "SERVER_ERROR") as AuthErrorCode;
+        setState({
+          globalError: errCode,
+          serverMessage: res.msg,
+          retryAfterSeconds: res.data?.resendAvailableInSeconds,
+        });
+      }
+    } catch (err) {
+      console.error("Client register error:", err);
+      setState({
+        globalError: "NETWORK_ERROR",
+      });
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  useEffect(() => {
     if (state?.redirectTo) {
       if (state.sessionUser) {
         setUser(state.sessionUser);
@@ -131,7 +232,7 @@ export function RegisterForm() {
 
         {/* Form */}
         <form
-          action={formAction}
+          onSubmit={handleSubmit}
           className="flex flex-col gap-4"
           aria-labelledby="register-heading"
           noValidate

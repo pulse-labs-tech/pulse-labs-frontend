@@ -505,7 +505,7 @@ export function QueryView() {
 
   // Role KB state
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || authUser?.roleKbId || "");
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
 
   // Sessions history state
@@ -541,9 +541,25 @@ export function QueryView() {
 
   // ─── Bootstrap: load roles ───
   useEffect(() => {
-    const initRoleKbId = searchParams.get("roleKbId") || "";
+    const initRoleKbId = searchParams.get("roleKbId") || authUser?.roleKbId || "";
 
     const loadRoles = async () => {
+      // Optimization: If user is Free and already has a roleKbId, bypass loading onboarding state list
+      if (authUser?.plan === "free" && authUser?.roleKbId) {
+        setUserRoles([{
+          id: authUser.roleKbId,
+          roleName: "",
+          roleGroup: "other",
+          roleOptionId: "",
+          isCustom: false,
+          status: "active",
+          isPrimary: true,
+          createdAt: new Date().toISOString(),
+        }]);
+        setIsLoadingRoles(false);
+        return;
+      }
+
       setIsLoadingRoles(true);
       try {
         const res = await getOnboardingStateAction();
@@ -965,18 +981,21 @@ export function QueryView() {
             <nav className="flex items-center gap-1.5">
               <Link
                 href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> Dashboard
               </Link>
               <Link
                 href={selectedRoleKbId ? `/${locale}/query?roleKbId=${selectedRoleKbId}` : `/${locale}/query`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <LineIcon name="comment" className="h-3.5 w-3.5" /> Query AI
               </Link>
               <Link
                 href={selectedRoleKbId ? `/${locale}/wiki?roleKbId=${selectedRoleKbId}` : `/${locale}/wiki`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="book" className="h-3.5 w-3.5" /> Wiki

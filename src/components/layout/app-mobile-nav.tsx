@@ -65,6 +65,7 @@ export function AppMobileNav({ locale }: AppMobileNavProps) {
           <Link
             key={tab.href}
             href={tab.href}
+            prefetch={false}
             className={`app-mobile-nav__item${isActive ? " app-mobile-nav__item--active" : ""}`}
             aria-current={isActive ? "page" : undefined}
           >

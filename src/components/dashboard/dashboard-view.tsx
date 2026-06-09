@@ -167,7 +167,7 @@ export function DashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roleKbIdFromUrl = searchParams.get("roleKbId") || "";
-  const { user: authUser, clearAuth } = useAuth();
+  const { user: authUser, clearAuth, setUser } = useAuth();
   const [isPending, startTransition] = useTransition();
   const { t, locale } = useTranslation();
 
@@ -307,6 +307,11 @@ export function DashboardView() {
               newParams.set("roleKbId", data.role.roleKbId);
               router.replace(`/${locale}/dashboard?${newParams.toString()}`);
             }
+            // Sync roleKbId to user context and cookies
+            if (authUser && authUser.roleKbId !== data.role.roleKbId) {
+              setUser({ ...authUser, roleKbId: data.role.roleKbId });
+              await syncCompletedOnboardingAction(data.role.roleKbId);
+            }
           }
 
           // Fetch user's roles list to support switcher for Pro users
@@ -323,7 +328,7 @@ export function DashboardView() {
             console.log("🟢 [ONBOARDING_ALREADY_COMPLETED] Synchronizing completed onboarding status with roleKbId:", extractedRoleKbId);
             
             // 1. Sync completed onboarding status to user cookies
-            await syncCompletedOnboardingAction();
+            await syncCompletedOnboardingAction(extractedRoleKbId);
 
             // 2. Set selectedRoleKbId state so the page immediately gets the ID
             setSelectedRoleKbId(extractedRoleKbId);
@@ -662,6 +667,7 @@ export function DashboardView() {
             <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1">
               <Link
                 href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/25 transition-all"
                 title="Dashboard"
               >
@@ -671,6 +677,7 @@ export function DashboardView() {
               <Link
                 href={stats.totalItems > 0 ? `/${locale}/query${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}` : "#"}
                 onClick={(e) => { if (stats.totalItems === 0) e.preventDefault(); }}
+                prefetch={false}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
                   stats.totalItems > 0
                     ? "text-[#a1a1aa] hover:text-white hover:bg-white/[0.05]"
@@ -683,6 +690,7 @@ export function DashboardView() {
               </Link>
               <Link
                 href={`/${locale}/research${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("common.research", "Nghiên cứu AI")}
               >
@@ -691,6 +699,7 @@ export function DashboardView() {
               </Link>
               <Link
                 href={`/${locale}/wiki${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("compile.labels.sidebarWiki", "Wiki")}
               >
@@ -699,6 +708,7 @@ export function DashboardView() {
               </Link>
               <Link
                 href={`/${locale}/settings`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
                 title={t("common.settings", "Cài đặt")}
               >

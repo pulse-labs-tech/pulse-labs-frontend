@@ -311,7 +311,7 @@ export function WikiListView() {
   const [isLoading, setIsLoading] = useState(true);
   const [apiWarning, setApiWarning] = useState<string | null>(null);
 
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState(searchParams.get("roleKbId") || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(searchParams.get("roleKbId") || authUser?.roleKbId || "");
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
   const [rolesLoading, setRolesLoading] = useState(true);
   const LIMIT = 12;
@@ -387,13 +387,31 @@ export function WikiListView() {
   // Initial load & Roles resolver
   useEffect(() => {
     async function loadRoles() {
+      const initialId = searchParams.get("roleKbId") || authUser?.roleKbId || "";
+      
+      // Optimization: If user is Free and already has a roleKbId, bypass loading onboarding state list
+      if (authUser?.plan === "free" && authUser?.roleKbId) {
+        setUserRoles([{
+          id: authUser.roleKbId,
+          roleName: "",
+          roleGroup: "other",
+          roleOptionId: "",
+          isCustom: false,
+          status: "active",
+          isPrimary: true,
+          createdAt: new Date().toISOString(),
+        }]);
+        setRolesLoading(false);
+        fetchItems({ roleKbId: authUser.roleKbId });
+        return;
+      }
+
       setRolesLoading(true);
       try {
         const res = await getOnboardingStateAction();
         console.log("🟢 [F12 API RESPONSE] getOnboardingStateAction:", res);
         if (res.status === "1" && res.data?.roles?.length) {
           setUserRoles(res.data.roles);
-          const initialId = searchParams.get("roleKbId") || "";
           const isValid = res.data.roles.some((r) => r.id === initialId);
           let resolvedId = initialId;
           if (!isValid) {
@@ -510,18 +528,21 @@ export function WikiListView() {
             <nav className="flex items-center gap-1.5">
               <Link
                 href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="grid-alt" className="h-3.5 w-3.5" /> {t("common.dashboard", "Dashboard")}
               </Link>
               <Link
                 href={selectedRoleKbId ? `/${locale}/query?roleKbId=${selectedRoleKbId}` : `/${locale}/query`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-auth-text-2 hover:text-white transition-colors"
               >
                 <LineIcon name="comment" className="h-3.5 w-3.5" /> {t("common.query", "Ask AI")}
               </Link>
               <Link
                 href={selectedRoleKbId ? `/${locale}/wiki?roleKbId=${selectedRoleKbId}` : `/${locale}/wiki`}
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-auth-accent-dim text-auth-accent border border-auth-accent/20"
               >
                 <LineIcon name="book" className="h-3.5 w-3.5" /> {t("common.wiki", "Personal Wiki")}

@@ -98,6 +98,7 @@ export async function setUserData(user: AuthUser): Promise<void> {
     displayName: user.displayName,
     plan: user.plan,
     onboardingStatus: user.onboardingStatus,
+    roleKbId: user.roleKbId,
   };
 
   // URL-encode so the JSON is safe in cookie header (special chars: ", {, }, etc.)

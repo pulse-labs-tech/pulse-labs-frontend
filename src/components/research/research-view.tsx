@@ -128,7 +128,7 @@ export function ResearchView() {
 
   // Stream Query
   const [streamQuery, setStreamQuery] = useState("");
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState(roleKbIdFromUrl);
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(() => roleKbIdFromUrl || user?.roleKbId || "");
   const [limitToIngested, setLimitToIngested] = useState(false);
   const [topK, setTopK] = useState(10);
   const [domainFiltersInput, setDomainFiltersInput] = useState("");
@@ -176,6 +176,25 @@ export function ResearchView() {
 
   useEffect(() => {
     async function loadRolesAndRuns() {
+      // Optimization: If user is Free and already has a roleKbId, bypass loading onboarding state list
+      if (user?.plan === "free" && user?.roleKbId) {
+        const activeRoleId = roleKbIdFromUrl || user.roleKbId;
+        setUserRoles([{
+          id: user.roleKbId,
+          roleName: "",
+          roleGroup: "other",
+          roleOptionId: "",
+          isCustom: false,
+          status: "active",
+          isPrimary: true,
+          createdAt: new Date().toISOString(),
+        }]);
+        setSelectedRoleKbId(activeRoleId);
+        setRolesLoading(false);
+        await loadRuns(activeRoleId);
+        return;
+      }
+
       setRolesLoading(true);
       try {
         const res = await getOnboardingStateAction();
@@ -206,7 +225,7 @@ export function ResearchView() {
       }
     }
     loadRolesAndRuns();
-  }, [loadRuns, roleKbIdFromUrl, locale, searchParams, router]);
+  }, [loadRuns, roleKbIdFromUrl, locale, searchParams, router, user]);
 
   const handleRoleChange = (roleId: string) => {
     setSelectedRoleKbId(roleId);
@@ -424,7 +443,7 @@ export function ResearchView() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
         <div className="container-focused flex h-16 items-center gap-3">
-          <Link href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`} className="text-auth-text-2 hover:text-white transition-colors text-sm">
+          <Link href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`} prefetch={false} className="text-auth-text-2 hover:text-white transition-colors text-sm">
             ← {t("common.dashboard", "Dashboard")}
           </Link>
           <LineIcon name="chevron-right" className="h-3.5 w-3.5 text-auth-text-3" />
@@ -1036,6 +1055,7 @@ function ResearchRunCard({
   return (
     <Link
       href={`/${locale}/research/${run.id}`}
+      prefetch={false}
       className={`flex items-start gap-4 p-4 rounded-xl border transition-all hover:border-white/[0.15] hover:bg-auth-elevated/50 group ${
         isActive
           ? "border-auth-accent/20 bg-auth-accent-dim/20"
