@@ -8,6 +8,7 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { ActivityChart } from "./activity-chart";
 import { useAuth } from "@/hooks/use-auth";
 import { logoutAction } from "@/app/actions/auth";
+import { syncCompletedOnboardingAction } from "@/app/actions/dashboard";
 import {
   getDashboardSummaryAction,
   getActiveJobsAction,
@@ -314,6 +315,31 @@ export function DashboardView() {
               setUserRoles(stateRes.data.roles);
             }
           }
+        } else if (summaryRes.error_code === "ONBOARDING_ALREADY_COMPLETED") {
+          // Extract roleKbId from the response message
+          const extractedRoleKbId = summaryRes.msg;
+          if (extractedRoleKbId) {
+            console.log("🟢 [ONBOARDING_ALREADY_COMPLETED] Synchronizing completed onboarding status with roleKbId:", extractedRoleKbId);
+            
+            // 1. Sync completed onboarding status to user cookies
+            await syncCompletedOnboardingAction();
+
+            // 2. Set selectedRoleKbId state so the page immediately gets the ID
+            setSelectedRoleKbId(extractedRoleKbId);
+
+            // 3. Update the browser URL without full reload
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.set("roleKbId", extractedRoleKbId);
+            router.replace(`/${locale}/dashboard?${newParams.toString()}`);
+
+            // 4. Re-fetch dashboard data using this roleKbId!
+            fetchDashboardData(extractedRoleKbId, false);
+            return;
+          } else {
+            // Fallback if msg is somehow empty
+            if (!summary) setSummary(buildFallbackSummary());
+            setApiWarning(summaryRes.msg || t("dashboard.errors.loadFailed", "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật."));
+          }
         } else {
           const errCode = summaryRes.error_code;
           // Auth/permission errors → hard block (redirect)
@@ -335,7 +361,7 @@ export function DashboardView() {
         setIsChangingRole(false);
       }
     },
-    [handleGlobalError, summary, buildFallbackSummary, t]
+    [handleGlobalError, summary, buildFallbackSummary, t, locale, router, searchParams, roleKbIdFromUrl]
   );
 
   useEffect(() => {

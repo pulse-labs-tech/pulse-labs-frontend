@@ -10,6 +10,7 @@
  */
 
 import { authClient } from "@/lib/authenticated-client";
+import { getUserData, setUserData } from "@/lib/token-storage";
 import type { AuthApiResponse } from "@/types/auth";
 import type {
   DashboardSummaryData,
@@ -98,5 +99,34 @@ export async function getQuotaAction(): Promise<AuthApiResponse<{ quota: Dashboa
       msg: "Không thể tải thông tin giới hạn tài khoản.",
       data: {} as { quota: DashboardQuota },
     };
+  }
+}
+
+/**
+ * Synchronize the user's completed onboarding status in local cookies.
+ */
+export async function syncCompletedOnboardingAction(): Promise<void> {
+  try {
+    const user = await getUserData();
+    if (user) {
+      await setUserData({
+        ...user,
+        onboardingStatus: "completed",
+      });
+    } else {
+      await setUserData({
+        id: "",
+        email: "",
+        firstName: "",
+        lastName: "",
+        displayName: "",
+        emailVerified: true,
+        plan: "free",
+        selectedPlanIntent: "free",
+        onboardingStatus: "completed",
+      });
+    }
+  } catch (error) {
+    console.error("syncCompletedOnboardingAction error:", error);
   }
 }
