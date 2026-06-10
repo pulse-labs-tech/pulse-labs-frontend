@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LineIcon } from "../shared/line-icon";
+import { LineIcon } from "./line-icon";
 
 interface MarkdownRendererProps {
   content: string;
@@ -11,9 +11,33 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(code)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((err) => {
+          console.error("Clipboard copy failed: ", err);
+        });
+    } else {
+      // Fallback copy using temporary textarea
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = code;
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error("Fallback copy failed: ", err);
+      }
+    }
   };
 
   return (
@@ -214,6 +238,13 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
   // Flush remaining list items
   flushList(lines.length);
+
+  // Flush unclosed streaming code blocks
+  if (inCodeBlock && codeLines.length > 0) {
+    elements.push(
+      <CodeBlock key="code-unclosed" code={codeLines.join("\n")} language={codeLang} />
+    );
+  }
 
   return <div className="space-y-1">{elements}</div>;
 }
