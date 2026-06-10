@@ -44,7 +44,7 @@ export function LocaleSwitcher({ id = "default" }: LocaleSwitcherProps) {
       <motion.div
         whileHover={{ rotate: 180 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
-        className="pl-2 pr-1 text-auth-text-3 flex items-center justify-center cursor-pointer"
+        className="pl-2 pr-1 text-auth-text-3 flex items-center justify-center cursor-pointer max-[480px]:hidden"
       >
         <LineIcon name="world" className="h-3.5 w-3.5 text-auth-text-3/70 hover:text-emerald-400 transition-colors duration-300" />
       </motion.div>
@@ -54,7 +54,7 @@ export function LocaleSwitcher({ id = "default" }: LocaleSwitcherProps) {
         <button
           onClick={() => changeLocale("vi")}
           disabled={isPending}
-          className={`relative px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center focus:outline-none select-none ${
+          className={`relative px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center focus:outline-none select-none sm:px-3.5 ${
             currentLocale === "vi"
               ? "text-emerald-400"
               : "text-auth-text-3/80 hover:text-white"
@@ -74,7 +74,7 @@ export function LocaleSwitcher({ id = "default" }: LocaleSwitcherProps) {
         <button
           onClick={() => changeLocale("en")}
           disabled={isPending}
-          className={`relative px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center focus:outline-none select-none ${
+          className={`relative px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center focus:outline-none select-none sm:px-3.5 ${
             currentLocale === "en"
               ? "text-emerald-400"
               : "text-auth-text-3/80 hover:text-white"

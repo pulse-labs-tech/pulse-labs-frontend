@@ -27,7 +27,8 @@ import type {
 } from "@/types/dashboard";
 import type { RoleKbDto } from "@/types/onboarding";
 import { useTranslation } from "@/contexts/locale-context";
-import { LocaleSwitcher } from "../layout/locale-switcher";
+import { AppHeader } from "@/components/layout";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import Loading from "@/app/[locale]/loading";
@@ -785,13 +786,14 @@ export function DashboardView() {
   });
 
   return (
-    <div className="dashboard-page min-h-screen bg-[#09090b] text-[#fafafa] relative overflow-hidden flex flex-col animate-fade-in">
+    <div className="dashboard-page min-h-screen bg-[#09090b] text-[#fafafa] relative overflow-x-hidden flex flex-col animate-fade-in">
       {/* Glow Effects */}
       <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]" style={{ background: "radial-gradient(ellipse, var(--color-auth-accent-glow) 0%, transparent 70%)" }} aria-hidden="true" />
       <div className="pointer-events-none absolute -right-[100px] top-[10%] h-[400px] w-[400px] blur-[100px]" style={{ background: "radial-gradient(circle, var(--color-auth-accent-dim) 0%, transparent 70%)" }} aria-hidden="true" />
 
       {/* ────────────────── Header / Navigation ────────────────── */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#09090b]/80 backdrop-blur-2xl">
+      <AppHeader active="dashboard" locale={locale} selectedRoleKbId={selectedRoleKbId} />
+      <header className="hidden">
         <div className="container-focused flex h-14 items-center justify-between gap-4 relative">
           {/* ── Left: Logo ── */}
           <div className="flex-shrink-0">

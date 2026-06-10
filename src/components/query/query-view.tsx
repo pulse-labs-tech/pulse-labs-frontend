@@ -30,6 +30,7 @@ import {
 } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
+import { AppHeader } from "@/components/layout";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import type { QueryCitation, QuerySession } from "@/types/query";
 import type { RoleKbDto } from "@/types/onboarding";
@@ -1120,7 +1121,21 @@ export function QueryView() {
       {/* Right Content Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
         {/* Header */}
-        <header className="border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16 flex-shrink-0">
+        <AppHeader
+          active="query"
+          locale={locale}
+          selectedRoleKbId={selectedRoleKbId}
+          leftAction={!sidebarOpen ? (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-auth-elevated text-auth-text-2 transition-colors hover:bg-white/[0.06] hover:text-white"
+              title={t("query.expandSidebar", "Toggle sidebar")}
+            >
+              <LineIcon name="grid-alt" className="h-4 w-4" />
+            </button>
+          ) : undefined}
+        />
+        <header className="hidden">
           <div className="px-6 flex h-full items-center justify-between relative">
             <div className="flex justify-start z-10">
               {!sidebarOpen && (

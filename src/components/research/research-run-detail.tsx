@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LineIcon } from "@/components/shared/line-icon";
+import { AppHeader } from "@/components/layout";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import Loading from "@/app/[locale]/loading";
 import { Button } from "@/components/ui/button";
@@ -263,7 +264,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
   const isCancelled = run.status === "cancelled";
 
   return (
-    <div className="min-h-screen bg-auth-bg text-white relative overflow-hidden">
+    <div className="min-h-screen bg-auth-bg text-white relative overflow-x-hidden">
       {/* Background glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/3 blur-[100px]"
@@ -272,7 +273,8 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
       />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
+      <AppHeader active="research" locale={locale} selectedRoleKbId={detail?.researchRun?.roleKbId} />
+      <header className="hidden">
         <div className="container-focused flex h-16 items-center gap-3">
           <Link
             href={detail?.researchRun?.roleKbId ? `/${locale}/research?roleKbId=${detail.researchRun.roleKbId}` : `/${locale}/research`}

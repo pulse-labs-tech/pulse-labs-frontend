@@ -38,6 +38,7 @@ import type {
   RoleOption,
   SaveRoleInput,
 } from "@/types/onboarding";
+import { AppHeader } from "@/components/layout";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import Loading from "@/app/[locale]/loading";
@@ -713,7 +714,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
   const freePlan = plans?.find((p) => p.code === "free") ?? currentPlan;
 
   return (
-    <div className="min-h-screen bg-auth-bg text-white relative overflow-hidden">
+    <div className="min-h-screen bg-auth-bg text-white relative overflow-x-hidden">
       {/* Background glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/3 blur-[100px]"
@@ -722,7 +723,8 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
       />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
+      <AppHeader active="settings" locale={locale} />
+      <header className="hidden">
         <div className="container-focused flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href={`/${locale}/dashboard`} prefetch={false} className="text-auth-text-2 hover:text-white transition-colors text-sm">

@@ -21,6 +21,7 @@ import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
+import { AppHeader } from "@/components/layout";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { createSourceAction, getCompileJobAction, getStoredRoleKbId, setStoredRoleKbId, getOnboardingStateAction, getCurrentUserAction } from "@/lib/client-api";
 import type { RoleKbDto } from "@/types/onboarding";
@@ -538,7 +539,7 @@ export function CompileView() {
   ];
 
   return (
-    <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-x-hidden flex flex-col">
       {/* ── Ambient glow ── */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]"
@@ -552,7 +553,8 @@ export function CompileView() {
       />
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl">
+      <AppHeader active="compile" locale={locale} selectedRoleKbId={selectedRoleKbId} />
+      <header className="hidden">
         <div className="container-focused flex h-16 items-center justify-between relative">
           <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">

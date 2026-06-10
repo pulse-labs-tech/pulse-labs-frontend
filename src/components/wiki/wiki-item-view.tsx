@@ -10,6 +10,7 @@ import { logoutAction } from "@/app/actions/auth";
 import { getWikiItemAction } from "@/lib/client-api";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
+import { AppHeader } from "@/components/layout";
 import type { WikiItemDetail, WikiRetrievalStatus, WikiSourceType } from "@/types/wiki";
 
 // ────────────────────────────────────────────────────────────────
@@ -244,7 +245,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
 
   // ── Layout wrapper (always renders header) ───────────────────
   const renderLayout = (children: React.ReactNode) => (
-    <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-auth-bg text-auth-text relative overflow-x-hidden flex flex-col">
       {/* Ambient Glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]"
@@ -253,7 +254,8 @@ export function WikiItemView({ id }: WikiItemViewProps) {
       />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-auth-bg/75 backdrop-blur-2xl h-16">
+      <AppHeader active="wiki" locale={locale} selectedRoleKbId={item?.roleKbId} />
+      <header className="hidden">
         <div className="container-focused flex h-16 items-center justify-between relative">
           <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
