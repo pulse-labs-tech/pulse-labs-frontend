@@ -67,29 +67,30 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
   };
 
   return (
-    <header className="sticky top-0 z-50 shrink-0 border-b border-white/[0.08] bg-auth-bg/90 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-16 w-full max-w-[1480px] items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          {leftAction}
-          <button
-            onClick={() => setMenuOpen((value) => !value)}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-auth-elevated text-auth-text-2 transition-colors hover:bg-white/[0.06] hover:text-white md:hidden"
-            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-            aria-expanded={menuOpen}
-          >
-            <LineIcon name={menuOpen ? "xmark" : "list"} className="h-4 w-4" />
-          </button>
-          <Link
-            href={`/${locale}`}
-            className="inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border border-white/[0.08] bg-auth-elevated px-3 text-sm font-black text-auth-text"
-            aria-label="Pulse Knowledge home"
-          >
-            <PulseLogo size={24} />
-            <span className="hidden truncate whitespace-nowrap sm:inline">
-              Pulse<span className="text-auth-accent">Knowledge</span>
-            </span>
-          </Link>
-        </div>
+    <>
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-auth-bg/95 backdrop-blur-xl">
+        <div className="mx-auto flex min-h-16 w-full max-w-[1480px] items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            {leftAction}
+            <button
+              onClick={() => setMenuOpen((value) => !value)}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-auth-elevated text-auth-text-2 transition-colors hover:bg-white/[0.06] hover:text-white md:hidden"
+              aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+              aria-expanded={menuOpen}
+            >
+              <LineIcon name={menuOpen ? "xmark" : "list"} className="h-4 w-4" />
+            </button>
+            <Link
+              href={`/${locale}`}
+              className="inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border border-white/[0.08] bg-auth-elevated px-3 text-sm font-black text-auth-text"
+              aria-label="Pulse Knowledge home"
+            >
+              <PulseLogo size={24} />
+              <span className="hidden truncate whitespace-nowrap sm:inline">
+                Pulse<span className="text-auth-accent">Knowledge</span>
+              </span>
+            </Link>
+          </div>
 
         <nav className="hidden max-w-[620px] items-center gap-1 overflow-x-auto rounded-2xl border border-white/[0.08] bg-auth-elevated p-1 md:flex">
           {navItems.map((item) => {
@@ -182,6 +183,8 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </nav>
         </div>
       )}
-    </header>
+      </header>
+      <div className="h-[69px] shrink-0" aria-hidden="true" />
+    </>
   );
 }
