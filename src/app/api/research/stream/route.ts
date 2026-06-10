@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. Construct backend URL
-    const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
+    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com";
+    const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || (rawApiUrl.endsWith("/api") ? rawApiUrl.slice(0, -4) : rawApiUrl);
     const backendUrl = new URL(`${RESEARCH_API_BASE}/research/stream`);
     
     // Forward query

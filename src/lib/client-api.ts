@@ -40,11 +40,9 @@ import type { RoleKbDto, OnboardingStateResponse, RoleOption, RoleOptionsRespons
 import type { SettingsOverviewData, UpgradeIntentStatus } from "@/types/settings";
 import type { DashboardSummaryData, ActiveJobsResponseData } from "@/types/dashboard";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
-
-const RESEARCH_API_BASE =
-  process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com";
+const API_BASE = rawApiUrl.endsWith("/api") ? rawApiUrl : `${rawApiUrl}/api`;
+const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || (rawApiUrl.endsWith("/api") ? rawApiUrl.slice(0, -4) : rawApiUrl);
 
 export async function getClientAccessToken(forceRefresh = false): Promise<string | null> {
   if (typeof document === "undefined") return null;

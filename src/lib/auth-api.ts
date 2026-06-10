@@ -26,13 +26,8 @@ import type {
 // Config
 // ────────────────────────────────────────────────────────────────
 
-const AUTH_API_BASE_RAW =
-  process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
-
-const AUTH_API_BASE =
-  typeof window === "undefined" && AUTH_API_BASE_RAW.startsWith("/")
-    ? "https://kbapi.pulsemarketspt.com/api"
-    : AUTH_API_BASE_RAW;
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com";
+const AUTH_API_BASE = rawApiUrl.endsWith("/api") ? rawApiUrl : `${rawApiUrl}/api`;
 
 // ────────────────────────────────────────────────────────────────
 // Internal fetch helper

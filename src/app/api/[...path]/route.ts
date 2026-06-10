@@ -20,7 +20,8 @@ function getUserFromCookies(request: NextRequest): any {
 // Fetch onboarding state from remote backend
 async function fetchOnboardingState(accessToken: string): Promise<any> {
   try {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
+    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com";
+    const API_BASE = rawApiUrl.endsWith("/api") ? rawApiUrl : `${rawApiUrl}/api`;
     const response = await fetch(`${API_BASE}/v1/onboarding/state`, {
       method: "GET",
       headers: {
@@ -78,7 +79,8 @@ async function handleProxy(
   let res: any;
 
   try {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com/api";
+    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com";
+    const API_BASE = rawApiUrl.endsWith("/api") ? rawApiUrl : `${rawApiUrl}/api`;
     const isPublicRoute =
       path.includes("/auth/login") ||
       path.includes("/auth/register") ||

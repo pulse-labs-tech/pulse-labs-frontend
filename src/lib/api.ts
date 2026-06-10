@@ -3,13 +3,8 @@
  * Centralized fetch wrapper with error handling, headers, and base URL.
  */
 
-const API_BASE_URL_RAW =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.pulselabs.ai";
-
-const API_BASE_URL =
-  typeof window === "undefined" && API_BASE_URL_RAW.startsWith("/")
-    ? "https://kbapi.pulsemarketspt.com/api"
-    : API_BASE_URL_RAW;
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com";
+const API_BASE_URL = rawApiUrl.endsWith("/api") ? rawApiUrl : `${rawApiUrl}/api`;
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>;

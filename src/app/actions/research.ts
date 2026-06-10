@@ -208,7 +208,8 @@ export async function submitDocumentAction(
       role_id: activeRoleId,
     };
 
-    const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || "https://cardboard-desolate-zoologist.ngrok-free.dev";
+    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://kbapi.pulsemarketspt.com";
+    const RESEARCH_API_BASE = process.env.NEXT_PUBLIC_RESEARCH_API_URL || (rawApiUrl.endsWith("/api") ? rawApiUrl.slice(0, -4) : rawApiUrl);
     const res = await fetch(`${RESEARCH_API_BASE}/documents`, {
       method: "POST",
       headers: {
