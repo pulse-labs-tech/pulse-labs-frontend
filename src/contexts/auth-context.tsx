@@ -22,6 +22,7 @@ import {
   useReducer,
   useEffect,
 } from "react";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import type { AuthUser } from "@/types/auth";
 
@@ -141,10 +142,41 @@ function readUserCookie(): AuthUser | null {
   }
 }
 
+/**
+ * Detect if the pathname matches a public route.
+ */
+function isPublicPath(pathname: string): boolean {
+  if (!pathname) return true;
+
+  // Normalize pathname: remove language prefix (e.g. /vi/login -> /login, /en/about -> /about, /en -> /)
+  const segments = pathname.split("/").filter(Boolean);
+  const subpath = segments.length > 0 && ["vi", "en"].includes(segments[0])
+    ? "/" + segments.slice(1).join("/")
+    : pathname;
+
+  const PUBLIC_ROUTES = [
+    "/",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/verify-email",
+    "/verify-email-pending",
+    "/terms",
+    "/privacy",
+    "/contact",
+    "/about",
+    "/features",
+    "/pricing",
+  ];
+
+  return PUBLIC_ROUTES.some((route) => subpath === route || subpath.startsWith(route + "/"));
+}
+
 export function AuthProvider({
   children,
   initialUser = null,
 }: AuthProviderProps) {
+  const pathname = usePathname();
   const [state, dispatch] = useReducer(authReducer, {
     status: initialUser ? "authenticated" : "loading",
     user: initialUser,
@@ -177,6 +209,8 @@ export function AuthProvider({
 
   // Synchronize user roles and details from /users/me on mount
   useEffect(() => {
+    if (isPublicPath(pathname)) return; // Don't call user profile API on public paths!
+
     if (state.status === "authenticated" && state.user) {
       const userId = state.user.id;
       import("@/lib/client-api").then(({ getCurrentUserAction, setStoredRoleKbId }) => {
@@ -209,7 +243,7 @@ export function AuthProvider({
         }).catch((err) => console.error("Error fetching user profile in auth provider:", err));
       });
     }
-  }, [state.status, state.user?.id]);
+  }, [state.status, state.user?.id, pathname]);
 
   const setUser = useCallback((user: AuthUser) => {
     dispatch({ type: "SET_USER", user });

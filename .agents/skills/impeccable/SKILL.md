@@ -63,6 +63,15 @@ Two hard typographic ceilings you currently miss:
 
 - Dropdowns rendered with `position: absolute` inside an `overflow: hidden` or `overflow: auto` container will be clipped. Use the native `<dialog>` / popover API, `position: fixed`, or a portal to escape the stacking context.
 
+#### API & Network
+
+- Do NOT use local Next.js `/api/...` proxies for client-side API calls. All client-side fetches must target the backend directly (via `API_BASE` or `RESEARCH_API_BASE` imported from `@/lib/client-api`) so developers can inspect clean, unencoded JSON responses in DevTools.
+- Do NOT use Server Actions (`"use server"`) for fetching standard data queries and listing/detail actions in client components. Server Actions return obfuscated RSC streams, which are hard to debug in DevTools.
+- For auth flows (login/register/refresh), perform direct fetches to the remote backend endpoints (e.g. `${API_BASE}/v1/auth/login`), and then save/clear cookies (`pulse_at`, `pulse_rt`, `pulse_user`) on the client side using `document.cookie` so they remain readable by the Next.js middleware router.
+- Do NOT call backend APIs on public pages or paths where authentication is not required (e.g., do not sync the user profile `/v1/users/me` on landing/login/register pages). Skip these fetches early.
+- Avoid duplicate API calls on mount. Ensure that the root providers and subpages do not duplicate the same fetching requests (like parallel `/users/me` loads) during hydration.
+- Ensure all rendered data in components comes from the backend. Do not mock, stub, or use fake/mock data in UI components where backend data is expected.
+
 ### Copy
 
 - Every word earns its place. No restated headings, no intros that repeat the title.

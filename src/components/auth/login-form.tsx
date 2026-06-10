@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { getLocalizedPath } from "@/lib/utils";
 import type { AuthErrorCode, AuthUser } from "@/types/auth";
+import { API_BASE } from "@/lib/client-api";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -72,7 +73,7 @@ export function LoginForm() {
 
     try {
       // Call standard proxy endpoint
-      const response = await fetch("/api/v1/auth/login", {
+      const response = await fetch(`${API_BASE}/v1/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,6 +88,29 @@ export function LoginForm() {
       if (res.status === "1" && res.data) {
         // Sync user state to Auth Provider
         setUser(res.data.user);
+        
+        // Save tokens and user data in browser cookies so middleware and API helpers can use them
+        const maxAge = res.data.expiresIn || 900;
+        const secure = window.location.protocol === "https:";
+        const sameSite = "lax";
+        
+        document.cookie = `pulse_at=${res.data.accessToken}; path=/; max-age=${maxAge}; ${secure ? "secure;" : ""} samesite=${sameSite}`;
+        if (res.data.refreshToken) {
+          document.cookie = `pulse_rt=${res.data.refreshToken}; path=/; max-age=${30 * 24 * 60 * 60}; ${secure ? "secure;" : ""} samesite=${sameSite}`;
+        }
+        
+        const safeData = {
+          id: res.data.user.id,
+          email: res.data.user.email,
+          firstName: res.data.user.firstName,
+          lastName: res.data.user.lastName,
+          displayName: res.data.user.displayName,
+          plan: res.data.user.plan,
+          onboardingStatus: res.data.user.onboardingStatus,
+          roleKbId: res.data.user.roleKbId,
+        };
+        const encoded = encodeURIComponent(JSON.stringify(safeData));
+        document.cookie = `pulse_user=${encoded}; path=/; max-age=${30 * 24 * 60 * 60}; ${secure ? "secure;" : ""} samesite=${sameSite}`;
         
         // Backend returns nextRoute/next_route
         const nextRoute = res.data.nextRoute || res.data.next_route || "/dashboard";

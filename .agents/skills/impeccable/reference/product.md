@@ -49,6 +49,11 @@ Every interactive component has: default, hover, focus, active, disabled, loadin
 - Reinventing standard affordances for flavor (custom scrollbars, weird form controls, non-standard modals).
 - Heavy color or full-saturation accents on inactive states.
 - Modal as first thought. Modals are usually laziness. Exhaust inline / progressive alternatives first.
+- Using Next.js Server Actions for standard API data fetching or queries in client components.
+- Using local Next.js `/api/...` proxies for client-side API calls.
+- Calling backend APIs on public paths or pages where authentication is not required (e.g. no `/users/me` sync on landing/login/register).
+- Making duplicate API calls on mount between layout providers and screen views.
+- Using fake, mock, or stubbed data for rendering where backend data is expected.
 
 ## Product permissions
 
