@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
+import { MarkdownRenderer } from "@/components/shared";
 import { Select } from "../ui/select";
 import { logoutAction } from "@/app/actions/auth";
 import {
@@ -301,9 +302,7 @@ function AssistantMessage({
 
         {/* Answer text */}
         <div className="ai-text">
-          <p className="whitespace-pre-wrap leading-relaxed break-words">
-            {msg.content}
-          </p>
+          <MarkdownRenderer content={msg.content} />
         </div>
 
         {/* Freshness Badge */}

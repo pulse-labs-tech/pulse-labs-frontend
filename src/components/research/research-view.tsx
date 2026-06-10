@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { Select } from "@/components/ui/select";
+import { MarkdownRenderer } from "@/components/shared";
 import {
   createResearchRunAction,
   listResearchRunsAction,
@@ -922,14 +923,7 @@ export function ResearchView() {
                             <span>Đang tổng hợp câu trả lời từ AI...</span>
                           </div>
                         )}
-                        <div
-                          className="text-xs text-white leading-relaxed whitespace-pre-wrap"
-                          dangerouslySetInnerHTML={{
-                            __html: streamAnswer
-                              ? streamAnswer.replace(/\n/g, "<br/>")
-                              : "",
-                          }}
-                        />
+                        <MarkdownRenderer content={streamAnswer || ""} />
                       </div>
                     </div>
                   )}

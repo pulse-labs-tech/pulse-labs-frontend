@@ -8,6 +8,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import Loading from "@/app/[locale]/loading";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/contexts/locale-context";
+import { MarkdownRenderer } from "@/components/shared";
 import {
   getResearchRunAction,
   getResearchRunSourcesAction,
@@ -109,6 +110,8 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
   const [savedWikiUrl, setSavedWikiUrl] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<"synthesis" | "sources" | "claims" | "plan">("synthesis");
+  const [copiedReport, setCopiedReport] = useState(false);
+  const [sharedReport, setSharedReport] = useState(false);
 
   const fetchDetail = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -455,11 +458,46 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                 )}
 
                 {/* Answer */}
-                <div className="prose prose-invert prose-sm max-w-none rounded-2xl border border-auth-border bg-auth-surface p-6">
-                  <div
-                    className="text-sm text-white leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: synthesis.answer.replace(/\n/g, "<br/>") }}
-                  />
+                <div className="rounded-2xl border border-auth-border bg-auth-surface p-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-2">
+                    <span className="text-xs font-bold text-auth-text-3 uppercase tracking-wider flex items-center gap-1.5">
+                      <LineIcon name="file-text" className="h-3.5 w-3.5 text-auth-accent" />
+                      Nội dung báo cáo chi tiết
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(synthesis.answer);
+                          setCopiedReport(true);
+                          setTimeout(() => setCopiedReport(false), 2000);
+                        }}
+                        className="flex items-center gap-1 text-xs text-auth-text-2 hover:text-white transition-colors cursor-pointer border border-white/[0.08] rounded-lg px-2.5 py-1 bg-white/[0.02]"
+                      >
+                        <LineIcon name={copiedReport ? "checkmark-circle" : "copy"} className={`h-3.5 w-3.5 ${copiedReport ? "text-auth-accent" : ""}`} />
+                        <span>{copiedReport ? "Đã sao chép" : "Sao chép"}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (navigator.share) {
+                            navigator.share({
+                              title: run.query,
+                              text: synthesis.answer,
+                              url: window.location.href,
+                            }).catch(() => {});
+                          } else {
+                            navigator.clipboard.writeText(window.location.href);
+                            setSharedReport(true);
+                            setTimeout(() => setSharedReport(false), 2000);
+                          }
+                        }}
+                        className="flex items-center gap-1 text-xs text-auth-text-2 hover:text-white transition-colors cursor-pointer border border-white/[0.08] rounded-lg px-2.5 py-1 bg-white/[0.02]"
+                      >
+                        <LineIcon name={sharedReport ? "checkmark-circle" : "share"} className={`h-3.5 w-3.5 ${sharedReport ? "text-auth-accent" : ""}`} />
+                        <span>{sharedReport ? "Đã chia sẻ" : "Chia sẻ link"}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <MarkdownRenderer content={synthesis.answer} />
                 </div>
 
                 {/* Citations */}
