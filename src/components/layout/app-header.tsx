@@ -71,12 +71,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
       shortLabel: "Wiki",
       href: appHref(locale, "/wiki", roleQuery),
     },
-    {
-      id: "settings",
-      label: locale === "vi" ? "Cài đặt" : "Settings",
-      shortLabel: locale === "vi" ? "Cài đặt" : "Settings",
-      href: `/${locale}/settings`,
-    },
   ];
 
   const userName = user?.displayName?.split(" ").slice(-1)[0] || user?.email?.split("@")[0] || "User";
