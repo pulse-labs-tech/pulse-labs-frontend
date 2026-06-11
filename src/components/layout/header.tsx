@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LineIcon } from "@/components/shared/line-icon";
 import { PulseLogo } from "@/components/shared/pulse-logo";
 import { Button } from "@/components/ui";
@@ -10,12 +11,22 @@ import { LocaleSwitcher } from "./locale-switcher";
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t, locale } = useTranslation();
+  const pathname = usePathname();
+  const homeHref = `/${locale}`;
 
   const navLinks = [
     { href: "#features", label: t("landing.navFeatures") },
     { href: "#how-it-works", label: t("landing.navHowItWorks") },
     { href: `/${locale}/pricing`, label: t("landing.navPricing") },
   ];
+
+  const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (pathname !== homeHref) return;
+
+    event.preventDefault();
+    setMobileOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-white/[0.08] glass-premium">
@@ -25,7 +36,8 @@ export function Header() {
         {/* Col 1 — Logo (1fr, left-aligned) */}
         <div className="flex justify-start">
           <Link
-            href={`/${locale}`}
+            href={homeHref}
+            onClick={handleLogoClick}
             className="group flex items-center gap-2 shrink-0"
             aria-label="Pulse Knowledge — trang chủ"
           >
@@ -79,7 +91,8 @@ export function Header() {
       <div className="w-full max-w-[1440px] mx-auto px-5 h-14 flex items-center justify-between lg:hidden">
         {/* Logo */}
         <Link
-          href={`/${locale}`}
+          href={homeHref}
+          onClick={handleLogoClick}
           className="group flex items-center gap-2"
           aria-label="Pulse Knowledge — trang chủ"
         >

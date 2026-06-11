@@ -1,7 +1,8 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState, useTransition } from "react";
+import { type MouseEvent, ReactNode, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
 import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo } from "@/components/shared/pulse-logo";
@@ -34,12 +35,14 @@ const navIcon: Record<AppHeaderNavItem, string> = {
 
 export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppHeaderProps) {
   const { user, clearAuth } = useAuth();
+  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const roleQuery = active === "settings" ? null : selectedRoleKbId;
+  const dashboardHref = `/${locale}/dashboard${roleQuery ? `?roleKbId=${roleQuery}` : ""}`;
   const navItems: { id: AppHeaderNavItem; label: string; shortLabel: string; href: string }[] = [
     {
       id: "dashboard",
@@ -80,6 +83,14 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("open-global-search"));
     }
+  };
+
+  const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (pathname !== `/${locale}/dashboard`) return;
+
+    event.preventDefault();
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLogout = () => {
@@ -134,7 +145,8 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
               <LineIcon name={menuOpen ? "xmark" : "list"} className="h-4 w-4" />
             </button>
             <Link
-              href={`/${locale}/dashboard${roleQuery ? `?roleKbId=${roleQuery}` : ""}`}
+              href={dashboardHref}
+              onClick={handleLogoClick}
               className="app-glass-pill inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border px-3 text-sm font-black text-auth-text transition-colors sm:px-4"
               aria-label="Pulse Knowledge dashboard"
             >
