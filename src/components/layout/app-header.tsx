@@ -125,7 +125,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-auth-bg/78 shadow-[0_10px_32px_rgba(0,0,0,0.24)] backdrop-blur-2xl supports-[backdrop-filter]:bg-auth-bg/68">
+      <header className="app-glass-header fixed inset-x-0 top-0 z-50 border-b border-white/[0.08]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" aria-hidden="true" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-auth-accent/22 to-transparent" aria-hidden="true" />
         <div className="mx-auto grid min-h-[72px] w-full max-w-[1760px] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 sm:px-6 xl:gap-5 2xl:px-8">
@@ -133,7 +133,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             {leftAction}
             <button
               onClick={() => setMenuOpen((value) => !value)}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.055] text-auth-text-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:bg-white/[0.09] hover:text-white lg:hidden"
+              className="app-glass-pill flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border text-auth-text-2 transition-colors hover:text-white lg:hidden"
               aria-label={menuOpen ? "Close navigation" : "Open navigation"}
               aria-expanded={menuOpen}
             >
@@ -141,7 +141,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             </button>
             <Link
               href={`/${locale}/dashboard${roleQuery ? `?roleKbId=${roleQuery}` : ""}`}
-              className="inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border border-white/[0.10] bg-white/[0.055] px-3 text-sm font-black text-auth-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09] sm:px-4"
+              className="app-glass-pill inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border px-3 text-sm font-black text-auth-text transition-colors sm:px-4"
               aria-label="Pulse Knowledge dashboard"
             >
               <PulseLogo size={24} />
@@ -152,7 +152,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </div>
 
           <nav className="hidden min-w-0 justify-center lg:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
-            <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl border border-white/[0.10] bg-white/[0.055] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
+            <div className="app-glass-pill flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl border p-1">
               {navItems.map((item) => {
                 const isActive = item.id === active;
                 return (
@@ -161,9 +161,9 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                     href={item.href}
                     prefetch={false}
                     title={item.label}
-                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-xs font-bold transition-colors 2xl:px-3 ${
+                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-transparent px-2.5 text-xs font-bold transition-colors 2xl:px-3 ${
                       isActive
-                        ? "bg-auth-accent-dim text-auth-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+                        ? "app-glass-pill-active text-auth-accent"
                         : "text-auth-text-2 hover:bg-white/[0.08] hover:text-auth-text"
                     }`}
                   >
@@ -179,7 +179,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
             <button
               onClick={openSearch}
-              className="hidden h-10 items-center gap-2 rounded-2xl border border-white/[0.10] bg-white/[0.055] px-3 text-xs font-semibold text-auth-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09] hover:text-auth-text xl:inline-flex"
+              className="app-glass-pill hidden h-10 items-center gap-2 rounded-2xl border px-3 text-xs font-semibold text-auth-text-3 transition-colors hover:text-auth-text xl:inline-flex"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-3.5 w-3.5" />
@@ -190,7 +190,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             </button>
             <button
               onClick={openSearch}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.055] text-auth-text-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09] hover:text-auth-text xl:hidden"
+              className="app-glass-pill flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-auth-text-2 transition-colors hover:text-auth-text xl:hidden"
               title={locale === "vi" ? "Tìm kiếm" : "Search"}
               aria-label={locale === "vi" ? "Tìm kiếm" : "Search"}
             >
@@ -209,7 +209,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen((value) => !value)}
-                  className="group flex h-10 min-w-10 items-center gap-2 rounded-2xl border border-white/[0.10] bg-white/[0.055] py-1 pl-1 pr-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09]"
+                  className="app-glass-pill group flex h-10 min-w-10 items-center gap-2 rounded-2xl border py-1 pl-1 pr-2 text-left transition-colors"
                   aria-haspopup="menu"
                   aria-expanded={userMenuOpen}
                 >
@@ -232,7 +232,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                   >
                     <div
                       role="menu"
-                      className="overflow-hidden rounded-[22px] border border-white/[0.12] bg-auth-elevated/94 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-2xl"
+                      className="app-user-menu overflow-hidden rounded-[22px] border p-3"
                     >
                       <div className="flex items-center gap-3 px-3 py-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-auth-accent-dark text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
@@ -252,7 +252,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                         prefetch={false}
                         onClick={() => setUserMenuOpen(false)}
                         role="menuitem"
-                        className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-white/[0.07] hover:text-white"
+                        className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
                       >
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
                           <LineIcon name="gear" className="h-4 w-4 text-auth-accent" />
@@ -279,7 +279,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
               <button
                 onClick={handleLogout}
                 disabled={isPending}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.055] text-auth-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-red-300 disabled:opacity-50"
+                className="app-glass-pill flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-auth-text-3 transition-colors hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-red-300 disabled:opacity-50"
                 title={locale === "vi" ? "Đăng xuất" : "Log out"}
                 aria-label={locale === "vi" ? "Đăng xuất" : "Log out"}
               >
@@ -303,7 +303,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                     className={`flex h-12 items-center gap-2 rounded-2xl border px-3 text-sm font-bold transition-colors ${
                       isActive
                         ? "border-auth-accent/25 bg-auth-accent-dim text-auth-accent"
-                        : "border-white/[0.10] bg-white/[0.055] text-auth-text-2 hover:bg-white/[0.09] hover:text-auth-text"
+                        : "app-glass-pill text-auth-text-2 hover:text-auth-text"
                     }`}
                   >
                     <LineIcon name={navIcon[item.id]} className="h-4 w-4" />
