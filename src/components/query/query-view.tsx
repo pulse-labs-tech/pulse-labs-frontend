@@ -1002,7 +1002,7 @@ export function QueryView() {
   const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
 
   return (
-    <div className="h-screen w-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-row">
+    <div className="h-screen w-screen bg-auth-bg text-auth-text relative overflow-hidden flex flex-col">
       {/* Ambient glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/3 blur-[120px]"
@@ -1010,6 +1010,22 @@ export function QueryView() {
         aria-hidden="true"
       />
 
+      <AppHeader
+        active="query"
+        locale={locale}
+        selectedRoleKbId={selectedRoleKbId}
+        leftAction={!sidebarOpen ? (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.055] text-auth-text-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:bg-white/[0.09] hover:text-white"
+            title={t("query.expandSidebar", "Toggle sidebar")}
+          >
+            <LineIcon name="grid-alt" className="h-4 w-4" />
+          </button>
+        ) : undefined}
+      />
+
+      <div className="relative z-10 flex min-h-0 flex-1 flex-row overflow-hidden">
       {/* Left Sidebar */}
       <aside
         id="sidebar"
@@ -1120,21 +1136,6 @@ export function QueryView() {
 
       {/* Right Content Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
-        {/* Header */}
-        <AppHeader
-          active="query"
-          locale={locale}
-          selectedRoleKbId={selectedRoleKbId}
-          leftAction={!sidebarOpen ? (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-auth-elevated text-auth-text-2 transition-colors hover:bg-white/[0.06] hover:text-white"
-              title={t("query.expandSidebar", "Toggle sidebar")}
-            >
-              <LineIcon name="grid-alt" className="h-4 w-4" />
-            </button>
-          ) : undefined}
-        />
         <header className="hidden">
           <div className="px-6 flex h-full items-center justify-between relative">
             <div className="flex justify-start z-10">
@@ -1496,6 +1497,7 @@ export function QueryView() {
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Floating Compile Insights Notification Bar */}

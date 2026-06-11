@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useTransition } from "react";
+import { ReactNode, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { useAuth } from "@/hooks/use-auth";
@@ -36,6 +36,8 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
   const { user, clearAuth } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const roleQuery = active === "settings" ? null : selectedRoleKbId;
   const navItems: { id: AppHeaderActive; label: string; shortLabel: string; href: string }[] = [
@@ -97,15 +99,41 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
     });
   };
 
+  useEffect(() => {
+    if (!userMenuOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [userMenuOpen]);
+
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-auth-bg/95 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-auth-bg/78 shadow-[0_10px_32px_rgba(0,0,0,0.24)] backdrop-blur-2xl supports-[backdrop-filter]:bg-auth-bg/68">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-auth-accent/22 to-transparent" aria-hidden="true" />
         <div className="mx-auto grid min-h-[72px] w-full max-w-[1760px] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 sm:px-6 xl:gap-5 2xl:px-8">
           <div className="flex min-w-0 items-center gap-2">
             {leftAction}
             <button
               onClick={() => setMenuOpen((value) => !value)}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-auth-elevated text-auth-text-2 transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.055] text-auth-text-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:bg-white/[0.09] hover:text-white lg:hidden"
               aria-label={menuOpen ? "Close navigation" : "Open navigation"}
               aria-expanded={menuOpen}
             >
@@ -113,7 +141,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             </button>
             <Link
               href={`/${locale}/dashboard${roleQuery ? `?roleKbId=${roleQuery}` : ""}`}
-              className="inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border border-white/[0.08] bg-auth-elevated px-3 text-sm font-black text-auth-text transition-colors hover:border-white/[0.14] hover:bg-auth-card-hover sm:px-4"
+              className="inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border border-white/[0.10] bg-white/[0.055] px-3 text-sm font-black text-auth-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09] sm:px-4"
               aria-label="Pulse Knowledge dashboard"
             >
               <PulseLogo size={24} />
@@ -124,7 +152,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </div>
 
           <nav className="hidden min-w-0 justify-center lg:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
-            <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl border border-white/[0.08] bg-auth-elevated p-1">
+            <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl border border-white/[0.10] bg-white/[0.055] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
               {navItems.map((item) => {
                 const isActive = item.id === active;
                 return (
@@ -135,8 +163,8 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                     title={item.label}
                     className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-xs font-bold transition-colors 2xl:px-3 ${
                       isActive
-                        ? "bg-auth-accent-dim text-auth-accent"
-                        : "text-auth-text-2 hover:bg-white/[0.06] hover:text-auth-text"
+                        ? "bg-auth-accent-dim text-auth-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+                        : "text-auth-text-2 hover:bg-white/[0.08] hover:text-auth-text"
                     }`}
                   >
                     <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5" />
@@ -151,7 +179,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
             <button
               onClick={openSearch}
-              className="hidden h-10 items-center gap-2 rounded-2xl border border-white/[0.08] bg-auth-elevated px-3 text-xs font-semibold text-auth-text-3 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-auth-text xl:inline-flex"
+              className="hidden h-10 items-center gap-2 rounded-2xl border border-white/[0.10] bg-white/[0.055] px-3 text-xs font-semibold text-auth-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09] hover:text-auth-text xl:inline-flex"
               title={locale === "vi" ? "Tìm kiếm (Ctrl+K)" : "Search (Ctrl+K)"}
             >
               <LineIcon name="search" className="h-3.5 w-3.5" />
@@ -162,7 +190,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             </button>
             <button
               onClick={openSearch}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-auth-elevated text-auth-text-2 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-auth-text xl:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.055] text-auth-text-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09] hover:text-auth-text xl:hidden"
               title={locale === "vi" ? "Tìm kiếm" : "Search"}
               aria-label={locale === "vi" ? "Tìm kiếm" : "Search"}
             >
@@ -171,32 +199,98 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
 
             <LocaleSwitcher id={`app-${active}`} />
 
-            {user && (
-              <div className="hidden items-center gap-2 rounded-2xl border border-white/[0.08] bg-auth-elevated py-1 pl-1 pr-2 xl:flex">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-auth-accent-dark text-xs font-black text-white">
-                  {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0 leading-none">
-                  <div className="max-w-[92px] truncate text-[11px] font-bold text-white">{userName}</div>
-                  <div className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-auth-accent">{planName}</div>
-                </div>
-              </div>
-            )}
+            {user ? (
+              <div
+                ref={userMenuRef}
+                className="relative"
+                onMouseEnter={() => setUserMenuOpen(true)}
+                onMouseLeave={() => setUserMenuOpen(false)}
+              >
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((value) => !value)}
+                  className="group flex h-10 min-w-10 items-center gap-2 rounded-2xl border border-white/[0.10] bg-white/[0.055] py-1 pl-1 pr-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-white/[0.16] hover:bg-white/[0.09]"
+                  aria-haspopup="menu"
+                  aria-expanded={userMenuOpen}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-auth-accent-dark text-xs font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                    {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="hidden min-w-0 leading-none min-[500px]:block">
+                    <div className="max-w-[104px] truncate text-[11px] font-bold text-white">{userName}</div>
+                    <div className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-auth-accent">{planName}</div>
+                  </div>
+                  <LineIcon
+                    name="chevron-down"
+                    className={`hidden h-3 w-3 text-auth-text-3 transition-transform sm:block ${userMenuOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
 
-            <button
-              onClick={handleLogout}
-              disabled={isPending}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-auth-elevated text-auth-text-3 transition-colors hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-red-300 disabled:opacity-50"
-              title={locale === "vi" ? "Đăng xuất" : "Log out"}
-              aria-label={locale === "vi" ? "Đăng xuất" : "Log out"}
-            >
-              {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LineIcon name="exit" className="h-4 w-4" />}
-            </button>
+                {userMenuOpen && (
+                  <div
+                    className="absolute right-0 top-full z-50 w-[min(90vw,320px)] pt-2"
+                  >
+                    <div
+                      role="menu"
+                      className="overflow-hidden rounded-[22px] border border-white/[0.12] bg-auth-elevated/94 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-2xl"
+                    >
+                      <div className="flex items-center gap-3 px-3 py-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-auth-accent-dark text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                          {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-bold text-white">{user.displayName || user.email || "User"}</div>
+                          <div className="mt-1 truncate text-xs text-auth-text-3">{user.email}</div>
+                          <div className="mt-2 inline-flex rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-auth-accent">
+                            {planName}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="my-2 h-px bg-white/[0.08]" />
+                      <Link
+                        href={`/${locale}/settings`}
+                        prefetch={false}
+                        onClick={() => setUserMenuOpen(false)}
+                        role="menuitem"
+                        className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-white/[0.07] hover:text-white"
+                      >
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+                          <LineIcon name="gear" className="h-4 w-4 text-auth-accent" />
+                        </span>
+                        <span className="leading-5">{locale === "vi" ? "Cài đặt tài khoản" : "Account settings"}</span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        disabled={isPending}
+                        role="menuitem"
+                        className="mt-1 flex min-h-12 w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-left text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/[0.10] disabled:opacity-50"
+                      >
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-red-400/15 bg-red-500/[0.06]">
+                          {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LineIcon name="exit" className="h-4 w-4" />}
+                        </span>
+                        <span>{locale === "vi" ? "Đăng xuất" : "Log out"}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={handleLogout}
+                disabled={isPending}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.055] text-auth-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-red-300 disabled:opacity-50"
+                title={locale === "vi" ? "Đăng xuất" : "Log out"}
+                aria-label={locale === "vi" ? "Đăng xuất" : "Log out"}
+              >
+                {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LineIcon name="exit" className="h-4 w-4" />}
+              </button>
+            )}
           </div>
         </div>
 
         {menuOpen && (
-          <div className="border-t border-white/[0.08] px-4 pb-4 lg:hidden">
+          <div className="border-t border-white/[0.08] bg-auth-bg/70 px-4 pb-4 backdrop-blur-2xl lg:hidden">
             <nav className="mx-auto grid max-w-[1760px] grid-cols-2 gap-2 pt-4 sm:grid-cols-3" aria-label={locale === "vi" ? "Điều hướng di động" : "Mobile navigation"}>
               {navItems.map((item) => {
                 const isActive = item.id === active;
@@ -209,7 +303,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                     className={`flex h-12 items-center gap-2 rounded-2xl border px-3 text-sm font-bold transition-colors ${
                       isActive
                         ? "border-auth-accent/25 bg-auth-accent-dim text-auth-accent"
-                        : "border-white/[0.08] bg-auth-elevated text-auth-text-2 hover:bg-white/[0.06] hover:text-auth-text"
+                        : "border-white/[0.10] bg-white/[0.055] text-auth-text-2 hover:bg-white/[0.09] hover:text-auth-text"
                     }`}
                   >
                     <LineIcon name={navIcon[item.id]} className="h-4 w-4" />
