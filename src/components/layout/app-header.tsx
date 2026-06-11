@@ -10,6 +10,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
 
 type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
+type AppHeaderNavItem = "dashboard" | "query" | "compile" | "wiki";
 
 interface AppHeaderProps {
   active: AppHeaderActive;
@@ -23,13 +24,11 @@ function appHref(locale: string, path: string, roleKbId?: string | null) {
   return `/${locale}${path}${query}`;
 }
 
-const navIcon: Record<AppHeaderActive, string> = {
+const navIcon: Record<AppHeaderNavItem, string> = {
   dashboard: "grid-alt",
   query: "comment",
   compile: "upload",
   wiki: "book",
-  research: "compass",
-  settings: "database",
 };
 
 export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppHeaderProps) {
@@ -40,7 +39,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const roleQuery = active === "settings" ? null : selectedRoleKbId;
-  const navItems: { id: AppHeaderActive; label: string; shortLabel: string; href: string }[] = [
+  const navItems: { id: AppHeaderNavItem; label: string; shortLabel: string; href: string }[] = [
     {
       id: "dashboard",
       label: locale === "vi" ? "Bảng điều khiển" : "Dashboard",
@@ -58,12 +57,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
       label: locale === "vi" ? "Biên dịch" : "Compile",
       shortLabel: locale === "vi" ? "Dịch" : "Build",
       href: appHref(locale, "/compile/new", roleQuery),
-    },
-    {
-      id: "research",
-      label: locale === "vi" ? "Nghiên cứu AI" : "Research",
-      shortLabel: locale === "vi" ? "Nghiên cứu" : "Research",
-      href: appHref(locale, "/research", roleQuery),
     },
     {
       id: "wiki",
@@ -285,7 +278,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
 
         {menuOpen && (
           <div className="border-t border-white/[0.08] bg-auth-bg/70 px-4 pb-4 backdrop-blur-2xl lg:hidden">
-            <nav className="mx-auto grid max-w-[1760px] grid-cols-2 gap-2 pt-4 sm:grid-cols-3" aria-label={locale === "vi" ? "Điều hướng di động" : "Mobile navigation"}>
+            <nav className="mx-auto grid max-w-[1760px] grid-cols-2 gap-2 pt-4" aria-label={locale === "vi" ? "Điều hướng di động" : "Mobile navigation"}>
               {navItems.map((item) => {
                 const isActive = item.id === active;
                 return (
