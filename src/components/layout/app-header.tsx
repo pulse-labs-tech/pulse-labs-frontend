@@ -10,7 +10,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
 
 type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
-type AppHeaderNavItem = "dashboard" | "query" | "compile" | "wiki";
+type AppHeaderNavItem = "dashboard" | "query" | "compile" | "research" | "wiki";
 
 interface AppHeaderProps {
   active: AppHeaderActive;
@@ -28,6 +28,7 @@ const navIcon: Record<AppHeaderNavItem, string> = {
   dashboard: "grid-alt",
   query: "comment",
   compile: "upload",
+  research: "compass",
   wiki: "book",
 };
 
@@ -57,6 +58,12 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
       label: locale === "vi" ? "Biên dịch" : "Compile",
       shortLabel: locale === "vi" ? "Dịch" : "Build",
       href: appHref(locale, "/compile/new", roleQuery),
+    },
+    {
+      id: "research",
+      label: locale === "vi" ? "Nghiên cứu AI" : "Research",
+      shortLabel: locale === "vi" ? "Nghiên cứu" : "Research",
+      href: appHref(locale, "/research", roleQuery),
     },
     {
       id: "wiki",
@@ -139,7 +146,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </div>
 
           <nav className="hidden min-w-0 justify-center lg:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
-            <div className="app-glass-pill flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl border p-1">
+            <div className="app-glass-pill flex max-w-full items-center gap-0.5 overflow-x-auto rounded-[18px] border p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
               {navItems.map((item) => {
                 const isActive = item.id === active;
                 return (
@@ -148,13 +155,13 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                     href={item.href}
                     prefetch={false}
                     title={item.label}
-                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-transparent px-2.5 text-xs font-bold transition-colors 2xl:px-3 ${
+                    className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[14px] border border-transparent px-2.5 text-[11px] font-bold transition-all duration-200 xl:px-3 ${
                       isActive
-                        ? "app-glass-pill-active text-auth-accent"
-                        : "text-auth-text-2 hover:bg-white/[0.08] hover:text-auth-text"
+                        ? "border-auth-accent/25 bg-auth-accent-dim text-auth-accent shadow-[0_0_18px_rgba(35,197,132,0.16)]"
+                        : "text-auth-text-2 hover:bg-white/[0.06] hover:text-auth-text"
                     }`}
                   >
-                    <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5" />
+                    <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
                     <span className="hidden 2xl:inline">{item.label}</span>
                     <span className="hidden xl:inline 2xl:hidden">{item.shortLabel}</span>
                   </Link>
