@@ -12,7 +12,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
 
 type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
-type AppHeaderNavItem = "dashboard" | "query" | "wiki";
+type AppHeaderNavItem = "dashboard" | "query" | "research" | "wiki";
 
 interface AppHeaderProps {
   active: AppHeaderActive;
@@ -29,6 +29,7 @@ function appHref(locale: string, path: string, roleKbId?: string | null) {
 const navIcon: Record<AppHeaderNavItem, string> = {
   dashboard: "grid-alt",
   query: "comment",
+  research: "compass",
   wiki: "book",
 };
 
@@ -54,6 +55,12 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
       label: locale === "vi" ? "Hỏi đáp AI" : "Ask AI",
       shortLabel: locale === "vi" ? "Hỏi AI" : "Ask",
       href: appHref(locale, "/query", roleQuery),
+    },
+    {
+      id: "research",
+      label: locale === "vi" ? "Nghiên cứu AI" : "AI Research",
+      shortLabel: locale === "vi" ? "Nghiên cứu" : "Research",
+      href: appHref(locale, "/research", roleQuery),
     },
     {
       id: "wiki",
@@ -251,11 +258,35 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                         </div>
                         <div className="my-2 h-px bg-white/[0.08]" />
                         <Link
-                          href={`/${locale}/settings`}
+                          href={appHref(locale, "/research", roleQuery)}
                           prefetch={false}
                           onClick={() => setUserMenuOpen(false)}
                           role="menuitem"
                           className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+                            <LineIcon name="compass" className="h-4 w-4 text-auth-accent" />
+                          </span>
+                          <span className="leading-5">{locale === "vi" ? "Nghiên cứu AI" : "AI Research"}</span>
+                        </Link>
+                        <Link
+                          href={appHref(locale, "/compile/new", roleQuery)}
+                          prefetch={false}
+                          onClick={() => setUserMenuOpen(false)}
+                          role="menuitem"
+                          className="mt-1 flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+                            <LineIcon name="plus" className="h-4 w-4 text-auth-accent" />
+                          </span>
+                          <span className="leading-5">{locale === "vi" ? "Nạp tài liệu" : "Ingest documents"}</span>
+                        </Link>
+                        <Link
+                          href={`/${locale}/settings`}
+                          prefetch={false}
+                          onClick={() => setUserMenuOpen(false)}
+                          role="menuitem"
+                          className="mt-1 flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
                             <LineIcon name="gear" className="h-4 w-4 text-auth-accent" />
