@@ -3,6 +3,7 @@
 import { type MouseEvent, ReactNode, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { logoutAction } from "@/app/actions/auth";
 import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo } from "@/components/shared/pulse-logo";
@@ -11,7 +12,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
 
 type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
-type AppHeaderNavItem = "dashboard" | "query" | "compile" | "research" | "wiki";
+type AppHeaderNavItem = "dashboard" | "query" | "wiki";
 
 interface AppHeaderProps {
   active: AppHeaderActive;
@@ -28,8 +29,6 @@ function appHref(locale: string, path: string, roleKbId?: string | null) {
 const navIcon: Record<AppHeaderNavItem, string> = {
   dashboard: "grid-alt",
   query: "comment",
-  compile: "upload",
-  research: "compass",
   wiki: "book",
 };
 
@@ -55,18 +54,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
       label: locale === "vi" ? "Hỏi đáp AI" : "Ask AI",
       shortLabel: locale === "vi" ? "Hỏi AI" : "Ask",
       href: appHref(locale, "/query", roleQuery),
-    },
-    {
-      id: "compile",
-      label: locale === "vi" ? "Biên dịch" : "Compile",
-      shortLabel: locale === "vi" ? "Dịch" : "Build",
-      href: appHref(locale, "/compile/new", roleQuery),
-    },
-    {
-      id: "research",
-      label: locale === "vi" ? "Nghiên cứu AI" : "Research",
-      shortLabel: locale === "vi" ? "Nghiên cứu" : "Research",
-      href: appHref(locale, "/research", roleQuery),
     },
     {
       id: "wiki",
@@ -167,15 +154,20 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                     href={item.href}
                     prefetch={false}
                     title={item.label}
-                    className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[14px] border border-transparent px-2.5 text-[11px] font-bold transition-all duration-200 xl:px-3 ${
-                      isActive
-                        ? "border-auth-accent/25 bg-auth-accent-dim text-auth-accent shadow-[0_0_18px_rgba(35,197,132,0.16)]"
-                        : "text-auth-text-2 hover:bg-white/[0.06] hover:text-auth-text"
-                    }`}
+                    className={`relative inline-flex h-8 shrink-0 items-center px-3 text-[11px] font-bold transition-colors duration-200`}
                   >
-                    <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
-                    <span className="hidden 2xl:inline">{item.label}</span>
-                    <span className="hidden xl:inline 2xl:hidden">{item.shortLabel}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="app-active-tab"
+                        className="absolute inset-0 rounded-[14px] border border-auth-accent/25 bg-auth-accent-dim shadow-[0_0_14px_rgba(35,197,132,0.12)]"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-auth-accent" : "text-auth-text-2 hover:text-auth-text"}`}>
+                      <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
+                      <span className="hidden 2xl:inline">{item.label}</span>
+                      <span className="hidden xl:inline 2xl:hidden">{item.shortLabel}</span>
+                    </span>
                   </Link>
                 );
               })}
@@ -232,54 +224,60 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                   />
                 </button>
 
-                {userMenuOpen && (
-                  <div
-                    className="absolute right-0 top-full z-50 w-[min(90vw,320px)] pt-2"
-                  >
-                    <div
-                      role="menu"
-                      className="app-user-menu overflow-hidden rounded-[22px] border p-3"
+                <AnimatePresence>
+                  {userMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute right-0 top-full z-50 w-[min(90vw,320px)] pt-2"
                     >
-                      <div className="flex items-center gap-3 px-3 py-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-auth-accent-dark text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
-                          {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-bold text-white">{user.displayName || user.email || "User"}</div>
-                          <div className="mt-1 truncate text-xs text-auth-text-3">{user.email}</div>
-                          <div className="mt-2 inline-flex rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-auth-accent">
-                            {planName}
+                      <div
+                        role="menu"
+                        className="app-user-menu overflow-hidden rounded-[22px] border p-3"
+                      >
+                        <div className="flex items-center gap-3 px-3 py-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-auth-accent-dark text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                            {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-bold text-white">{user.displayName || user.email || "User"}</div>
+                            <div className="mt-1 truncate text-xs text-auth-text-3">{user.email}</div>
+                            <div className="mt-2 inline-flex rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-auth-accent">
+                              {planName}
+                            </div>
                           </div>
                         </div>
+                        <div className="my-2 h-px bg-white/[0.08]" />
+                        <Link
+                          href={`/${locale}/settings`}
+                          prefetch={false}
+                          onClick={() => setUserMenuOpen(false)}
+                          role="menuitem"
+                          className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+                            <LineIcon name="gear" className="h-4 w-4 text-auth-accent" />
+                          </span>
+                          <span className="leading-5">{locale === "vi" ? "Cài đặt tài khoản" : "Account settings"}</span>
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          disabled={isPending}
+                          role="menuitem"
+                          className="mt-1 flex min-h-12 w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-left text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/[0.10] disabled:opacity-50"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-red-400/15 bg-red-500/[0.06]">
+                            {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LineIcon name="exit" className="h-4 w-4" />}
+                          </span>
+                          <span>{locale === "vi" ? "Đăng xuất" : "Log out"}</span>
+                        </button>
                       </div>
-                      <div className="my-2 h-px bg-white/[0.08]" />
-                      <Link
-                        href={`/${locale}/settings`}
-                        prefetch={false}
-                        onClick={() => setUserMenuOpen(false)}
-                        role="menuitem"
-                        className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
-                      >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-                          <LineIcon name="gear" className="h-4 w-4 text-auth-accent" />
-                        </span>
-                        <span className="leading-5">{locale === "vi" ? "Cài đặt tài khoản" : "Account settings"}</span>
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        disabled={isPending}
-                        role="menuitem"
-                        className="mt-1 flex min-h-12 w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-left text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/[0.10] disabled:opacity-50"
-                      >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-red-400/15 bg-red-500/[0.06]">
-                          {isPending ? <DotMatrixLoader variant="pulse" size="xs" /> : <LineIcon name="exit" className="h-4 w-4" />}
-                        </span>
-                        <span>{locale === "vi" ? "Đăng xuất" : "Log out"}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <button
@@ -295,31 +293,39 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </div>
         </div>
 
-        {menuOpen && (
-          <div className="border-t border-white/[0.08] bg-auth-bg/70 px-4 pb-4 backdrop-blur-2xl lg:hidden">
-            <nav className="mx-auto grid max-w-[1760px] grid-cols-2 gap-2 pt-4" aria-label={locale === "vi" ? "Điều hướng di động" : "Mobile navigation"}>
-              {navItems.map((item) => {
-                const isActive = item.id === active;
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    prefetch={false}
-                    onClick={() => setMenuOpen(false)}
-                    className={`flex h-12 items-center gap-2 rounded-2xl border px-3 text-sm font-bold transition-colors ${
-                      isActive
-                        ? "border-auth-accent/25 bg-auth-accent-dim text-auth-accent"
-                        : "app-glass-pill text-auth-text-2 hover:text-auth-text"
-                    }`}
-                  >
-                    <LineIcon name={navIcon[item.id]} className="h-4 w-4" />
-                    <span className="truncate">{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        )}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="border-t border-white/[0.08] bg-auth-bg/70 px-4 pb-4 backdrop-blur-2xl lg:hidden overflow-hidden"
+            >
+              <nav className="mx-auto grid max-w-[1760px] grid-cols-2 gap-2 pt-4" aria-label={locale === "vi" ? "Điều hướng di động" : "Mobile navigation"}>
+                {navItems.map((item) => {
+                  const isActive = item.id === active;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      prefetch={false}
+                      onClick={() => setMenuOpen(false)}
+                      className={`flex h-12 items-center gap-2 rounded-2xl border px-3 text-sm font-bold transition-colors ${
+                        isActive
+                          ? "border-auth-accent/25 bg-auth-accent-dim text-auth-accent"
+                          : "app-glass-pill text-auth-text-2 hover:text-auth-text"
+                      }`}
+                    >
+                      <LineIcon name={navIcon[item.id]} className="h-4 w-4" />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
       <div className="h-[73px] shrink-0" aria-hidden="true" />
     </>
