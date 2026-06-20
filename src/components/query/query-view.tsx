@@ -534,7 +534,7 @@ export function QueryView() {
 
   // Role KB state
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || getStoredRoleKbId() || authUser?.roleKbId || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState<string>(() => searchParams.get("roleKbId") || searchParams.get("roleId") || searchParams.get("role_id") || getStoredRoleKbId() || authUser?.roleKbId || "");
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
 
   // Sessions history state

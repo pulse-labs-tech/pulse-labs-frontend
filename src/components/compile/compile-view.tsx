@@ -252,7 +252,7 @@ export function CompileView() {
   const { t, locale } = useTranslation();
 
   // ── URL param ──
-  const roleKbIdFromUrl = searchParams.get("roleKbId") ?? "";
+  const roleKbIdFromUrl = searchParams.get("roleKbId") || searchParams.get("roleId") || searchParams.get("role_id") || "";
 
   // ── Step state ──
   const [step, setStep] = useState<Step>(1);

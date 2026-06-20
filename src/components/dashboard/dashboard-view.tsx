@@ -172,7 +172,7 @@ const getIconComponent = (iconName: string) => {
 export function DashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const roleKbIdFromUrl = searchParams.get("roleKbId") || "";
+  const roleKbIdFromUrl = searchParams.get("roleKbId") || searchParams.get("roleId") || searchParams.get("role_id") || "";
   const { user: authUser, clearAuth, setUser } = useAuth();
   const [isPending, startTransition] = useTransition();
   const { t, locale } = useTranslation();
@@ -1158,7 +1158,10 @@ export function DashboardView() {
               <div className="grid grid-cols-2 gap-2.5">
 
                 {/* 1. Knowledge Items */}
-                <div className="stat-terminal-card group">
+                <Link
+                  href={`/${locale}/wiki${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                  className="stat-terminal-card group cursor-pointer transition-all hover:bg-white/[0.02] hover:border-white/[0.12] active:scale-[0.99]"
+                >
                   <div className="stat-terminal-label">
                     <Database className="h-3 w-3" />
                     {locale === "vi" ? "Tài liệu KB" : "KB Items"}
@@ -1170,10 +1173,13 @@ export function DashboardView() {
                       <span className="text-amber-400/70"> · {stats.pendingRetrievalItems} pending</span>
                     )}
                   </div>
-                </div>
+                </Link>
 
                 {/* 2. Active Domains */}
-                <div className="stat-terminal-card group">
+                <Link
+                  href={`/${locale}/wiki${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                  className="stat-terminal-card group cursor-pointer transition-all hover:bg-white/[0.02] hover:border-white/[0.12] active:scale-[0.99]"
+                >
                   <div className="stat-terminal-label">
                     <Globe className="h-3 w-3" />
                     {locale === "vi" ? "Domain" : "Domains"}
@@ -1182,10 +1188,13 @@ export function DashboardView() {
                   <div className="stat-terminal-sub">
                     {locale === "vi" ? "chuyên ngành đang dùng" : "active domains"}
                   </div>
-                </div>
+                </Link>
 
                 {/* 3. AI Queries (today) */}
-                <div className="stat-terminal-card group">
+                <Link
+                  href={`/${locale}/query${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                  className="stat-terminal-card group cursor-pointer transition-all hover:bg-white/[0.02] hover:border-white/[0.12] active:scale-[0.99]"
+                >
                   <div className="stat-terminal-label">
                     <MessageSquare className="h-3 w-3" />
                     {locale === "vi" ? "Query AI hôm nay" : "AI Queries"}
@@ -1211,10 +1220,13 @@ export function DashboardView() {
                       />
                     </div>
                   )}
-                </div>
+                </Link>
 
                 {/* 4. Compiles (this month) */}
-                <div className="stat-terminal-card group">
+                <Link
+                  href={`/${locale}/compile/new${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
+                  className="stat-terminal-card group cursor-pointer transition-all hover:bg-white/[0.02] hover:border-white/[0.12] active:scale-[0.99]"
+                >
                   <div className="stat-terminal-label">
                     <Zap className="h-3 w-3" />
                     {locale === "vi" ? "Ingests tháng này" : "Ingests / mo"}
@@ -1240,7 +1252,7 @@ export function DashboardView() {
                       />
                     </div>
                   )}
-                </div>
+                </Link>
 
                 {/* 5. Storage — full width */}
                 <div className="stat-terminal-card group col-span-2">
@@ -1649,7 +1661,7 @@ export function DashboardView() {
                   <Link
                     href={`/${locale}/query?prompt=${encodeURIComponent(
                       "Help me document my ITBA Workflow. I want to create a structured knowledge entry covering the 3 core ITBA phases: Research Phase, Design & Validate Phase, and Spec & Handoff Protocol. Please provide a step-by-step workflow with inputs, outputs, and gate conditions for each phase."
-                    )}`}
+                    )}${selectedRoleKbId ? `&roleKbId=${selectedRoleKbId}` : ""}`}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-auth-accent text-white hover:bg-auth-accent-dark transition-all active:scale-[0.98] shadow-[0_0_15px_var(--color-auth-accent-glow)]"
                   >
                     <LineIcon name="plus" className="h-3.5 w-3.5" /> {locale === "vi" ? "Vẽ quy trình AI" : "Generate AI Workflow"}

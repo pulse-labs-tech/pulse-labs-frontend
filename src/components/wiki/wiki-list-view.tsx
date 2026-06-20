@@ -312,7 +312,7 @@ export function WikiListView() {
   const [isLoading, setIsLoading] = useState(true);
   const [apiWarning, setApiWarning] = useState<string | null>(null);
 
-  const [selectedRoleKbId, setSelectedRoleKbId] = useState(searchParams.get("roleKbId") || getStoredRoleKbId() || authUser?.roleKbId || "");
+  const [selectedRoleKbId, setSelectedRoleKbId] = useState(searchParams.get("roleKbId") || searchParams.get("roleId") || searchParams.get("role_id") || getStoredRoleKbId() || authUser?.roleKbId || "");
   const [userRoles, setUserRoles] = useState<RoleKbDto[]>([]);
   const [rolesLoading, setRolesLoading] = useState(true);
   const LIMIT = 12;
@@ -388,7 +388,7 @@ export function WikiListView() {
   // Initial load & Roles resolver
   useEffect(() => {
     async function loadRoles() {
-      const initialId = searchParams.get("roleKbId") || authUser?.roleKbId || "";
+      const initialId = searchParams.get("roleKbId") || searchParams.get("roleId") || searchParams.get("role_id") || authUser?.roleKbId || "";
       
       setRolesLoading(true);
       try {

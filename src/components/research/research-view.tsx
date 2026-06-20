@@ -103,7 +103,7 @@ function formatRelativeTime(dateStr: string): string {
 export function ResearchView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const roleKbIdFromUrl = searchParams.get("roleKbId") || searchParams.get("role_id") || "";
+  const roleKbIdFromUrl = searchParams.get("roleKbId") || searchParams.get("roleId") || searchParams.get("role_id") || "";
   const { user } = useAuth();
   const { t, locale } = useTranslation();
 
