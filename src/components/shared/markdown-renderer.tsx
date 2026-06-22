@@ -130,7 +130,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           parts.push(
             <code
               key={parts.length}
-              className="bg-white/5 border border-white/10 px-1 py-0.5 rounded font-mono text-[11px] text-amber-400"
+              className="bg-white/5 border border-white/10 px-1 py-0.5 rounded font-mono text-[11px] text-zinc-400"
             >
               {codeText}
             </code>

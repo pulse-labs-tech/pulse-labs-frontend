@@ -20,7 +20,7 @@ import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { ScrollToTop } from "@/components/ui";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { getDictionary } from "@/dictionaries";
-import { PulseLogo } from "@/components/shared/pulse-logo";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 import { LandingStats } from "@/components/landing/landing-stats";
 
 const clean = (value: string) => value.replace(/[\u2013\u2014]/g, ",");
@@ -109,7 +109,7 @@ export default async function HomePage({
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div className="min-h-screen overflow-x-hidden bg-auth-bg text-auth-text">
+      <div className="landing-page min-h-screen overflow-x-hidden bg-auth-bg text-auth-text">
         <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-10">
             <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-2">
               <Link
@@ -118,9 +118,7 @@ export default async function HomePage({
                 aria-label="Pulse Knowledge home"
               >
                 <PulseLogo size={26} />
-              <span className="truncate whitespace-nowrap max-[430px]:hidden">
-                Pulse<span className="text-auth-accent">Knowledge</span>
-              </span>
+              <PulseWordmark className="truncate whitespace-nowrap max-[430px]:hidden" />
             </Link>
 
             <div className="flex h-12 shrink-0 items-center gap-1 rounded-2xl border border-white/[0.08] bg-auth-elevated px-2 shadow-[0_10px_24px_rgba(0,0,0,0.28)] sm:gap-3 sm:px-4">
@@ -423,7 +421,7 @@ export default async function HomePage({
           <div className="mx-auto flex max-w-[1280px] flex-col gap-5 text-sm text-auth-text-3 sm:flex-row sm:items-center sm:justify-between">
             <Link href={`/${locale}`} className="inline-flex items-center gap-2 font-black text-white">
               <PulseLogo size={24} />
-              Pulse<span className="text-auth-accent">Knowledge</span>
+              <PulseWordmark className="text-sm" />
             </Link>
             <div className="flex flex-wrap gap-5">
               <Link href={`/${locale}/terms`}>{dict.common.terms}</Link>

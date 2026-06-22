@@ -147,8 +147,8 @@ export function ProModal({ isOpen, onClose }: ProModalProps) {
               </div>
 
               {/* Notice */}
-              <div className="flex items-start gap-2 bg-auth-orange-dim border border-auth-orange/20 rounded-lg p-3 text-xs text-auth-text-2 mb-6">
-                <LineIcon name="warning" className="h-4 w-4 text-auth-orange shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 bg-white/[0.02] border border-white/[0.08] rounded-lg p-3 text-xs text-auth-text-2 mb-6">
+                <LineIcon name="warning" className="h-4 w-4 text-zinc-400 shrink-0 mt-0.5" />
                 <span>
                   <strong>{t("onboarding.proModal.notice")}</strong> {t("onboarding.proModal.noticeText")}
                 </span>

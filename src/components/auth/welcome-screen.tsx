@@ -93,9 +93,9 @@ function WelcomeScreen() {
       icon: "target",
       title: t("onboarding.welcome.feat3Title"),
       desc: t("onboarding.welcome.feat3Desc"),
-      gradient: "from-amber-500/20 to-amber-500/5",
-      iconColor: "text-amber-400",
-      borderColor: "border-amber-500/20",
+      gradient: "from-[var(--color-brand-600)]/20 to-[var(--color-brand-600)]/5",
+      iconColor: "text-[var(--color-brand-400)]",
+      borderColor: "border-[var(--color-brand-500)]/20",
     },
   ];
 

@@ -3,7 +3,7 @@ import { type MouseEvent, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LineIcon } from "@/components/shared/line-icon";
-import { PulseLogo } from "@/components/shared/pulse-logo";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "./locale-switcher";
@@ -45,9 +45,7 @@ export function Header() {
               size={32}
               className="transition-all duration-300 group-hover:drop-shadow-[0_0_10px_var(--color-auth-accent-glow)]"
             />
-            <span className="text-[15px] font-extrabold tracking-tight text-auth-text leading-none whitespace-nowrap">
-              Pulse<span className="text-auth-accent">Knowledge</span>
-            </span>
+            <PulseWordmark className="text-[15px] leading-none" />
           </Link>
         </div>
 
@@ -100,9 +98,7 @@ export function Header() {
             size={28}
             className="transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]"
           />
-          <span className="text-[14px] font-extrabold tracking-tight text-auth-text leading-none">
-            Pulse<span className="text-auth-accent">Knowledge</span>
-          </span>
+          <PulseWordmark className="text-[14px] leading-none" />
         </Link>
 
         {/* Mobile right: locale + hamburger */}

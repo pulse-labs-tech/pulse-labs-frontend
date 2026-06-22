@@ -1,21 +1,17 @@
-/**
- * PulseLogo — SVG logo component for Pulse Knowledge.
- *
- * Icon: Open book fused with an ECG/pulse waveform.
- * Colors: Emerald → Teal gradient matching the app's brand palette.
- * Optimized for both large (loading screen) and small (navbar) use cases.
- */
+import { useId } from "react";
 
 interface PulseLogoProps {
-  /** Width/height in px (square). Default: 40 */
   size?: number;
-  /** Extra class on the root wrapper */
   className?: string;
 }
 
+interface PulseWordmarkProps {
+  className?: string;
+  compact?: boolean;
+}
+
 export function PulseLogo({ size = 40, className = "" }: PulseLogoProps) {
-  // Unique IDs so multiple instances on the same page don't conflict
-  const uid = "pl";
+  const uid = useId().replace(/:/g, "");
 
   return (
     <svg
@@ -28,54 +24,39 @@ export function PulseLogo({ size = 40, className = "" }: PulseLogoProps) {
       className={className}
     >
       <defs>
-        {/* Emerald → Teal icon gradient */}
-        <linearGradient id={`${uid}-g`} x1="4" y1="4" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="var(--color-brand-400)" />
-          <stop offset="100%" stopColor="var(--color-accent-400)" />
+        <linearGradient id={`${uid}-g`} x1="8" y1="8" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="oklch(0.77 0.16 158)" />
+          <stop offset="100%" stopColor="oklch(0.66 0.13 184)" />
         </linearGradient>
-
-        {/* Soft glow for the waveform */}
-        <filter id={`${uid}-glow`} x="-30%" y="-60%" width="160%" height="220%">
-          <feGaussianBlur stdDeviation="1.2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
 
-
-
-      {/* ── Book icon (open book, viewed from above) ── */}
-      {/* Left page */}
       <path
-        d="M7 13 C7 12 8 11.5 9 11.5 C13 11.5 17 12 20.5 14 L20.5 32 C17 30.5 13 30 9 30 C8 30 7 29.5 7 28.5 Z"
+        d="M12 15.8C12 13.7 13.7 12 15.8 12h12.4c2.1 0 3.8 1.7 3.8 3.8v12.4c0 2.1-1.7 3.8-3.8 3.8H15.8C13.7 32 12 30.3 12 28.2V15.8Z"
         stroke={`url(#${uid}-g)`}
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinejoin="round"
         fill="none"
       />
-      {/* Right page */}
       <path
-        d="M37 13 C37 12 36 11.5 35 11.5 C31 11.5 27 12 23.5 14 L23.5 32 C27 30.5 31 30 35 30 C36 30 37 29.5 37 28.5 Z"
+        d="M17 23.5h4.2l2-5 2.6 7 2-4.2H32"
         stroke={`url(#${uid}-g)`}
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      {/* Spine / center line */}
-      <line x1="22" y1="14" x2="22" y2="32" stroke={`url(#${uid}-g)`} strokeWidth="1.5" strokeLinecap="round" />
-
-      {/* ── ECG / Pulse waveform across the book's middle ── */}
-      <path
-        d="M7 22 L13 22 L15.5 17.5 L18.5 26.5 L20.5 20.5 L22 23.5 L23.5 20.5 L25.5 26.5 L28.5 17.5 L31 22 L37 22"
-        stroke={`url(#${uid}-g)`}
-        strokeWidth="1.8"
+        strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
-        filter={`url(#${uid}-glow)`}
       />
+      <circle cx="17" cy="23.5" r="1.8" fill={`url(#${uid}-g)`} />
+      <circle cx="32" cy="21.3" r="1.8" fill={`url(#${uid}-g)`} />
+      <path d="M12 18.5h-3.5M35.5 25.5H32" stroke={`url(#${uid}-g)`} strokeWidth="2" strokeLinecap="round" opacity="0.72" />
     </svg>
+  );
+}
+
+export function PulseWordmark({ className = "", compact = false }: PulseWordmarkProps) {
+  return (
+    <span className={`inline-flex items-baseline whitespace-nowrap font-black tracking-[-0.035em] text-auth-text ${className}`}>
+      <span>Pulse</span>
+      {!compact && <span className="ml-0.5 text-[oklch(0.70_0.18_160)]">Knowledge</span>}
+    </span>
   );
 }

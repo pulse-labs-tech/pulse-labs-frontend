@@ -34,7 +34,7 @@ function getSourceTypeIcon(type: WikiSourceType) {
     case "query_output":
       return <LineIcon name="cpu" className="h-3.5 w-3.5 text-cyan-400" />;
     case "manual_note":
-      return <LineIcon name="pencil" className="h-3.5 w-3.5 text-amber-400" />;
+      return <LineIcon name="pencil" className="h-3.5 w-3.5 text-zinc-400" />;
     default:
       return <LineIcon name="upload" className="h-3.5 w-3.5 text-auth-text-3" />;
   }
@@ -69,7 +69,7 @@ function getStatusBadge(status: WikiRetrievalStatus, tFn: (key: string, fallback
       );
     case "degraded":
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-800/40 border border-zinc-700/20 text-zinc-400">
           <LineIcon name="warning" className="h-2.5 w-2.5" /> {tFn("wiki.statuses.lowQuality", "Low Quality")}
         </span>
       );
@@ -653,16 +653,16 @@ export function WikiListView() {
 
         {/* API warning banner */}
         {apiWarning && (
-          <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300">
-            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400" />
+          <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-xs text-zinc-300">
+            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-zinc-400" />
             <span className="flex-1">{apiWarning}</span>
             <button
               onClick={() => { setApiWarning(null); fetchItems(); }}
-              className="ml-2 shrink-0 rounded-lg bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300 hover:bg-amber-500/20 transition-colors"
+              className="ml-2 shrink-0 rounded-lg bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-300 hover:bg-white/[0.12] transition-colors"
             >
               {t("common.retry", "Retry")}
             </button>
-            <button onClick={() => setApiWarning(null)} className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors">
+            <button onClick={() => setApiWarning(null)} className="shrink-0 text-zinc-400 hover:text-white transition-colors">
               <LineIcon name="xmark" className="h-4 w-4" />
             </button>
           </div>
@@ -858,11 +858,11 @@ export function WikiListView() {
           <WikiGridSkeleton />
         ) : !selectedRoleKbId ? (
           <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
-            <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center text-amber-400 animate-pulse">
+            <div className="h-20 w-20 rounded-2xl bg-zinc-800/30 border border-zinc-700/20 flex items-center justify-center text-zinc-400 animate-pulse">
               <LineIcon name="warning" className="h-10 w-10" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-amber-400">
+              <h3 className="text-base font-bold text-zinc-300">
                 {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
               </h3>
               <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
@@ -873,7 +873,7 @@ export function WikiListView() {
             </div>
             <Link
               href={`/${locale}/settings#settings-section-role`}
-              className="btn-primary-pulse text-sm bg-amber-500 hover:bg-amber-400 text-black border-none"
+              className="btn-primary-pulse text-sm bg-white hover:bg-zinc-200 text-black border-none"
             >
               <LineIcon name="settings" className="h-4 w-4" />
               {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}

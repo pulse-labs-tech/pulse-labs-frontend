@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { LineIcon } from "@/components/shared/line-icon";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 
 /**
  * Custom 404 Not Found page.
@@ -16,8 +16,8 @@ export default function NotFound() {
       <div className="relative flex max-w-lg flex-col items-center text-center">
         {/* Floating animated logo */}
         <div className="relative mb-6 animate-[float_3s_ease-in-out_infinite]">
-          <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-[0_0_30px_oklch(0.72_0.11_145_/_0.30)]">
-            <Image src="/images/logo-512.png" alt="Pulse Knowledge" width={64} height={64} className="h-full w-full object-cover" priority />
+          <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/[0.08] bg-auth-elevated shadow-[0_0_30px_oklch(0.72_0.11_145_/_0.30)]">
+            <PulseLogo size={42} />
           </div>
           {/* Shimmer ring */}
           <div className="absolute -inset-1 -z-10 rounded-[18px] bg-gradient-conic from-[var(--color-brand-400)]/30 via-transparent to-[var(--color-brand-400)]/30 animate-[spin_4s_linear_infinite] blur-[2px]" />
@@ -25,7 +25,7 @@ export default function NotFound() {
 
         {/* Brand name */}
         <Link href="/" className="mb-8 text-sm font-bold tracking-tight opacity-70 transition-opacity hover:opacity-100 animate-[fadeUp_0.5s_ease-out_0.1s_both]">
-          Pulse<span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">Knowledge</span>
+          <PulseWordmark />
         </Link>
 
         {/* 404 number — large gradient with glow */}

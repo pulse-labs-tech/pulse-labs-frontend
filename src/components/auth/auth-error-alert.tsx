@@ -152,7 +152,7 @@ export function AuthErrorAlert({
       aria-live="assertive"
       className={`flex items-start gap-2 rounded-lg border px-3.5 py-2.5 text-xs leading-relaxed ${
         isWarning
-          ? "border-auth-orange/20 bg-auth-orange-dim text-auth-orange"
+          ? "border-white/[0.08] bg-white/[0.02] text-zinc-300"
           : "border-auth-error/20 bg-auth-error-dim text-auth-error"
       } ${className}`}
     >

@@ -129,7 +129,7 @@ function SourceTypeCard({
 
       {/* Pro badge */}
       {badge && (
-        <span className="absolute top-3 right-3 rounded-full bg-amber-950/40 border border-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+        <span className="absolute top-3 right-3 rounded-full bg-zinc-800/40 border border-zinc-700/30 text-zinc-400 text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
           {badge}
         </span>
       )}
@@ -682,11 +682,11 @@ export function CompileView() {
       <main className="container-focused-narrow flex-grow py-8 relative z-10 flex flex-col gap-6">
         {!selectedRoleKbId ? (
           <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
-            <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center text-amber-400 animate-pulse animate-duration-1000">
+            <div className="h-20 w-20 rounded-2xl bg-zinc-800/30 border border-zinc-700/20 flex items-center justify-center text-zinc-400 animate-pulse animate-duration-1000">
               <LineIcon name="warning" className="h-10 w-10" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-amber-400">
+              <h3 className="text-base font-bold text-zinc-300">
                 {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
               </h3>
               <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
@@ -697,7 +697,7 @@ export function CompileView() {
             </div>
             <Link
               href={`/${locale}/settings#settings-section-role`}
-              className="btn-primary-pulse text-sm bg-amber-500 hover:bg-amber-400 text-black border-none"
+              className="btn-primary-pulse text-sm bg-white hover:bg-zinc-200 text-black border-none"
             >
               <LineIcon name="settings" className="h-4 w-4" />
               {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}
@@ -881,7 +881,7 @@ export function CompileView() {
                   </label>
                   <span
                     className={`text-[10px] font-semibold tabular-nums transition-colors
-                      ${text.length < MIN_TEXT_CHARS ? "text-amber-400" : text.length > MAX_TEXT_CHARS ? "text-red-400" : "text-auth-accent"}
+                      ${text.length < MIN_TEXT_CHARS ? "text-zinc-400" : text.length > MAX_TEXT_CHARS ? "text-red-400" : "text-auth-accent"}
                     `}
                   >
                     {text.length.toLocaleString()} / {MAX_TEXT_CHARS.toLocaleString()}
@@ -1033,7 +1033,7 @@ export function CompileView() {
                       {t("common.error", "Lỗi xử lý")}
                     </span>
                   ) : currentJob.status === "cancelled" ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-zinc-800/40 border border-zinc-700/20 text-zinc-400">
                       <LineIcon name="warning" className="h-3.5 w-3.5" />
                       {t("common.cancel", "Đã hủy")}
                     </span>
@@ -1050,9 +1050,9 @@ export function CompileView() {
 
                 {/* Poll timeout error */}
                 {pollError && (
-                  <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
-                    <LineIcon name="warning" className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-400">{pollError}</p>
+                  <div className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3">
+                    <LineIcon name="warning" className="h-4 w-4 text-zinc-400 shrink-0 mt-0.5" />
+                    <p className="text-xs text-zinc-300">{pollError}</p>
                   </div>
                 )}
 

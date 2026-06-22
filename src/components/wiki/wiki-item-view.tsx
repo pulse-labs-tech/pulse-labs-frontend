@@ -32,7 +32,7 @@ function getSourceTypeIcon(type: WikiSourceType, size = "h-4 w-4") {
     case "query_output":
       return <LineIcon name="cpu" className={`${size} text-cyan-400`} />;
     case "manual_note":
-      return <LineIcon name="pencil" className={`${size} text-amber-400`} />;
+      return <LineIcon name="pencil" className={`${size} text-zinc-400`} />;
     default:
       return <LineIcon name="upload" className={`${size} text-auth-text-3`} />;
   }
@@ -68,7 +68,7 @@ function getStatusBadge(status: WikiRetrievalStatus, t: (path: string) => string
       );
     case "degraded":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-zinc-800/40 border border-zinc-700/20 text-zinc-400">
           <LineIcon name="warning" className="h-3.5 w-3.5" /> {t("wiki.statuses.lowQuality")}
         </span>
       );
@@ -405,7 +405,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
   if (errorMsg && !item) {
     return renderLayout(
       <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
-        <div className="h-20 w-20 rounded-2xl bg-amber-950/20 border border-amber-500/20 flex items-center justify-center text-amber-400">
+        <div className="h-20 w-20 rounded-2xl bg-zinc-800/30 border border-zinc-700/20 flex items-center justify-center text-zinc-400">
           <LineIcon name="warning" className="h-10 w-10" />
         </div>
         <div>

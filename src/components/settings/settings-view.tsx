@@ -753,12 +753,12 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
 
         {/* Non-critical warning if overview has section errors */}
         {overview?.sectionErrors && overview.sectionErrors.length > 0 && (
-          <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300">
+          <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-xs text-zinc-300">
             <LineIcon name="warning" className="h-4 w-4 shrink-0" />
             <span>{t("settings.errors.partialLoad", "Một số phần Settings chưa tải được. Thông tin còn lại vẫn hiển thị đầy đủ.")}</span>
             <button
               onClick={loadOverview}
-              className="ml-auto shrink-0 rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider hover:bg-amber-500/20 transition-colors cursor-pointer"
+              className="ml-auto shrink-0 rounded-lg bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider hover:bg-white/[0.12] transition-colors cursor-pointer"
             >
               {t("common.retry", "Thử lại")}
             </button>
@@ -795,7 +795,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
               {/* Plan badge */}
               <div className="flex items-center gap-2">
                 {isPro ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border border-amber-500/30 text-amber-300">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-white/[0.04] border border-white/[0.08] text-zinc-300">
                     <LineIcon name="crown" className="h-3 w-3" />
                     Pro Plan
                   </span>
@@ -827,26 +827,21 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
           {/* Current plan card */}
           <section
             id="settings-section-plan"
-            className={`flex flex-col gap-4 rounded-2xl p-5 relative ${
-              isPro ? "premium-hover-card-amber" : "premium-hover-card"
-            }`}
-            style={{
-              borderColor: isPro ? "rgba(245, 158, 11, 0.3)" : undefined,
-            }}
+            className="flex flex-col gap-4 rounded-2xl p-5 relative premium-hover-card"
             aria-labelledby="settings-plan-heading"
           >
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isPro ? "bg-amber-500/20" : "bg-auth-accent-dim"}`}>
-                  {isPro ? <LineIcon name="crown" className="h-3.5 w-3.5 text-amber-400" /> : <LineIcon name="shield" className="h-3.5 w-3.5 text-auth-accent" />}
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-auth-accent-dim">
+                  <LineIcon name={isPro ? "crown" : "shield"} className="h-3.5 w-3.5 text-auth-accent" />
                 </div>
                 <h2 id="settings-plan-heading" className="text-sm font-bold text-white">
                   {t("settings.plan.title", "Gói dịch vụ hiện tại")}
                 </h2>
               </div>
               {isPro ? (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 border border-amber-500/30 text-amber-300">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/[0.06] border border-white/[0.12] text-zinc-300">
                   ACTIVE
                 </span>
               ) : (
@@ -861,7 +856,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                 {isPro ? "Pro Plan" : "Free Plan"}
               </p>
               {!isPro && hasUpgradeIntent && (
-                <p className="text-xs text-amber-300 mt-1 flex items-center gap-1.5">
+                <p className="text-xs text-zinc-300 mt-1 flex items-center gap-1.5">
                   <LineIcon name="checkmark-circle" className="h-3 w-3" />
                   {t("settings.plan.upgradeIntentRecorded", "Đã ghi nhận yêu cầu nâng cấp. Gói hiện tại vẫn là Free.")}
                 </p>
@@ -1159,11 +1154,11 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="plan-card-title text-auth-purple">Pro Plan</h3>
-                    <p className="text-[10px] text-amber-400 font-semibold uppercase tracking-wider mt-0.5">
+                    <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider mt-0.5">
                       {locale === "vi" ? "Khuyên dùng" : "Recommended"}
                     </p>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                  <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-zinc-800/40 border border-zinc-700/30 text-zinc-300">
                     PRO
                   </span>
                 </div>

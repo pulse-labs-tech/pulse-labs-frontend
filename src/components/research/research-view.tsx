@@ -81,7 +81,7 @@ function getStatusLabel(status: ResearchStatus, t: (key: string, fallback: strin
 function getConfidenceColor(score: number | null): string {
   if (score === null) return "text-auth-text-3";
   if (score >= 0.8) return "text-auth-accent";
-  if (score >= 0.6) return "text-amber-400";
+  if (score >= 0.6) return "text-zinc-400";
   return "text-red-400";
 }
 
@@ -481,11 +481,11 @@ export function ResearchView() {
       <main className="container-focused py-8 space-y-6 relative z-10 flex-grow">
         {!selectedRoleKbId ? (
           <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
-            <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center text-amber-400 animate-pulse animate-duration-1000">
+            <div className="h-20 w-20 rounded-2xl bg-zinc-800/30 border border-zinc-700/20 flex items-center justify-center text-zinc-400 animate-pulse animate-duration-1000">
               <LineIcon name="warning" className="h-10 w-10" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-amber-400">
+              <h3 className="text-base font-bold text-zinc-300">
                 {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
               </h3>
               <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
@@ -496,7 +496,7 @@ export function ResearchView() {
             </div>
             <Link
               href={`/${locale}/settings#settings-section-role`}
-              className="btn-primary-pulse text-sm bg-amber-500 hover:bg-amber-400 text-black border-none"
+              className="btn-primary-pulse text-sm bg-white hover:bg-zinc-200 text-black border-none"
             >
               <LineIcon name="settings" className="h-4 w-4" />
               {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}

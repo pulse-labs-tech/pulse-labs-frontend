@@ -16,7 +16,7 @@ function getStatusColor(status: QuotaStatus): string {
     case "ok":
       return "text-auth-accent";
     case "warning":
-      return "text-amber-400";
+      return "text-zinc-400";
     case "exceeded":
       return "text-red-400";
     case "unlimited":
@@ -32,7 +32,7 @@ function getStatusBarColor(status: QuotaStatus): string {
     case "ok":
       return "bg-auth-accent";
     case "warning":
-      return "bg-amber-400";
+      return "bg-zinc-400";
     case "exceeded":
       return "bg-red-400";
     case "unlimited":
@@ -53,7 +53,7 @@ function getStatusBadge(status: QuotaStatus, t: (key: string, fallback: string) 
       );
     case "warning":
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-800/40 border border-zinc-700/20 text-zinc-400">
           <LineIcon name="warning" className="h-3 w-3" />
           {t("settings.quota.statusWarning", "Sắp đầy")}
         </span>
@@ -206,7 +206,7 @@ export function QuotaCard({ quota, onRetry, isRetrying }: QuotaCardProps) {
       {/* Helper copy for warning/exceeded */}
       {quota.helperCopy && (
         <p className={`text-xs leading-relaxed ${
-          quota.status === "exceeded" ? "text-red-300" : "text-amber-300"
+          quota.status === "exceeded" ? "text-red-300" : "text-zinc-300"
         }`}>
           {quota.helperCopy}
         </p>

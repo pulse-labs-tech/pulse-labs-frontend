@@ -98,7 +98,7 @@ function ConfidenceBadge({ level, score, t }: { level: "high" | "medium" | "low"
     },
     medium: {
       label: t("query.confidenceMedium"),
-      cls: "bg-amber-950/40 border border-amber-500/20 text-amber-400",
+      cls: "bg-zinc-800/40 border border-zinc-700/20 text-zinc-400",
       Icon: "grow",
     },
     low: {
@@ -210,24 +210,24 @@ function KbGapWarning({
   roleKbId?: string;
 }) {
   return (
-    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-left">
-      <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-left">
+      <LineIcon name="warning" className="h-4 w-4 shrink-0 text-zinc-400 mt-0.5" />
       <div className="flex-1">
-        <p className="text-xs font-bold text-amber-300">{t("query.gapTitle")}</p>
+        <p className="text-xs font-bold text-zinc-200">{t("query.gapTitle")}</p>
         {suggestion && (
-          <p className="text-xs text-amber-200/70 mt-1 leading-relaxed">{suggestion}</p>
+          <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{suggestion}</p>
         )}
         <div className="flex flex-wrap gap-2 mt-3">
           {actions.includes("compile_source") && (
             <Link
               href={roleKbId ? `/${locale}/compile/new?roleKbId=${roleKbId}` : `/${locale}/compile/new`}
-              className="inline-flex items-center gap-1 bg-amber-950/50 hover:bg-amber-900/60 border border-amber-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
+              className="inline-flex items-center gap-1 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.12] px-2.5 py-1 rounded-lg text-[10px] font-bold text-zinc-300 hover:text-white transition-colors"
             >
               <LineIcon name="plus" className="h-2.5 w-2.5" /> {t("query.gapButton")}
             </Link>
           )}
           {actions.includes("change_scope") && (
-            <span className="inline-flex items-center gap-1 bg-amber-950/30 border border-amber-500/10 px-2.5 py-1 rounded-lg text-[10px] text-amber-400/80">
+            <span className="inline-flex items-center gap-1 bg-white/[0.02] border border-white/[0.06] px-2.5 py-1 rounded-lg text-[10px] text-zinc-400">
               💡 {locale === "vi" ? "Đổi phạm vi hỏi" : "Change scope"}
             </span>
           )}
@@ -445,8 +445,8 @@ function EmptyState({
 function KbEmptyState({ locale, t, roleKbId }: { locale: string; t: (path: string) => string; roleKbId?: string }) {
   return (
     <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
-      <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center mb-6">
-        <LineIcon name="database" className="h-10 w-10 text-amber-400" />
+      <div className="h-20 w-20 rounded-2xl bg-white/[0.02] border border-white/[0.08] flex items-center justify-center mb-6">
+        <LineIcon name="database" className="h-10 w-10 text-zinc-400" />
       </div>
       <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2">
         {t("query.emptyKbTitle")}
@@ -469,10 +469,10 @@ function KbEmptyState({ locale, t, roleKbId }: { locale: string; t: (path: strin
 function MissingRoleState({ locale }: { locale: string }) {
   return (
     <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center animate-fade-in">
-      <div className="h-20 w-20 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center justify-center mb-6">
-        <LineIcon name="warning" className="h-10 w-10 text-amber-400" />
+      <div className="h-20 w-20 rounded-2xl bg-white/[0.02] border border-white/[0.08] flex items-center justify-center mb-6">
+        <LineIcon name="warning" className="h-10 w-10 text-zinc-400" />
       </div>
-      <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2 text-amber-400">
+      <h2 className="text-fluid-xl font-extrabold tracking-tight mb-2 text-zinc-200">
         {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
       </h2>
       <p className="text-xs text-auth-text-2 max-w-sm leading-relaxed mb-6">
@@ -482,7 +482,7 @@ function MissingRoleState({ locale }: { locale: string }) {
       </p>
       <Link
         href={`/${locale}/settings#settings-section-role`}
-        className="btn-primary-pulse text-sm bg-amber-500 hover:bg-amber-400 text-black border-none"
+        className="btn-primary-pulse text-sm bg-white hover:bg-zinc-200 text-black border-none"
       >
         <LineIcon name="settings" className="h-4 w-4" />
         {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}

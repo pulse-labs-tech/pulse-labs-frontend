@@ -1,6 +1,6 @@
 "use client";
 
-import { PulseLogo } from "@/components/shared/pulse-logo";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 
 /**
  * AuthMobileHeader — Reusable header component for small/mobile screens.
@@ -14,12 +14,7 @@ export function AuthMobileHeader() {
         size={28}
         className="drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]"
       />
-      <span className="text-sm font-bold tracking-tight text-auth-text">
-        Pulse
-        <span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">
-          Knowledge
-        </span>
-      </span>
+      <PulseWordmark className="text-sm" />
     </div>
   );
 }

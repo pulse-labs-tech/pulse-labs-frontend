@@ -20,7 +20,7 @@ import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
 import { useAuth } from "@/hooks/use-auth";
-import { PulseLogo } from "@/components/shared/pulse-logo";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 import { getLocalizedPath } from "@/lib/utils";
 import type { AuthErrorCode, AuthUser } from "@/types/auth";
 import { API_BASE } from "@/lib/client-api";
@@ -152,12 +152,7 @@ export function LoginForm() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent-500)] shadow-[0_0_12px_oklch(0.72_0.11_145_/_0.3)]">
               <PulseLogo size={20} className="drop-shadow-[0_0_6px_var(--color-auth-accent-glow)]" />
             </div>
-          <span className="text-sm font-bold tracking-tight text-auth-text">
-            Pulse
-            <span className="bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-accent-300)] bg-clip-text text-transparent">
-              Knowledge
-            </span>
-          </span>
+          <PulseWordmark className="text-sm" />
         </div>
 
         {/* Form header */}

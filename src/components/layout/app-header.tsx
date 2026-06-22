@@ -1,12 +1,12 @@
 "use client";
 
-import { type MouseEvent, ReactNode, useEffect, useRef, useState, useTransition } from "react";
+import { type MouseEvent, type PointerEvent as ReactPointerEvent, ReactNode, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { logoutAction } from "@/app/actions/auth";
 import { useAuth } from "@/hooks/use-auth";
-import { PulseLogo } from "@/components/shared/pulse-logo";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
@@ -39,7 +39,14 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
   const [isPending, startTransition] = useTransition();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [navCanScrollPrev, setNavCanScrollPrev] = useState(false);
+  const [navCanScrollNext, setNavCanScrollNext] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const navRailRef = useRef<HTMLDivElement>(null);
+  const navDragStartXRef = useRef(0);
+  const navDragStartScrollRef = useRef(0);
+  const navDraggingRef = useRef(false);
+  const navDidDragRef = useRef(false);
 
   const roleQuery = active === "settings" ? null : selectedRoleKbId;
   const dashboardHref = `/${locale}/dashboard${roleQuery ? `?roleKbId=${roleQuery}` : ""}`;
@@ -79,6 +86,60 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
     }
   };
 
+  const syncNavScrollState = useCallback(() => {
+    const rail = navRailRef.current;
+    if (!rail) return;
+
+    const maxScroll = rail.scrollWidth - rail.clientWidth;
+    setNavCanScrollPrev(rail.scrollLeft > 4);
+    setNavCanScrollNext(rail.scrollLeft < maxScroll - 4);
+  }, []);
+
+  const scrollNavRail = (direction: "prev" | "next") => {
+    const rail = navRailRef.current;
+    if (!rail) return;
+
+    rail.scrollBy({
+      left: direction === "next" ? 180 : -180,
+      behavior: "smooth",
+    });
+  };
+
+  const handleNavPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const rail = navRailRef.current;
+    if (!rail) return;
+
+    navDraggingRef.current = true;
+    navDidDragRef.current = false;
+    navDragStartXRef.current = event.clientX;
+    navDragStartScrollRef.current = rail.scrollLeft;
+    rail.setPointerCapture(event.pointerId);
+  };
+
+  const handleNavPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const rail = navRailRef.current;
+    if (!rail || !navDraggingRef.current) return;
+
+    const deltaX = event.clientX - navDragStartXRef.current;
+    if (Math.abs(deltaX) > 5) {
+      navDidDragRef.current = true;
+    }
+    rail.scrollLeft = navDragStartScrollRef.current - deltaX;
+  };
+
+  const handleNavPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const rail = navRailRef.current;
+    if (rail?.hasPointerCapture(event.pointerId)) {
+      rail.releasePointerCapture(event.pointerId);
+    }
+
+    navDraggingRef.current = false;
+    syncNavScrollState();
+    window.setTimeout(() => {
+      navDidDragRef.current = false;
+    }, 0);
+  };
+
   const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (pathname !== `/${locale}/dashboard`) return;
 
@@ -101,7 +162,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
   useEffect(() => {
     if (!userMenuOpen) return;
 
-    const handlePointerDown = (event: PointerEvent) => {
+    const handlePointerDown = (event: globalThis.PointerEvent) => {
       if (!userMenuRef.current?.contains(event.target as Node)) {
         setUserMenuOpen(false);
       }
@@ -122,6 +183,24 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
     };
   }, [userMenuOpen]);
 
+  useEffect(() => {
+    syncNavScrollState();
+
+    const rail = navRailRef.current;
+    if (!rail) return;
+
+    const handleScroll = () => syncNavScrollState();
+    const handleResize = () => syncNavScrollState();
+
+    rail.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      rail.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [syncNavScrollState]);
+
   return (
     <>
       <header className="app-glass-header fixed inset-x-0 top-0 z-50 border-b border-white/[0.08]">
@@ -141,43 +220,76 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             <Link
               href={dashboardHref}
               onClick={handleLogoClick}
-              className="app-glass-pill inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border px-3 text-sm font-black text-auth-text transition-colors sm:px-4"
+              className="app-brand-lockup inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border px-3 text-sm text-auth-text transition-colors sm:px-4"
               aria-label="Pulse Knowledge dashboard"
             >
               <PulseLogo size={24} />
-              <span className="hidden truncate whitespace-nowrap sm:inline">
-                Pulse<span className="text-auth-accent">Knowledge</span>
-              </span>
+              <PulseWordmark className="hidden text-[14px] sm:inline-flex" />
             </Link>
           </div>
 
           <nav className="hidden min-w-0 justify-center lg:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
-            <div className="app-glass-pill flex max-w-full items-center gap-0.5 overflow-x-auto rounded-[18px] border p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-              {navItems.map((item) => {
-                const isActive = item.id === active;
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    prefetch={false}
-                    title={item.label}
-                    className={`relative inline-flex h-8 shrink-0 items-center px-3 text-[11px] font-bold transition-colors duration-200`}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="app-active-tab"
-                        className="absolute inset-0 rounded-[14px] border border-auth-accent/25 bg-auth-accent-dim shadow-[0_0_14px_rgba(35,197,132,0.12)]"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-auth-accent" : "text-auth-text-2 hover:text-auth-text"}`}>
-                      <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
-                      <span className="hidden 2xl:inline">{item.label}</span>
-                      <span className="hidden xl:inline 2xl:hidden">{item.shortLabel}</span>
-                    </span>
-                  </Link>
-                );
-              })}
+            <div className="app-nav-shell relative flex max-w-full items-center rounded-[18px] border p-0.5">
+              <button
+                type="button"
+                onClick={() => scrollNavRail("prev")}
+                className={`app-nav-arrow left-1 ${navCanScrollPrev ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                aria-label={locale === "vi" ? "Mục trước" : "Previous item"}
+              >
+                <LineIcon name="chevron-left" className="h-3.5 w-3.5" />
+              </button>
+              <div
+                ref={navRailRef}
+                className="app-nav-rail flex max-w-full touch-pan-x select-none items-center gap-0.5 overflow-x-auto rounded-[15px]"
+                onPointerDown={handleNavPointerDown}
+                onPointerMove={handleNavPointerMove}
+                onPointerUp={handleNavPointerEnd}
+                onPointerCancel={handleNavPointerEnd}
+                onWheel={(event) => {
+                  if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+                    event.currentTarget.scrollLeft += event.deltaY;
+                  }
+                }}
+              >
+                {navItems.map((item) => {
+                  const isActive = item.id === active;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      prefetch={false}
+                      title={item.label}
+                      onClick={(event) => {
+                        if (navDidDragRef.current) {
+                          event.preventDefault();
+                        }
+                      }}
+                      className="relative inline-flex h-9 shrink-0 items-center rounded-[14px] px-3.5 text-[11px] font-bold transition-colors duration-200"
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="app-active-tab"
+                          className="absolute inset-0 rounded-[14px] border border-auth-accent/25 bg-auth-accent-dim shadow-[0_0_18px_rgba(35,197,132,0.12)]"
+                          transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.82 }}
+                        />
+                      )}
+                      <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-auth-accent" : "text-auth-text-2 hover:text-auth-text"}`}>
+                        <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
+                        <span className="hidden 2xl:inline">{item.label}</span>
+                        <span className="hidden xl:inline 2xl:hidden">{item.shortLabel}</span>
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                onClick={() => scrollNavRail("next")}
+                className={`app-nav-arrow right-1 ${navCanScrollNext ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                aria-label={locale === "vi" ? "Mục tiếp theo" : "Next item"}
+              >
+                <LineIcon name="chevron-right" className="h-3.5 w-3.5" />
+              </button>
             </div>
           </nav>
 
@@ -258,35 +370,11 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                         </div>
                         <div className="my-2 h-px bg-white/[0.08]" />
                         <Link
-                          href={appHref(locale, "/research", roleQuery)}
-                          prefetch={false}
-                          onClick={() => setUserMenuOpen(false)}
-                          role="menuitem"
-                          className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
-                        >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-                            <LineIcon name="compass" className="h-4 w-4 text-auth-accent" />
-                          </span>
-                          <span className="leading-5">{locale === "vi" ? "Nghiên cứu AI" : "AI Research"}</span>
-                        </Link>
-                        <Link
-                          href={appHref(locale, "/compile/new", roleQuery)}
-                          prefetch={false}
-                          onClick={() => setUserMenuOpen(false)}
-                          role="menuitem"
-                          className="mt-1 flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
-                        >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-                            <LineIcon name="plus" className="h-4 w-4 text-auth-accent" />
-                          </span>
-                          <span className="leading-5">{locale === "vi" ? "Nạp tài liệu" : "Ingest documents"}</span>
-                        </Link>
-                        <Link
                           href={`/${locale}/settings`}
                           prefetch={false}
                           onClick={() => setUserMenuOpen(false)}
                           role="menuitem"
-                          className="mt-1 flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
+                          className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
                             <LineIcon name="gear" className="h-4 w-4 text-auth-accent" />

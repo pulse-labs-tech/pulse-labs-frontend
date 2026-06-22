@@ -90,7 +90,7 @@ export function PricingView() {
         <div className="text-center max-w-2xl">
           <ScrollReveal direction="up" delay={0.1}>
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] font-semibold text-auth-text-2 backdrop-blur-md uppercase tracking-wider">
-              <LineIcon name="crown" className="h-3 w-3 text-amber-400" />
+              <LineIcon name="crown" className="h-3 w-3 text-zinc-400" />
               {locale === "vi" ? "Gói dịch vụ linh hoạt" : "Flexible Service Tiers"}
             </div>
           </ScrollReveal>
@@ -214,11 +214,11 @@ export function PricingView() {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="plan-card-title text-auth-purple">Pro Plan</h3>
-                  <p className="text-[10px] text-amber-400 font-semibold uppercase tracking-wider mt-0.5">
+                  <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider mt-0.5">
                     {locale === "vi" ? "Khuyên dùng" : "Recommended"}
                   </p>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-zinc-800/40 border border-zinc-700/30 text-zinc-300">
                   PRO
                 </span>
               </div>

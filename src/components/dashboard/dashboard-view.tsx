@@ -650,7 +650,7 @@ export function DashboardView() {
         );
       case "degraded":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-800/40 border border-zinc-700/30 text-zinc-400">
             <LineIcon name="warning" className="h-3 w-3" /> {t("dashboard.status.lowQuality", "Chất lượng thấp")}
           </span>
         );
@@ -952,27 +952,27 @@ export function DashboardView() {
 
         {/* Non-blocking API warning banner */}
         {apiWarning && (
-          <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-xs text-amber-300 animate-fade-in">
-            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400" />
+          <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-xs text-zinc-300 animate-fade-in">
+            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-zinc-400" />
             <span className="flex-1">{apiWarning}</span>
             <button
               onClick={() => { setApiWarning(null); fetchDashboardData(selectedRoleKbId || undefined, true); }}
-              className="ml-2 shrink-0 rounded-lg bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              className="ml-2 shrink-0 rounded-lg bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-300 hover:bg-white/[0.12] transition-colors cursor-pointer"
             >
               {t("dashboard.btnRetry", "Thử lại")}
             </button>
-            <button onClick={() => setApiWarning(null)} className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors cursor-pointer">
+            <button onClick={() => setApiWarning(null)} className="shrink-0 text-zinc-400 hover:text-white transition-colors cursor-pointer">
               <LineIcon name="xmark-circle" className="h-4 w-4" />
             </button>
           </div>
         )}
 
         {!selectedRoleKbId && (
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-xl border border-amber-500/20 bg-amber-950/10 p-5 text-xs text-amber-300 animate-pulse">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 text-xs text-zinc-300 animate-pulse">
             <div className="flex items-start gap-3">
-              <LineIcon name="warning" className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+              <LineIcon name="warning" className="h-5 w-5 shrink-0 text-zinc-400 mt-0.5" />
               <div>
-                <h4 className="font-bold text-sm text-amber-400 mb-1">
+                <h4 className="font-bold text-sm text-zinc-200 mb-1">
                   {locale === "vi" ? "Chưa chọn Knowledge Base Chuyên Ngành" : "No Professional Knowledge Base Selected"}
                 </h4>
                 <p className="text-[#a1a1aa] leading-relaxed">
@@ -985,7 +985,7 @@ export function DashboardView() {
             <button
               type="button"
               onClick={() => router.push(`/${locale}/onboarding?force=true`)}
-              className="w-full md:w-auto shrink-0 bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full md:w-auto shrink-0 bg-white hover:bg-zinc-200 text-black font-bold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>{locale === "vi" ? "Thiết lập ngay" : "Set up now"}</span>
               <LineIcon name="external-link" className="h-3.5 w-3.5" />
@@ -1052,7 +1052,7 @@ export function DashboardView() {
                 onClick={() => router.push(`/${locale}/onboarding?force=true`)}
                 className={`rounded-lg px-3 py-2 text-xs font-semibold flex items-center gap-2 transition-all duration-300 ${
                   !selectedRoleKbId
-                    ? "bg-[#18181b] border border-amber-500/40 hover:border-amber-500 text-amber-400 hover:text-amber-300 cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.1)] hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                    ? "bg-[#18181b] border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.02)] hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]"
                     : "bg-[#18181b] border border-[#27272a] text-auth-accent cursor-default"
                 }`}
                 title={!selectedRoleKbId ? (locale === "vi" ? "Click để thiết lập Knowledge Base của bạn" : "Click to set up your Knowledge Base") : undefined}
@@ -1170,7 +1170,7 @@ export function DashboardView() {
                   <div className="stat-terminal-sub">
                     {stats.indexedItems} {locale === "vi" ? "đã index" : "indexed"}
                     {stats.pendingRetrievalItems > 0 && (
-                      <span className="text-amber-400/70"> · {stats.pendingRetrievalItems} pending</span>
+                      <span className="text-zinc-400"> · {stats.pendingRetrievalItems} pending</span>
                     )}
                   </div>
                 </Link>
@@ -1357,7 +1357,7 @@ export function DashboardView() {
                       quota.storage.status === "exceeded"
                         ? "bg-red-500"
                         : quota.storage.status === "warning"
-                          ? "bg-amber-400"
+                          ? "bg-zinc-400"
                           : "bg-[var(--color-auth-accent)]"
                     }`}
                     style={{ width: `${quota.storage.percentage || 0}%` }}
@@ -1380,7 +1380,7 @@ export function DashboardView() {
                        quota.queries.status === "exceeded"
                          ? "bg-red-500"
                          : quota.queries.status === "warning"
-                           ? "bg-amber-400"
+                           ? "bg-zinc-400"
                            : "bg-[var(--color-auth-accent)]"
                      }`}
                      style={{
@@ -1410,7 +1410,7 @@ export function DashboardView() {
                        quota.compiles.status === "exceeded"
                          ? "bg-red-500"
                          : quota.compiles.status === "warning"
-                           ? "bg-amber-400"
+                           ? "bg-zinc-400"
                            : "bg-indigo-500"
                      }`}
                      style={{

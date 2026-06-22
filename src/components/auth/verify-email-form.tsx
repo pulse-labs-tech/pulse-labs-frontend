@@ -9,7 +9,7 @@ import { verifyEmailAction } from "@/app/actions/auth";
 import { AuthErrorAlert } from "@/components/auth/auth-error-alert";
 import type { AuthErrorCode } from "@/types/auth";
 import { useTranslation } from "@/contexts/locale-context";
-import { PulseLogo } from "@/components/shared/pulse-logo";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 import { getLocalizedPath } from "@/lib/utils";
 
 export function VerifyEmailForm() {
@@ -91,9 +91,7 @@ export function VerifyEmailForm() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 to-accent-500 shadow-[0_0_12px_var(--color-auth-accent-glow)]">
               <PulseLogo size={20} className="drop-shadow-[0_0_6px_var(--color-auth-accent-glow)]" />
             </div>
-          <span className="text-sm font-bold tracking-tight text-auth-text">
-            Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
-          </span>
+          <PulseWordmark className="text-sm" />
         </div>
 
         {/* Card Content */}

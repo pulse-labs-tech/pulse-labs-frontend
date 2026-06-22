@@ -45,7 +45,7 @@ function getConfidenceBadge(level: ConfidenceLevel, score: number) {
       );
     case "medium":
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-950/40 border border-amber-500/20 text-amber-400">
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-zinc-800/40 border border-zinc-700/30 text-zinc-400">
           <LineIcon name="shield" className="h-3 w-3" />
           Tin cậy vừa — {pct}%
         </span>
@@ -448,12 +448,12 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
               <section className="space-y-4">
                 {/* Caveats */}
                 {synthesis.caveats.length > 0 && (
-                  <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-950/10 px-4 py-3">
-                    <LineIcon name="warning" className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+                  <div className="flex items-start gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3">
+                    <LineIcon name="warning" className="h-4 w-4 shrink-0 text-zinc-400 mt-0.5" />
                     <div className="space-y-1">
-                      <p className="text-xs font-semibold text-amber-300">{t("research.caveats", "Lưu ý")}</p>
+                      <p className="text-xs font-semibold text-zinc-200">{t("research.caveats", "Lưu ý")}</p>
                       {synthesis.caveats.map((c, i) => (
-                        <p key={i} className="text-xs text-amber-200/80">{c}</p>
+                        <p key={i} className="text-xs text-zinc-400">{c}</p>
                       ))}
                     </div>
                   </div>
@@ -550,7 +550,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                           Điểm: <strong className="text-auth-accent">{Math.round(src.score * 100)}%</strong>
                         </span>
                         {!src.fetchedOk && (
-                          <span className="text-[10px] text-amber-300">Chỉ lấy được snippet</span>
+                          <span className="text-[10px] text-zinc-400">Chỉ lấy được snippet</span>
                         )}
                       </div>
                     </div>
@@ -577,7 +577,7 @@ export function ResearchRunDetail({ runId }: ResearchRunDetailProps) {
                       <p className="text-sm text-white leading-relaxed">{claim.text}</p>
                       <span className={`text-[10px] font-bold shrink-0 px-2 py-0.5 rounded-full border ${
                         claim.confidence >= 0.8 ? "bg-auth-accent-dim border-auth-accent/20 text-auth-accent" :
-                        claim.confidence >= 0.6 ? "bg-amber-950/40 border-amber-500/20 text-amber-400" :
+                        claim.confidence >= 0.6 ? "bg-zinc-800/40 border-zinc-700/20 text-zinc-400" :
                         "bg-red-950/40 border-red-500/20 text-red-400"
                       }`}>
                         {Math.round(claim.confidence * 100)}%

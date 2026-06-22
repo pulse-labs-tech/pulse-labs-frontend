@@ -1122,7 +1122,7 @@ export function OnboardingWizard() {
 
                   {/* Timeout Reached */}
                   {pollTimeoutReached && (
-                    <div className="flex items-start gap-2 bg-auth-orange-dim border border-auth-orange/20 rounded-lg p-3 text-xs text-auth-text-2">
+                    <div className="flex items-start gap-2 bg-white/[0.02] border border-white/[0.08] rounded-lg p-3 text-xs text-auth-text-2">
                       <span>
                         {t("onboarding.seed.timeoutWarning")}
                       </span>

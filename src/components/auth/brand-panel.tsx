@@ -6,7 +6,7 @@
  */
 
 import { LineIcon } from "@/components/shared/line-icon";
-import { PulseLogo } from "@/components/shared/pulse-logo";
+import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 import { getDictionary } from "@/dictionaries";
 
 export async function BrandPanel({ locale = "vi" }: { locale?: string }) {
@@ -54,9 +54,7 @@ export async function BrandPanel({ locale = "vi" }: { locale?: string }) {
       {/* Logo */}
       <div className="relative flex items-center gap-2.5">
         <PulseLogo size={36} className="drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
-        <span className="text-[15px] font-bold tracking-tight text-auth-text 3xl:text-base">
-          Pulse<span className="bg-gradient-to-r from-brand-400 to-accent-300 bg-clip-text text-transparent">Knowledge</span>
-        </span>
+        <PulseWordmark className="text-[15px] 3xl:text-base" />
       </div>
 
       {/* Hero text */}

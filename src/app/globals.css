@@ -133,8 +133,8 @@
   /* --- Auth Secondary Accents --- */
   --color-auth-purple: oklch(0.68 0.18 280);
   --color-auth-purple-dim: oklch(0.68 0.18 280 / 0.12);
-  --color-auth-orange: oklch(0.72 0.16 55);
-  --color-auth-orange-dim: oklch(0.72 0.16 55 / 0.12);
+  --color-auth-orange: oklch(0.72 0 0);
+  --color-auth-orange-dim: oklch(0.72 0 0 / 0.12);
   --color-auth-cyan: oklch(0.78 0.14 195);
   --color-auth-cyan-dim: oklch(0.78 0.14 195 / 0.12);
 
@@ -2079,9 +2079,9 @@ select:focus {
   background: linear-gradient(
     90deg,
     var(--color-auth-orange) 0%,
-    oklch(0.78 0.16 80) 25%,
-    oklch(0.82 0.18 95) 50%,
-    oklch(0.78 0.16 80) 75%,
+    oklch(0.78 0 0) 25%,
+    oklch(0.82 0 0) 50%,
+    oklch(0.78 0 0) 75%,
     var(--color-auth-orange) 100%
   ) !important;
   background-size: 200% auto !important;
