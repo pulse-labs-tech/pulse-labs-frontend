@@ -27,9 +27,7 @@ function VerifyEmailFallback() {
       <div className="w-full max-w-[380px] 3xl:max-w-[420px] 4xl:max-w-[460px]">
         {/* Mobile logo — shown only on small screens */}
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent-500)] shadow-[0_0_12px_oklch(0.72_0.11_145_/_0.3)]">
-              <PulseLogo size={20} className="drop-shadow-[0_0_6px_var(--color-auth-accent-glow)]" />
-            </div>
+          <PulseLogo size={28} className="drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
           <PulseWordmark className="text-sm" />
         </div>
 
