@@ -123,12 +123,12 @@
   --color-auth-text-2: oklch(0.70 0.01 260);
   --color-auth-text-3: oklch(0.48 0.01 260);
 
-  /* --- Auth Accent (Silver White — premium, not neon) --- */
-  --color-auth-accent: oklch(1 0 0);
-  --color-auth-accent-dim: oklch(1 0 0 / 0.08);
-  --color-auth-accent-dark: oklch(0.82 0.002 260);
-  --color-auth-accent-muted: oklch(1 0 0 / 0.40);
-  --color-auth-accent-glow: oklch(1 0 0 / 0.10);
+  /* --- Auth Accent (refined jade — premium, not neon) --- */
+  --color-auth-accent: oklch(0.65 0.13 160);
+  --color-auth-accent-dim: oklch(0.65 0.13 160 / 0.09);
+  --color-auth-accent-dark: oklch(0.54 0.12 160);
+  --color-auth-accent-muted: oklch(0.65 0.13 160 / 0.60);
+  --color-auth-accent-glow: oklch(0.65 0.13 160 / 0.14);
 
   /* --- Auth Secondary Accents --- */
   --color-auth-purple: oklch(0.68 0.18 280);
