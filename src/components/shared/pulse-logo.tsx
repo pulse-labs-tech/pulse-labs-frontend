@@ -24,40 +24,39 @@ export function PulseLogo({ size = 40, className = "" }: PulseLogoProps) {
       className={className}
     >
       <defs>
-        <linearGradient id={`${uid}-g1`} x1="22" y1="6" x2="22" y2="38" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${uid}-g1`} x1="12" y1="8" x2="28" y2="36" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="60%" stopColor="oklch(0.80 0.005 260)" />
+          <stop offset="50%" stopColor="oklch(0.82 0.002 260)" />
           <stop offset="100%" stopColor="oklch(0.65 0.13 160)" />
         </linearGradient>
-        <linearGradient id={`${uid}-g2`} x1="12" y1="12" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${uid}-g2`} x1="12" y1="17" x2="32" y2="17" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="oklch(0.65 0.13 160)" />
-          <stop offset="100%" stopColor="oklch(0.65 0.13 160 / 0.12)" />
+          <stop offset="100%" stopColor="#ffffff" />
         </linearGradient>
       </defs>
 
-      {/* Outer elegant pulse ring (broken loop representing infinite flow) */}
+      {/* Main letter P stem and bowl loop */}
       <path
-        d="M 22 6 A 16 16 0 1 1 11 11"
+        d="M 13 36 V 10 C 13 10, 29 8, 29 17 C 29 26, 13 24, 13 24"
         stroke={`url(#${uid}-g1)`}
-        strokeWidth="3.2"
+        strokeWidth="3.5"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
 
-      {/* Secondary overlapping wave arc that loops inwards */}
+      {/* Heartbeat pulse wave running through the center of the P bowl */}
       <path
-        d="M 12 18 C 16 12, 28 12, 32 20 C 36 28, 24 36, 18 30 C 14 26, 16 20, 22 20 C 26 20, 28 24, 26 28"
+        d="M 13 17 H 16.5 L 19.5 10 L 22.5 24 L 25.5 14 L 28.5 17 H 32.5"
         stroke={`url(#${uid}-g2)`}
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity="0.85"
       />
 
-      {/* Central bright core node representing Knowledge */}
-      <circle cx="22" cy="20" r="2.5" fill="#ffffff" />
-      
-      {/* Accent pulse spark representing Pulse */}
-      <circle cx="26" cy="28" r="1.5" fill="oklch(0.65 0.13 160)" />
+      {/* Glowing connection nodes */}
+      <circle cx="19.5" cy="10" r="1.2" fill="#ffffff" />
+      <circle cx="22.5" cy="24" r="1.2" fill="oklch(0.65 0.13 160)" />
+      <circle cx="32.5" cy="17" r="1.5" fill="#ffffff" />
     </svg>
   );
 }

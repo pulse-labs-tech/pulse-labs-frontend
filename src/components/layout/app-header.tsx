@@ -219,7 +219,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
               className="app-brand-lockup inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border px-3 text-sm text-auth-text transition-colors sm:px-4"
               aria-label="Pulse Knowledge dashboard"
             >
-              <PulseLogo size={24} />
+              <PulseLogo size={28} />
               <PulseWordmark className="hidden text-[14px] sm:inline-flex" />
             </Link>
           </div>

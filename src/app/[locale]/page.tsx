@@ -117,7 +117,7 @@ export default async function HomePage({
                 className="inline-flex h-12 min-w-0 items-center gap-2 rounded-2xl border border-white/[0.08] bg-auth-elevated px-3 text-sm font-bold text-auth-text shadow-[0_10px_24px_rgba(0,0,0,0.28)] sm:px-4"
                 aria-label="Pulse Knowledge home"
               >
-                <PulseLogo size={26} />
+                <PulseLogo size={28} />
               <PulseWordmark className="truncate whitespace-nowrap max-[430px]:hidden" />
             </Link>
 
@@ -236,7 +236,7 @@ export default async function HomePage({
               <ScrollReveal direction="left" delay={0.12} className="relative min-h-[560px] overflow-hidden lg:min-h-[640px]">
                 <div className="absolute right-0 top-0 w-[72%] rounded-2xl border border-white/[0.08] bg-auth-elevated p-4 shadow-[0_18px_34px_rgba(0,0,0,0.26)] transition duration-200 hover:border-white/[0.14] hover:bg-auth-card-hover/80 hover:opacity-95 sm:w-[64%]">
                   <div className="flex items-center gap-2 text-xs font-bold text-auth-text">
-                    <PulseLogo size={18} />
+                    <PulseLogo size={22} />
                     Evidence preview
                   </div>
                   <div className="mt-5 grid grid-cols-[0.8fr_1fr] gap-3 sm:gap-4">
@@ -420,7 +420,7 @@ export default async function HomePage({
         <footer className="border-t border-white/[0.08] bg-auth-bg px-4 py-10 sm:px-6 lg:px-10">
           <div className="mx-auto flex max-w-[1280px] flex-col gap-5 text-sm text-auth-text-3 sm:flex-row sm:items-center sm:justify-between">
             <Link href={`/${locale}`} className="inline-flex items-center gap-2 font-black text-white">
-              <PulseLogo size={24} />
+              <PulseLogo size={28} />
               <PulseWordmark className="text-sm" />
             </Link>
             <div className="flex flex-wrap gap-5">
