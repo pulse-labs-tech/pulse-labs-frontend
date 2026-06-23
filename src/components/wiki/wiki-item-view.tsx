@@ -20,7 +20,7 @@ import type { WikiItemDetail, WikiRetrievalStatus, WikiSourceType } from "@/type
 function getSourceTypeIcon(type: WikiSourceType, size = "h-4 w-4") {
   switch (type) {
     case "text":
-      return <LineIcon name="files" className={`${size} text-emerald-400`} />;
+      return <LineIcon name="files" className={`${size} text-auth-text-2`} />;
     case "url":
       return <LineIcon name="link" className={`${size} text-blue-400`} />;
     case "file_pdf":
@@ -56,7 +56,7 @@ function getStatusBadge(status: WikiRetrievalStatus, t: (path: string) => string
   switch (status) {
     case "indexed":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.04] border border-white/[0.10] text-auth-text-2">
           <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" /> {t("wiki.statuses.ready")}
         </span>
       );
@@ -153,7 +153,7 @@ function WikiItemSkeleton() {
           <div className="h-4 w-28 bg-white/[0.06] rounded animate-pulse" />
           {[100, 90, 80, 95].map((w, i) => (
             <div key={i} className="flex gap-2 items-center">
-              <div className="h-2 w-2 rounded-full bg-emerald-400/20 shrink-0" />
+              <div className="h-2 w-2 rounded-full bg-white/[0.06] shrink-0" />
               <div className="h-3 bg-white/[0.04] rounded animate-pulse" style={{ width: `${w}%` }} />
             </div>
           ))}
@@ -260,7 +260,7 @@ export function WikiItemView({ id }: WikiItemViewProps) {
           <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
-                Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+                Pulse<span className="text-auth-text">Knowledge</span>
               </span>
             </Link>
           </div>

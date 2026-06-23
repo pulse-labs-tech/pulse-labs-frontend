@@ -196,7 +196,7 @@ function StageProgressBar({ job }: StageProgressBarProps) {
                 ? "bg-red-500"
                 : job.status === "wiki_ready"
                   ? "bg-auth-accent"
-                  : "bg-gradient-to-r from-auth-accent to-teal-400 animate-pulse"
+                  : "bg-auth-accent animate-pulse"
             }
           `}
           style={{ width: `${Math.max(job.progress ?? 0, job.status === "wiki_ready" ? 100 : 0)}%` }}
@@ -559,7 +559,7 @@ export function CompileView() {
           <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
-                Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+                Pulse<span className="text-auth-text">Knowledge</span>
               </span>
             </Link>
           </div>
@@ -824,8 +824,8 @@ export function CompileView() {
               <div className="flex items-center gap-2 text-xs text-auth-text-3">
                 {selectedSourceType === "text" ? (
                   <>
-                    <LineIcon name="files" className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="text-emerald-400 font-semibold">{t("compile.labels.badgeText", "Văn bản")}</span>
+                    <LineIcon name="files" className="h-3.5 w-3.5 text-auth-text-2" />
+                    <span className="text-auth-text-2 font-semibold">{t("compile.labels.badgeText", "Văn bản")}</span>
                   </>
                 ) : (
                   <>
@@ -1023,7 +1023,7 @@ export function CompileView() {
 
                   {/* Status badge */}
                   {currentJob.status === "wiki_ready" ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/[0.04] border border-white/[0.10] text-auth-text-2">
                       <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" />
                       {t("common.success", "Hoàn thành")}
                     </span>
@@ -1074,8 +1074,8 @@ export function CompileView() {
               <div className="backdrop-blur-md rounded-2xl p-6 relative flex flex-col gap-5 premium-hover-card">
 
                 <div className="flex flex-col items-center gap-4 py-4 text-center">
-                  <div className="h-16 w-16 rounded-full bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-center">
-                    <LineIcon name="checkmark-circle" className="h-8 w-8 text-emerald-400" />
+                  <div className="h-16 w-16 rounded-full bg-white/[0.04] border border-white/[0.10] flex items-center justify-center">
+                    <LineIcon name="checkmark-circle" className="h-8 w-8 text-auth-text-2" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-auth-text">{t("compile.success", "Tài liệu đã được biên soạn thành công!")}</h3>

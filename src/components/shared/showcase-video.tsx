@@ -156,7 +156,7 @@ export function ShowcaseVideo() {
           {isMuted ? (
             <VolumeX className="h-[18px] w-[18px] text-white/80" />
           ) : (
-            <Volume2 className="h-[18px] w-[18px] text-emerald-400" />
+            <Volume2 className="h-[18px] w-[18px] text-auth-text-2" />
           )}
         </button>
       )}

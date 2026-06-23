@@ -50,19 +50,19 @@ const variantClasses: Record<string, string> = {
 
   secondary: [
     "bg-[var(--color-auth-elevated)] border border-[var(--color-auth-border)]",
-    "text-[var(--color-auth-text)] hover:border-[var(--color-auth-accent)]/30",
+    "text-[var(--color-auth-text)] hover:border-white/[0.18]",
     "hover:bg-[var(--color-auth-card-hover)]",
     "active:scale-[0.97]",
     "disabled:opacity-50 disabled:pointer-events-none",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-auth-accent)]",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40",
   ].join(" "),
 
   ghost: [
     "bg-transparent border border-[var(--color-auth-border)] text-[var(--color-auth-text-2)]",
-    "hover:bg-white/5 hover:text-white hover:border-[var(--color-auth-border)]",
+    "hover:bg-white/[0.05] hover:text-white hover:border-white/[0.14]",
     "active:scale-[0.97]",
     "disabled:opacity-40 disabled:pointer-events-none",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-auth-accent)]",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40",
   ].join(" "),
 
   danger: [
@@ -75,12 +75,12 @@ const variantClasses: Record<string, string> = {
   ].join(" "),
 
   outline: [
-    "bg-transparent border border-[var(--color-auth-accent)]/30",
-    "text-[var(--color-auth-accent)]",
-    "hover:bg-[var(--color-auth-accent-dim)] hover:border-[var(--color-auth-accent)]/55",
+    "bg-transparent border border-white/[0.14]",
+    "text-[var(--color-auth-text-2)]",
+    "hover:bg-white/[0.05] hover:border-white/[0.22] hover:text-white",
     "active:scale-[0.97]",
     "disabled:opacity-50 disabled:pointer-events-none",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-auth-accent)]",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40",
   ].join(" "),
 };
 

@@ -22,7 +22,7 @@ import { AppHeader } from "@/components/layout";
 function getSourceTypeIcon(type: WikiSourceType) {
   switch (type) {
     case "text":
-      return <LineIcon name="files" className="h-3.5 w-3.5 text-emerald-400" />;
+      return <LineIcon name="files" className="h-3.5 w-3.5 text-auth-text-2" />;
     case "url":
       return <LineIcon name="link" className="h-3.5 w-3.5 text-blue-400" />;
     case "file_pdf":
@@ -57,7 +57,7 @@ function getStatusBadge(status: WikiRetrievalStatus, tFn: (key: string, fallback
   switch (status) {
     case "indexed":
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/[0.04] border border-white/[0.10] text-auth-text-2">
           <LineIcon name="checkmark-circle" className="h-2.5 w-2.5" /> {tFn("wiki.statuses.ready", "Indexed")}
         </span>
       );
@@ -540,7 +540,7 @@ export function WikiListView() {
           <div className="flex justify-start z-10">
             <Link href={`/${locale}`} className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-auth-text">
-                Pulse<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Knowledge</span>
+                Pulse<span className="text-auth-text">Knowledge</span>
               </span>
             </Link>
           </div>

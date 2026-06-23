@@ -39,14 +39,14 @@ export function LocaleSwitcher({ id = "default" }: LocaleSwitcherProps) {
   };
 
   return (
-    <div className="relative inline-flex items-center gap-1 rounded-full bg-white/[0.02] p-0.5 border border-white/[0.08] hover:border-white/[0.14] shadow-[0_4px_16px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-300">
-      {/* Globe Icon with smooth hover rotation */}
+    <div className="relative inline-flex items-center gap-1 rounded-full bg-white/[0.02] p-0.5 border border-white/[0.07] hover:border-white/[0.13] shadow-[0_4px_16px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-300">
+      {/* Globe Icon */}
       <motion.div
         whileHover={{ rotate: 180 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
         className="pl-2 pr-1 text-auth-text-3 flex items-center justify-center cursor-pointer max-[480px]:hidden"
       >
-        <LineIcon name="world" className="h-3.5 w-3.5 text-auth-text-3/70 hover:text-emerald-400 transition-colors duration-300" />
+        <LineIcon name="world" className="h-3.5 w-3.5 text-auth-text-3/70 hover:text-auth-text-2 transition-colors duration-300" />
       </motion.div>
       
       <div className="relative flex items-center bg-black/25 p-0.5 rounded-full border border-white/[0.03]">
@@ -56,14 +56,14 @@ export function LocaleSwitcher({ id = "default" }: LocaleSwitcherProps) {
           disabled={isPending}
           className={`relative px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center focus:outline-none select-none sm:px-3.5 ${
             currentLocale === "vi"
-              ? "text-emerald-400"
+              ? "text-white"
               : "text-auth-text-3/80 hover:text-white"
           } ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
         >
           {currentLocale === "vi" && (
             <motion.span
               layoutId={`activeLocaleBg-${id}`}
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/15 via-emerald-500/20 to-teal-500/15 border border-emerald-500/25 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+              className="absolute inset-0 rounded-full bg-white/[0.10] border border-white/[0.12]"
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             />
           )}
@@ -76,14 +76,14 @@ export function LocaleSwitcher({ id = "default" }: LocaleSwitcherProps) {
           disabled={isPending}
           className={`relative px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 flex items-center justify-center focus:outline-none select-none sm:px-3.5 ${
             currentLocale === "en"
-              ? "text-emerald-400"
+              ? "text-white"
               : "text-auth-text-3/80 hover:text-white"
           } ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
         >
           {currentLocale === "en" && (
             <motion.span
               layoutId={`activeLocaleBg-${id}`}
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/15 via-emerald-500/20 to-teal-500/15 border border-emerald-500/25 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+              className="absolute inset-0 rounded-full bg-white/[0.10] border border-white/[0.12]"
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             />
           )}

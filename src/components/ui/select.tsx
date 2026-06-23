@@ -71,10 +71,10 @@ export function Select({
           flex items-center justify-between gap-2 px-3.5 py-2
           bg-[#18181b] border border-[#27272a] hover:border-white/[0.15]
           text-xs text-[#fafafa] font-semibold rounded-xl cursor-pointer
-          transition-all duration-300 focus:outline-none focus:border-auth-accent
-          focus:ring-2 focus:ring-auth-accent-glow/50
+          transition-all duration-300 focus:outline-none focus:border-white/30
+          focus:ring-2 focus:ring-white/[0.06]
           ${fullWidth ? "w-full" : ""}
-          ${isOpen ? "border-auth-accent ring-2 ring-auth-accent-glow/50" : ""}
+          ${isOpen ? "border-white/25 ring-2 ring-white/[0.05]" : ""}
           ${className}
         `}
       >
@@ -83,7 +83,7 @@ export function Select({
         </span>
         <LineIcon name="chevron-down"
           className={`h-4 w-4 text-[#52525b] transition-transform duration-300 shrink-0 ${
-            isOpen ? "rotate-180 text-auth-accent" : "rotate-0"
+            isOpen ? "rotate-180 text-auth-text-2" : "rotate-0"
           }`}
         />
       </button>
@@ -121,7 +121,7 @@ export function Select({
                     hover:bg-white/5 cursor-pointer
                     ${
                       isSelected
-                        ? "text-auth-accent bg-auth-accent-dim/30"
+                        ? "text-white bg-white/[0.07]"
                         : "text-auth-text-2 hover:text-white"
                     }
                   `}
@@ -135,7 +135,7 @@ export function Select({
                     )}
                   </div>
                   {isSelected && (
-                    <LineIcon name="checkmark" className="h-3.5 w-3.5 text-auth-accent shrink-0" />
+                    <LineIcon name="checkmark" className="h-3.5 w-3.5 text-auth-text-2 shrink-0" />
                   )}
                 </button>
               );

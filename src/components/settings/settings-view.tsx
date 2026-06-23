@@ -1053,7 +1053,7 @@ export function SettingsView({ initialSection }: SettingsViewProps) {
             )}
 
             {roleSuccess && (
-              <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-950/20 px-4 py-3 text-xs text-emerald-300">
+              <div className="flex items-center gap-2 rounded-xl border border-[var(--color-auth-success)]/20 bg-[var(--color-auth-success-dim)] px-4 py-3 text-xs text-[var(--color-auth-success)]">
                 <LineIcon name="checkmark-circle" className="h-4 w-4 shrink-0" />
                 <span>{roleSuccess}</span>
               </div>

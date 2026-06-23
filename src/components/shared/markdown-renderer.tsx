@@ -55,7 +55,7 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
       </div>
 
       {/* Code Area */}
-      <pre className="p-4 overflow-x-auto text-xs text-emerald-400/90 leading-relaxed whitespace-pre font-mono">
+      <pre className="p-4 overflow-x-auto text-xs text-auth-text-2 leading-relaxed whitespace-pre font-mono">
         <code>{code}</code>
       </pre>
     </div>

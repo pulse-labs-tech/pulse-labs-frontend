@@ -80,7 +80,7 @@ function TypingIndicator({ t }: { t: (path: string) => string }) {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce"
+          className="h-2 w-2 rounded-full bg-white/70 animate-bounce"
           style={{ animationDelay: `${i * 0.15}s`, animationDuration: "0.8s" }}
         />
       ))}
@@ -93,7 +93,7 @@ function ConfidenceBadge({ level, score, t }: { level: "high" | "medium" | "low"
   const map = {
     high: {
       label: t("query.confidenceHigh"),
-      cls: "bg-emerald-950/40 border border-emerald-500/20 text-emerald-400",
+      cls: "bg-white/[0.04] border border-white/[0.10] text-auth-text-2",
       Icon: "checkmark-circle",
     },
     medium: {
@@ -130,13 +130,13 @@ function CitationCard({ citation, index, t }: { citation: QueryCitation; index: 
     >
       {/* Index + domain */}
       <div className="flex items-center justify-between gap-2">
-        <span className="h-5 w-5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold flex items-center justify-center shrink-0">
+        <span className="h-5 w-5 rounded-full bg-white/[0.04] border border-white/[0.10] text-auth-text-2 text-[10px] font-bold flex items-center justify-center shrink-0">
           {index + 1}
         </span>
         <span className="text-[9px] font-bold uppercase tracking-wider text-auth-text-3 bg-auth-bg/60 border border-white/[0.06] px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
           {citation.domain?.name || "Unknown"}
         </span>
-        <LineIcon name="popup" className="h-3 w-3 text-auth-text-3 group-hover:text-emerald-400 transition-colors shrink-0" />
+        <LineIcon name="popup" className="h-3 w-3 text-auth-text-3 group-hover:text-auth-text transition-colors shrink-0" />
       </div>
 
       {/* Title */}
@@ -153,11 +153,11 @@ function CitationCard({ citation, index, t }: { citation: QueryCitation; index: 
       <div className="flex items-center gap-2 mt-auto">
         <div className="flex-1 h-1 bg-auth-bg rounded-full overflow-hidden border border-white/[0.04]">
           <div
-            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all"
+            className="h-full bg-gradient-to-r from-white/30 to-white/10 rounded-full transition-all"
             style={{ width: `${score}%` }}
           />
         </div>
-        <span className="text-[10px] font-bold text-emerald-400">{score}%</span>
+        <span className="text-[10px] font-bold text-auth-text-2">{score}%</span>
       </div>
     </a>
   );
@@ -173,7 +173,7 @@ function CitationsPanel({ citations, t }: { citations: QueryCitation[]; t: (path
     <div className="mt-3">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-auth-text-2 hover:text-white transition-colors"
       >
         <LineIcon name="book" className="h-3 w-3" />
         {t("query.citationsCount", "{count} sources").replace("{count}", citations.length.toString())}
@@ -1504,7 +1504,7 @@ export function QueryView() {
       {showCompileBar && lastAssistantMsg && (
         <div id="compileBar" className="text-left select-none animate-dropdown-enter">
           <div className="flex items-start gap-3">
-            <div className="h-7 w-7 rounded-lg bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="h-7 w-7 rounded-lg bg-white/[0.04] border border-white/[0.10] text-auth-text-2 flex items-center justify-center shrink-0">
               <LineIcon name="star" className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -1519,7 +1519,7 @@ export function QueryView() {
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => handleSaveToWiki(lastAssistantMsg.id)}
-                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                  className="bg-[var(--color-auth-error)] hover:bg-[var(--color-auth-error)]/80 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                 >
                   {locale === "vi" ? "Lưu vào Wiki" : "Compile to Wiki"}
                 </button>

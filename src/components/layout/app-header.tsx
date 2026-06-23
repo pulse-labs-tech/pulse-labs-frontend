@@ -205,7 +205,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
     <>
       <header className="app-glass-header fixed inset-x-0 top-0 z-50 border-b border-white/[0.08]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" aria-hidden="true" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-auth-accent/22 to-transparent" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" aria-hidden="true" />
         <div className="mx-auto grid min-h-[72px] w-full max-w-[1760px] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 sm:px-6 xl:gap-5 2xl:px-8">
           <div className="flex min-w-0 items-center gap-2">
             {leftAction}
@@ -229,11 +229,15 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </div>
 
           <nav className="hidden min-w-0 justify-center lg:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
-            <div className="app-nav-shell relative flex max-w-full items-center rounded-[18px] border p-0.5">
+            <div
+              className={`app-nav-shell relative flex max-w-full items-center rounded-[18px] border p-0.5 ${
+                navCanScrollPrev ? "can-scroll-prev" : ""
+              } ${navCanScrollNext ? "can-scroll-next" : ""}`}
+            >
               <button
                 type="button"
                 onClick={() => scrollNavRail("prev")}
-                className={`app-nav-arrow left-1 ${navCanScrollPrev ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                className={`app-nav-arrow left-1 transition-opacity duration-150 ${navCanScrollPrev ? "opacity-100" : "pointer-events-none opacity-0"}`}
                 aria-label={locale === "vi" ? "Mục trước" : "Previous item"}
               >
                 <LineIcon name="chevron-left" className="h-3.5 w-3.5" />
@@ -259,17 +263,18 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                       href={item.href}
                       prefetch={false}
                       title={item.label}
+                      draggable={false}
                       onClick={(event) => {
                         if (navDidDragRef.current) {
                           event.preventDefault();
                         }
                       }}
-                      className="relative inline-flex h-9 shrink-0 items-center rounded-[14px] px-3.5 text-[11px] font-bold transition-colors duration-200"
+                      className="relative inline-flex h-9 shrink-0 cursor-pointer items-center rounded-[14px] px-3.5 text-[11px] font-bold transition-colors duration-200 select-none"
                     >
                       {isActive && (
                         <motion.div
                           layoutId="app-active-tab"
-                          className="absolute inset-0 rounded-[14px] border border-auth-accent/25 bg-auth-accent-dim shadow-[0_0_18px_rgba(35,197,132,0.12)]"
+                          className="absolute inset-0 rounded-[14px] border border-auth-accent/25 bg-auth-accent-dim shadow-[0_0_18px_rgba(35,197,132,0.10)]"
                           transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.82 }}
                         />
                       )}
@@ -285,7 +290,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
               <button
                 type="button"
                 onClick={() => scrollNavRail("next")}
-                className={`app-nav-arrow right-1 ${navCanScrollNext ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                className={`app-nav-arrow right-1 transition-opacity duration-150 ${navCanScrollNext ? "opacity-100" : "pointer-events-none opacity-0"}`}
                 aria-label={locale === "vi" ? "Mục tiếp theo" : "Next item"}
               >
                 <LineIcon name="chevron-right" className="h-3.5 w-3.5" />
@@ -330,12 +335,12 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                   aria-haspopup="menu"
                   aria-expanded={userMenuOpen}
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-auth-accent-dark text-xs font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--color-auth-elevated)] text-xs font-black text-auth-text shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]">
                     {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden min-w-0 leading-none min-[500px]:block">
                     <div className="max-w-[104px] truncate text-[11px] font-bold text-white">{userName}</div>
-                    <div className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-auth-accent">{planName}</div>
+                    <div className="mt-1 text-[9px] font-medium uppercase tracking-[0.08em] text-auth-text-3">{planName}</div>
                   </div>
                   <LineIcon
                     name="chevron-down"
@@ -357,18 +362,18 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                         className="app-user-menu overflow-hidden rounded-[22px] border p-3"
                       >
                         <div className="flex items-center gap-3 px-3 py-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-auth-accent-dark text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-auth-elevated)] text-sm font-black text-auth-text shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                             {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-bold text-white">{user.displayName || user.email || "User"}</div>
                             <div className="mt-1 truncate text-xs text-auth-text-3">{user.email}</div>
-                            <div className="mt-2 inline-flex rounded-full border border-auth-accent/20 bg-auth-accent-dim px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-auth-accent">
+                            <div className="mt-2 inline-flex rounded-full border border-white/[0.07] bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-auth-text-3">
                               {planName}
                             </div>
                           </div>
                         </div>
-                        <div className="my-2 h-px bg-white/[0.08]" />
+                        <div className="my-2 h-px bg-white/[0.07]" />
                         <Link
                           href={`/${locale}/settings`}
                           prefetch={false}
@@ -376,8 +381,8 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                           role="menuitem"
                           className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-                            <LineIcon name="gear" className="h-4 w-4 text-auth-accent" />
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03]">
+                            <LineIcon name="gear" className="h-4 w-4 text-auth-text-3" />
                           </span>
                           <span className="leading-5">{locale === "vi" ? "Cài đặt tài khoản" : "Account settings"}</span>
                         </Link>
