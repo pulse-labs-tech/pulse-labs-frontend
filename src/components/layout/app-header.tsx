@@ -43,10 +43,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
   const [navCanScrollNext, setNavCanScrollNext] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const navRailRef = useRef<HTMLDivElement>(null);
-  const navDragStartXRef = useRef(0);
-  const navDragStartScrollRef = useRef(0);
-  const navDraggingRef = useRef(false);
-  const navDidDragRef = useRef(false);
 
   const roleQuery = active === "settings" ? null : selectedRoleKbId;
   const dashboardHref = `/${locale}/dashboard${roleQuery ? `?roleKbId=${roleQuery}` : ""}`;
@@ -103,41 +99,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
       left: direction === "next" ? 180 : -180,
       behavior: "smooth",
     });
-  };
-
-  const handleNavPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const rail = navRailRef.current;
-    if (!rail) return;
-
-    navDraggingRef.current = true;
-    navDidDragRef.current = false;
-    navDragStartXRef.current = event.clientX;
-    navDragStartScrollRef.current = rail.scrollLeft;
-    rail.setPointerCapture(event.pointerId);
-  };
-
-  const handleNavPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const rail = navRailRef.current;
-    if (!rail || !navDraggingRef.current) return;
-
-    const deltaX = event.clientX - navDragStartXRef.current;
-    if (Math.abs(deltaX) > 5) {
-      navDidDragRef.current = true;
-    }
-    rail.scrollLeft = navDragStartScrollRef.current - deltaX;
-  };
-
-  const handleNavPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const rail = navRailRef.current;
-    if (rail?.hasPointerCapture(event.pointerId)) {
-      rail.releasePointerCapture(event.pointerId);
-    }
-
-    navDraggingRef.current = false;
-    syncNavScrollState();
-    window.setTimeout(() => {
-      navDidDragRef.current = false;
-    }, 0);
   };
 
   const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -245,10 +206,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
               <div
                 ref={navRailRef}
                 className="app-nav-rail flex max-w-full touch-pan-x select-none items-center gap-0.5 overflow-x-auto rounded-[15px]"
-                onPointerDown={handleNavPointerDown}
-                onPointerMove={handleNavPointerMove}
-                onPointerUp={handleNavPointerEnd}
-                onPointerCancel={handleNavPointerEnd}
                 onWheel={(event) => {
                   if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
                     event.currentTarget.scrollLeft += event.deltaY;
@@ -264,11 +221,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                       prefetch={false}
                       title={item.label}
                       draggable={false}
-                      onClick={(event) => {
-                        if (navDidDragRef.current) {
-                          event.preventDefault();
-                        }
-                      }}
                       className="relative inline-flex h-9 shrink-0 cursor-pointer items-center rounded-[14px] px-3.5 text-[11px] font-bold transition-colors duration-200 select-none"
                     >
                       {isActive && (
@@ -280,8 +232,8 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                       )}
                       <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-auth-accent" : "text-auth-text-2 hover:text-auth-text"}`}>
                         <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
-                        <span className="hidden 2xl:inline">{item.label}</span>
-                        <span className="hidden xl:inline 2xl:hidden">{item.shortLabel}</span>
+                        <span className="hidden xl:inline">{item.label}</span>
+                        <span className="hidden lg:inline xl:hidden">{item.shortLabel}</span>
                       </span>
                     </Link>
                   );
