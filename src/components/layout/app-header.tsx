@@ -413,7 +413,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
 
       </header>
       <div className="h-[73px] shrink-0" aria-hidden="true" />
-      <AppMobileNav locale={locale} />
+      <AppMobileNav locale={locale} selectedRoleKbId={selectedRoleKbId} />
     </>
   );
 }
