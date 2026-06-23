@@ -146,7 +146,7 @@ export default async function HomePage({
                   </Link>
                   <Link
                     href={`/${locale}/register`}
-                    className="mt-1 flex items-center justify-center rounded-xl bg-auth-accent-dark px-3 py-3 text-sm font-bold text-white transition-transform active:scale-[0.98]"
+                    className="btn-landing-cta mt-1 flex items-center justify-center rounded-xl px-3 py-3 text-sm font-bold text-white transition-transform active:scale-[0.98]"
                   >
                     {dict.landing.ctaStart}
                   </Link>
@@ -172,7 +172,7 @@ export default async function HomePage({
               </Link>
               <Link
                 href={`/${locale}/register`}
-                className="hidden items-center rounded-xl bg-auth-accent-dark px-4 py-2 text-sm font-bold text-white transition-transform active:scale-[0.98] sm:inline-flex"
+                className="btn-landing-cta hidden items-center rounded-xl px-4 py-2 text-sm font-bold text-white transition-transform active:scale-[0.98] sm:inline-flex"
               >
                 {dict.landing.ctaStart}
               </Link>
@@ -218,14 +218,14 @@ export default async function HomePage({
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href={`/${locale}/register`}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-auth-accent-dark px-7 py-4 text-base font-bold text-white transition-transform active:scale-[0.98]"
+                    className="btn-landing-cta inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-bold text-white transition-transform active:scale-[0.98]"
                   >
                     {dict.landing.ctaStart}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <a
                     href="#features"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-auth-elevated px-7 py-4 text-base font-bold text-auth-text transition-transform active:scale-[0.98]"
+                    className="btn-landing-secondary inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-bold text-auth-text transition-transform active:scale-[0.98]"
                   >
                     {dict.landing.ctaHow}
                     <ArrowRight className="h-4 w-4" />
@@ -405,11 +405,11 @@ export default async function HomePage({
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-                <Link href={`/${locale}/register`} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-auth-accent-dark px-7 py-4 text-base font-black text-white">
+                <Link href={`/${locale}/register`} className="btn-landing-cta inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-black text-white">
                   {dict.landing.ctaStart}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <a href="mailto:support@pulseknowledge.com" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/16 px-7 py-4 text-base font-bold text-white">
+                <a href="mailto:support@pulseknowledge.com" className="btn-landing-secondary inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-bold text-white">
                   {dict.landing.ctaContact}
                 </a>
               </div>
