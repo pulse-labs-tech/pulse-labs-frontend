@@ -10,6 +10,7 @@ import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 import { LineIcon } from "@/components/shared/line-icon";
 import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
+import { AppMobileNav } from "./app-mobile-nav";
 
 type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
 type AppHeaderNavItem = "dashboard" | "query" | "research" | "wiki";
@@ -37,12 +38,55 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
   const { user, clearAuth } = useAuth();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [navCanScrollPrev, setNavCanScrollPrev] = useState(false);
   const [navCanScrollNext, setNavCanScrollNext] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const navRailRef = useRef<HTMLDivElement>(null);
+
+  const navDragStartXRef = useRef<number>(0);
+  const navDragStartScrollRef = useRef<number>(0);
+  const navDraggingRef = useRef<boolean>(false);
+  const navDidDragRef = useRef<boolean>(false);
+
+  const handleNavPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+
+    const rail = navRailRef.current;
+    if (!rail) return;
+
+    navDragStartXRef.current = e.clientX;
+    navDragStartScrollRef.current = rail.scrollLeft;
+    navDraggingRef.current = true;
+    navDidDragRef.current = false;
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      if (!navDraggingRef.current) return;
+
+      const dx = moveEvent.clientX - navDragStartXRef.current;
+      if (Math.abs(dx) > 5) {
+        navDidDragRef.current = true;
+      }
+      rail.scrollLeft = navDragStartScrollRef.current - dx;
+    };
+
+    const handlePointerUp = () => {
+      navDraggingRef.current = false;
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+
+      if (navDidDragRef.current) {
+        setTimeout(() => {
+          navDidDragRef.current = false;
+        }, 80);
+      }
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+  };
 
   const roleQuery = active === "settings" ? null : selectedRoleKbId;
   const dashboardHref = `/${locale}/dashboard${roleQuery ? `?roleKbId=${roleQuery}` : ""}`;
@@ -105,7 +149,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
     if (pathname !== `/${locale}/dashboard`) return;
 
     event.preventDefault();
-    setMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -170,14 +213,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
         <div className="mx-auto grid min-h-[72px] w-full max-w-[1760px] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 sm:px-6 xl:gap-5 2xl:px-8">
           <div className="flex min-w-0 items-center gap-2">
             {leftAction}
-            <button
-              onClick={() => setMenuOpen((value) => !value)}
-              className="app-glass-pill flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border text-auth-text-2 transition-colors hover:text-white md:hidden"
-              aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-              aria-expanded={menuOpen}
-            >
-              <LineIcon name={menuOpen ? "xmark" : "list"} className="h-4 w-4" />
-            </button>
             <Link
               href={dashboardHref}
               onClick={handleLogoClick}
@@ -205,6 +240,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
               </button>
               <div
                 ref={navRailRef}
+                onPointerDown={handleNavPointerDown}
                 className="app-nav-rail flex max-w-full touch-pan-x select-none items-center gap-0.5 overflow-x-auto rounded-[15px]"
                 onWheel={(event) => {
                   if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
@@ -221,6 +257,12 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                       prefetch={false}
                       title={item.label}
                       draggable={false}
+                      onClick={(e) => {
+                        if (navDidDragRef.current) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }
+                      }}
                       className="relative inline-flex h-9 shrink-0 cursor-pointer items-center rounded-[14px] px-3.5 text-[11px] font-bold transition-colors duration-200 select-none"
                     >
                       {isActive && (
@@ -369,41 +411,9 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </div>
         </div>
 
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="border-t border-white/[0.08] bg-auth-bg/70 px-4 pb-4 backdrop-blur-2xl md:hidden overflow-hidden"
-            >
-              <nav className="mx-auto grid max-w-[1760px] grid-cols-2 gap-2 pt-4" aria-label={locale === "vi" ? "Điều hướng di động" : "Mobile navigation"}>
-                {navItems.map((item) => {
-                  const isActive = item.id === active;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      prefetch={false}
-                      onClick={() => setMenuOpen(false)}
-                      className={`flex h-12 items-center gap-2 rounded-2xl border px-3 text-sm font-bold transition-colors ${
-                        isActive
-                          ? "border-white/[0.12] bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-                          : "app-glass-pill text-auth-text-2 hover:text-auth-text"
-                      }`}
-                    >
-                      <LineIcon name={navIcon[item.id]} className="h-4 w-4" />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
       <div className="h-[73px] shrink-0" aria-hidden="true" />
+      <AppMobileNav locale={locale} />
     </>
   );
 }

@@ -522,7 +522,7 @@ export function ResearchView() {
               onClick={() => setActiveTab("interactive")}
               className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "interactive"
-                  ? "bg-auth-accent text-black"
+                  ? "bg-white text-black shadow-sm"
                   : "text-auth-text-3 hover:text-white"
               }`}
             >
@@ -532,7 +532,7 @@ export function ResearchView() {
               onClick={() => setActiveTab("history")}
               className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "history"
-                  ? "bg-auth-accent text-black"
+                  ? "bg-white text-black shadow-sm"
                   : "text-auth-text-3 hover:text-white"
               }`}
             >

@@ -203,7 +203,7 @@ export function GlobalSearchPalette() {
     const size = "h-4 w-4 shrink-0";
     switch (type) {
       case "text":
-        return <LineIcon name="files" className={`${size} text-emerald-400`} />;
+        return <LineIcon name="files" className={`${size} text-slate-400`} />;
       case "url":
         return <LineIcon name="link" className={`${size} text-blue-400`} />;
       case "file_pdf":
@@ -215,7 +215,7 @@ export function GlobalSearchPalette() {
       case "query_output":
         return <LineIcon name="cpu" className={`${size} text-cyan-400`} />;
       default:
-        return <LineIcon name="book" className={`${size} text-emerald-500`} />;
+        return <LineIcon name="book" className={`${size} text-slate-400`} />;
     }
   };
 
@@ -289,7 +289,7 @@ export function GlobalSearchPalette() {
                       }}
                       className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all cursor-pointer border ${
                         isActive
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-sm"
+                          ? "bg-white/10 border-white/20 text-white shadow-sm"
                           : "bg-transparent border-transparent text-auth-text-3 hover:text-auth-text-2 hover:bg-white/5"
                       }`}
                     >

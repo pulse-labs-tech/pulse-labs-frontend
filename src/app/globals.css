@@ -27,30 +27,30 @@
   --breakpoint-4xl: 160rem; /* 2560px — QHD / Ultra-wide */
   --breakpoint-5xl: 240rem; /* 3840px — 4K UHD */
 
-  /* --- Colors: Pulse Labs Brand Palette (Jade-Emerald Green — matches auth-accent) --- */
-  --color-brand-50:  oklch(0.97 0.02 160);
-  --color-brand-100: oklch(0.94 0.04 160);
-  --color-brand-200: oklch(0.88 0.08 160);
-  --color-brand-300: oklch(0.78 0.14 160);
-  --color-brand-400: oklch(0.70 0.18 160);
-  --color-brand-500: oklch(0.62 0.20 160);
-  --color-brand-600: oklch(0.54 0.19 160);
-  --color-brand-700: oklch(0.44 0.16 160);
-  --color-brand-800: oklch(0.35 0.11 160);
-  --color-brand-900: oklch(0.26 0.07 160);
-  --color-brand-950: oklch(0.18 0.04 160);
+  /* --- Colors: Pulse Labs Brand Palette (Slate Gray — Professional Neutral) --- */
+  --color-brand-50:  oklch(0.98 0.002 260);
+  --color-brand-100: oklch(0.95 0.004 260);
+  --color-brand-200: oklch(0.88 0.006 260);
+  --color-brand-300: oklch(0.78 0.008 260);
+  --color-brand-400: oklch(0.70 0.01 260);
+  --color-brand-500: oklch(0.62 0.01 260);
+  --color-brand-600: oklch(0.54 0.01 260);
+  --color-brand-700: oklch(0.44 0.01 260);
+  --color-brand-800: oklch(0.35 0.008 260);
+  --color-brand-900: oklch(0.26 0.006 260);
+  --color-brand-950: oklch(0.18 0.004 260);
 
-  /* --- Accent (Teal — complementary to brand green) --- */
-  --color-accent-50:  oklch(0.97 0.02 175);
-  --color-accent-100: oklch(0.94 0.04 175);
-  --color-accent-200: oklch(0.88 0.08 175);
-  --color-accent-300: oklch(0.78 0.13 175);
-  --color-accent-400: oklch(0.68 0.17 175);
-  --color-accent-500: oklch(0.60 0.19 175);
-  --color-accent-600: oklch(0.52 0.17 175);
-  --color-accent-700: oklch(0.44 0.14 175);
-  --color-accent-800: oklch(0.36 0.09 175);
-  --color-accent-900: oklch(0.28 0.06 175);
+  /* --- Accent (Silver Gray — Professional Neutral) --- */
+  --color-accent-50:  oklch(0.98 0.002 260);
+  --color-accent-100: oklch(0.95 0.004 260);
+  --color-accent-200: oklch(0.88 0.006 260);
+  --color-accent-300: oklch(0.78 0.008 260);
+  --color-accent-400: oklch(0.70 0.01 260);
+  --color-accent-500: oklch(0.60 0.01 260);
+  --color-accent-600: oklch(0.52 0.01 260);
+  --color-accent-700: oklch(0.44 0.01 260);
+  --color-accent-800: oklch(0.36 0.008 260);
+  --color-accent-900: oklch(0.28 0.006 260);
 
   /* --- Surface / Neutral --- */
   --color-surface-50: oklch(0.985 0 0);
@@ -123,12 +123,12 @@
   --color-auth-text-2: oklch(0.70 0.01 260);
   --color-auth-text-3: oklch(0.48 0.01 260);
 
-  /* --- Auth Accent (refined jade — premium, not neon) --- */
-  --color-auth-accent: oklch(0.65 0.13 160);
-  --color-auth-accent-dim: oklch(0.65 0.13 160 / 0.09);
-  --color-auth-accent-dark: oklch(0.54 0.12 160);
-  --color-auth-accent-muted: oklch(0.65 0.13 160 / 0.60);
-  --color-auth-accent-glow: oklch(0.65 0.13 160 / 0.14);
+  /* --- Auth Accent (Silver White — premium, not neon) --- */
+  --color-auth-accent: oklch(1 0 0);
+  --color-auth-accent-dim: oklch(1 0 0 / 0.08);
+  --color-auth-accent-dark: oklch(0.82 0.002 260);
+  --color-auth-accent-muted: oklch(1 0 0 / 0.40);
+  --color-auth-accent-glow: oklch(1 0 0 / 0.10);
 
   /* --- Auth Secondary Accents --- */
   --color-auth-purple: oklch(0.68 0.18 280);
@@ -838,11 +838,11 @@ select:focus {
    ============================================================ */
 
 @theme inline {
-  --color-emerald-400: oklch(0.66 0.13 152);
-  --color-emerald-500: oklch(0.58 0.12 155);
-  --color-teal-300:    oklch(0.77 0.10 178);
-  --color-teal-400:    oklch(0.66 0.11 178);
-  --color-teal-500:    oklch(0.56 0.10 178);
+  --color-emerald-400: oklch(0.70 0.01 260);
+  --color-emerald-500: oklch(0.55 0.01 260);
+  --color-teal-300:    oklch(0.80 0.01 260);
+  --color-teal-400:    oklch(0.70 0.01 260);
+  --color-teal-500:    oklch(0.55 0.01 260);
 }
 
 /* ============================================================
@@ -3482,4 +3482,81 @@ select:focus {
   background:
     linear-gradient(180deg, oklch(0.13 0.006 260 / 0.88), oklch(0.11 0.006 260 / 0.76)),
     linear-gradient(90deg, transparent 0%, oklch(0.65 0.13 160 / 0.04) 50%, transparent 100%) !important;
+}
+
+/* ============================================================
+   MOBILE BOTTOM NAVIGATION — Instagram-style fixed tab nav
+   ============================================================ */
+
+.app-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  height: 52px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: linear-gradient(180deg, oklch(0.13 0.006 260 / 0.92), oklch(0.11 0.006 260 / 0.82)) !important;
+  backdrop-filter: blur(28px) saturate(165%);
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+  border-top: 1px solid oklch(1 0 0 / 0.08);
+  box-shadow: 0 -4px 20px oklch(0 0 0 / 0.4);
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: content-box;
+}
+
+@media (min-width: 768px) {
+  .app-mobile-nav {
+    display: none !important;
+  }
+}
+
+.app-mobile-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  color: var(--color-auth-text-3);
+  text-decoration: none;
+  transition: color 150ms ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.app-mobile-nav__item:hover {
+  color: var(--color-auth-text-2);
+}
+
+.app-mobile-nav__item--active {
+  color: #ffffff !important;
+}
+
+.app-mobile-nav__icon {
+  margin-bottom: 2px;
+  opacity: 0.65;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.app-mobile-nav__item--active .app-mobile-nav__icon {
+  opacity: 1 !important;
+  transform: scale(1.06);
+}
+
+.app-mobile-nav__label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* Ensure body or content container has bottom padding to prevent fixed bar from covering anything */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom)) !important;
+  }
 }
