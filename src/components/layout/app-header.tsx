@@ -2,7 +2,7 @@
 
 import { type MouseEvent, type PointerEvent as ReactPointerEvent, ReactNode, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { logoutAction } from "@/app/actions/auth";
 import { useAuth } from "@/hooks/use-auth";
@@ -37,6 +37,7 @@ const navIcon: Record<AppHeaderNavItem, string> = {
 export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppHeaderProps) {
   const { user, clearAuth } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [navCanScrollPrev, setNavCanScrollPrev] = useState(false);
@@ -158,10 +159,23 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
         clearAuth();
         await logoutAction();
       } catch {
-        window.location.href = `/${locale}/login`;
+        router.replace(`/${locale}/login`);
       }
     });
   };
+
+  useEffect(() => {
+    const destinations = [
+      appHref(locale, "/dashboard", roleQuery),
+      appHref(locale, "/query", roleQuery),
+      appHref(locale, "/research", roleQuery),
+      appHref(locale, "/wiki", roleQuery),
+      appHref(locale, "/compile/new", roleQuery),
+      appHref(locale, "/settings"),
+    ];
+
+    destinations.forEach((destination) => router.prefetch(destination));
+  }, [locale, roleQuery, router]);
 
   useEffect(() => {
     if (!userMenuOpen) return;
@@ -254,7 +268,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                     <Link
                       key={item.id}
                       href={item.href}
-                      prefetch={false}
                       title={item.label}
                       draggable={false}
                       onClick={(e) => {
@@ -370,7 +383,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                         <div className="my-2 h-px bg-white/[0.07]" />
                         <Link
                           href={`/${locale}/settings`}
-                          prefetch={false}
                           onClick={() => setUserMenuOpen(false)}
                           role="menuitem"
                           className="flex min-h-12 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-auth-text-2 transition-colors hover:bg-auth-card-hover hover:text-white"

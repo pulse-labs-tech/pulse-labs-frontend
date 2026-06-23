@@ -460,6 +460,7 @@ function VerifyEmailScreen({
   initialCountdown: number;
 }) {
   const { t, locale } = useTranslation();
+  const router = useRouter();
   const [countdown, setCountdown] = useState(initialCountdown);
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
@@ -486,10 +487,10 @@ function VerifyEmailScreen({
       const result = await resendVerificationAction(email);
       console.log("🟢 [F12 API RESPONSE] resendVerificationAction:", result);
       if (result.success) {
-        // If server auto-verified in dev mode, redirect is handled via window.location
+        // Keep the verification redirect inside the App Router navigation flow.
         if (result.autoVerifiedRedirect) {
           setResendMessage(t("auth.register.verifiedRedirecting"));
-          window.location.href = getLocalizedPath(result.autoVerifiedRedirect, locale);
+          router.replace(getLocalizedPath(result.autoVerifiedRedirect, locale));
           return;
         }
         setCountdown(result.resendAvailableInSeconds || 60);
@@ -502,7 +503,7 @@ function VerifyEmailScreen({
     } finally {
       setIsResending(false);
     }
-  }, [countdown, isResending, email, t, locale]);
+  }, [countdown, isResending, email, t, locale, router]);
 
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-y-auto bg-auth-surface px-6 py-12 sm:px-10 lg:px-14 xl:px-16 3xl:px-20">

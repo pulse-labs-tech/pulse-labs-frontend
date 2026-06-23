@@ -43,7 +43,6 @@ export function Footer() {
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    prefetch={false}
                     className="text-xs text-auth-text-3 transition-colors duration-200 hover:text-auth-text-2"
                   >
                     {l.label}

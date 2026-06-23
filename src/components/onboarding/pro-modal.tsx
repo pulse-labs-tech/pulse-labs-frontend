@@ -4,6 +4,7 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui";
 import { useTranslation } from "@/contexts/locale-context";
+import { useRouter } from "next/navigation";
 
 interface ProModalProps {
   isOpen: boolean;
@@ -11,11 +12,11 @@ interface ProModalProps {
 }
 
 export function ProModal({ isOpen, onClose }: ProModalProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const router = useRouter();
 
   const handleUpgrade = () => {
-    // Redirect to upgrade page (or mock payment activation path)
-    window.location.href = "/settings/plan/upgrade";
+    router.push(`/${locale}/settings/plan/upgrade`);
   };
 
   return (

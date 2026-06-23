@@ -293,7 +293,6 @@ export function LoginForm() {
               {t("auth.login.agreement")}{" "}
               <Link
                 href={`/${locale}/terms`}
-                prefetch={false}
                 className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
               >
                 {t("auth.login.terms")}
@@ -301,7 +300,6 @@ export function LoginForm() {
               {t("auth.login.and")}{" "}
               <Link
                 href={`/${locale}/privacy`}
-                prefetch={false}
                 className="text-auth-text-2 hover:text-auth-text underline underline-offset-2"
               >
                 {t("auth.login.privacy")}

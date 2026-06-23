@@ -709,7 +709,7 @@ export function CompileView() {
             {/* Page title */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-auth-text-3 text-xs">
-            <Link href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`} prefetch={false} className="hover:text-auth-text transition-colors">
+            <Link href={selectedRoleKbId ? `/${locale}/dashboard?roleKbId=${selectedRoleKbId}` : `/${locale}/dashboard`} className="hover:text-auth-text transition-colors">
               {t("common.dashboard", "Dashboard")}
             </Link>
             <LineIcon name="chevron-right" className="h-3 w-3" />
