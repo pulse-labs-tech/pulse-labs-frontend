@@ -1673,6 +1673,12 @@ select:focus {
   text-decoration: none;
 }
 
+@media (max-width: 767px) {
+  .dashboard-page .fab-compile {
+    display: none !important;
+  }
+}
+
 .dashboard-page .fab-compile svg {
   width: 16px;
   height: 16px;
