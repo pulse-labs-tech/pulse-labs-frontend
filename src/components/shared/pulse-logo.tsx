@@ -24,36 +24,52 @@ export function PulseLogo({ size = 40, className = "" }: PulseLogoProps) {
       className={className}
     >
       <defs>
-        <linearGradient id={`${uid}-grad1`} x1="13" y1="9" x2="13" y2="35" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="100%" stopColor="#737373" />
+        {/* Emerald → Teal icon gradient */}
+        <linearGradient id={`${uid}-g`} x1="4" y1="4" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#34d399" />
+          <stop offset="100%" stopColor="#2dd4bf" />
         </linearGradient>
-        <linearGradient id={`${uid}-grad2`} x1="13" y1="9" x2="35" y2="22" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="50%" stopColor="oklch(0.65 0.13 160)" />
-          <stop offset="100%" stopColor="oklch(0.50 0.13 160)" />
-        </linearGradient>
+
+        {/* Soft glow for the waveform */}
+        <filter id={`${uid}-glow`} x="-30%" y="-60%" width="160%" height="220%">
+          <feGaussianBlur stdDeviation="1.2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
-      {/* Left Vertical Stem */}
+      {/* ── Book icon (open book, viewed from above) ── */}
+      {/* Left page */}
       <path
-        d="M 13 9 V 35"
-        stroke={`url(#${uid}-grad1)`}
-        strokeWidth="4.5"
-        strokeLinecap="round"
+        d="M7 13 C7 12 8 11.5 9 11.5 C13 11.5 17 12 20.5 14 L20.5 32 C17 30.5 13 30 9 30 C8 30 7 29.5 7 28.5 Z"
+        stroke={`url(#${uid}-g)`}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+        fill="none"
       />
-
-      {/* Hexagonal Loop Bowl */}
+      {/* Right page */}
       <path
-        d="M 13 9 H 26.5 L 34.5 17 L 26.5 25 H 18.5"
-        stroke={`url(#${uid}-grad2)`}
-        strokeWidth="4.5"
+        d="M37 13 C37 12 36 11.5 35 11.5 C31 11.5 27 12 23.5 14 L23.5 32 C27 30.5 31 30 35 30 C36 30 37 29.5 37 28.5 Z"
+        stroke={`url(#${uid}-g)`}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      {/* Spine / center line */}
+      <line x1="22" y1="14" x2="22" y2="32" stroke={`url(#${uid}-g)`} strokeWidth="1.5" strokeLinecap="round" />
+
+      {/* ── ECG / Pulse waveform across the book's middle ── */}
+      <path
+        d="M7 22 L13 22 L15.5 17.5 L18.5 26.5 L20.5 20.5 L22 23.5 L23.5 20.5 L25.5 26.5 L28.5 17.5 L31 22 L37 22"
+        stroke={`url(#${uid}-g)`}
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
+        fill="none"
+        filter={`url(#${uid}-glow)`}
       />
-
-      {/* Floating Connection Node */}
-      <circle cx="13" cy="25" r="2" fill="oklch(0.65 0.13 160)" />
     </svg>
   );
 }
