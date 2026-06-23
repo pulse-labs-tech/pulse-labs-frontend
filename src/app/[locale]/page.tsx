@@ -203,11 +203,11 @@ export default async function HomePage({
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
 
-                <h1 className="max-w-[10ch] text-[clamp(3rem,13vw,6.3rem)] font-black leading-[0.88] tracking-[-0.045em] text-white sm:max-w-[11ch]">
+                <h1 className="max-w-[10ch] text-5xl font-black leading-[0.9] tracking-[-0.04em] text-white sm:max-w-[11ch] sm:text-6xl lg:text-[5.5rem]">
                   Pulse Knowledge
                 </h1>
 
-                <h2 className="mt-6 max-w-xl text-wrap text-[clamp(1.28rem,5.7vw,2.45rem)] font-bold leading-[1.1] tracking-[-0.02em] text-auth-text [overflow-wrap:anywhere]">
+                <h2 className="mt-6 max-w-xl text-wrap text-xl font-bold leading-[1.15] tracking-[-0.02em] text-auth-text [overflow-wrap:anywhere] sm:text-2xl lg:text-[2.25rem]">
                   {dict.landing.title1} {dict.landing.title2}
                 </h2>
 
@@ -317,7 +317,7 @@ export default async function HomePage({
           <section id="features" className="scroll-mt-24 bg-auth-bg px-4 py-24 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-[1280px]">
               <ScrollReveal direction="up" className="max-w-3xl">
-                <h2 className="text-[clamp(3rem,6vw,5.8rem)] font-black leading-[0.9] tracking-[-0.05em] text-white">
+                <h2 className="text-5xl font-black leading-[0.92] tracking-[-0.04em] text-white sm:text-6xl lg:text-[5.25rem]">
                   {dict.landing.featuresTitle}
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-auth-text-2">
@@ -371,7 +371,7 @@ export default async function HomePage({
           <section id="how-it-works" className="scroll-mt-24 bg-auth-surface px-4 py-24 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-[1280px]">
               <ScrollReveal direction="up" className="max-w-3xl">
-                <h2 className="text-[clamp(3rem,6vw,5.6rem)] font-black leading-[0.9] tracking-[-0.05em] text-white">
+                <h2 className="text-5xl font-black leading-[0.92] tracking-[-0.04em] text-white sm:text-6xl lg:text-[5.1rem]">
                   {dict.landing.stepsTitle}
                 </h2>
               </ScrollReveal>
@@ -397,7 +397,7 @@ export default async function HomePage({
             <ScrollReveal direction="up" className="mx-auto grid max-w-[1280px] gap-8 rounded-[30px] border border-white/[0.08] bg-auth-elevated p-7 text-white transition duration-200 hover:border-white/[0.14] hover:bg-auth-card-hover/70 hover:opacity-95 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-end lg:p-12">
               <div className="max-w-2xl">
                 <BrainCircuit className="mb-8 h-9 w-9 text-auth-accent" />
-                <h2 className="text-[clamp(2.5rem,5vw,4.8rem)] font-black leading-[0.9] tracking-[-0.05em]">
+                <h2 className="text-4xl font-black leading-[0.92] tracking-[-0.04em] sm:text-5xl lg:text-[4.5rem]">
                   {dict.landing.ctaTitle}
                 </h2>
                 <p className="mt-5 text-base leading-8 text-white/70">

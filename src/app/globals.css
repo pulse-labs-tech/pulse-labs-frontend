@@ -125,10 +125,10 @@
 
   /* --- Auth Accent (refined jade — premium, not neon) --- */
   --color-auth-accent: oklch(0.65 0.13 160);
-  --color-auth-accent-dim: oklch(0.65 0.13 160 / 0.09);
+  --color-auth-accent-dim: oklch(1 0 0 / 0.055);
   --color-auth-accent-dark: oklch(0.54 0.12 160);
   --color-auth-accent-muted: oklch(0.65 0.13 160 / 0.60);
-  --color-auth-accent-glow: oklch(0.65 0.13 160 / 0.14);
+  --color-auth-accent-glow: oklch(1 0 0 / 0.06);
 
   /* --- Auth Secondary Accents --- */
   --color-auth-purple: oklch(0.68 0.18 280);
@@ -341,6 +341,7 @@
 }
 
 html {
+  font-size: 106.25%;
   scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -352,8 +353,56 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
-  line-height: 1.6;
+  line-height: 1.65;
   overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* Product typography floor: compact metadata stays readable without
+   inflating the surrounding controls or changing the information density. */
+.text-\[8px\],
+.text-\[9px\] {
+  font-size: 0.6875rem !important;
+  line-height: 1.4 !important;
+}
+
+.text-\[10px\],
+.text-\[11px\] {
+  font-size: 0.75rem !important;
+  line-height: 1.45 !important;
+}
+
+.dashboard-page .tf-btn,
+.dashboard-page .tech-table th,
+.dashboard-page .tech-sort-label,
+.stat-terminal-label,
+.stat-terminal-sub,
+.ai-name,
+.confidence-badge,
+.thinking-bar.done,
+.sb-group-label,
+.conv-domain-badge,
+.conv-date,
+.model-info-sub,
+.input-footer,
+.input-footer kbd,
+.gs-section-label,
+.gs-recent-del,
+.gs-action-key {
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.save-badge-accent,
+.model-pro-tag {
+  font-size: 0.6875rem;
+  line-height: 1.4;
 }
 
 /* ============================================================
@@ -392,9 +441,8 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none !important;
-  border-color: var(--color-auth-accent) !important;
-  box-shadow: inset 0 0 0 1px var(--color-auth-accent-dim),
-              0 0 24px var(--color-auth-accent-glow) !important;
+  border-color: oklch(1 0 0 / 0.28) !important;
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.06) !important;
 }
 
 /* ============================================================
@@ -418,39 +466,39 @@ select:focus {
    ============================================================ */
 
 .text-fluid-xs {
-  font-size: clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem);
+  font-size: 0.875rem;
 }
 
 .text-fluid-sm {
-  font-size: clamp(0.8125rem, 0.75rem + 0.2vw, 1rem);
+  font-size: 1rem;
 }
 
 .text-fluid-base {
-  font-size: clamp(0.9375rem, 0.85rem + 0.25vw, 1.125rem);
+  font-size: 1.125rem;
 }
 
 .text-fluid-lg {
-  font-size: clamp(1.125rem, 1rem + 0.4vw, 1.375rem);
+  font-size: 1.375rem;
 }
 
 .text-fluid-xl {
-  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  font-size: 1.625rem;
 }
 
 .text-fluid-2xl {
-  font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2.25rem);
+  font-size: 2.25rem;
 }
 
 .text-fluid-3xl {
-  font-size: clamp(1.875rem, 1.4rem + 1.2vw, 3rem);
+  font-size: 3rem;
 }
 
 .text-fluid-4xl {
-  font-size: clamp(2.25rem, 1.6rem + 1.8vw, 4rem);
+  font-size: 4rem;
 }
 
 .text-fluid-5xl {
-  font-size: clamp(3rem, 2rem + 2.5vw, 5rem);
+  font-size: 5rem;
 }
 
 /* ============================================================
@@ -3483,11 +3531,11 @@ select:focus {
   display: none !important;
 }
 
-/* Header: restore proper layered glass with subtle green accent tint */
+/* Neutral graphite glass: transparent depth without a colored haze. */
 .app-glass-header {
   background:
-    linear-gradient(180deg, oklch(0.13 0.006 260 / 0.88), oklch(0.11 0.006 260 / 0.76)),
-    linear-gradient(90deg, transparent 0%, oklch(0.65 0.13 160 / 0.04) 50%, transparent 100%) !important;
+    linear-gradient(180deg, oklch(0.14 0.004 260 / 0.9), oklch(0.105 0.004 260 / 0.8)),
+    linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.025) 50%, transparent 100%) !important;
 }
 
 /* ============================================================
@@ -3634,4 +3682,221 @@ select:focus {
 
 .btn-landing-secondary:active {
   transform: translateY(0) scale(0.98);
+}
+
+/* ============================================================
+   AI RESPONSE READING SYSTEM
+   Shared by Query and Research markdown output.
+   ============================================================ */
+
+.ai-markdown {
+  width: 100%;
+  max-width: 78ch;
+  color: oklch(0.83 0.012 255);
+  font-size: 1rem;
+  line-height: 1.76;
+  text-wrap: pretty;
+}
+
+.ai-markdown > :first-child {
+  margin-top: 0;
+}
+
+.ai-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.ai-markdown-h1,
+.ai-markdown-h2,
+.ai-markdown-h3,
+.ai-markdown-h4 {
+  color: oklch(0.97 0.004 255);
+  font-weight: 700;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.ai-markdown-h1 {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+}
+
+.ai-markdown-h2 {
+  margin: 1.8rem 0 0.75rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid oklch(1 0 0 / 0.08);
+  font-size: 1.12rem;
+}
+
+.ai-markdown-h3 {
+  margin: 1.5rem 0 0.55rem;
+  color: oklch(0.8 0.08 160);
+  font-size: 1rem;
+}
+
+.ai-markdown-h4 {
+  margin: 1.2rem 0 0.45rem;
+  color: oklch(0.88 0.012 255);
+  font-size: 0.92rem;
+}
+
+.ai-markdown-paragraph {
+  margin: 0 0 0.9rem;
+  color: oklch(0.83 0.012 255);
+}
+
+.ai-markdown-strong {
+  color: oklch(0.97 0.004 255);
+  font-weight: 650;
+}
+
+.ai-markdown-emphasis {
+  color: oklch(0.76 0.018 255);
+  font-style: italic;
+}
+
+.ai-markdown-link {
+  color: oklch(0.78 0.11 160);
+  text-decoration: underline;
+  text-decoration-color: oklch(0.65 0.13 160 / 0.35);
+  text-underline-offset: 3px;
+  transition: color 180ms var(--ease-standard);
+}
+
+.ai-markdown-link:hover {
+  color: oklch(0.87 0.11 160);
+}
+
+.ai-markdown-inline-code {
+  border: 1px solid oklch(0.65 0.13 160 / 0.16);
+  border-radius: 0.3rem;
+  background: oklch(0.65 0.13 160 / 0.07);
+  padding: 0.1rem 0.32rem;
+  color: oklch(0.82 0.09 160);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  white-space: break-spaces;
+}
+
+.ai-markdown-list {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.4rem;
+  color: oklch(0.83 0.012 255);
+}
+
+.ai-markdown-list li {
+  margin: 0.42rem 0;
+  padding-left: 0.25rem;
+}
+
+.ai-markdown-list li::marker {
+  color: oklch(0.72 0.1 160);
+  font-weight: 700;
+}
+
+.ai-markdown-list-unordered {
+  list-style-type: disc;
+}
+
+.ai-markdown-list-ordered {
+  list-style-type: decimal;
+}
+
+.ai-markdown-quote {
+  margin: 1rem 0;
+  border: 1px solid oklch(0.65 0.13 160 / 0.18);
+  border-radius: 0.65rem;
+  background: oklch(0.65 0.13 160 / 0.055);
+  padding: 0.8rem 0.95rem;
+  color: oklch(0.79 0.025 255);
+}
+
+.ai-markdown-rule {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid oklch(1 0 0 / 0.08);
+}
+
+.ai-markdown-code {
+  position: relative;
+  margin: 1rem 0 1.25rem;
+  overflow: hidden;
+  border: 1px solid oklch(1 0 0 / 0.09);
+  border-radius: 0.75rem;
+  background: oklch(0.105 0.006 260);
+  font-family: var(--font-mono);
+}
+
+.ai-markdown-code-header {
+  display: flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid oklch(1 0 0 / 0.065);
+  background: oklch(1 0 0 / 0.025);
+  padding: 0.45rem 0.85rem 0.45rem 1rem;
+  color: oklch(0.62 0.012 255);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ai-markdown-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.45rem;
+  color: oklch(0.7 0.012 255);
+  cursor: pointer;
+  transition: background-color 180ms var(--ease-standard), color 180ms var(--ease-standard);
+}
+
+.ai-markdown-copy:hover {
+  background: oklch(1 0 0 / 0.055);
+  color: oklch(0.96 0.004 255);
+}
+
+.ai-markdown-code-body {
+  overflow-x: auto;
+  padding: 1rem;
+  color: oklch(0.82 0.035 255);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  white-space: pre;
+}
+
+.ai-stream-response {
+  position: relative;
+  min-width: 0;
+}
+
+.ai-stream-caret {
+  display: inline-block;
+  width: 0.42rem;
+  height: 0.9rem;
+  margin-top: 0.15rem;
+  border-radius: 2px;
+  background: var(--color-auth-accent);
+  box-shadow: 0 0 8px var(--color-auth-accent-glow);
+  animation: blink-caret 0.8s step-end infinite;
+}
+
+@media (max-width: 640px) {
+  .ai-markdown {
+    font-size: 0.9375rem;
+    line-height: 1.72;
+  }
+
+  .ai-markdown-code-body {
+    padding: 0.85rem;
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-stream-caret {
+    animation: none;
+  }
 }

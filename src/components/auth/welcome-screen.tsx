@@ -143,7 +143,7 @@ function WelcomeScreen() {
         >
           {/* Logo */}
           <div className="mb-5 flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-auth-surface border border-white/[0.08] shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-auth-surface border border-white/[0.08] shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
               <PulseLogo size={36} className="drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]" />
             </div>
           </div>

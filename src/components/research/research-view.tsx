@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MarkdownRenderer } from "@/components/shared";
+import { StreamingMarkdownRenderer } from "@/components/shared";
 import {
   createResearchRunAction,
   listResearchRunsAction,
@@ -45,6 +45,13 @@ const ACTIVE_STATUSES: ResearchStatus[] = [
   "reflecting",
   "synthesizing",
 ];
+
+function mergeStreamAnswer(previous: string, incoming: string) {
+  if (!incoming) return previous;
+  if (!previous || incoming.startsWith(previous)) return incoming;
+  if (previous.startsWith(incoming) || previous.endsWith(incoming)) return previous;
+  return `${previous}${incoming}`;
+}
 
 function getStatusIcon(status: ResearchStatus) {
   if (ACTIVE_STATUSES.includes(status)) {
@@ -427,7 +434,7 @@ export function ResearchView() {
                 setStreamResults((prev) => [...prev, event]);
               } else if (event.type === "ANSWER") {
                 console.log("🟢 [F12 API RESPONSE] Research Stream Event [ANSWER]:", event);
-                setStreamAnswer(event.message);
+                setStreamAnswer((previous) => mergeStreamAnswer(previous, event.message));
               } else if (event.type === "ERROR") {
                 console.log("🔴 [F12 API RESPONSE] Research Stream Event [ERROR]:", event);
                 setStreamError(event.message);
@@ -916,14 +923,24 @@ export function ResearchView() {
                         Báo cáo tổng hợp tri thức
                       </h3>
 
-                      <div className="prose prose-invert prose-sm max-w-none rounded-xl border border-auth-border bg-[#121214] p-4 min-h-[120px] relative overflow-hidden">
+                      <div className="min-h-[148px] overflow-hidden rounded-xl border border-auth-border bg-[oklch(0.135_0.007_260)] p-5 sm:p-6 relative">
                         {isStreaming && !streamAnswer && (
-                          <div className="absolute inset-0 flex items-center justify-center text-xs text-auth-text-3 gap-2 bg-[#121214]/80 z-10">
+                          <div className="absolute inset-0 flex items-center justify-center text-xs text-auth-text-2 gap-2 bg-[oklch(0.135_0.007_260/0.92)] z-10">
                             <DotMatrixLoader variant="ripple" size="sm" />
                             <span>Đang tổng hợp câu trả lời từ AI...</span>
                           </div>
                         )}
-                        <MarkdownRenderer content={streamAnswer || ""} />
+                        {streamAnswer && isStreaming && (
+                          <div className="mb-4 flex items-center gap-2 text-[11px] font-semibold text-auth-accent">
+                            <span className="h-1.5 w-1.5 rounded-full bg-auth-accent animate-pulse" />
+                            <span>AI đang viết câu trả lời</span>
+                          </div>
+                        )}
+                        <StreamingMarkdownRenderer
+                          content={streamAnswer}
+                          active={isStreaming}
+                          animate
+                        />
                       </div>
                     </div>
                   )}

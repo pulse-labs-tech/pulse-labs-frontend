@@ -41,13 +41,13 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
   };
 
   return (
-    <div className="bg-[#0b0b0e] border border-white/[0.08] rounded-xl overflow-hidden my-4 relative font-mono group">
+    <div className="ai-markdown-code group">
       {/* Code Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white/[0.02] border-b border-white/[0.06] text-[10px] text-auth-text-3 select-none">
-        <span className="uppercase font-bold tracking-wider">{language || "code"}</span>
+      <div className="ai-markdown-code-header">
+        <span>{language || "code"}</span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 active:bg-white/10 text-auth-text-2 hover:text-white transition-all cursor-pointer"
+          className="ai-markdown-copy"
         >
           <LineIcon name={copied ? "checkmark-circle" : "copy"} className={`h-3 w-3 ${copied ? "text-auth-accent" : ""}`} />
           <span>{copied ? "Copied" : "Copy"}</span>
@@ -55,7 +55,7 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
       </div>
 
       {/* Code Area */}
-      <pre className="p-4 overflow-x-auto text-xs text-auth-text-2 leading-relaxed whitespace-pre font-mono">
+      <pre className="ai-markdown-code-body">
         <code>{code}</code>
       </pre>
     </div>
@@ -67,7 +67,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
   const elements: React.ReactNode[] = [];
   const lines = content.split("\n");
-  let inList = false;
+  let listType: "ordered" | "unordered" | null = null;
   let listItems: string[] = [];
   let inCodeBlock = false;
   let codeLines: string[] = [];
@@ -81,8 +81,10 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       const boldIdx = currentText.indexOf("**");
       const italicIdx = currentText.indexOf("*");
       const codeIdx = currentText.indexOf("`");
+      const linkMatch = currentText.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/);
+      const linkIdx = linkMatch?.index ?? -1;
 
-      const indices = [boldIdx, italicIdx, codeIdx].filter((idx) => idx >= 0);
+      const indices = [boldIdx, italicIdx, codeIdx, linkIdx].filter((idx) => idx >= 0);
       if (indices.length === 0) {
         parts.push(currentText);
         break;
@@ -99,7 +101,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         if (endIdx >= 0) {
           const boldText = currentText.slice(boldIdx + 2, endIdx);
           parts.push(
-            <strong key={parts.length} className="text-white font-semibold">
+            <strong key={parts.length} className="ai-markdown-strong">
               {boldText}
             </strong>
           );
@@ -113,7 +115,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         if (endIdx >= 0) {
           const italicText = currentText.slice(italicIdx + 1, endIdx);
           parts.push(
-            <em key={parts.length} className="italic text-auth-text-2">
+            <em key={parts.length} className="ai-markdown-emphasis">
               {italicText}
             </em>
           );
@@ -122,7 +124,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           parts.push("*");
           currentText = currentText.slice(italicIdx + 1);
         }
-      } else {
+      } else if (minIdx === codeIdx) {
         // codeIdx
         const endIdx = currentText.indexOf("`", codeIdx + 1);
         if (endIdx >= 0) {
@@ -130,7 +132,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           parts.push(
             <code
               key={parts.length}
-              className="bg-white/5 border border-white/10 px-1 py-0.5 rounded font-mono text-[11px] text-zinc-400"
+              className="ai-markdown-inline-code"
             >
               {codeText}
             </code>
@@ -140,6 +142,19 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           parts.push("`");
           currentText = currentText.slice(codeIdx + 1);
         }
+      } else if (linkMatch) {
+        parts.push(
+          <a
+            key={parts.length}
+            href={linkMatch[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ai-markdown-link"
+          >
+            {linkMatch[1]}
+          </a>
+        );
+        currentText = currentText.slice(linkIdx + linkMatch[0].length);
       }
     }
     return parts;
@@ -147,17 +162,22 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
   const flushList = (key: number) => {
     if (listItems.length > 0) {
+      const items = listItems.map((item, idx) => (
+        <li key={idx}>{renderInlineText(item)}</li>
+      ));
       elements.push(
-        <ul key={`list-${key}`} className="list-disc pl-5 my-3 space-y-1.5 text-sm text-auth-text-2">
-          {listItems.map((item, idx) => (
-            <li key={idx} className="leading-relaxed">
-              {renderInlineText(item)}
-            </li>
-          ))}
-        </ul>
+        listType === "ordered" ? (
+          <ol key={`list-${key}`} className="ai-markdown-list ai-markdown-list-ordered">
+            {items}
+          </ol>
+        ) : (
+          <ul key={`list-${key}`} className="ai-markdown-list ai-markdown-list-unordered">
+            {items}
+          </ul>
+        )
       );
       listItems = [];
-      inList = false;
+      listType = null;
     }
   };
 
@@ -187,25 +207,32 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     }
 
     // Headings
-    if (line.startsWith("###")) {
+    const headingMatch = line.match(/^(#{1,4})\s+(.+)$/);
+    if (headingMatch) {
       flushList(i);
-      const level = line.startsWith("####") ? 4 : 3;
-      const cleanLine = line
-        .replace(/^####?\s*(\*\*|)?/, "")
-        .replace(/(\*\*|)?\s*$/, "")
-        .trim();
-      if (level === 3) {
+      const level = headingMatch[1].length;
+      const cleanLine = headingMatch[2].replace(/^\*\*|\*\*$/g, "").trim();
+      if (level === 1) {
         elements.push(
-          <h3
-            key={`h3-${i}`}
-            className="text-base font-extrabold text-white mt-6 mb-2.5 pb-1 border-b border-white/[0.04]"
-          >
+          <h1 key={`h1-${i}`} className="ai-markdown-h1">
+            {renderInlineText(cleanLine)}
+          </h1>
+        );
+      } else if (level === 2) {
+        elements.push(
+          <h2 key={`h2-${i}`} className="ai-markdown-h2">
+            {renderInlineText(cleanLine)}
+          </h2>
+        );
+      } else if (level === 3) {
+        elements.push(
+          <h3 key={`h3-${i}`} className="ai-markdown-h3">
             {renderInlineText(cleanLine)}
           </h3>
         );
       } else {
         elements.push(
-          <h4 key={`h4-${i}`} className="text-sm font-bold text-white mt-4 mb-2">
+          <h4 key={`h4-${i}`} className="ai-markdown-h4">
             {renderInlineText(cleanLine)}
           </h4>
         );
@@ -213,11 +240,32 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       continue;
     }
 
-    // Bullet lists
-    if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
-      inList = true;
+    // Lists
+    const unorderedMatch = line.trim().match(/^[-*]\s+(.+)$/);
+    const orderedMatch = line.trim().match(/^\d+[.)]\s+(.+)$/);
+    if (unorderedMatch || orderedMatch) {
+      const nextListType = orderedMatch ? "ordered" : "unordered";
+      if (listType && listType !== nextListType) flushList(i);
+      listType = nextListType;
       const cleanLine = line.trim().slice(2).trim();
-      listItems.push(cleanLine);
+      listItems.push(orderedMatch ? orderedMatch[1] : cleanLine);
+      continue;
+    }
+
+    // Quotes and separators
+    if (line.trim().startsWith("> ")) {
+      flushList(i);
+      elements.push(
+        <blockquote key={`quote-${i}`} className="ai-markdown-quote">
+          {renderInlineText(line.trim().slice(2))}
+        </blockquote>
+      );
+      continue;
+    }
+
+    if (/^\s*([-*_])\1{2,}\s*$/.test(line)) {
+      flushList(i);
+      elements.push(<hr key={`rule-${i}`} className="ai-markdown-rule" />);
       continue;
     }
 
@@ -230,7 +278,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     // Regular paragraphs
     flushList(i);
     elements.push(
-      <p key={`p-${i}`} className="text-sm text-auth-text-2 leading-relaxed mb-3">
+      <p key={`p-${i}`} className="ai-markdown-paragraph">
         {renderInlineText(line)}
       </p>
     );
@@ -246,5 +294,5 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     );
   }
 
-  return <div className="space-y-1">{elements}</div>;
+  return <div className="ai-markdown">{elements}</div>;
 }

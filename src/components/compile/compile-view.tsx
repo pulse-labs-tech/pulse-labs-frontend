@@ -120,7 +120,7 @@ function SourceTypeCard({
         ${disabled ? "cursor-not-allowed opacity-50 border border-white/[0.06] bg-auth-surface/20" : "cursor-pointer"}
         ${
           selected
-            ? "border border-auth-accent/60 bg-auth-accent-dim shadow-[0_0_20px_rgba(52,211,153,0.12)]"
+            ? "border border-white/20 bg-white/[0.055] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
             : disabled
               ? ""
               : "premium-hover-card"
@@ -138,7 +138,7 @@ function SourceTypeCard({
       {/* Icon */}
       <div
         className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-all
-          ${selected ? "bg-auth-accent text-black" : "bg-white/[0.06] text-auth-text-2 group-hover:text-auth-accent"}
+          ${selected ? "bg-white text-black" : "bg-white/[0.06] text-auth-text-2 group-hover:text-white"}
         `}
       >
         {icon}
@@ -146,7 +146,7 @@ function SourceTypeCard({
 
       {/* Text */}
       <div>
-        <p className={`text-sm font-bold ${selected ? "text-auth-accent" : "text-auth-text"}`}>
+        <p className={`text-sm font-bold ${selected ? "text-white" : "text-auth-text"}`}>
           {title}
         </p>
         <p className="mt-1 text-xs text-auth-text-3 leading-relaxed">{description}</p>
@@ -154,8 +154,8 @@ function SourceTypeCard({
 
       {/* Selected check */}
       {selected && (
-        <div className="absolute bottom-3 right-3 h-5 w-5 rounded-full bg-auth-accent flex items-center justify-center">
-          <LineIcon name="checkmark-circle" className="h-3 w-3 text-black" />
+        <div className="absolute bottom-3 right-3 h-5 w-5 rounded-full border border-white/20 bg-white/[0.1] flex items-center justify-center">
+          <LineIcon name="checkmark-circle" className="h-3 w-3 text-white" />
         </div>
       )}
     </button>
@@ -734,21 +734,21 @@ export function CompileView() {
                 <div className="flex items-center gap-1.5">
                   <div
                     className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all
-                      ${isDone ? "bg-auth-accent border-auth-accent text-black" : isActive ? "border-auth-accent bg-auth-accent-dim text-auth-accent" : "border-white/10 bg-white/5 text-auth-text-3"}
+                      ${isDone ? "bg-white border-white text-black" : isActive ? "border-white/25 bg-white/[0.08] text-white" : "border-white/10 bg-white/[0.035] text-auth-text-3"}
                     `}
                   >
                     {isDone ? <LineIcon name="checkmark-circle" className="h-3.5 w-3.5" /> : n}
                   </div>
                   <span
                     className={`text-[10px] font-bold uppercase tracking-wider hidden sm:inline
-                      ${isActive ? "text-auth-text" : isDone ? "text-auth-accent" : "text-auth-text-3"}
+                      ${isActive ? "text-white" : isDone ? "text-auth-text-2" : "text-auth-text-3"}
                     `}
                   >
                     {label}
                   </span>
                 </div>
                 {i < stepLabel.length - 1 && (
-                  <div className={`h-px w-8 transition-all ${isDone ? "bg-auth-accent/50" : "bg-white/[0.06]"}`} />
+                  <div className={`h-px w-8 transition-all ${isDone ? "bg-white/25" : "bg-white/[0.06]"}`} />
                 )}
               </div>
             );

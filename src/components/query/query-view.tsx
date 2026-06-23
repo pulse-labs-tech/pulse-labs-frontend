@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
-import { MarkdownRenderer } from "@/components/shared";
+import { StreamingMarkdownRenderer } from "@/components/shared";
 import { Select } from "../ui/select";
 import { Skeleton } from "../ui/skeleton";
 import { logoutAction } from "@/app/actions/auth";
@@ -52,6 +52,7 @@ export interface QueryMessage {
   usedItems: number;
   createdAt: string;
   feedbackRating?: "up" | "down";
+  animateResponse?: boolean;
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -304,7 +305,7 @@ function AssistantMessage({
 
         {/* Answer text */}
         <div className="ai-text">
-          <MarkdownRenderer content={msg.content} />
+          <StreamingMarkdownRenderer content={msg.content} animate={msg.animateResponse} />
         </div>
 
         {/* Freshness Badge */}
@@ -940,6 +941,7 @@ export function QueryView() {
           followUps: d.assistantMessage.followUps || [],
           usedItems: d.assistantMessage.citations?.length || 0,
           createdAt: new Date().toISOString(),
+          animateResponse: true,
         };
         setMessages((prev) => [...prev, assistantMsg]);
         loadSessions();
