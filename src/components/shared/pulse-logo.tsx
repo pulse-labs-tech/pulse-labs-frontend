@@ -24,39 +24,36 @@ export function PulseLogo({ size = 40, className = "" }: PulseLogoProps) {
       className={className}
     >
       <defs>
-        <linearGradient id={`${uid}-g1`} x1="12" y1="8" x2="28" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="50%" stopColor="oklch(0.82 0.002 260)" />
-          <stop offset="100%" stopColor="oklch(0.65 0.13 160)" />
+        <linearGradient id={`${uid}-grad1`} x1="13" y1="9" x2="13" y2="35" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="100%" stopColor="#737373" />
         </linearGradient>
-        <linearGradient id={`${uid}-g2`} x1="12" y1="17" x2="32" y2="17" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="oklch(0.65 0.13 160)" />
-          <stop offset="100%" stopColor="#ffffff" />
+        <linearGradient id={`${uid}-grad2`} x1="13" y1="9" x2="35" y2="22" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="50%" stopColor="oklch(0.65 0.13 160)" />
+          <stop offset="100%" stopColor="oklch(0.50 0.13 160)" />
         </linearGradient>
       </defs>
 
-      {/* Main letter P stem and bowl loop */}
+      {/* Left Vertical Stem */}
       <path
-        d="M 13 36 V 10 C 13 10, 29 8, 29 17 C 29 26, 13 24, 13 24"
-        stroke={`url(#${uid}-g1)`}
-        strokeWidth="3.5"
+        d="M 13 9 V 35"
+        stroke={`url(#${uid}-grad1)`}
+        strokeWidth="4.5"
+        strokeLinecap="round"
+      />
+
+      {/* Hexagonal Loop Bowl */}
+      <path
+        d="M 13 9 H 26.5 L 34.5 17 L 26.5 25 H 18.5"
+        stroke={`url(#${uid}-grad2)`}
+        strokeWidth="4.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* Heartbeat pulse wave running through the center of the P bowl */}
-      <path
-        d="M 13 17 H 16.5 L 19.5 10 L 22.5 24 L 25.5 14 L 28.5 17 H 32.5"
-        stroke={`url(#${uid}-g2)`}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Glowing connection nodes */}
-      <circle cx="19.5" cy="10" r="1.2" fill="#ffffff" />
-      <circle cx="22.5" cy="24" r="1.2" fill="oklch(0.65 0.13 160)" />
-      <circle cx="32.5" cy="17" r="1.5" fill="#ffffff" />
+      {/* Floating Connection Node */}
+      <circle cx="13" cy="25" r="2" fill="oklch(0.65 0.13 160)" />
     </svg>
   );
 }
