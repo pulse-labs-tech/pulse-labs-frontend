@@ -18,6 +18,7 @@ import Link from "next/link";
 import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { Select } from "../ui/select";
+import { Skeleton } from "../ui/skeleton";
 import { logoutAction } from "@/app/actions/auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
@@ -842,10 +843,7 @@ export function CompileView() {
                 {t("compile.labels.kbDestination", "Knowledge Base đích")} <span className="text-red-400">*</span>
               </label>
               {rolesLoading ? (
-                <div className="h-10 bg-auth-elevated border border-auth-border rounded-xl flex items-center px-3 gap-2">
-                  <DotMatrixLoader variant="pulse" size="xs" />
-                  <span className="text-xs text-auth-text-3">{t("compile.labels.kbLoading", "Đang tải...")}</span>
-                </div>
+                <Skeleton className="h-10 w-full rounded-xl" />
               ) : userRoles.length > 1 ? (
                 <Select
                   value={selectedRoleKbId}

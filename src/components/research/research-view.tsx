@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "@/contexts/locale-context";
 import { Select } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MarkdownRenderer } from "@/components/shared";
 import {
   createResearchRunAction,
@@ -700,10 +701,7 @@ export function ResearchView() {
                     Knowledge Base Đích (Role)
                   </label>
                   {rolesLoading ? (
-                    <div className="h-9 bg-auth-elevated border border-auth-border rounded-xl flex items-center px-3 gap-2 text-xs text-auth-text-3">
-                      <DotMatrixLoader variant="pulse" size="xs" />
-                      <span>Đang tải...</span>
-                    </div>
+                    <Skeleton className="h-9 w-full rounded-xl" />
                   ) : userRoles.length > 0 ? (
                     <Select
                       value={selectedRoleKbId}
@@ -1032,8 +1030,10 @@ export function ResearchView() {
               </div>
 
               {isLoadingRuns ? (
-                <div className="flex items-center justify-center py-12 text-auth-text-3">
-                  <DotMatrixLoader variant="ripple" size="md" />
+                <div className="space-y-2">
+                  <Skeleton className="h-16 w-full rounded-2xl" />
+                  <Skeleton className="h-16 w-full rounded-2xl" />
+                  <Skeleton className="h-16 w-full rounded-2xl" />
                 </div>
               ) : listError ? (
                 <div className="text-center py-8 space-y-3">

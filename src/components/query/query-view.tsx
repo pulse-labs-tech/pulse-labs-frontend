@@ -14,6 +14,7 @@ import { LineIcon } from "@/components/shared/line-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { MarkdownRenderer } from "@/components/shared";
 import { Select } from "../ui/select";
+import { Skeleton } from "../ui/skeleton";
 import { logoutAction } from "@/app/actions/auth";
 import {
   createQuerySessionAction,
@@ -1092,8 +1093,10 @@ export function QueryView() {
 
           <div className="sb-group-label text-left">Recent Sessions</div>
           {isLoadingSessions ? (
-            <div className="flex items-center justify-center py-12">
-              <DotMatrixLoader variant="pulse" size="sm" />
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-14 w-full rounded-xl" />
+              <Skeleton className="h-14 w-full rounded-xl" />
+              <Skeleton className="h-14 w-full rounded-xl" />
             </div>
           ) : sessions.length === 0 ? (
             <div className="sb-empty text-center">

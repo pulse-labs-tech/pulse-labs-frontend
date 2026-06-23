@@ -172,7 +172,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             {leftAction}
             <button
               onClick={() => setMenuOpen((value) => !value)}
-              className="app-glass-pill flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border text-auth-text-2 transition-colors hover:text-white lg:hidden"
+              className="app-glass-pill flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border text-auth-text-2 transition-colors hover:text-white md:hidden"
               aria-label={menuOpen ? "Close navigation" : "Open navigation"}
               aria-expanded={menuOpen}
             >
@@ -189,7 +189,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             </Link>
           </div>
 
-          <nav className="hidden min-w-0 justify-center lg:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
+          <nav className="hidden min-w-0 justify-center md:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
             <div
               className={`app-nav-shell relative flex max-w-full items-center rounded-[18px] border p-0.5 ${
                 navCanScrollPrev ? "can-scroll-prev" : ""
@@ -226,11 +226,11 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                       {isActive && (
                         <motion.div
                           layoutId="app-active-tab"
-                          className="absolute inset-0 rounded-[14px] border border-auth-accent/25 bg-auth-accent-dim shadow-[0_0_18px_rgba(35,197,132,0.10)]"
+                          className="absolute inset-0 rounded-[14px] border border-white/[0.08] bg-white/[0.06] shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
                           transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.82 }}
                         />
                       )}
-                      <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-auth-accent" : "text-auth-text-2 hover:text-auth-text"}`}>
+                      <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-white" : "text-auth-text-2 hover:text-auth-text"}`}>
                         <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
                         <span className="hidden xl:inline">{item.label}</span>
                         <span className="hidden lg:inline xl:hidden">{item.shortLabel}</span>
@@ -376,7 +376,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="border-t border-white/[0.08] bg-auth-bg/70 px-4 pb-4 backdrop-blur-2xl lg:hidden overflow-hidden"
+              className="border-t border-white/[0.08] bg-auth-bg/70 px-4 pb-4 backdrop-blur-2xl md:hidden overflow-hidden"
             >
               <nav className="mx-auto grid max-w-[1760px] grid-cols-2 gap-2 pt-4" aria-label={locale === "vi" ? "Điều hướng di động" : "Mobile navigation"}>
                 {navItems.map((item) => {
@@ -389,7 +389,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                       onClick={() => setMenuOpen(false)}
                       className={`flex h-12 items-center gap-2 rounded-2xl border px-3 text-sm font-bold transition-colors ${
                         isActive
-                          ? "border-auth-accent/25 bg-auth-accent-dim text-auth-accent"
+                          ? "border-white/[0.12] bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
                           : "app-glass-pill text-auth-text-2 hover:text-auth-text"
                       }`}
                     >

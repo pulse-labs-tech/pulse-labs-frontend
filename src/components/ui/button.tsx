@@ -27,24 +27,23 @@ import { DotMatrixLoader } from "./dot-matrix-loader";
 
 const variantClasses: Record<string, string> = {
   primary: [
-    // Muted jade — not neon, aligned with dark UI aesthetic
-    "bg-[var(--color-auth-accent-dark)] text-white",
-    "shadow-[0_2px_12px_var(--color-auth-accent-glow)]",
-    "hover:bg-[var(--color-auth-accent)] hover:shadow-[0_4px_20px_var(--color-auth-accent-glow)] hover:-translate-y-[1px]",
-    "active:scale-[0.97] active:shadow-none active:translate-y-0",
+    "bg-white text-[var(--color-auth-bg)] border border-white",
+    "shadow-[0_1px_2px_rgba(0,0,0,0.05)]",
+    "hover:bg-white/90 hover:border-white/90 hover:-translate-y-[1px]",
+    "active:scale-[0.97] active:translate-y-0 active:shadow-none",
     "disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-auth-accent)]",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
   ].join(" "),
 
   premium: [
     "relative overflow-hidden z-0",
     "bg-[var(--color-auth-bg)] border border-[var(--color-auth-border)] text-white",
-    "hover:border-[var(--color-auth-accent)]/50",
-    "hover:shadow-[0_4px_16px_var(--color-auth-accent-glow)] hover:-translate-y-[1px]",
+    "hover:border-white/40",
+    "hover:shadow-[0_4px_16px_rgba(255,255,255,0.04)] hover:-translate-y-[1px]",
     "active:scale-[0.97] active:shadow-none",
     "disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-auth-accent)]",
-    "before:absolute before:inset-[-150%] before:z-[-2] before:bg-[conic-gradient(from_0deg,transparent_45%,var(--color-auth-accent)_50%,transparent_55%)] before:animate-[spin_4s_linear_infinite] before:opacity-0 hover:before:opacity-70 before:transition-opacity before:duration-300",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40",
+    "before:absolute before:inset-[-150%] before:z-[-2] before:bg-[conic-gradient(from_0deg,transparent_45%,white_50%,transparent_55%)] before:animate-[spin_4s_linear_infinite] before:opacity-0 hover:before:opacity-30 before:transition-opacity before:duration-300",
     "after:absolute after:inset-[1px] after:z-[-1] after:bg-[var(--color-auth-bg)] after:rounded-[inherit] hover:after:bg-[var(--color-auth-surface)] after:transition-colors after:duration-200",
   ].join(" "),
 
