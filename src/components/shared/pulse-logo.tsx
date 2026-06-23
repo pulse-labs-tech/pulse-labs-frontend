@@ -24,39 +24,49 @@ export function PulseLogo({ size = 40, className = "" }: PulseLogoProps) {
       className={className}
     >
       <defs>
-        <linearGradient id={`${uid}-g`} x1="8" y1="8" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="oklch(0.77 0.16 158)" />
-          <stop offset="100%" stopColor="oklch(0.66 0.13 184)" />
+        <linearGradient id={`${uid}-g1`} x1="22" y1="6" x2="22" y2="38" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="60%" stopColor="oklch(0.80 0.005 260)" />
+          <stop offset="100%" stopColor="oklch(0.65 0.13 160)" />
+        </linearGradient>
+        <linearGradient id={`${uid}-g2`} x1="12" y1="12" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="oklch(0.65 0.13 160)" />
+          <stop offset="100%" stopColor="oklch(0.65 0.13 160 / 0.12)" />
         </linearGradient>
       </defs>
 
+      {/* Outer elegant pulse ring (broken loop representing infinite flow) */}
       <path
-        d="M12 15.8C12 13.7 13.7 12 15.8 12h12.4c2.1 0 3.8 1.7 3.8 3.8v12.4c0 2.1-1.7 3.8-3.8 3.8H15.8C13.7 32 12 30.3 12 28.2V15.8Z"
-        stroke={`url(#${uid}-g)`}
-        strokeWidth="2"
-        strokeLinejoin="round"
-        fill="none"
+        d="M 22 6 A 16 16 0 1 1 11 11"
+        stroke={`url(#${uid}-g1)`}
+        strokeWidth="3.2"
+        strokeLinecap="round"
       />
+
+      {/* Secondary overlapping wave arc that loops inwards */}
       <path
-        d="M17 23.5h4.2l2-5 2.6 7 2-4.2H32"
-        stroke={`url(#${uid}-g)`}
-        strokeWidth="2.2"
+        d="M 12 18 C 16 12, 28 12, 32 20 C 36 28, 24 36, 18 30 C 14 26, 16 20, 22 20 C 26 20, 28 24, 26 28"
+        stroke={`url(#${uid}-g2)`}
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        fill="none"
+        opacity="0.85"
       />
-      <circle cx="17" cy="23.5" r="1.8" fill={`url(#${uid}-g)`} />
-      <circle cx="32" cy="21.3" r="1.8" fill={`url(#${uid}-g)`} />
-      <path d="M12 18.5h-3.5M35.5 25.5H32" stroke={`url(#${uid}-g)`} strokeWidth="2" strokeLinecap="round" opacity="0.72" />
+
+      {/* Central bright core node representing Knowledge */}
+      <circle cx="22" cy="20" r="2.5" fill="#ffffff" />
+      
+      {/* Accent pulse spark representing Pulse */}
+      <circle cx="26" cy="28" r="1.5" fill="oklch(0.65 0.13 160)" />
     </svg>
   );
 }
 
 export function PulseWordmark({ className = "", compact = false }: PulseWordmarkProps) {
   return (
-    <span className={`inline-flex items-baseline whitespace-nowrap font-black tracking-[-0.035em] text-auth-text ${className}`}>
-      <span>Pulse</span>
-      {!compact && <span className="ml-0.5 text-[oklch(0.70_0.18_160)]">Knowledge</span>}
+    <span className={`inline-flex items-baseline whitespace-nowrap font-sans font-black tracking-[-0.035em] text-white ${className}`}>
+      <span className="text-white">Pulse</span>
+      {!compact && <span className="ml-1 font-semibold text-auth-text-2">Knowledge</span>}
     </span>
   );
 }
