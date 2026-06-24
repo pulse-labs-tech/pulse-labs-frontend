@@ -295,16 +295,22 @@
         "roles": {
           "frontend": { "label": "Lập trình viên Frontend", "desc": "React, Vue, CSS, UI, Hiệu năng" },
           "frontend_developer": { "label": "Lập trình viên Frontend", "desc": "React, Vue, CSS, UI, Hiệu năng" },
+          "frontend_engineer": { "label": "Kỹ sư Frontend", "desc": "React, Vue, CSS, UI, Hiệu năng" },
           "backend": { "label": "Lập trình viên Backend", "desc": "API, Database, Kiến trúc, Bảo mật" },
           "backend_developer": { "label": "Lập trình viên Backend", "desc": "API, Database, Kiến trúc, Bảo mật" },
+          "backend_engineer": { "label": "Kỹ sư Backend", "desc": "API, Database, Kiến trúc, Bảo mật" },
+          "fullstack_engineer": { "label": "Kỹ sư Fullstack", "desc": "Phát triển full-stack, API, UI, DevOps" },
           "mobile": { "label": "Lập trình viên Di động", "desc": "iOS, Android, Flutter, React Native" },
           "mobile_developer": { "label": "Lập trình viên Di động", "desc": "iOS, Android, Flutter, React Native" },
+          "mobile_engineer": { "label": "Kỹ sư Mobile", "desc": "iOS, Android, Flutter, React Native" },
           "devops": { "label": "Kỹ sư DevOps / Platform", "desc": "CI/CD, K8s, Cloud, SRE" },
           "devops_engineer": { "label": "Kỹ sư DevOps / Platform", "desc": "CI/CD, K8s, Cloud, SRE" },
           "security": { "label": "Kỹ sư Bảo mật", "desc": "Bảo mật ứng dụng, Hạ tầng, Tuân thủ" },
           "security_engineer": { "label": "Kỹ sư Bảo mật", "desc": "Bảo mật ứng dụng, Hạ tầng, Tuân thủ" },
           "qa": { "label": "Kỹ sư QA / Kiểm thử", "desc": "Kiểm thử tự động, Chiến lược kiểm thử" },
-          "qa_engineer": { "label": "Kỹ sư QA / Kiểm thử", "desc": "Kiểm thử tự động, Chiến lược kiểm thử" }
+          "qa_engineer": { "label": "Kỹ sư QA / Kiểm thử", "desc": "Kiểm thử tự động, Chiến lược kiểm thử" },
+          "data_engineer": { "label": "Kỹ sư Dữ liệu", "desc": "ETL, Pipeline dữ liệu, Kho dữ liệu, Spark" },
+          "ml_engineer": { "label": "Kỹ sư ML", "desc": "Machine Learning, Huấn luyện mô hình, MLOps" }
         }
       },
       "business": {
@@ -339,8 +345,11 @@
           "data_analyst": { "label": "Chuyên viên Phân tích dữ liệu", "desc": "SQL, BI, Dashboard, Insight" },
           "data_eng": { "label": "Kỹ sư Dữ liệu", "desc": "Pipeline, ETL, Kho dữ liệu" },
           "data_engineer": { "label": "Kỹ sư Dữ liệu", "desc": "Pipeline, ETL, Kho dữ liệu" },
+          "data_scientist": { "label": "Nhà khoa học dữ liệu", "desc": "Thống kê, ML, Python, Trực quan hóa dữ liệu" },
+          "bi_analyst": { "label": "Chuyên viên BI", "desc": "Công cụ BI, Dashboard, KPI, Business Intelligence" },
           "ai_ml": { "label": "Kỹ sư AI / Machine Learning", "desc": "LLM, RAG, Huấn luyện mô hình, MLOps" },
-          "ai_ml_engineer": { "label": "Kỹ sư AI / Machine Learning", "desc": "LLM, RAG, Huấn luyện mô hình, MLOps" }
+          "ai_ml_engineer": { "label": "Kỹ sư AI / Machine Learning", "desc": "LLM, RAG, Huấn luyện mô hình, MLOps" },
+          "ml_engineer": { "label": "Kỹ sư ML", "desc": "Machine Learning, Huấn luyện mô hình, MLOps" }
         }
       },
       "other": {
@@ -378,6 +387,21 @@
       "connectionFailed": "Không thể kết nối dữ liệu",
       "syncingRoles": "Đang đồng bộ vai trò chuyên môn...",
       "noKb": "Chưa chọn KB"
+    },
+    "warnings": {
+      "title": "Dashboard chưa đồng bộ đủ dữ liệu",
+      "apiNotFound": "API dữ liệu Dashboard chưa sẵn sàng (HTTP 404). Hệ thống đang hiển thị trạng thái an toàn để bạn tiếp tục làm việc; hãy thử lại sau khi backend deploy route này.",
+      "network": "Không kết nối được máy chủ. Dashboard đang giữ trạng thái an toàn cho đến khi kết nối ổn định trở lại.",
+      "server": "Backend trả về lỗi khi tải dữ liệu Dashboard. Dữ liệu an toàn hiện vẫn được hiển thị.",
+      "loadPartial": "Một số dữ liệu Dashboard chưa tải mới được. Dữ liệu an toàn vẫn hiển thị; hãy thử lại để đồng bộ.",
+      "loadPartialWithReason": "Một số dữ liệu Dashboard chưa tải mới được: {reason}. Dữ liệu an toàn vẫn hiển thị.",
+      "autoHide": "Thông báo này tự ẩn sau 5 giây nếu bạn không tương tác.",
+      "dismiss": "Đóng thông báo"
+    },
+    "setup": {
+      "title": "Chưa chọn Knowledge Base chuyên ngành",
+      "description": "Bạn chưa thiết lập vị trí chuyên môn. Hãy hoàn thành onboarding để tạo Knowledge Base và bắt đầu làm việc.",
+      "action": "Thiết lập ngay"
     },
     "welcome": {
       "hello": "Xin chào, {name} 👋",

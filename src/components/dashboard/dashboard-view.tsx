@@ -200,6 +200,7 @@ export function DashboardView() {
 
   // Polling management refs
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const apiWarningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollCountRef = useRef<number>(0);
   const maxPolls = 30; // Stop polling after 5 minutes (30 * 10s = 300s)
 
@@ -287,6 +288,60 @@ export function DashboardView() {
       serverTime: new Date().toISOString(),
     };
   }, [authUser, t, locale]);
+
+  const formatDashboardApiWarning = useCallback(
+    (errorCode?: string, rawMessage?: string) => {
+      const message = rawMessage?.trim() || "";
+      const lowerMessage = message.toLowerCase();
+      const isHttp404 = errorCode === "HTTP_ERROR" && (lowerMessage.includes("404") || lowerMessage.includes("not found"));
+
+      if (isHttp404) {
+        return t(
+          "dashboard.warnings.apiNotFound",
+          "Dashboard data endpoint is not available (HTTP 404). Showing a safe fallback so you can keep working; retry after the backend route is deployed."
+        );
+      }
+
+      if (errorCode === "NETWORK_ERROR") {
+        return t(
+          "dashboard.warnings.network",
+          "Cannot connect to the server. Dashboard is showing the last safe state until the connection is restored."
+        );
+      }
+
+      if (errorCode === "SERVER_ERROR" || lowerMessage.includes("500")) {
+        return t(
+          "dashboard.warnings.server",
+          "Backend service returned an error while loading dashboard data. Existing safe data is still visible."
+        );
+      }
+
+      if (message && !lowerMessage.startsWith("lỗi http")) {
+        return t("dashboard.warnings.loadPartialWithReason", "Some dashboard data could not be refreshed: {reason}. Safe data is still visible.").replace("{reason}", message);
+      }
+
+      return t(
+        "dashboard.warnings.loadPartial",
+        "Some dashboard data could not be refreshed. Safe data is still visible; retry to sync again."
+      );
+    },
+    [t]
+  );
+
+  const clearApiWarningTimer = useCallback(() => {
+    if (apiWarningTimerRef.current) {
+      clearTimeout(apiWarningTimerRef.current);
+      apiWarningTimerRef.current = null;
+    }
+  }, []);
+
+  const startApiWarningTimer = useCallback(() => {
+    clearApiWarningTimer();
+    apiWarningTimerRef.current = setTimeout(() => {
+      setApiWarning(null);
+      apiWarningTimerRef.current = null;
+    }, 5000);
+  }, [clearApiWarningTimer]);
 
   // ────────────────────────────────────────────────────────────────
   // 2. Initial Data Fetch (Bootstrap)
@@ -440,7 +495,7 @@ export function DashboardView() {
           } else {
             // Fallback if msg is somehow empty
             setSummary(prev => prev || buildFallbackSummary());
-            setApiWarning(summaryRes.msg || t("dashboard.errors.loadFailed", "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật."));
+            setApiWarning(formatDashboardApiWarning(summaryRes.error_code, summaryRes.msg));
           }
         } else if (summaryRes.error_code === "ONBOARDING_REQUIRED" || summaryRes.error_code === "ROLE_KB_REQUIRED") {
           const stateRes = await getOnboardingStateAction();
@@ -480,21 +535,31 @@ export function DashboardView() {
           } else {
             // Non-auth error (API not ready, network, etc.) → graceful degradation
             setSummary(prev => prev || buildFallbackSummary());
-            setApiWarning(summaryRes.msg || t("dashboard.errors.loadFailed", "Không thể tải dữ liệu mới nhất. Thử lại để cập nhật."));
+            setApiWarning(formatDashboardApiWarning(summaryRes.error_code, summaryRes.msg));
           }
         }
       } catch (err) {
         console.error("fetchDashboardData error:", err);
         // Network error → degrade gracefully, never block the whole dashboard
         setSummary(prev => prev || buildFallbackSummary());
-        setApiWarning(t("dashboard.errors.NETWORK_ERROR", "Không kết nối được máy chủ. Một số dữ liệu có thể chưa cập nhật."));
+        setApiWarning(formatDashboardApiWarning("NETWORK_ERROR"));
       } finally {
         setIsLoading(false);
         setIsChangingRole(false);
       }
     },
-    [handleGlobalError, buildFallbackSummary, t, locale, router, searchParams, roleKbIdFromUrl]
+    [handleGlobalError, buildFallbackSummary, formatDashboardApiWarning, t, locale, router, searchParams, roleKbIdFromUrl]
   );
+
+  useEffect(() => {
+    if (!apiWarning) {
+      clearApiWarningTimer();
+      return;
+    }
+
+    startApiWarningTimer();
+    return clearApiWarningTimer;
+  }, [apiWarning, startApiWarningTimer, clearApiWarningTimer]);
 
   useEffect(() => {
     // Avoid synchronous execution by deferring with setTimeout
@@ -952,16 +1017,33 @@ export function DashboardView() {
 
         {/* Non-blocking API warning banner */}
         {apiWarning && (
-          <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-xs text-zinc-300 animate-fade-in">
-            <LineIcon name="warning" className="h-4 w-4 shrink-0 text-zinc-400" />
-            <span className="flex-1">{apiWarning}</span>
+          <div
+            className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-xs text-zinc-300 animate-fade-in"
+            onMouseEnter={clearApiWarningTimer}
+            onMouseLeave={startApiWarningTimer}
+          >
+            <LineIcon name="warning" className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" />
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-zinc-100">
+                {t("dashboard.warnings.title", "Dashboard sync issue")}
+              </p>
+              <p className="mt-0.5 leading-relaxed text-zinc-300">{apiWarning}</p>
+              <p className="mt-1 text-[10px] text-zinc-500">
+                {t("dashboard.warnings.autoHide", "This notice auto-hides after 5 seconds if you do not interact.")}
+              </p>
+            </div>
             <button
-              onClick={() => { setApiWarning(null); fetchDashboardData(selectedRoleKbId || undefined, true); }}
+              onClick={() => { clearApiWarningTimer(); setApiWarning(null); fetchDashboardData(selectedRoleKbId || undefined, true); }}
               className="ml-2 shrink-0 rounded-lg bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-300 hover:bg-white/[0.12] transition-colors cursor-pointer"
             >
               {t("dashboard.btnRetry", "Thử lại")}
             </button>
-            <button onClick={() => setApiWarning(null)} className="shrink-0 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+            <button
+              onClick={() => { clearApiWarningTimer(); setApiWarning(null); }}
+              className="shrink-0 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              aria-label={t("dashboard.warnings.dismiss", "Dismiss")}
+              title={t("dashboard.warnings.dismiss", "Dismiss")}
+            >
               <LineIcon name="xmark-circle" className="h-4 w-4" />
             </button>
           </div>
@@ -973,12 +1055,10 @@ export function DashboardView() {
               <LineIcon name="warning" className="h-5 w-5 shrink-0 text-zinc-400 mt-0.5" />
               <div>
                 <h4 className="font-bold text-sm text-zinc-200 mb-1">
-                  {locale === "vi" ? "Chưa chọn Knowledge Base Chuyên Ngành" : "No Professional Knowledge Base Selected"}
+                  {t("dashboard.setup.title", "No Professional Knowledge Base Selected")}
                 </h4>
                 <p className="text-[#a1a1aa] leading-relaxed">
-                  {locale === "vi" 
-                    ? "Bạn chưa thiết lập vị trí chuyên môn. Hãy hoàn thành onboarding để tạo Knowledge Base và bắt đầu làm việc."
-                    : "You haven't configured your professional role yet. Complete onboarding to create your Knowledge Base and start working."}
+                  {t("dashboard.setup.description", "You haven't configured your professional role yet. Complete onboarding to create your Knowledge Base and start working.")}
                 </p>
               </div>
             </div>
@@ -987,7 +1067,7 @@ export function DashboardView() {
               onClick={() => router.push(`/${locale}/onboarding?force=true`)}
               className="w-full md:w-auto shrink-0 bg-white hover:bg-zinc-200 text-black font-bold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <span>{locale === "vi" ? "Thiết lập ngay" : "Set up now"}</span>
+              <span>{t("dashboard.setup.action", "Set up now")}</span>
               <LineIcon name="external-link" className="h-3.5 w-3.5" />
             </button>
           </div>
