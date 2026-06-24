@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * NavigationProgress — Premium top-of-page progress bar for route transitions.
+ * NavigationProgress — single neutral header progress bar for route transitions.
  *
  * Design:
- * - Slim 2px bar at the very top of the viewport (z-index: 99999)
- * - Brand jade-emerald gradient with shimmer animation
- * - Glowing "spark" dot at the leading edge
+ * - Slim bar aligned with the app header chrome
+ * - Neutral graphite/white shimmer to avoid adding extra brand color
  * - Starts IMMEDIATELY on link click (no waiting for server)
  * - Completes (100%) when pathname changes (navigation done)
  * - Fades out gracefully after completion
@@ -27,6 +26,8 @@ import { useEffect, useRef, useState, Suspense, useCallback } from "react";
 function ProgressBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const routeSegment = pathname.split("/").filter(Boolean)[1] ?? "";
+  const isAppRoute = ["dashboard", "query", "research", "wiki", "compile", "settings"].includes(routeSegment);
 
   const [visible, setVisible] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -110,10 +111,9 @@ function ProgressBar() {
   }, [startProgress]);
 
   // ── Complete on route change ───────────────────────────────────────────────
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     completeProgress();
-  // pathname + searchParams as a string to avoid stale closure
+    // pathname + searchParams as a string to avoid stale closure
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams?.toString()]);
 
@@ -129,32 +129,15 @@ function ProgressBar() {
     top: 0,
     height: "100%",
     width: `${progress}%`,
-    background: "linear-gradient(90deg, var(--color-auth-accent) 0%, var(--color-auth-purple) 50%, var(--color-auth-accent) 100%)",
+    background: "linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.88) 48%, rgba(255,255,255,0.32) 100%)",
     backgroundSize: "200% 100%",
-    boxShadow: "0 0 12px var(--color-auth-accent-glow), 0 0 4px var(--color-auth-accent-glow)",
+    boxShadow: "0 0 14px rgba(255,255,255,0.18), 0 0 2px rgba(255,255,255,0.24)",
     // Complete immediately, ramp slowly
     transition: completing
       ? "width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out 0.25s"
       : "width 0.5s cubic-bezier(0.1, 0.4, 0.5, 1)",
     opacity: completing && progress === 100 ? 0 : 1,
     animation: !completing ? "nav-shimmer 1.8s linear infinite" : undefined,
-  };
-
-  const sparkStyle: React.CSSProperties = {
-    position: "absolute",
-    top: "50%",
-    transform: "translateY(-50%) translateX(50%)",
-    right: `${100 - progress}%`,
-    width: "6px",
-    height: "6px",
-    borderRadius: "50%",
-    background: "var(--color-auth-accent)",
-    boxShadow: "0 0 10px 3px var(--color-auth-accent-glow)",
-    transition: completing
-      ? "right 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
-      : "right 0.5s cubic-bezier(0.1, 0.4, 0.5, 1)",
-    opacity: completing ? 0 : 1,
-    pointerEvents: "none",
   };
 
   return (
@@ -173,18 +156,18 @@ function ProgressBar() {
         aria-valuemax={100}
         style={{
           position: "fixed",
-          top: 0,
+          top: isAppRoute ? "72px" : 0,
           left: 0,
           right: 0,
-          height: "2.5px",
-          zIndex: 99999,
+          height: "2px",
+          zIndex: 55,
           overflow: "hidden",
-          background: "oklch(0.18 0.006 260)",
+          background: "rgba(255,255,255,0.045)",
           pointerEvents: "none",
+          boxShadow: "0 1px 0 rgba(255,255,255,0.035)",
         }}
       >
         <div style={barStyle} />
-        <div style={sparkStyle} />
       </div>
     </>
   );

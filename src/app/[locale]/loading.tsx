@@ -33,18 +33,6 @@ function PublicPageSkeleton() {
   );
 }
 
-function AppRouteTransition() {
-  return (
-    <main className="min-h-[calc(100vh-73px)] bg-auth-bg" aria-hidden="true">
-      <div className="container-focused py-4">
-        <div className="h-px overflow-hidden rounded-full bg-white/[0.06]">
-          <div className="h-full w-1/3 animate-[route-loading-slide_1.1s_ease-in-out_infinite] rounded-full bg-white/35" />
-        </div>
-      </div>
-    </main>
-  );
-}
-
 export default function Loading() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -65,7 +53,7 @@ export default function Loading() {
   return (
     <div className="min-h-screen bg-auth-bg text-auth-text" role="status" aria-live="polite" aria-label="Đang tải trang">
       <AppHeader active={appHeaderActiveFromSegment(routeSegment)} locale={locale} selectedRoleKbId={selectedRoleKbId} />
-      <AppRouteTransition />
+      <main className="min-h-[calc(100vh-73px)] bg-auth-bg" aria-hidden="true" />
     </div>
   );
 }
