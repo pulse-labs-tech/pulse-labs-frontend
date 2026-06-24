@@ -1,28 +1,17 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { AppHeader, type AppHeaderActive } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const APP_ROUTES = ["dashboard", "query", "research", "wiki", "compile", "settings"];
 
-function AppHeaderSkeleton() {
-  return (
-    <>
-      <header className="app-glass-header fixed inset-x-0 top-0 z-50 border-b border-white/[0.08]">
-        <div className="mx-auto grid min-h-[72px] w-full max-w-[1760px] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 sm:px-6 xl:gap-5 2xl:px-8">
-          <Skeleton className="h-11 w-12 rounded-2xl sm:w-48" />
-          <div className="hidden justify-center md:flex">
-            <Skeleton className="h-11 w-[min(42vw,560px)] rounded-[18px]" />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Skeleton className="hidden h-10 w-28 rounded-2xl xl:block" />
-            <Skeleton className="h-10 w-20 rounded-2xl" />
-          </div>
-        </div>
-      </header>
-      <div className="h-[72px] shrink-0" aria-hidden="true" />
-    </>
-  );
+function appHeaderActiveFromSegment(segment: string): AppHeaderActive {
+  if (segment === "dashboard" || segment === "query" || segment === "research" || segment === "wiki" || segment === "compile" || segment === "settings") {
+    return segment;
+  }
+
+  return "dashboard";
 }
 
 function PageHeadingSkeleton() {
@@ -127,8 +116,12 @@ function PublicPageSkeleton() {
 
 export default function Loading() {
   const pathname = usePathname();
-  const routeSegment = pathname.split("/").filter(Boolean)[1] ?? "";
+  const searchParams = useSearchParams();
+  const segments = pathname.split("/").filter(Boolean);
+  const locale = segments[0] ?? "vi";
+  const routeSegment = segments[1] ?? "";
   const isAppRoute = APP_ROUTES.includes(routeSegment);
+  const selectedRoleKbId = searchParams.get("roleKbId") || searchParams.get("roleId") || searchParams.get("role_id");
 
   if (!isAppRoute) {
     return (
@@ -140,7 +133,7 @@ export default function Loading() {
 
   return (
     <div className="min-h-screen bg-auth-bg text-auth-text" role="status" aria-live="polite" aria-label="Đang tải trang">
-      <AppHeaderSkeleton />
+      <AppHeader active={appHeaderActiveFromSegment(routeSegment)} locale={locale} selectedRoleKbId={selectedRoleKbId} />
       {routeSegment === "query" ? (
         <QuerySkeleton />
       ) : (

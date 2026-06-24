@@ -3,3 +3,4 @@ export { Footer } from "./footer";
 export { LocaleSwitcher } from "./locale-switcher";
 export { GlobalSearchPalette } from "./global-search-palette";
 export { AppHeader } from "./app-header";
+export type { AppHeaderActive } from "./app-header";

@@ -3,7 +3,7 @@
 import { type MouseEvent, type PointerEvent as ReactPointerEvent, ReactNode, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { logoutAction } from "@/app/actions/auth";
 import { useAuth } from "@/hooks/use-auth";
 import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
@@ -12,7 +12,7 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
 import { AppMobileNav } from "./app-mobile-nav";
 
-type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
+export type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
 type AppHeaderNavItem = "dashboard" | "query" | "research" | "wiki";
 
 interface AppHeaderProps {
@@ -239,70 +239,72 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
           </div>
 
           <nav className="hidden min-w-0 justify-center md:flex" aria-label={locale === "vi" ? "Điều hướng chính" : "Primary navigation"}>
-            <div
-              className={`app-nav-shell relative flex max-w-full items-center rounded-[18px] border p-0.5 ${
-                navCanScrollPrev ? "can-scroll-prev" : ""
-              } ${navCanScrollNext ? "can-scroll-next" : ""}`}
-            >
-              <button
-                type="button"
-                onClick={() => scrollNavRail("prev")}
-                className={`app-nav-arrow left-1 transition-opacity duration-150 ${navCanScrollPrev ? "opacity-100" : "pointer-events-none opacity-0"}`}
-                aria-label={locale === "vi" ? "Mục trước" : "Previous item"}
-              >
-                <LineIcon name="chevron-left" className="h-3.5 w-3.5" />
-              </button>
+            <LayoutGroup id={`app-header-tabs-${locale}`}>
               <div
-                ref={navRailRef}
-                onPointerDown={handleNavPointerDown}
-                className="app-nav-rail flex max-w-full touch-pan-x select-none items-center gap-0.5 overflow-x-auto rounded-[15px]"
-                onWheel={(event) => {
-                  if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-                    event.currentTarget.scrollLeft += event.deltaY;
-                  }
-                }}
+                className={`app-nav-shell relative flex max-w-full items-center rounded-[18px] border p-0.5 ${
+                  navCanScrollPrev ? "can-scroll-prev" : ""
+                } ${navCanScrollNext ? "can-scroll-next" : ""}`}
               >
-                {navItems.map((item) => {
-                  const isActive = item.id === active;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      title={item.label}
-                      draggable={false}
-                      onClick={(e) => {
-                        if (navDidDragRef.current) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }
-                      }}
-                      className="relative inline-flex h-9 shrink-0 cursor-pointer items-center rounded-[14px] px-3.5 text-[11px] font-bold transition-colors duration-200 select-none"
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="app-active-tab"
-                          className="absolute inset-0 rounded-[14px] border border-white/[0.08] bg-white/[0.06] shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
-                          transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.82 }}
-                        />
-                      )}
-                      <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-white" : "text-auth-text-2 hover:text-auth-text"}`}>
-                        <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
-                        <span className="hidden xl:inline">{item.label}</span>
-                        <span className="hidden lg:inline xl:hidden">{item.shortLabel}</span>
-                      </span>
-                    </Link>
-                  );
-                })}
+                <button
+                  type="button"
+                  onClick={() => scrollNavRail("prev")}
+                  className={`app-nav-arrow left-1 transition-opacity duration-150 ${navCanScrollPrev ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                  aria-label={locale === "vi" ? "Mục trước" : "Previous item"}
+                >
+                  <LineIcon name="chevron-left" className="h-3.5 w-3.5" />
+                </button>
+                <div
+                  ref={navRailRef}
+                  onPointerDown={handleNavPointerDown}
+                  className="app-nav-rail flex max-w-full touch-pan-x select-none items-center gap-0.5 overflow-x-auto rounded-[15px]"
+                  onWheel={(event) => {
+                    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+                      event.currentTarget.scrollLeft += event.deltaY;
+                    }
+                  }}
+                >
+                  {navItems.map((item) => {
+                    const isActive = item.id === active;
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        title={item.label}
+                        draggable={false}
+                        onClick={(e) => {
+                          if (navDidDragRef.current) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }
+                        }}
+                        className="relative inline-flex h-9 shrink-0 cursor-pointer items-center rounded-[14px] px-3.5 text-[11px] font-bold transition-colors duration-200 select-none"
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="app-active-tab"
+                            className="absolute inset-0 rounded-[14px] border border-white/[0.08] bg-white/[0.06] shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
+                            transition={{ type: "spring", stiffness: 520, damping: 38, mass: 0.74 }}
+                          />
+                        )}
+                        <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? "text-white" : "text-auth-text-2 hover:text-auth-text"}`}>
+                          <LineIcon name={navIcon[item.id]} className="h-3.5 w-3.5 opacity-90" />
+                          <span className="hidden xl:inline">{item.label}</span>
+                          <span className="hidden lg:inline xl:hidden">{item.shortLabel}</span>
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => scrollNavRail("next")}
+                  className={`app-nav-arrow right-1 transition-opacity duration-150 ${navCanScrollNext ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                  aria-label={locale === "vi" ? "Mục tiếp theo" : "Next item"}
+                >
+                  <LineIcon name="chevron-right" className="h-3.5 w-3.5" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => scrollNavRail("next")}
-                className={`app-nav-arrow right-1 transition-opacity duration-150 ${navCanScrollNext ? "opacity-100" : "pointer-events-none opacity-0"}`}
-                aria-label={locale === "vi" ? "Mục tiếp theo" : "Next item"}
-              >
-                <LineIcon name="chevron-right" className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            </LayoutGroup>
           </nav>
 
           <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
