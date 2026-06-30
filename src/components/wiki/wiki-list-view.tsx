@@ -14,8 +14,6 @@ import type { WikiItemCard, WikiRetrievalStatus, WikiSourceType, WikiListDomainS
 import { useTranslation } from "@/contexts/locale-context";
 import { LocaleSwitcher } from "../layout/locale-switcher";
 import { AppHeader } from "@/components/layout";
-import { apiDocsList } from "./api-docs-data";
-import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 
 // ────────────────────────────────────────────────────────────────
 // Helpers
@@ -305,8 +303,6 @@ export function WikiListView() {
   );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
-  const [activeMode, setActiveMode] = useState<"library" | "api">("library");
-  const [selectedApiDocId, setSelectedApiDocId] = useState<string>("auth");
 
   // Data state
   const [items, setItems] = useState<WikiItemCard[]>([]);
@@ -676,409 +672,333 @@ export function WikiListView() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-auth-accent-dim text-auth-accent flex items-center justify-center shrink-0">
-              <LineIcon name={activeMode === "library" ? "book" : "code"} className="h-5 w-5" />
+              <LineIcon name="book" className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-fluid-xl font-extrabold tracking-tight">
-                {activeMode === "library" ? t("wiki.title", "Wiki Library") : (locale === "vi" ? "Tài liệu API" : "Developer APIs")}
-              </h1>
+              <h1 className="text-fluid-xl font-extrabold tracking-tight">{t("wiki.title", "Wiki Library")}</h1>
               <p className="text-xs text-auth-text-2 mt-0.5">
-                {activeMode === "library"
-                  ? t("wiki.subtitle", "All knowledge compiled and indexed")
-                  : (locale === "vi" ? "Tài liệu tích hợp API dành cho lập trình viên" : "System integration API documentation")}
+                {t("wiki.subtitle", "All knowledge compiled and indexed")}
               </p>
             </div>
-            {activeMode === "library" && !isLoading && total > 0 && (
+            {!isLoading && total > 0 && (
               <span className="ml-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-auth-accent-dim text-auth-accent border border-auth-accent/20">
                 {total.toLocaleString(locale === "vi" ? "vi-VN" : "en-US")} {locale === "vi" ? "mục" : "items"}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Active KB switcher */}
-            {activeMode === "library" && !rolesLoading && userRoles.length > 0 && (
-              <div className="flex items-center gap-2 bg-auth-surface/40 border border-white/[0.06] rounded-xl p-1.5 px-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
-                  {locale === "vi" ? "Chuyên ngành:" : "Domain:"}
-                </span>
-                <Select
-                  value={selectedRoleKbId}
-                  onChange={(roleId) => {
-                    setSelectedRoleKbId(roleId);
-                    setStoredRoleKbId(roleId);
-                    const newParams = new URLSearchParams(searchParams.toString());
-                    newParams.set("roleKbId", roleId);
-                    router.replace(`/${locale}/wiki?${newParams.toString()}`);
-                    fetchItems({ roleKbId: roleId, page: 1 });
-                  }}
-                  options={userRoles.map((r) => ({
-                    value: r.id,
-                    label: r.roleName,
-                  }))}
-                  className="bg-auth-elevated border-auth-border rounded-xl text-xs py-1"
-                />
-              </div>
-            )}
+          {/* Active KB switcher */}
+          {!rolesLoading && userRoles.length > 0 && (
+            <div className="flex items-center gap-2 bg-auth-surface/40 border border-white/[0.06] rounded-xl p-1.5 px-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3">
+                {locale === "vi" ? "Chuyên ngành:" : "Domain:"}
+              </span>
+              <Select
+                value={selectedRoleKbId}
+                onChange={(roleId) => {
+                  setSelectedRoleKbId(roleId);
+                  setStoredRoleKbId(roleId);
+                  const newParams = new URLSearchParams(searchParams.toString());
+                  newParams.set("roleKbId", roleId);
+                  router.replace(`/${locale}/wiki?${newParams.toString()}`);
+                  fetchItems({ roleKbId: roleId, page: 1 });
+                }}
+                options={userRoles.map((r) => ({
+                  value: r.id,
+                  label: r.roleName,
+                }))}
+                className="bg-auth-elevated border-auth-border rounded-xl text-xs py-1"
+              />
+            </div>
+          )}
 
-            {/* View toggle */}
-            {activeMode === "library" && (
-              <div className="flex items-center gap-1 bg-auth-elevated border border-auth-border rounded-xl p-1">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
-                    viewMode === "grid"
-                      ? "bg-auth-accent-dim text-auth-accent"
-                      : "text-auth-text-3 hover:text-auth-text"
-                  }`}
-                  title={locale === "vi" ? "Xem lưới" : "Grid view"}
-                >
-                  <LineIcon name="grid-alt" className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
-                    viewMode === "list"
-                      ? "bg-auth-accent-dim text-auth-accent"
-                      : "text-auth-text-3 hover:text-auth-text"
-                  }`}
-                  title={locale === "vi" ? "Xem danh sách" : "List view"}
-                >
-                  <LineIcon name="list" className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
+          {/* View toggle & API Docs Link */}
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/${locale}/wiki/api`}
+              className="inline-flex h-9 items-center gap-1.5 px-4 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all select-none cursor-pointer"
+            >
+              <LineIcon name="code" className="h-3.5 w-3.5" />
+              <span>{locale === "vi" ? "Tài liệu API" : "API Docs"}</span>
+            </Link>
 
-            {/* Mode Switcher */}
-            <div className="flex bg-[#121214] border border-[#27272a] rounded-xl p-1 shrink-0">
+            <div className="flex items-center gap-1 bg-auth-elevated border border-auth-border rounded-xl p-1">
               <button
-                onClick={() => setActiveMode("library")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeMode === "library"
-                    ? "bg-white text-black shadow-sm"
-                    : "text-auth-text-3 hover:text-white"
+                onClick={() => setViewMode("grid")}
+                className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
+                  viewMode === "grid"
+                    ? "bg-auth-accent-dim text-auth-accent"
+                    : "text-auth-text-3 hover:text-auth-text"
                 }`}
+                title={locale === "vi" ? "Xem lưới" : "Grid view"}
               >
-                {locale === "vi" ? "Thư viện" : "Library"}
+                <LineIcon name="grid-alt" className="h-3.5 w-3.5" />
               </button>
               <button
-                onClick={() => setActiveMode("api")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeMode === "api"
-                    ? "bg-white text-black shadow-sm"
-                    : "text-auth-text-3 hover:text-white"
+                onClick={() => setViewMode("list")}
+                className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
+                  viewMode === "list"
+                    ? "bg-auth-accent-dim text-auth-accent"
+                    : "text-auth-text-3 hover:text-auth-text"
                 }`}
+                title={locale === "vi" ? "Xem danh sách" : "List view"}
               >
-                API Docs
+                <LineIcon name="list" className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
         </div>
 
-        {activeMode === "library" ? (
-          <>
-            {/* Search & Filters bar */}
-            <div className="backdrop-blur-md rounded-2xl p-4 flex flex-col gap-4 relative premium-hover-card">
+        {/* Search & Filters bar */}
+        <div className="backdrop-blur-md rounded-2xl p-4 flex flex-col gap-4 relative premium-hover-card">
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                {/* Search input */}
-                <div className="relative w-full max-w-sm">
-                  <LineIcon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder={t("wiki.searchPlaceholder", "Search knowledge...")}
-                    className="w-full bg-auth-elevated border border-auth-border rounded-xl pl-9 pr-4 py-2 text-sm text-auth-text placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/60 transition-colors"
-                  />
-                  {search && (
-                    <button
-                      onClick={() => handleSearchChange("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-auth-text-3 hover:text-auth-text transition-colors"
-                    >
-                      <LineIcon name="xmark" className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Spacer */}
-                <div className="flex-grow" />
-
-                {/* Sort */}
-                <div className="flex items-center gap-2">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">
-                    <LineIcon name="control-panel" className="h-3 w-3 inline mr-1" />{t("wiki.sortBy.label", "Sort by")}
-                  </label>
-                  <Select
-                    value={sortBy}
-                    onChange={(val) => setSortBy(val as "compiledAt" | "title" | "updatedAt")}
-                    options={[
-                      { value: "compiledAt", label: t("wiki.sortBy.newest", "Newest") },
-                      { value: "updatedAt", label: t("wiki.sortBy.updated", "Recently Updated") },
-                      { value: "title", label: t("wiki.sortBy.title", "Alphabetical") },
-                    ]}
-                    className="bg-auth-elevated border-auth-border rounded-xl"
-                  />
-                </div>
-              </div>
-
-              {/* Filter pills row */}
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Status pills */}
-                <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">{t("wiki.status.label", "Status:")}</span>
-                {(
-                  [
-                    { label: t("wiki.status.all", "All"), value: "" },
-                    { label: t("wiki.status.ready", "Ready"), value: "indexed" },
-                    { label: t("wiki.status.pending", "Processing"), value: "pending" },
-                    { label: t("wiki.status.failed", "Failed"), value: "failed" },
-                  ] as { label: string; value: WikiRetrievalStatus | "" }[]
-                ).map(({ label, value }) => (
-                  <button
-                    key={value}
-                    onClick={() => handleStatusFilter(value)}
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
-                      statusFilter === value
-                        ? "bg-auth-accent-dim text-auth-accent border-auth-accent/30"
-                        : "bg-auth-elevated border-auth-border text-auth-text-3 hover:text-auth-text hover:border-white/[0.15]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-
-                {/* Domain filter */}
-                {domains.length > 0 && (
-                  <>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">{t("dashboard.selectDomain", "Domain")}:</span>
-                    <Select
-                      value={domainFilter}
-                      onChange={handleDomainFilter}
-                      options={[
-                        { value: "", label: locale === "vi" ? "Tất cả domain" : "All domains" },
-                        ...domains.map((d) => ({ value: d.id, label: d.name })),
-                      ]}
-                      className="bg-auth-elevated border-auth-border rounded-full py-1 px-3"
-                    />
-                  </>
-                )}
-
-                {/* Tag filter */}
-                {allTags.length > 0 && (
-                  <>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">Tag:</span>
-                    <Select
-                      value={tagFilter}
-                      onChange={handleTagFilter}
-                      options={[
-                        { value: "", label: locale === "vi" ? "Tất cả tags" : "All tags" },
-                        ...allTags.map((t) => ({ value: t, label: `#${t}` })),
-                      ]}
-                      className="bg-auth-elevated border-auth-border rounded-full py-1 px-3"
-                    />
-                  </>
-                )}
-
-                {/* Clear filters */}
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearAllFilters}
-                    className="inline-flex items-center gap-1 ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-red-950/30 border border-red-500/20 text-red-400 hover:bg-red-950/50 transition-colors"
-                  >
-                    <LineIcon name="xmark" className="h-3 w-3" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Content area */}
-            {isLoading ? (
-              <WikiGridSkeleton />
-            ) : !selectedRoleKbId ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
-                <div className="h-20 w-20 rounded-2xl bg-zinc-800/30 border border-zinc-700/20 flex items-center justify-center text-zinc-400 animate-pulse">
-                  <LineIcon name="warning" className="h-10 w-10" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-zinc-300">
-                    {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
-                  </h3>
-                  <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
-                    {locale === "vi"
-                      ? "Wiki yêu cầu vai trò chuyên môn để tùy chỉnh cơ sở tri thức. Vui lòng thiết lập vai trò của bạn tại trang Cài đặt."
-                      : "Wiki requires a professional role to customize your knowledge base. Please configure your role in Settings."}
-                  </p>
-                </div>
-                <Link
-                  href={`/${locale}/settings#settings-section-role`}
-                  className="btn-primary-pulse text-sm bg-white hover:bg-zinc-200 text-black border-none"
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            {/* Search input */}
+            <div className="relative w-full max-w-sm">
+              <LineIcon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-auth-text-3 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder={t("wiki.searchPlaceholder", "Search knowledge...")}
+                className="w-full bg-auth-elevated border border-auth-border rounded-xl pl-9 pr-4 py-2 text-sm text-auth-text placeholder:text-auth-text-3 focus:outline-none focus:border-auth-accent/60 transition-colors"
+              />
+              {search && (
+                <button
+                  onClick={() => handleSearchChange("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-auth-text-3 hover:text-auth-text transition-colors"
                 >
-                  <LineIcon name="settings" className="h-4 w-4" />
-                  {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}
-                </Link>
-              </div>
-            ) : items.length === 0 ? (
-              /* Empty states */
-              hasActiveFilters ? (
-                /* No search results */
-                <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
-                  <div className="h-16 w-16 rounded-2xl bg-auth-surface/40 border border-white/[0.06] flex items-center justify-center text-auth-text-3">
-                    <LineIcon name="search" className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-auth-text">{t("wiki.noResults", "No results found")}</h3>
-                    <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs">
-                      {t("wiki.noResultsDesc", "Try changing your keywords or filters to find other wiki items.")}
-                    </p>
-                  </div>
-                  <button
-                    onClick={clearAllFilters}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm font-semibold transition-all"
-                  >
-                    <LineIcon name="xmark" className="h-4 w-4" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
-                  </button>
-                </div>
-              ) : (
-                /* Completely empty */
-                <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
-                  <div className="h-20 w-20 rounded-2xl bg-auth-surface/40 border border-white/[0.06] flex items-center justify-center text-auth-text-3">
-                    <LineIcon name="brain-alt" className="h-10 w-10" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-auth-text">{t("wiki.empty", "No knowledge items yet")}</h3>
-                    <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
-                      {t("wiki.emptyDesc", "Start by ingesting your first document to build your personal wiki library.")}
-                    </p>
-                  </div>
-                  <Link
-                    href={selectedRoleKbId ? `/${locale}/compile/new?roleKbId=${selectedRoleKbId}` : `/${locale}/compile/new`}
-                    className="btn-primary-pulse text-sm"
-                  >
-                    <LineIcon name="upload" className="h-4 w-4" /> {t("wiki.uploadCta", "Ingest your first document")}
-                  </Link>
-                </div>
-              )
-            ) : viewMode === "grid" ? (
-              /* Grid view */
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((item) => (
-                  <WikiCard key={item.id} item={item} />
-                ))}
-              </div>
-            ) : (
-              /* List view */
-              <div className="flex flex-col gap-2">
-                {items.map((item) => (
-                  <WikiRow key={item.id} item={item} />
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            {!isLoading && totalPages > 1 && (
-              <div className="flex items-center justify-between gap-4 pt-2">
-                <p className="text-xs text-auth-text-3">
-                  {locale === "vi"
-                    ? `Trang ${page}/${totalPages} · ${total.toLocaleString("vi-VN")} mục`
-                    : `Page ${page}/${totalPages} · ${total.toLocaleString("en-US")} items`}
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePage(page - 1)}
-                    disabled={page <= 1}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <LineIcon name="chevron-left" className="h-3.5 w-3.5" /> {locale === "vi" ? "Trước" : "Back"}
-                  </button>
-
-                  {/* Page number pills */}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum: number;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (page <= 3) {
-                        pageNum = i + 1;
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = page - 2 + i;
-                      }
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePage(pageNum)}
-                          className={`h-8 w-8 rounded-lg text-xs font-bold transition-all ${
-                            pageNum === page
-                              ? "bg-auth-accent-dim text-auth-accent border border-auth-accent/30"
-                              : "bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-3 hover:text-auth-text"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => handlePage(page + 1)}
-                    disabled={page >= totalPages}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {t("common.next", "Next")} <LineIcon name="chevron-right" className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          /* API Documentation View */
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start">
-            {/* Left sidebar: docs list */}
-            <div className="backdrop-blur-md bg-auth-surface/30 border border-white/[0.06] rounded-2xl p-4 flex flex-col gap-2">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 px-2 mb-2">
-                {locale === "vi" ? "Danh sách API" : "API Modules"}
-              </div>
-              {apiDocsList.map((doc) => {
-                const isSelected = selectedApiDocId === doc.id;
-                return (
-                  <button
-                    key={doc.id}
-                    onClick={() => setSelectedApiDocId(doc.id)}
-                    className={`flex items-center gap-2.5 w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                      isSelected
-                        ? "bg-auth-accent-dim text-auth-accent border border-auth-accent/30"
-                        : "bg-auth-elevated border-auth-border text-auth-text-2 hover:bg-white/[0.04] hover:text-white"
-                    }`}
-                  >
-                    <LineIcon name={doc.id === "auth" ? "lock" : doc.id === "users" ? "user" : doc.id === "onboarding" ? "grid-alt" : "compass"} className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{doc.title}</span>
-                  </button>
-                );
-              })}
+                  <LineIcon name="xmark" className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Right panel: Markdown Renderer */}
-            <div className="backdrop-blur-md bg-auth-surface/30 border border-white/[0.06] rounded-2xl p-6 lg:p-8 flex flex-col min-w-0">
-              {/* Document Metadata header */}
-              <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-4 mb-6">
-                <div className="flex items-center gap-2">
-                  <LineIcon name="code" className="h-4 w-4 text-auth-accent" />
-                  <span className="text-xs font-semibold text-auth-text-3 font-mono">
-                    {apiDocsList.find((d) => d.id === selectedApiDocId)?.filename}
-                  </span>
-                </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/[0.04] border border-white/[0.10] text-auth-text-2 uppercase tracking-wide">
-                  V1.0 — 2026
-                </span>
+            {/* Spacer */}
+            <div className="flex-grow" />
+
+            {/* Sort */}
+            <div className="flex items-center gap-2">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">
+                <LineIcon name="control-panel" className="h-3 w-3 inline mr-1" />{t("wiki.sortBy.label", "Sort by")}
+              </label>
+              <Select
+                value={sortBy}
+                onChange={(val) => setSortBy(val as "compiledAt" | "title" | "updatedAt")}
+                options={[
+                  { value: "compiledAt", label: t("wiki.sortBy.newest", "Newest") },
+                  { value: "updatedAt", label: t("wiki.sortBy.updated", "Recently Updated") },
+                  { value: "title", label: t("wiki.sortBy.title", "Alphabetical") },
+                ]}
+                className="bg-auth-elevated border-auth-border rounded-xl"
+              />
+            </div>
+          </div>
+
+          {/* Filter pills row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Status pills */}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 shrink-0">{t("wiki.status.label", "Status:")}</span>
+            {(
+              [
+                { label: t("wiki.status.all", "All"), value: "" },
+                { label: t("wiki.status.ready", "Ready"), value: "indexed" },
+                { label: t("wiki.status.pending", "Processing"), value: "pending" },
+                { label: t("wiki.status.failed", "Failed"), value: "failed" },
+              ] as { label: string; value: WikiRetrievalStatus | "" }[]
+            ).map(({ label, value }) => (
+              <button
+                key={value}
+                onClick={() => handleStatusFilter(value)}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
+                  statusFilter === value
+                    ? "bg-auth-accent-dim text-auth-accent border-auth-accent/30"
+                    : "bg-auth-elevated border-auth-border text-auth-text-3 hover:text-auth-text hover:border-white/[0.15]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+
+            {/* Domain filter */}
+            {domains.length > 0 && (
+              <>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">{t("dashboard.selectDomain", "Domain")}:</span>
+                <Select
+                  value={domainFilter}
+                  onChange={handleDomainFilter}
+                  options={[
+                    { value: "", label: locale === "vi" ? "Tất cả domain" : "All domains" },
+                    ...domains.map((d) => ({ value: d.id, label: d.name })),
+                  ]}
+                  className="bg-auth-elevated border-auth-border rounded-full py-1 px-3"
+                />
+              </>
+            )}
+
+            {/* Tag filter */}
+            {allTags.length > 0 && (
+              <>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-auth-text-3 ml-2 shrink-0">Tag:</span>
+                <Select
+                  value={tagFilter}
+                  onChange={handleTagFilter}
+                  options={[
+                    { value: "", label: locale === "vi" ? "Tất cả tags" : "All tags" },
+                    ...allTags.map((t) => ({ value: t, label: `#${t}` })),
+                  ]}
+                  className="bg-auth-elevated border-auth-border rounded-full py-1 px-3"
+                />
+              </>
+            )}
+
+            {/* Clear filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="inline-flex items-center gap-1 ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-red-950/30 border border-red-500/20 text-red-400 hover:bg-red-950/50 transition-colors"
+              >
+                <LineIcon name="xmark" className="h-3 w-3" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Content area */}
+        {isLoading ? (
+          <WikiGridSkeleton />
+        ) : !selectedRoleKbId ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
+            <div className="h-20 w-20 rounded-2xl bg-zinc-800/30 border border-zinc-700/20 flex items-center justify-center text-zinc-400 animate-pulse">
+              <LineIcon name="warning" className="h-10 w-10" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-zinc-300">
+                {locale === "vi" ? "Chưa Thiết Lập Vai Trò Chuyên Môn" : "Professional Role Not Configured"}
+              </h3>
+              <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
+                {locale === "vi"
+                  ? "Wiki yêu cầu vai trò chuyên môn để tùy chỉnh cơ sở tri thức. Vui lòng thiết lập vai trò của bạn tại trang Cài đặt."
+                  : "Wiki requires a professional role to customize your knowledge base. Please configure your role in Settings."}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/settings#settings-section-role`}
+              className="btn-primary-pulse text-sm bg-white hover:bg-zinc-200 text-black border-none"
+            >
+              <LineIcon name="settings" className="h-4 w-4" />
+              {locale === "vi" ? "Thiết lập trong Cài đặt" : "Configure in Settings"}
+            </Link>
+          </div>
+        ) : items.length === 0 ? (
+          /* Empty states */
+          hasActiveFilters ? (
+            /* No search results */
+            <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-auth-surface/40 border border-white/[0.06] flex items-center justify-center text-auth-text-3">
+                <LineIcon name="search" className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-auth-text">{t("wiki.noResults", "No results found")}</h3>
+                <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs">
+                  {t("wiki.noResultsDesc", "Try changing your keywords or filters to find other wiki items.")}
+                </p>
+              </div>
+              <button
+                onClick={clearAllFilters}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-full text-sm font-semibold transition-all"
+              >
+                <LineIcon name="xmark" className="h-4 w-4" /> {locale === "vi" ? "Xóa bộ lọc" : "Clear filters"}
+              </button>
+            </div>
+          ) : (
+            /* Completely empty */
+            <div className="flex flex-col items-center justify-center py-20 gap-5 text-center">
+              <div className="h-20 w-20 rounded-2xl bg-auth-surface/40 border border-white/[0.06] flex items-center justify-center text-auth-text-3">
+                <LineIcon name="brain-alt" className="h-10 w-10" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-auth-text">{t("wiki.empty", "No knowledge items yet")}</h3>
+                <p className="text-xs text-auth-text-2 mt-1.5 max-w-xs leading-relaxed">
+                  {t("wiki.emptyDesc", "Start by ingesting your first document to build your personal wiki library.")}
+                </p>
+              </div>
+              <Link
+                href={selectedRoleKbId ? `/${locale}/compile/new?roleKbId=${selectedRoleKbId}` : `/${locale}/compile/new`}
+                className="btn-primary-pulse text-sm"
+              >
+                <LineIcon name="upload" className="h-4 w-4" /> {t("wiki.uploadCta", "Ingest your first document")}
+              </Link>
+            </div>
+          )
+        ) : viewMode === "grid" ? (
+          /* Grid view */
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <WikiCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          /* List view */
+          <div className="flex flex-col gap-2">
+            {items.map((item) => (
+              <WikiRow key={item.id} item={item} />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && totalPages > 1 && (
+          <div className="flex items-center justify-between gap-4 pt-2">
+            <p className="text-xs text-auth-text-3">
+              {locale === "vi"
+                ? `Trang ${page}/${totalPages} · ${total.toLocaleString("vi-VN")} mục`
+                : `Page ${page}/${totalPages} · ${total.toLocaleString("en-US")} items`}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePage(page - 1)}
+                disabled={page <= 1}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <LineIcon name="chevron-left" className="h-3.5 w-3.5" /> {locale === "vi" ? "Trước" : "Back"}
+              </button>
+
+              {/* Page number pills */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePage(pageNum)}
+                      className={`h-8 w-8 rounded-lg text-xs font-bold transition-all ${
+                        pageNum === page
+                          ? "bg-auth-accent-dim text-auth-accent border border-auth-accent/30"
+                          : "bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-3 hover:text-auth-text"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Render the Markdown content */}
-              <div className="prose prose-invert max-w-none">
-                <MarkdownRenderer
-                  content={apiDocsList.find((d) => d.id === selectedApiDocId)?.content || ""}
-                />
-              </div>
+              <button
+                onClick={() => handlePage(page + 1)}
+                disabled={page >= totalPages}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-auth-text-2 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {t("common.next", "Next")} <LineIcon name="chevron-right" className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
         )}
