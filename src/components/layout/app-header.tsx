@@ -12,8 +12,8 @@ import { DotMatrixLoader } from "@/components/ui/dot-matrix-loader";
 import { LocaleSwitcher } from "./locale-switcher";
 import { AppMobileNav } from "./app-mobile-nav";
 
-export type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "research" | "settings";
-type AppHeaderNavItem = "dashboard" | "query" | "research" | "wiki";
+export type AppHeaderActive = "dashboard" | "query" | "compile" | "wiki" | "settings";
+type AppHeaderNavItem = "dashboard" | "query" | "wiki";
 
 interface AppHeaderProps {
   active: AppHeaderActive;
@@ -30,7 +30,6 @@ function appHref(locale: string, path: string, roleKbId?: string | null) {
 const navIcon: Record<AppHeaderNavItem, string> = {
   dashboard: "grid-alt",
   query: "comment",
-  research: "compass",
   wiki: "book",
 };
 
@@ -105,12 +104,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
       href: appHref(locale, "/query", roleQuery),
     },
     {
-      id: "research",
-      label: locale === "vi" ? "Nghiên cứu AI" : "AI Research",
-      shortLabel: locale === "vi" ? "Nghiên cứu" : "Research",
-      href: appHref(locale, "/research", roleQuery),
-    },
-    {
       id: "wiki",
       label: locale === "vi" ? "Wiki cá nhân" : "Wiki",
       shortLabel: "Wiki",
@@ -168,7 +161,6 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
     const destinations = [
       appHref(locale, "/dashboard", roleQuery),
       appHref(locale, "/query", roleQuery),
-      appHref(locale, "/research", roleQuery),
       appHref(locale, "/wiki", roleQuery),
       appHref(locale, "/compile/new", roleQuery),
       appHref(locale, "/settings"),
@@ -230,11 +222,11 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
             <Link
               href={dashboardHref}
               onClick={handleLogoClick}
-              className="app-brand-lockup inline-flex h-11 min-w-0 items-center gap-2 rounded-2xl border px-3 text-sm text-auth-text transition-colors sm:px-4"
+              className="app-brand-lockup inline-flex h-11 min-w-0 items-center gap-1.5 rounded-2xl border-none px-0 text-sm text-auth-text transition-colors md:border md:bg-white/[0.02] md:px-3"
               aria-label="Pulse Knowledge dashboard"
             >
-              <PulseLogo size={28} />
-              <PulseWordmark className="hidden text-[14px] sm:inline-flex" />
+              <PulseLogo size={26} />
+              <PulseWordmark className="hidden text-[13px] md:inline-flex" />
             </Link>
           </div>
 
@@ -347,7 +339,7 @@ export function AppHeader({ active, locale, selectedRoleKbId, leftAction }: AppH
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--color-auth-elevated)] text-xs font-black text-auth-text shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]">
                     {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
                   </div>
-                  <div className="hidden min-w-0 leading-none min-[500px]:block">
+                  <div className="hidden min-w-0 leading-none md:block">
                     <div className="max-w-[104px] truncate text-[11px] font-bold text-white">{userName}</div>
                     <div className="mt-1 text-[9px] font-medium uppercase tracking-[0.08em] text-auth-text-3">{planName}</div>
                   </div>

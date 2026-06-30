@@ -896,15 +896,7 @@ export function DashboardView() {
                 <LineIcon name="comment" className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="hidden lg:inline">{t("compile.labels.sidebarQuery", "Hỏi đáp AI")}</span>
               </Link>
-              <Link
-                href={`/${locale}/research${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
-                prefetch={false}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#a1a1aa] hover:text-white hover:bg-white/[0.05] transition-all"
-                title={t("common.research", "Nghiên cứu AI")}
-              >
-                <LineIcon name="compass" className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="hidden lg:inline">{t("common.research", "Nghiên cứu")}</span>
-              </Link>
+
               <Link
                 href={`/${locale}/wiki${selectedRoleKbId ? `?roleKbId=${selectedRoleKbId}` : ""}`}
                 prefetch={false}

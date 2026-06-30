@@ -4,10 +4,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { AppHeader, type AppHeaderActive } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const APP_ROUTES = ["dashboard", "query", "research", "wiki", "compile", "settings"];
+const APP_ROUTES = ["dashboard", "query", "wiki", "compile", "settings"];
 
 function appHeaderActiveFromSegment(segment: string): AppHeaderActive {
-  if (segment === "dashboard" || segment === "query" || segment === "research" || segment === "wiki" || segment === "compile" || segment === "settings") {
+  if (segment === "dashboard" || segment === "query" || segment === "wiki" || segment === "compile" || segment === "settings") {
     return segment;
   }
 

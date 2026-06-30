@@ -98,7 +98,7 @@ export function Header() {
             size={28}
             className="transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--color-auth-accent-glow)]"
           />
-          <PulseWordmark className="text-[14px] leading-none" />
+          <PulseWordmark className="hidden sm:inline-flex text-[14px] leading-none" />
         </Link>
 
         {/* Mobile right: locale + hamburger */}

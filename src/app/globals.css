@@ -6,6 +6,7 @@
   *,
   ::after,
   ::before {
+    border-color: #27272a; /* Fallback for older browsers without OKLCH support */
     border-color: var(--color-auth-border, oklch(0.28 0.006 260));
   }
 }
@@ -3605,8 +3606,12 @@ select:focus {
 }
 
 .app-mobile-nav__item--active .app-mobile-nav__icon-wrapper {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.12) 100%) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .app-mobile-nav__icon {
@@ -3614,7 +3619,7 @@ select:focus {
 }
 
 .app-mobile-nav__item--active .app-mobile-nav__icon {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .app-mobile-nav__label {
@@ -3899,4 +3904,72 @@ select:focus {
   .ai-stream-caret {
     animation: none;
   }
+}
+
+/* ============================================================
+   LEGACY BROWSER COMPATIBILITY FALLBACKS (OKLCH & color-mix)
+   ============================================================ */
+
+/* 1. CSS Variable fallbacks for browsers without OKLCH support */
+@supports not (color: oklch(0 0 0)) {
+  :root {
+    --color-auth-bg: #0d0f12;
+    --color-auth-surface: #14171c;
+    --color-auth-elevated: #1a1d23;
+    --color-auth-card-hover: #1f232b;
+    --color-auth-border: #262a34;
+    --color-auth-border-subtle: #1c1f26;
+
+    --color-auth-text: #fafafa;
+    --color-auth-text-2: #abafba;
+    --color-auth-text-3: #757985;
+
+    --color-auth-accent: #2bb396;
+    --color-auth-accent-dim: rgba(255, 255, 255, 0.055);
+    --color-auth-accent-dark: #22947c;
+    --color-auth-accent-muted: rgba(43, 179, 150, 0.60);
+    --color-auth-accent-glow: rgba(255, 255, 255, 0.06);
+
+    --color-auth-purple: #8b7feb;
+    --color-auth-purple-dim: rgba(139, 127, 235, 0.12);
+    --color-auth-orange: #b3b3b3;
+    --color-auth-orange-dim: rgba(179, 179, 179, 0.12);
+    --color-auth-cyan: #4cc9cc;
+    --color-auth-cyan-dim: rgba(76, 201, 204, 0.12);
+
+    --color-auth-error: #ef4444;
+    --color-auth-error-dim: rgba(239, 68, 68, 0.12);
+    --color-auth-success: #10b981;
+    --color-auth-success-dim: rgba(16, 185, 129, 0.10);
+  }
+}
+
+/* 2. Utility class fallbacks for browsers without color-mix() support */
+@supports not (color: color-mix(in srgb, red, blue)) {
+  /* Border opacity classes */
+  .border-white\/\[0\.08\] { border-color: rgba(255, 255, 255, 0.08) !important; }
+  .border-white\/\[0\.06\] { border-color: rgba(255, 255, 255, 0.06) !important; }
+  .border-white\/\[0\.14\] { border-color: rgba(255, 255, 255, 0.14) !important; }
+  .border-white\/10 { border-color: rgba(255, 255, 255, 0.1) !important; }
+  .border-white\/20 { border-color: rgba(255, 255, 255, 0.2) !important; }
+  .border-white\/5 { border-color: rgba(255, 255, 255, 0.05) !important; }
+  .border-white\/\[0\.04\] { border-color: rgba(255, 255, 255, 0.04) !important; }
+  .border-white\/\[0\.10\] { border-color: rgba(255, 255, 255, 0.10) !important; }
+  .border-white\/\[0\.12\] { border-color: rgba(255, 255, 255, 0.12) !important; }
+  .divide-white\/\[0\.08\] > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255, 255, 255, 0.08) !important; }
+
+  /* Background opacity classes */
+  .bg-white\/\[0\.02\] { background-color: rgba(255, 255, 255, 0.02) !important; }
+  .bg-white\/\[0\.03\] { background-color: rgba(255, 255, 255, 0.03) !important; }
+  .bg-white\/\[0\.05\] { background-color: rgba(255, 255, 255, 0.05) !important; }
+  .bg-white\/\[0\.06\] { background-color: rgba(255, 255, 255, 0.06) !important; }
+  .bg-white\/\[0\.08\] { background-color: rgba(255, 255, 255, 0.08) !important; }
+  .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1) !important; }
+  .bg-white\/5 { background-color: rgba(255, 255, 255, 0.05) !important; }
+
+  /* Text opacity classes */
+  .text-white\/78 { color: rgba(255, 255, 255, 0.78) !important; }
+  .text-white\/70 { color: rgba(255, 255, 255, 0.7) !important; }
+  .text-white\/55 { color: rgba(255, 255, 255, 0.55) !important; }
+  .text-white\/42 { color: rgba(255, 255, 255, 0.42) !important; }
 }

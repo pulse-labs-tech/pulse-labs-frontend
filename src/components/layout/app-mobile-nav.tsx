@@ -31,12 +31,6 @@ export function AppMobileNav({ locale, selectedRoleKbId }: AppMobileNavProps) {
       match: `/${locale}/query`,
     },
     {
-      href: `/${locale}/research${roleQuery}`,
-      label: t("common.research", "Nghiên cứu"),
-      icon: "research",
-      match: `/${locale}/research`,
-    },
-    {
       href: `/${locale}/wiki${roleQuery}`,
       label: t("common.wiki", "Wiki"),
       icon: "wiki",
