@@ -1267,12 +1267,19 @@ export function QueryView() {
 
         {/* Main Chat Area */}
         <div id="chat-main" className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="chat-topbar border-b border-white/[0.04]">
+          <div className="chat-topbar border-b border-white/[0.04] flex items-center justify-between pr-4">
             <span className="chat-topbar-title text-left pl-2">
               {conversationId
                 ? (sessions.find(s => s.id === conversationId)?.title || "Current Conversation")
                 : "New Conversation"}
             </span>
+            <Link
+              href={`/${locale}/query/api`}
+              className="inline-flex h-7 items-center gap-1.5 px-3 rounded-lg text-[10px] font-bold bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all select-none cursor-pointer"
+            >
+              <LineIcon name="code" className="h-3 w-3" />
+              <span>{locale === "vi" ? "Tài liệu API" : "API Docs"}</span>
+            </Link>
           </div>
 
           {quotaExceeded && (

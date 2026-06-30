@@ -1,13 +1,14 @@
-import "../globals.css";
+"use client";
+
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { LineIcon } from "@/components/shared/line-icon";
 import { PulseLogo, PulseWordmark } from "@/components/shared/pulse-logo";
 
-/**
- * Custom 404 Not Found page.
- * Premium dark theme with floating logo animation, ambient glows, and staggered entrance.
- */
-export default function NotFound() {
+export default function LocaleNotFound() {
+  const params = useParams();
+  const locale = (params?.locale as string) || "vi";
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-auth-bg px-5 text-auth-text">
       {/* Ambient glows */}
@@ -25,7 +26,7 @@ export default function NotFound() {
         </div>
 
         {/* Brand name */}
-        <Link href="/" className="mb-8 text-sm font-bold tracking-tight opacity-70 transition-opacity hover:opacity-100 animate-[fadeUp_0.5s_ease-out_0.1s_both]">
+        <Link href={`/${locale}`} className="mb-8 text-sm font-bold tracking-tight opacity-70 transition-opacity hover:opacity-100 animate-[fadeUp_0.5s_ease-out_0.1s_both]">
           <PulseWordmark />
         </Link>
 
@@ -39,20 +40,22 @@ export default function NotFound() {
 
         {/* Message */}
         <h1 className="mt-2 text-xl font-bold tracking-tight sm:text-2xl animate-[fadeUp_0.5s_ease-out_0.3s_both]">
-          Trang không tồn tại
+          {locale === "vi" ? "Trang không tồn tại" : "Page not found"}
         </h1>
         <p className="mt-3 max-w-sm text-sm leading-relaxed text-auth-text-2 animate-[fadeUp_0.5s_ease-out_0.4s_both]">
-          Trang bạn đang tìm kiếm có thể đã được di chuyển, đổi tên, hoặc không tồn tại.
+          {locale === "vi"
+            ? "Trang bạn đang tìm kiếm có thể đã được di chuyển, đổi tên, hoặc không tồn tại."
+            : "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable."}
         </p>
 
         {/* Action buttons */}
         <div className="mt-10 flex flex-col gap-3 sm:flex-row animate-[fadeUp_0.5s_ease-out_0.5s_both]">
-          <Link href="/" className="btn-primary-pulse text-sm group">
+          <Link href={`/${locale}`} className="btn-primary-pulse text-sm group">
             <LineIcon name="arrow-left" className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
-            Về trang chủ
+            {locale === "vi" ? "Về trang chủ" : "Back to Home"}
           </Link>
           <a href="mailto:support@pulseknowledge.com" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-3 text-sm font-medium text-auth-text backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95">
-            Liên hệ hỗ trợ
+            {locale === "vi" ? "Liên hệ hỗ trợ" : "Contact Support"}
           </a>
         </div>
 
@@ -61,7 +64,11 @@ export default function NotFound() {
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 backdrop-blur-sm">
             <div className="flex items-center gap-3 text-xs text-auth-text-3">
               <LineIcon name="search" className="h-3.5 w-3.5 shrink-0" />
-              <span>Thử tìm kiếm nội dung bạn cần từ trang chủ</span>
+              <span>
+                {locale === "vi"
+                  ? "Thử tìm kiếm nội dung bạn cần từ trang chủ"
+                  : "Try searching for what you need from the home page"}
+              </span>
             </div>
           </div>
         </div>
