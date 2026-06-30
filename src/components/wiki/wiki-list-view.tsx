@@ -712,40 +712,30 @@ export function WikiListView() {
             </div>
           )}
 
-          {/* View toggle & API Docs Link */}
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/${locale}/wiki/api`}
-              className="inline-flex h-9 items-center gap-1.5 px-4 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all select-none cursor-pointer"
+          {/* View toggle */}
+          <div className="flex items-center gap-1 bg-auth-elevated border border-auth-border rounded-xl p-1">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
+                viewMode === "grid"
+                  ? "bg-auth-accent-dim text-auth-accent"
+                  : "text-auth-text-3 hover:text-auth-text"
+              }`}
+              title={locale === "vi" ? "Xem lưới" : "Grid view"}
             >
-              <LineIcon name="code" className="h-3.5 w-3.5" />
-              <span>{locale === "vi" ? "Tài liệu API" : "API Docs"}</span>
-            </Link>
-
-            <div className="flex items-center gap-1 bg-auth-elevated border border-auth-border rounded-xl p-1">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
-                  viewMode === "grid"
-                    ? "bg-auth-accent-dim text-auth-accent"
-                    : "text-auth-text-3 hover:text-auth-text"
-                }`}
-                title={locale === "vi" ? "Xem lưới" : "Grid view"}
-              >
-                <LineIcon name="grid-alt" className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
-                  viewMode === "list"
-                    ? "bg-auth-accent-dim text-auth-accent"
-                    : "text-auth-text-3 hover:text-auth-text"
-                }`}
-                title={locale === "vi" ? "Xem danh sách" : "List view"}
-              >
-                <LineIcon name="list" className="h-3.5 w-3.5" />
-              </button>
-            </div>
+              <LineIcon name="grid-alt" className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
+                viewMode === "list"
+                  ? "bg-auth-accent-dim text-auth-accent"
+                  : "text-auth-text-3 hover:text-auth-text"
+              }`}
+              title={locale === "vi" ? "Xem danh sách" : "List view"}
+            >
+              <LineIcon name="list" className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
 
